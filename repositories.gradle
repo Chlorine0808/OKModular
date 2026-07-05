@@ -1,5 +1,8 @@
 // Add any additional repositories for your dependencies here.
 
 repositories {
+    // OmoshiroiKamo is consumed from the local Maven repository during development.
+    // Run `./gradlew publishToMavenLocal` in the OmoshiroiKamo project first.
+    mavenLocal()
     maven { url 'https://jitpack.io' }
 }

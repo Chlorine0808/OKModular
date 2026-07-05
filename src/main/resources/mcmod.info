@@ -3,10 +3,10 @@
 	"modList": [{
 		"modid": "${modId}",
 		"name": "${modName}",
-		"description": "",
+		"description": "Modular multiblock machinery with JSON-defined structures and recipes. Split out of Omoshiroi Kamo.",
 		"version": "${modVersion}",
 		"mcversion": "${minecraftVersion}",
-		"url": "https://github.com/Shigure-Ruiseki/OKBase",
+		"url": "https://github.com/Shigure-Ruiseki/OKModular",
 		"updateUrl": "",
 		"authorList": ["Shiruge Ruiseki"],
 		"credits": "",
