@@ -4,6 +4,7 @@ import java.util.Map;
 
 import net.minecraft.command.ICommand;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraftforge.common.MinecraftForge;
 
 import org.apache.logging.log4j.Level;
 
@@ -23,8 +24,6 @@ import cpw.mods.fml.common.event.FMLServerStartedEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppedEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
-import net.minecraftforge.common.MinecraftForge;
-
 import ruiseki.okmodular.client.nei.NEIConfig;
 import ruiseki.okmodular.config.MachineryConfig;
 import ruiseki.omoshiroikamo.core.command.CommandMod;
