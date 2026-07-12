@@ -23,14 +23,14 @@ import com.gtnewhorizon.structurelib.alignment.enumerable.Rotation;
 
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
+import ruiseki.okmodular.common.tile.StructureTintCache;
+import ruiseki.okmodular.common.tile.TEMachineController;
+import ruiseki.okmodular.config.MachineryConfig;
 import ruiseki.omoshiroikamo.api.enums.ModObject;
 import ruiseki.omoshiroikamo.api.modular.IModularBlockTint;
-import ruiseki.okmodular.config.MachineryConfig;
 import ruiseki.omoshiroikamo.core.block.AbstractBlock;
 import ruiseki.omoshiroikamo.core.datastructure.BlockPos;
 import ruiseki.omoshiroikamo.core.helper.InventoryHelpers;
-import ruiseki.okmodular.common.tile.StructureTintCache;
-import ruiseki.okmodular.common.tile.TEMachineController;
 
 /**
  * Machine Controller - the brain of a Modular Machinery structure.
@@ -112,8 +112,7 @@ public class BlockMachineController extends AbstractBlock<TEMachineController> i
         // Register all textures explicitly without calling super
         this.baseIcon = reg.registerIcon("okmodular:modular/controller_base");
         this.blockIcon = this.baseIcon; // Use baseIcon as blockIcon too
-        this.baseOverlayIcon = reg
-            .registerIcon("okmodular:modularmachineryOverlay/overlay_machine_controller_base");
+        this.baseOverlayIcon = reg.registerIcon("okmodular:modularmachineryOverlay/overlay_machine_controller_base");
         this.overlayIcon = reg.registerIcon("okmodular:modularmachineryOverlay/overlay_machine_controller_idle");
         this.overlayIconActive = reg
             .registerIcon("okmodular:modularmachineryOverlay/overlay_machine_controller_active");

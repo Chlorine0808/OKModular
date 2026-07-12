@@ -3,10 +3,10 @@ package ruiseki.okmodular.common.tile.vis.output;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.tile.vis.AbstractVisPortTE;
+import ruiseki.omoshiroikamo.api.enums.EnumIO;
+import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 import thaumcraft.api.aspects.Aspect;
 
 /**

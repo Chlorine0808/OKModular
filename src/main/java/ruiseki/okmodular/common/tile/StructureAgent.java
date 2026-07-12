@@ -21,6 +21,7 @@ import net.minecraft.world.World;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 
 import ruiseki.okmodular.OKModular;
+import ruiseki.okmodular.common.network.PacketStructureTint;
 import ruiseki.omoshiroikamo.api.enums.EnumIO;
 import ruiseki.omoshiroikamo.api.modular.IMachineController;
 import ruiseki.omoshiroikamo.api.modular.IModularPort;
@@ -34,7 +35,6 @@ import ruiseki.omoshiroikamo.core.common.structure.CustomStructureRegistry;
 import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
 import ruiseki.omoshiroikamo.core.common.util.Logger;
 import ruiseki.omoshiroikamo.core.helper.LangHelpers;
-import ruiseki.okmodular.common.network.PacketStructureTint;
 
 /**
  * Handles structure-related logic for {@link TEMachineController}.

@@ -24,6 +24,10 @@ import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.slot.ItemSlot;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 
+import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
+import ruiseki.okmodular.common.item.ItemMachineBlueprint;
+import ruiseki.okmodular.common.recipe.ProcessAgent;
+import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.omoshiroikamo.api.enums.RedstoneMode;
 import ruiseki.omoshiroikamo.api.modular.IModularPort;
 import ruiseki.omoshiroikamo.api.modular.IPortType;
@@ -34,10 +38,6 @@ import ruiseki.omoshiroikamo.api.recipe.io.IRecipeOutput;
 import ruiseki.omoshiroikamo.api.recipe.visitor.RecipeExecutionVisitor;
 import ruiseki.omoshiroikamo.core.client.gui.widget.TileWidget;
 import ruiseki.omoshiroikamo.core.helper.LangHelpers;
-import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
-import ruiseki.okmodular.common.item.ItemMachineBlueprint;
-import ruiseki.okmodular.common.recipe.ProcessAgent;
-import ruiseki.okmodular.common.recipe.RecipeLoader;
 
 /**
  * Handles GUI construction and display logic for {@link TEMachineController}.

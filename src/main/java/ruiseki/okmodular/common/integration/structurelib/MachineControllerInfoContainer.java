@@ -9,13 +9,13 @@ import com.gtnewhorizon.structurelib.alignment.enumerable.ExtendedFacing;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 
+import ruiseki.okmodular.common.item.ItemMachineBlueprint;
+import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.omoshiroikamo.api.modular.IMachineController;
 import ruiseki.omoshiroikamo.api.structure.core.IStructureEntry;
 import ruiseki.omoshiroikamo.core.common.structure.CustomStructureRegistry;
 import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
 import ruiseki.omoshiroikamo.core.common.util.Logger;
-import ruiseki.okmodular.common.item.ItemMachineBlueprint;
-import ruiseki.okmodular.common.tile.TEMachineController;
 
 /**
  * StructureLib info container for the modular Machine Controller.

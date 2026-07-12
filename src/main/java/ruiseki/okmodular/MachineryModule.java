@@ -15,16 +15,6 @@ import com.gtnewhorizon.structurelib.alignment.constructable.IMultiblockInfoCont
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import ruiseki.omoshiroikamo.core.common.structure.BlockResolver;
-import ruiseki.omoshiroikamo.core.common.structure.CustomStructureRegistry;
-import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
-import ruiseki.omoshiroikamo.core.event.MemoryEventHandler;
-import ruiseki.omoshiroikamo.core.helper.MinecraftHelpers;
-import ruiseki.omoshiroikamo.core.init.ModModuleBase;
-import ruiseki.omoshiroikamo.core.item.ItemFluidCanister;
-import ruiseki.omoshiroikamo.core.json.JsonErrorCollector;
-import ruiseki.omoshiroikamo.core.network.packet.PacketReloadNEI;
-import ruiseki.omoshiroikamo.core.proxy.ICommonProxy;
 import ruiseki.okmodular.common.command.CommandModular;
 import ruiseki.okmodular.common.fluid.EnumFluidMaterial;
 import ruiseki.okmodular.common.fluid.ModFluidGases;
@@ -37,6 +27,16 @@ import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tier.TierConfigLoader;
 import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.okmodular.common.tile.TEMachineController;
+import ruiseki.omoshiroikamo.core.common.structure.BlockResolver;
+import ruiseki.omoshiroikamo.core.common.structure.CustomStructureRegistry;
+import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
+import ruiseki.omoshiroikamo.core.event.MemoryEventHandler;
+import ruiseki.omoshiroikamo.core.helper.MinecraftHelpers;
+import ruiseki.omoshiroikamo.core.init.ModModuleBase;
+import ruiseki.omoshiroikamo.core.item.ItemFluidCanister;
+import ruiseki.omoshiroikamo.core.json.JsonErrorCollector;
+import ruiseki.omoshiroikamo.core.network.packet.PacketReloadNEI;
+import ruiseki.omoshiroikamo.core.proxy.ICommonProxy;
 
 public class MachineryModule extends ModModuleBase {
 

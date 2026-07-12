@@ -3,9 +3,9 @@ package ruiseki.okmodular.common.tile.mana.input;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.tile.mana.AbstractManaPortTE;
+import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 
 /**
  * Unified Mana Input Port TileEntity for all tiers (0-15).

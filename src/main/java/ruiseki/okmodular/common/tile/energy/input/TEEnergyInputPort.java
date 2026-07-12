@@ -8,13 +8,13 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import cpw.mods.fml.common.Optional;
 import mekanism.api.lasers.ILaserReceptor;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
+import ruiseki.okmodular.common.block.AbstractPortBlock;
+import ruiseki.okmodular.common.tile.energy.AbstractEnergyIOPortTE;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.omoshiroikamo.api.enums.EnumIO;
 import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 import ruiseki.omoshiroikamo.core.energy.EnergyTransfer;
 import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
-import ruiseki.okmodular.common.block.AbstractPortBlock;
-import ruiseki.okmodular.common.tile.energy.AbstractEnergyIOPortTE;
 
 /**
  * Unified Energy Input Port TileEntity for all tiers (0-15).

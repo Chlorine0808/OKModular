@@ -23,6 +23,7 @@ import com.cleanroommc.modularui.value.sync.SyncHandlers;
 import com.cleanroommc.modularui.widgets.slot.FluidSlot;
 
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
 import ruiseki.omoshiroikamo.api.enums.EnumIO;
 import ruiseki.omoshiroikamo.api.enums.RedstoneMode;
 import ruiseki.omoshiroikamo.api.modular.IModularPort;
@@ -33,7 +34,6 @@ import ruiseki.omoshiroikamo.core.fluid.SmartTank;
 import ruiseki.omoshiroikamo.core.helper.LangHelpers;
 import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
 import ruiseki.omoshiroikamo.core.tileentity.AbstractTE;
-import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
 
 public abstract class AbstractFluidPortTE extends AbstractTE
     implements IModularPort, IFluidHandler, IGuiHolder<PosGuiData> {

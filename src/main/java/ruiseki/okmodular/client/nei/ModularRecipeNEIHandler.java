@@ -25,6 +25,9 @@ import codechicken.nei.recipe.GuiRecipe;
 import codechicken.nei.recipe.GuiUsageRecipe;
 import codechicken.nei.recipe.TemplateRecipeHandler;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.common.init.MachineryBlocks;
+import ruiseki.okmodular.common.item.ItemMachineBlueprint;
+import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.omoshiroikamo.api.recipe.core.IModularRecipe;
 import ruiseki.omoshiroikamo.api.recipe.io.FluidInput;
 import ruiseki.omoshiroikamo.api.recipe.io.FluidOutput;
@@ -49,9 +52,6 @@ import ruiseki.omoshiroikamo.core.integration.nei.modular.layout.LayoutPartVis;
 import ruiseki.omoshiroikamo.core.integration.nei.modular.layout.RecipeLayoutPart;
 import ruiseki.omoshiroikamo.core.integration.nei.modular.renderer.INEIPositionedRenderer;
 import ruiseki.omoshiroikamo.core.integration.nei.modular.renderer.PositionedText;
-import ruiseki.okmodular.common.init.MachineryBlocks;
-import ruiseki.okmodular.common.item.ItemMachineBlueprint;
-import ruiseki.okmodular.common.recipe.RecipeLoader;
 
 public class ModularRecipeNEIHandler extends RecipeHandlerBase {
 

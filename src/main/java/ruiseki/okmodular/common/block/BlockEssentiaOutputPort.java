@@ -12,12 +12,12 @@ import net.minecraft.world.World;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ruiseki.omoshiroikamo.api.enums.ModObject;
-import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.core.helper.LangHelpers;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tier.TierManager;
 import ruiseki.okmodular.common.tile.essentia.output.TEEssentiaOutputPort;
+import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.omoshiroikamo.api.enums.ModObject;
+import ruiseki.omoshiroikamo.core.helper.LangHelpers;
 
 /**
  * Essentia Output Port block with unified 16-tier system.

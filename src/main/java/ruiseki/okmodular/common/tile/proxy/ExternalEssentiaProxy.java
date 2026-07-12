@@ -2,9 +2,9 @@ package ruiseki.okmodular.common.tile.proxy;
 
 import net.minecraft.util.ChunkCoordinates;
 
+import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.omoshiroikamo.api.enums.EnumIO;
 import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.okmodular.common.tile.TEMachineController;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.aspects.IAspectContainer;

@@ -10,10 +10,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 
 import ruiseki.okmodular.Reference;
-import ruiseki.omoshiroikamo.api.enums.ModObject;
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tile.essentia.input.TEEssentiaInputPortME;
+import ruiseki.omoshiroikamo.api.enums.ModObject;
+import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 
 /**
  * pulls Essentia from Thaumic Energistics ME network.

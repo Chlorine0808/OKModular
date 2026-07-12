@@ -12,6 +12,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.omoshiroikamo.api.enums.EnumIO;
 import ruiseki.omoshiroikamo.api.modular.IExternalPortProxy;
 import ruiseki.omoshiroikamo.api.modular.IPortType;
@@ -19,7 +20,6 @@ import ruiseki.omoshiroikamo.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.omoshiroikamo.core.datastructure.BlockPos;
 import ruiseki.omoshiroikamo.core.datastructure.DimPos;
 import ruiseki.omoshiroikamo.core.helper.LangHelpers;
-import ruiseki.okmodular.common.tile.TEMachineController;
 
 /**
  * Abstract base class for external port proxies.

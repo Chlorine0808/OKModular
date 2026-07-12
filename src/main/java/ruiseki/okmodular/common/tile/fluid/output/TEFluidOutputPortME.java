@@ -26,11 +26,11 @@ import appeng.me.helpers.AENetworkProxy;
 import appeng.me.helpers.IGridProxyable;
 import appeng.util.Platform;
 import appeng.util.item.AEFluidStack;
+import ruiseki.okmodular.common.block.AbstractPortBlock;
+import ruiseki.okmodular.common.tile.fluid.AbstractFluidPortTE;
 import ruiseki.omoshiroikamo.api.enums.EnumIO;
 import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 import ruiseki.omoshiroikamo.core.common.util.Logger;
-import ruiseki.okmodular.common.block.AbstractPortBlock;
-import ruiseki.okmodular.common.tile.fluid.AbstractFluidPortTE;
 
 /**
  * ME Fluid Output Port - outputs fluids directly to AE2 ME Network.

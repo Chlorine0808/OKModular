@@ -16,11 +16,11 @@ import com.gtnewhorizon.gtnhlib.client.renderer.TessellatorManager;
 import com.gtnewhorizon.structurelib.alignment.enumerable.Flip;
 import com.gtnewhorizon.structurelib.alignment.enumerable.Rotation;
 
-import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.core.helper.RenderHelpers;
 import ruiseki.okmodular.common.block.BlockMachineCasing;
 import ruiseki.okmodular.common.block.BlockMachineController;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
+import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.omoshiroikamo.core.helper.RenderHelpers;
 
 public class ItemPortRenderer implements IItemRenderer {
 
