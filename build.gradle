@@ -14,3 +14,7 @@ minecraft {
 tasks.withType(JavaCompile) {
     options.compilerArgs << "-Xlint:deprecation"
 }
+
+test {
+    useJUnitPlatform()
+}
