@@ -19,18 +19,18 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
-import ruiseki.okcore.client.util.IconRegistry;
 import ruiseki.okcore.helper.LangHelpers;
-import ruiseki.okcore.integration.waila.WailaUtils;
-import ruiseki.okcore.tileentity.legacy.AbstractEnergyTE;
-import ruiseki.okcore.tileentity.legacy.ISidedIO;
 import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.item.ItemWrench;
 import ruiseki.okmodular.common.tier.TierManager;
 import ruiseki.okmodular.common.tile.energy.input.TEEnergyInputPort;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.okmodular.core.tileentity.AbstractEnergyTE;
+import ruiseki.okmodular.core.tileentity.ISidedIO;
+import ruiseki.okmodular.integration.waila.WailaUtils;
 
 /**
  * Energy Input Port block with unified 16-tier system.

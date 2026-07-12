@@ -17,10 +17,8 @@ import com.gtnewhorizon.gtnhlib.client.model.color.IBlockColor;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ruiseki.okcore.block.legacy.BlockOK;
 import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okcore.helper.MinecraftHelpers;
-import ruiseki.okcore.item.legacy.ItemBlockOK;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.modular.IModularBlockTint;
 import ruiseki.okmodular.api.modular.ModularTier;
@@ -28,6 +26,8 @@ import ruiseki.okmodular.common.tier.TierConfigLoader;
 import ruiseki.okmodular.common.tier.TierManager;
 import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.okmodular.core.block.BlockOK;
+import ruiseki.okmodular.core.item.ItemBlockOK;
 
 /**
  * Machine Casing block.

@@ -26,7 +26,6 @@ import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 
 import ruiseki.okcore.api.modular.IModularPort;
 import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.client.gui.widget.TileWidget;
 import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
@@ -35,6 +34,7 @@ import ruiseki.okmodular.api.recipe.io.IModularRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.visitor.RecipeExecutionVisitor;
 import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
+import ruiseki.okmodular.client.gui.widget.TileWidget;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
 import ruiseki.okmodular.common.recipe.ProcessAgent;
 import ruiseki.okmodular.common.recipe.RecipeLoader;

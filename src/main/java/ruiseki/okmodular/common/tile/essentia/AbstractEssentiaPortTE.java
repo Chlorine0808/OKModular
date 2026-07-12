@@ -7,12 +7,12 @@ import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import ruiseki.okcore.enums.EnumIO;
-import ruiseki.okcore.persist.nbt.NBTPersist;
-import ruiseki.okcore.tileentity.legacy.AbstractTE;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.modular.port.IEssentiaPort;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.okmodular.core.persist.nbt.NBTPersist;
+import ruiseki.okmodular.core.tileentity.AbstractTE;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.aspects.IAspectContainer;

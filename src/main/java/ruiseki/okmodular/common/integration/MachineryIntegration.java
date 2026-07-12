@@ -5,11 +5,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.IFluidHandler;
 
 import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.energy.IOKEnergyTile;
-import ruiseki.okcore.energy.integration.EnergyIntegrationRegistry;
-import ruiseki.okcore.energy.integration.IEnergyIntegrationDelegate;
 import ruiseki.okcore.enums.Mods;
-import ruiseki.okcore.gas.IGasHandler;
 import ruiseki.okcore.structure.BlockResolver;
 import ruiseki.okmodular.common.block.BlockEssentiaInputPort;
 import ruiseki.okmodular.common.block.BlockEssentiaInputPortME;
@@ -31,6 +27,10 @@ import ruiseki.okmodular.common.tile.proxy.ExternalFluidProxy;
 import ruiseki.okmodular.common.tile.proxy.ExternalGasProxy;
 import ruiseki.okmodular.common.tile.proxy.ExternalItemProxy;
 import ruiseki.okmodular.common.tile.proxy.ExternalManaProxy;
+import ruiseki.okmodular.core.energy.IOKEnergyTile;
+import ruiseki.okmodular.core.energy.capability.EnergyIntegrationRegistry;
+import ruiseki.okmodular.core.energy.capability.IEnergyIntegrationDelegate;
+import ruiseki.okmodular.core.gas.IGasHandler;
 // import ruiseki.okmodular.common.tile.proxy.ExternalVisProxy;
 
 /**
@@ -182,24 +182,24 @@ public class MachineryIntegration {
 
             @Override
             public Integer tryExtract(Object te, ForgeDirection side, int amount, boolean simulate) {
-                return ruiseki.okcore.energy.integration.enderio.EnderIOIntegration
+                return ruiseki.okmodular.core.energy.capability.enderio.EnderIOIntegration
                     .tryExtract(te, side, amount, simulate);
             }
 
             @Override
             public Integer tryReceive(Object te, ForgeDirection side, int amount, boolean simulate) {
-                return ruiseki.okcore.energy.integration.enderio.EnderIOIntegration
+                return ruiseki.okmodular.core.energy.capability.enderio.EnderIOIntegration
                     .tryReceive(te, side, amount, simulate);
             }
 
             @Override
             public Integer getEnergyStored(Object te) {
-                return ruiseki.okcore.energy.integration.enderio.EnderIOIntegration.getEnergyStored(te);
+                return ruiseki.okmodular.core.energy.capability.enderio.EnderIOIntegration.getEnergyStored(te);
             }
 
             @Override
             public Integer getMaxEnergyStored(Object te) {
-                return ruiseki.okcore.energy.integration.enderio.EnderIOIntegration.getMaxEnergyStored(te);
+                return ruiseki.okmodular.core.energy.capability.enderio.EnderIOIntegration.getMaxEnergyStored(te);
             }
 
             @Override

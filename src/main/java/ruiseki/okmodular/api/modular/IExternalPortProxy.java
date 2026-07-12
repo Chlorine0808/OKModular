@@ -4,13 +4,14 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
 
 import ruiseki.okcore.api.modular.IMachineController;
-import ruiseki.okcore.api.modular.IModularPort;
 
 /**
  * Marker interface for external port proxies (like chests, tanks, energy cells)
- * that are linked to a controller and act as IModularPort.
+ * that are linked to a controller and act as a modular port. Extends
+ * {@link IVisitablePort} so proxies carry the sided IO/texture and recipe
+ * visitor concerns that machinery ports need.
  */
-public interface IExternalPortProxy extends IModularPort {
+public interface IExternalPortProxy extends IVisitablePort {
 
     /**
      * @return The controller this proxy is linked to.

@@ -8,14 +8,14 @@ import cofh.api.energy.IEnergyHandler;
 import cofh.api.energy.IEnergyProvider;
 import cofh.api.energy.IEnergyReceiver;
 import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.energy.IOKEnergyHandler;
-import ruiseki.okcore.energy.IOKEnergySink;
-import ruiseki.okcore.energy.IOKEnergySource;
-import ruiseki.okcore.energy.IOKEnergyTile;
-import ruiseki.okcore.energy.integration.EnergyIntegrationRegistry;
-import ruiseki.okcore.energy.integration.IEnergyIntegrationDelegate;
 import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okmodular.common.tile.TEMachineController;
+import ruiseki.okmodular.core.energy.IOKEnergyIO;
+import ruiseki.okmodular.core.energy.IOKEnergySink;
+import ruiseki.okmodular.core.energy.IOKEnergySource;
+import ruiseki.okmodular.core.energy.IOKEnergyTile;
+import ruiseki.okmodular.core.energy.capability.EnergyIntegrationRegistry;
+import ruiseki.okmodular.core.energy.capability.IEnergyIntegrationDelegate;
 
 /**
  * External Energy Port Proxy.
@@ -23,11 +23,11 @@ import ruiseki.okmodular.common.tile.TEMachineController;
  * Supports IOKEnergy, CoFH RF API, and EnderIO (lazy-loaded).
  *
  * Design Pattern: Adapter Pattern
- * - Implements IOKEnergyHandler (which combines IOKEnergySink and IOKEnergySource)
+ * - Implements IOKEnergyIO (which combines IOKEnergySink and IOKEnergySource)
  * - Uses AbstractExternalProxy for common proxy functionality
  * - Lazy-loads EnderIO integration only when the mod is present
  */
-public class ExternalEnergyProxy extends AbstractExternalProxy implements IOKEnergyHandler {
+public class ExternalEnergyProxy extends AbstractExternalProxy implements IOKEnergyIO {
 
     public ExternalEnergyProxy(TEMachineController controller, ChunkCoordinates targetPosition, EnumIO ioMode) {
         super(controller, targetPosition, ioMode);

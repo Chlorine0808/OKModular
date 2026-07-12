@@ -43,25 +43,25 @@ import ruiseki.okcore.api.recipe.context.IRecipeContext;
 import ruiseki.okcore.api.recipe.core.IMachineState;
 import ruiseki.okcore.api.recipe.core.ITieredMachine;
 import ruiseki.okcore.api.structure.core.IStructureEntry;
-import ruiseki.okcore.client.gui.handler.ItemStackHandlerBase;
-import ruiseki.okcore.enums.CraftingState;
 import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okcore.helper.LangHelpers;
-import ruiseki.okcore.persist.nbt.NBTPersist;
 import ruiseki.okcore.structure.StructureManager;
-import ruiseki.okcore.tileentity.legacy.AbstractMBModifierTE;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.api.enums.CraftingState;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.error.ErrorReason;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
 import ruiseki.okmodular.common.block.BlockMachineController;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
 import ruiseki.okmodular.common.recipe.ProcessAgent;
 import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
+import ruiseki.okmodular.core.persist.nbt.NBTPersist;
+import ruiseki.okmodular.core.tileentity.AbstractMBModifierTE;
 
 /**
  * Corresponds to the 'Q' symbol in structure definitions.

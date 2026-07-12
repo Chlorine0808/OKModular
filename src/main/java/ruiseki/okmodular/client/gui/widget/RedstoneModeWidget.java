@@ -7,8 +7,6 @@ import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.drawable.UITexture;
 import com.cleanroommc.modularui.value.sync.EnumSyncValue;
 
-import ruiseki.okcore.client.gui.widget.CyclicVariantButtonWidget;
-import ruiseki.okcore.client.gui.widget.RedstoneModeBaseWidget;
 import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okmodular.Reference;
 

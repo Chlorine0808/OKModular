@@ -13,12 +13,12 @@ import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
 
 import ruiseki.okcore.enums.EnumIO;
-import ruiseki.okcore.persist.nbt.NBTPersist;
-import ruiseki.okcore.tileentity.legacy.AbstractTE;
-import ruiseki.okcore.util.ManaStorage;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.okmodular.core.persist.nbt.NBTPersist;
+import ruiseki.okmodular.core.tileentity.AbstractTE;
+import ruiseki.okmodular.core.util.ManaStorage;
 import vazkii.botania.api.mana.IManaPool;
 import vazkii.botania.api.mana.ManaNetworkEvent;
 import vazkii.botania.api.mana.spark.ISparkAttachable;

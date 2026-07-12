@@ -14,13 +14,13 @@ import com.google.gson.JsonObject;
 import ruiseki.okcore.api.modular.IModularPort;
 import ruiseki.okcore.api.modular.IPortType;
 import ruiseki.okcore.api.recipe.context.IRecipeContext;
-import ruiseki.okcore.client.gui.handler.ItemStackHandlerBase;
-import ruiseki.okcore.item.legacy.ItemUtils;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.io.BlockInput;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
+import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
+import ruiseki.okmodular.core.item.ItemUtils;
 
 /**
  * Decorator that harvests blocks affected by the recipe's BlockInputs and

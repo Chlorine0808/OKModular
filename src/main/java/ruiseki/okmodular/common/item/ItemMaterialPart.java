@@ -13,8 +13,8 @@ import net.minecraft.util.StatCollector;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ruiseki.okcore.item.legacy.ItemOK;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.core.item.ItemOK;
 
 /**
  * Define the type of intermediate material.

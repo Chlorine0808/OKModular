@@ -24,20 +24,20 @@ import com.cleanroommc.modularui.widgets.layout.Column;
 import mekanism.api.gas.Gas;
 import mekanism.api.gas.GasStack;
 import mekanism.api.gas.ITubeConnection;
-import ruiseki.okcore.client.gui.OKGuiTextures;
-import ruiseki.okcore.client.gui.widget.TileWidget;
 import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okcore.enums.RedstoneMode;
-import ruiseki.okcore.gas.GasTankInfo;
-import ruiseki.okcore.gas.IGasHandler;
-import ruiseki.okcore.gas.SmartGasTank;
-import ruiseki.okcore.persist.nbt.NBTPersist;
-import ruiseki.okcore.tileentity.legacy.AbstractTE;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.client.gui.OKGuiTextures;
 import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
+import ruiseki.okmodular.client.gui.widget.TileWidget;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.okmodular.core.gas.GasTankInfo;
+import ruiseki.okmodular.core.gas.IGasHandler;
+import ruiseki.okmodular.core.gas.SmartGasTank;
+import ruiseki.okmodular.core.persist.nbt.NBTPersist;
+import ruiseki.okmodular.core.tileentity.AbstractTE;
 
 /*
  * Mekanism Handle Push/Pull itself so skip Auto PushPull
