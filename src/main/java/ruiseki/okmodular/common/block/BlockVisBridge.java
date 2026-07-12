@@ -2,6 +2,7 @@ package ruiseki.okmodular.common.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
@@ -10,10 +11,12 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.common.tile.vis.TileVisBridge;
 import ruiseki.omoshiroikamo.api.enums.ModObject;
 import ruiseki.omoshiroikamo.core.block.BlockOK;
-import ruiseki.okmodular.common.tile.vis.TileVisBridge;
 
 /**
  * Bridges Vis from Vis Output Port to Thaumcraft Vis network.
@@ -30,7 +33,14 @@ public class BlockVisBridge extends BlockOK {
         setHarvestLevel("pickaxe", 0);
         // setCreativeTab(LibMisc.MACHINERY_TAB);
         // Use base port texture for now
-        setBlockTextureName(Reference.MOD_ID + ":modularmachineryOverlay/base_modularports");
+        setBlockTextureName("modularmachineryOverlay/base_modularports");
+    }
+
+    // BlockOK.registerBlockIcons prefixes the parent mod's domain; register under okmodular instead
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void registerBlockIcons(IIconRegister reg) {
+        blockIcon = reg.registerIcon(Reference.PREFIX_MOD + getTextureName());
     }
 
     public static BlockVisBridge create() {

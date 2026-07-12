@@ -2,6 +2,7 @@ package ruiseki.okmodular.common.item;
 
 import java.util.List;
 
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -18,12 +19,13 @@ import com.gtnewhorizon.structurelib.alignment.constructable.ConstructableUtilit
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.omoshiroikamo.api.structure.core.IStructureEntry;
 import ruiseki.omoshiroikamo.core.common.structure.CustomStructureRegistry;
 import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
 import ruiseki.omoshiroikamo.core.helper.LangHelpers;
 import ruiseki.omoshiroikamo.core.item.ItemOK;
-import ruiseki.okmodular.common.tile.TEMachineController;
 
 /**
  * Machine Blueprint item that defines which custom structure a controller
@@ -39,6 +41,13 @@ public class ItemMachineBlueprint extends ItemOK {
         super("machineBlueprint");
         setMaxStackSize(1);
         setTextureName("modular/machineBlueprint");
+    }
+
+    // ItemOK.registerIcons prefixes the parent mod's domain; register under okmodular instead
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void registerIcons(IIconRegister register) {
+        itemIcon = register.registerIcon(Reference.PREFIX_MOD + getTextureName());
     }
 
     /**
