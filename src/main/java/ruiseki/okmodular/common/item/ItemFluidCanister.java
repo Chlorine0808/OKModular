@@ -34,10 +34,10 @@ import com.gtnewhorizon.gtnhlib.itemrendering.ItemWithTextures;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ruiseki.okcore.item.legacy.ItemOK;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.client.render.MaskedBlockItemTexture;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.okmodular.core.item.ItemOK;
 
 /**
  * Universal container for gases and liquids.

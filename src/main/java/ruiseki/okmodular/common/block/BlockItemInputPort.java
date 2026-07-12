@@ -17,15 +17,15 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
-import ruiseki.okcore.client.util.IconRegistry;
 import ruiseki.okcore.helper.LangHelpers;
-import ruiseki.okcore.integration.waila.WailaUtils;
 import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tier.TierManager;
 import ruiseki.okmodular.common.tile.item.input.TEItemInputPort;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.okmodular.integration.waila.WailaUtils;
 
 /**
  * Item Input Port block with unified 16-tier system.

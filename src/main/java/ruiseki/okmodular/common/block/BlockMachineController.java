@@ -23,7 +23,6 @@ import com.gtnewhorizon.structurelib.alignment.enumerable.Rotation;
 
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
-import ruiseki.okcore.block.legacy.AbstractBlock;
 import ruiseki.okcore.datastructure.BlockPos;
 import ruiseki.okcore.helper.InventoryHelpers;
 import ruiseki.okmodular.OKMObjects;
@@ -31,6 +30,7 @@ import ruiseki.okmodular.api.modular.IModularBlockTint;
 import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.okmodular.core.block.AbstractBlock;
 
 /**
  * Machine Controller - the brain of a Modular Machinery structure.

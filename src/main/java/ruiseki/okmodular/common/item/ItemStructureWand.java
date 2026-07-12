@@ -16,9 +16,9 @@ import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ruiseki.okcore.helper.LangHelpers;
-import ruiseki.okcore.item.legacy.ItemOK;
 import ruiseki.okcore.structure.StructureConstants;
 import ruiseki.okcore.structure.WandSelectionManager;
+import ruiseki.okmodular.core.item.ItemOK;
 
 /**
  * Wand item used for structure scanning.

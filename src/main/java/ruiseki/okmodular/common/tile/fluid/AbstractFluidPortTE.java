@@ -23,17 +23,17 @@ import com.cleanroommc.modularui.value.sync.SyncHandlers;
 import com.cleanroommc.modularui.widgets.slot.FluidSlot;
 
 import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.client.gui.widget.TileWidget;
 import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okcore.enums.RedstoneMode;
-import ruiseki.okcore.fluid.SmartTank;
 import ruiseki.okcore.helper.LangHelpers;
-import ruiseki.okcore.persist.nbt.NBTPersist;
-import ruiseki.okcore.tileentity.legacy.AbstractTE;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
+import ruiseki.okmodular.client.gui.widget.TileWidget;
+import ruiseki.okmodular.core.fluid.SmartTank;
+import ruiseki.okmodular.core.persist.nbt.NBTPersist;
+import ruiseki.okmodular.core.tileentity.AbstractTE;
 
 public abstract class AbstractFluidPortTE extends AbstractTE
     implements IVisitablePort, IFluidHandler, IGuiHolder<PosGuiData> {

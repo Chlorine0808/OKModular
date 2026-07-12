@@ -1,0 +1,22 @@
+package ruiseki.okmodular.client.gui.widget;
+
+import java.util.List;
+
+import com.cleanroommc.modularui.value.sync.EnumSyncValue;
+
+import ruiseki.okcore.enums.RedstoneMode;
+
+public class RedstoneModeBaseWidget extends CyclicVariantButtonWidget {
+
+    public RedstoneModeBaseWidget(List<Variant> variants, int iconOffset, int iconSize,
+        EnumSyncValue<RedstoneMode, ?> syncValue) {
+        super(
+            variants,
+            syncValue.getValue()
+                .getIndex(),
+            iconOffset,
+            iconSize,
+            value -> { syncValue.setValue(RedstoneMode.byIndex(value)); });
+        size(18);
+    }
+}

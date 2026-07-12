@@ -30,20 +30,20 @@ import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import com.cleanroommc.modularui.widgets.slot.SlotGroup;
 
 import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.client.gui.OKGuiTextures;
-import ruiseki.okcore.client.gui.handler.ItemStackHandlerBase;
-import ruiseki.okcore.client.gui.widget.TileWidget;
 import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okcore.helper.LangHelpers;
-import ruiseki.okcore.persist.nbt.NBTPersist;
-import ruiseki.okcore.tileentity.legacy.AbstractStorageTE;
-import ruiseki.okcore.util.SlotDefinition;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.modular.port.IItemPort;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.client.gui.OKGuiTextures;
+import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
 import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
+import ruiseki.okmodular.client.gui.widget.TileWidget;
+import ruiseki.okmodular.core.persist.nbt.NBTPersist;
+import ruiseki.okmodular.core.tileentity.AbstractStorageTE;
+import ruiseki.okmodular.core.util.SlotDefinition;
 
 /**
  * Item Input Port TileEntity.

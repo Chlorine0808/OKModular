@@ -21,11 +21,11 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ruiseki.okcore.api.structure.core.IStructureEntry;
 import ruiseki.okcore.helper.LangHelpers;
-import ruiseki.okcore.item.legacy.ItemOK;
 import ruiseki.okcore.structure.CustomStructureRegistry;
 import ruiseki.okcore.structure.StructureManager;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.common.tile.TEMachineController;
+import ruiseki.okmodular.core.item.ItemOK;
 
 /**
  * Machine Blueprint item that defines which custom structure a controller

@@ -8,9 +8,9 @@ import mekanism.api.gas.GasStack;
 import mekanism.api.gas.ITubeConnection;
 import ruiseki.okcore.api.modular.IPortType;
 import ruiseki.okcore.enums.EnumIO;
-import ruiseki.okcore.gas.GasTankInfo;
-import ruiseki.okcore.gas.IGasHandler;
 import ruiseki.okmodular.common.tile.TEMachineController;
+import ruiseki.okmodular.core.gas.GasTankInfo;
+import ruiseki.okmodular.core.gas.IGasHandler;
 
 /**
  * External Gas Port Proxy.

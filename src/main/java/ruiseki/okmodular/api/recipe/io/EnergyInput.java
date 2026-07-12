@@ -10,10 +10,10 @@ import ruiseki.okcore.api.condition.ConditionContext;
 import ruiseki.okcore.api.modular.IModularPort;
 import ruiseki.okcore.api.modular.IPortType;
 import ruiseki.okcore.api.recipe.expression.ExpressionParser;
-import ruiseki.okcore.energy.IOKEnergySource;
 import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.core.energy.IOKEnergySource;
 
 /**
  * perTick=true: Energy consumed every tick during processing.

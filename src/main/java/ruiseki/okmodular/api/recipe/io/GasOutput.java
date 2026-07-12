@@ -16,9 +16,9 @@ import ruiseki.okcore.api.modular.IPortType;
 import ruiseki.okcore.api.recipe.expression.ConstantExpression;
 import ruiseki.okcore.api.recipe.expression.ExpressionParser;
 import ruiseki.okcore.api.recipe.expression.ExpressionsParser;
-import ruiseki.okcore.gas.GasTankInfo;
-import ruiseki.okcore.gas.IGasHandler;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.core.gas.GasTankInfo;
+import ruiseki.okmodular.core.gas.IGasHandler;
 
 public class GasOutput extends AbstractModularRecipeOutput {
 

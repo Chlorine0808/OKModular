@@ -4,8 +4,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import ruiseki.okcore.client.util.IconRegistry;
 import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.tile.essentia.AbstractEssentiaPortTE;
 import thaumcraft.api.aspects.Aspect;

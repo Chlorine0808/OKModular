@@ -12,14 +12,14 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import cofh.api.item.IToolHammer;
-import ruiseki.okcore.OKCore;
 import ruiseki.okcore.api.modular.IMachineController;
 import ruiseki.okcore.api.modular.IPortType;
 import ruiseki.okcore.helper.LangHelpers;
-import ruiseki.okcore.item.legacy.ItemOK;
-import ruiseki.okcore.network.PacketToggleSide;
-import ruiseki.okcore.tileentity.legacy.ISidedIO;
+import ruiseki.okmodular.OKModular;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.common.network.PacketToggleSide;
+import ruiseki.okmodular.core.item.ItemOK;
+import ruiseki.okmodular.core.tileentity.ISidedIO;
 
 /**
  * Item Wrench - config ISidedIO.
@@ -100,7 +100,7 @@ public class ItemWrench extends ItemOK implements IToolHammer {
                 if (world.isRemote) {
                     ForgeDirection clicked = ForgeDirection.getOrientation(side);
                     ForgeDirection target = getClickedSide(clicked, hitX, hitY, hitZ);
-                    OKCore.instance.getPacketHandler()
+                    OKModular.instance.getPacketHandler()
                         .sendToServer(new PacketToggleSide(io, target, false));
                 }
                 return true;

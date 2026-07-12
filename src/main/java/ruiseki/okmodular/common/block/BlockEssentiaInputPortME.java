@@ -9,9 +9,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 
-import ruiseki.okcore.client.util.IconRegistry;
 import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tile.essentia.input.TEEssentiaInputPortME;
 

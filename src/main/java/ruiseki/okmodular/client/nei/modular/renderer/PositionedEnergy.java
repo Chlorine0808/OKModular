@@ -8,7 +8,7 @@ import net.minecraft.util.EnumChatFormatting;
 import org.lwjgl.opengl.GL11;
 
 import codechicken.lib.gui.GuiDraw;
-import ruiseki.okcore.client.gui.OKGuiTextures;
+import ruiseki.okmodular.client.gui.OKGuiTextures;
 
 public class PositionedEnergy implements INEIPositionedRenderer {
 

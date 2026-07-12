@@ -8,9 +8,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 
-import ruiseki.okcore.client.util.IconRegistry;
-import ruiseki.okcore.item.legacy.ItemBlockOK;
+import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
+import ruiseki.okmodular.core.item.ItemBlockOK;
 
 public abstract class AbstractPortItemBlock extends ItemBlockOK {
 

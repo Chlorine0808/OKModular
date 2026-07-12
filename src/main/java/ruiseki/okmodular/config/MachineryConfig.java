@@ -23,6 +23,22 @@ public class MachineryConfig {
     @Config.DefaultBoolean(false)
     public static boolean showAllCanisters;
 
+    @Config.Comment("Whether IC2 EU sink/source capability wrappers are attached to energy ports")
+    @Config.DefaultBoolean(true)
+    public static boolean ic2Capability = true;
+
+    @Config.Comment("RF per 1 EU conversion rate")
+    @Config.DefaultInt(4)
+    public static int rftToEU = 4;
+
+    @Config.Comment("IC2 sink tier used by energy-receiving tiles")
+    @Config.DefaultInt(2)
+    public static int ic2SinkTier = 2;
+
+    @Config.Comment("IC2 source tier used by energy-emitting tiles")
+    @Config.DefaultInt(2)
+    public static int ic2SourceTier = 2;
+
     @Config.Comment("Default tint color for machine blocks (hex color code)")
     @Config.DefaultString("#FFFFFF")
     public static String defaultTintColor;

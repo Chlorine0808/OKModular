@@ -1,0 +1,8 @@
+package ruiseki.okmodular.core.block.state;
+
+public interface IOpenState {
+
+    boolean isOpen();
+
+    void setOpen(boolean open);
+}

@@ -15,9 +15,9 @@ import net.minecraft.world.World;
 
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
-import ruiseki.okcore.client.util.IconRegistry;
 import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tile.fluid.output.TEFluidOutputPortME;
 

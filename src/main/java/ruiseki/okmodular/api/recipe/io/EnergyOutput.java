@@ -12,10 +12,10 @@ import ruiseki.okcore.api.condition.ConditionContext;
 import ruiseki.okcore.api.modular.IModularPort;
 import ruiseki.okcore.api.modular.IPortType;
 import ruiseki.okcore.api.recipe.expression.ExpressionParser;
-import ruiseki.okcore.energy.IOKEnergySink;
 import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.core.energy.IOKEnergySink;
 
 public class EnergyOutput extends AbstractModularRecipeOutput {
 

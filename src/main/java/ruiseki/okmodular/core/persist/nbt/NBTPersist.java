@@ -1,0 +1,28 @@
+package ruiseki.okmodular.core.persist.nbt;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import net.minecraft.nbt.NBTTagCompound;
+
+import ruiseki.okmodular.core.tileentity.TileEntityOK;
+
+/**
+ * If this field should be persisted in Tile Entities.
+ * Fields that are a subtype of {@link INBTSerializable} must not be null, they should
+ * have a dummy value that will then be populated with the actual values.
+ * It will automatically be added to
+ * {@link TileEntityOK#writeCommon(NBTTagCompound)}
+ * and {@link TileEntityOK#readCommon(NBTTagCompound)}.
+ *
+ * @author rubensworks
+ *
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface NBTPersist {
+
+    String value() default "";
+}

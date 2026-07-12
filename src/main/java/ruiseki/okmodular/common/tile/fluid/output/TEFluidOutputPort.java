@@ -6,13 +6,13 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import ruiseki.okcore.client.util.IconRegistry;
 import ruiseki.okcore.enums.EnumIO;
-import ruiseki.okcore.fluid.FluidTransfer;
-import ruiseki.okcore.persist.nbt.NBTPersist;
+import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.tile.fluid.AbstractFluidPortTE;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.okmodular.core.fluid.FluidTransfer;
+import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 
 /**
  * Unified Fluid Output Port TileEntity for all tiers (0-15).
