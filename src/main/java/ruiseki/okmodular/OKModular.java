@@ -1,14 +1,10 @@
 package ruiseki.okmodular;
 
-import java.util.Map;
-
-import net.minecraft.command.ICommand;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.MinecraftForge;
 
 import org.apache.logging.log4j.Level;
 
-import com.google.common.collect.Maps;
 import com.gtnewhorizon.gtnhlib.client.model.loading.ModelRegistry;
 import com.gtnewhorizon.gtnhlib.config.ConfigException;
 
@@ -24,7 +20,6 @@ import cpw.mods.fml.common.event.FMLServerStartedEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppedEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
-import ruiseki.okcore.command.CommandMod;
 import ruiseki.okcore.enums.Mods;
 import ruiseki.okcore.helper.MinecraftHelpers;
 import ruiseki.okcore.init.ModBase;
@@ -68,13 +63,9 @@ public class OKModular extends ModBase {
         registerModule(new MachineryModule());
     }
 
-    @Override
-    protected CommandMod constructBaseCommand() {
-        Map<String, ICommand> commands = Maps.newHashMap();
-        CommandMod command = new CommandMod(this, commands);
-        command.addAlias("okm");
-        return command;
-    }
+    // The base /okmodular command is built by ModBase.constructBaseCommand;
+    // MachineryModule contributes the `modular` subtree via constructModuleCommand.
+    // TODO: restore the "okm" alias once okcore's CommandMod exposes aliasing.
 
     @Override
     @EventHandler
@@ -100,9 +91,9 @@ public class OKModular extends ModBase {
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         super.postInit(event);
-        // Runs after OmoshiroiKamo's postInit (hard dependency => load order),
-        // so CustomStructureRegistry.registerAll() has already been executed
-        // by StructureCompat.postInit() in the parent mod.
+        // Register machinery structures with StructureLib. OKModular owns its
+        // structure engine now (via OKCore), so this no longer relies on the
+        // parent mod's StructureCompat having run first.
         MachineryModule.postInitStructures();
         if (MinecraftHelpers.isClientSide() && Mods.NotEnoughItems.isLoaded()) {
             NEIConfig.registerStructurePreviews();

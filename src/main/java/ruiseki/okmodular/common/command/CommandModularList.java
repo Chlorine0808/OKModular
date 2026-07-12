@@ -2,10 +2,12 @@ package ruiseki.okmodular.common.command;
 
 import java.util.Set;
 
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
+
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.context.CommandContext;
 
 import ruiseki.okcore.api.structure.core.IStructureEntry;
 import ruiseki.okcore.command.CommandMod;
@@ -22,14 +24,20 @@ public class CommandModularList extends CommandMod {
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+    public int getRequiredPermissionLevel() {
+        return 2;
+    }
+
+    @Override
+    public int run(CommandContext<ICommandSender> context) {
+        ICommandSender sender = context.getSource();
         Set<String> names = StructureManager.getInstance()
             .getCustomStructureNames();
 
         if (names.isEmpty()) {
             sender.addChatMessage(
                 new ChatComponentText(EnumChatFormatting.YELLOW + "[Modular] No custom structures registered"));
-            return;
+            return Command.SINGLE_SUCCESS;
         }
 
         sender.addChatMessage(
@@ -60,5 +68,6 @@ public class CommandModularList extends CommandMod {
                         + recipeGroupDisplay
                         + (hasStructureDef ? EnumChatFormatting.GREEN + " [OK]" : EnumChatFormatting.RED + " [ERR]")));
         }
+        return Command.SINGLE_SUCCESS;
     }
 }
