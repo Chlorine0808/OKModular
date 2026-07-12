@@ -1,25 +1,22 @@
 package ruiseki.okmodular.common.command;
 
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
+
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import ruiseki.okcore.command.CommandMod;
 import ruiseki.okcore.init.ModBase;
 
 /**
  * Modular machinery subcommand handler.
- * Handles: /ok modular <reload|list>
+ * Builds: /&lt;modid&gt; modular &lt;reload|list&gt;
  */
 public class CommandModular extends CommandMod {
 
     public static final String NAME = "modular";
 
     public CommandModular(ModBase mod) {
-        super(mod);
-        addSubcommands(CommandModularReload.NAME, new CommandModularReload(mod));
-        addSubcommands(CommandModularList.NAME, new CommandModularList(mod));
+        super(mod, NAME);
     }
 
     @Override
@@ -28,11 +25,8 @@ public class CommandModular extends CommandMod {
     }
 
     @Override
-    public void processCommandHelp(ICommandSender sender, String[] args) throws CommandException {
-        sender.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "[Modular] Usage:"));
-        sender.addChatMessage(
-            new ChatComponentText(EnumChatFormatting.WHITE + "  /ok modular reload - Reload structures and recipes"));
-        sender.addChatMessage(
-            new ChatComponentText(EnumChatFormatting.WHITE + "  /ok modular list - List custom structures"));
+    public LiteralArgumentBuilder<ICommandSender> make() {
+        return super.make().then(new CommandModularReload(getMod()).make())
+            .then(new CommandModularList(getMod()).make());
     }
 }

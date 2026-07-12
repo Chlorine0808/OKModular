@@ -1,9 +1,11 @@
 package ruiseki.okmodular.common.command;
 
-import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
+
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.context.CommandContext;
 
 import ruiseki.okcore.command.CommandMod;
 import ruiseki.okcore.init.ModBase;
@@ -19,14 +21,20 @@ public class CommandModularReload extends CommandMod {
     }
 
     @Override
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
+    public int getRequiredPermissionLevel() {
+        return 2;
+    }
+
+    @Override
+    public int run(CommandContext<ICommandSender> context) {
+        ICommandSender sender = context.getSource();
         sender.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "[OKModular] Reloading modular..."));
 
         MachineryModule machineryModule = getMod().getModuleManager()
             .getModuleByType(MachineryModule.class);
         if (machineryModule == null || !machineryModule.isEnable()) {
             sender.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "[Modular] Module is disabled."));
-            return;
+            return Command.SINGLE_SUCCESS;
         }
 
         try {
@@ -34,7 +42,7 @@ public class CommandModularReload extends CommandMod {
         } catch (Exception e) {
             sender.addChatMessage(
                 new ChatComponentText(EnumChatFormatting.RED + "[Modular] Reload failed: " + e.getMessage()));
-            return;
+            return Command.SINGLE_SUCCESS;
         }
 
         if (!JsonErrorCollector.getInstance()
@@ -42,5 +50,6 @@ public class CommandModularReload extends CommandMod {
             sender.addChatMessage(
                 new ChatComponentText(EnumChatFormatting.GREEN + "[OKModular] Modular reload completed!"));
         }
+        return Command.SINGLE_SUCCESS;
     }
 }

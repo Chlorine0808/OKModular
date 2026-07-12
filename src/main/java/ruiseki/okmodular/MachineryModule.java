@@ -3,19 +3,18 @@ package ruiseki.okmodular;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 
 import com.gtnewhorizon.structurelib.alignment.constructable.IMultiblockInfoContainer;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import ruiseki.okcore.event.MemoryEventHandler;
 import ruiseki.okcore.helper.MinecraftHelpers;
 import ruiseki.okcore.init.ModModuleBase;
 import ruiseki.okcore.json.JsonErrorCollector;
@@ -37,6 +36,12 @@ import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tier.TierConfigLoader;
 import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.okmodular.common.tile.TEMachineController;
+import ruiseki.okmodular.core.capabilities.energy.CapabilityEnergy;
+import ruiseki.okmodular.core.capabilities.fluid.CapabilityFluidHandler;
+import ruiseki.okmodular.core.capabilities.item.CapabilityItemHandler;
+import ruiseki.okmodular.core.capabilities.light.CapabilityLight;
+import ruiseki.okmodular.core.capabilities.redstone.CapabilityRedstone;
+import ruiseki.okmodular.core.event.MemoryEventHandler;
 
 public class MachineryModule extends ModModuleBase {
 
@@ -44,7 +49,7 @@ public class MachineryModule extends ModModuleBase {
     private static List<String> cachedGroupNames = new ArrayList<>();
 
     public MachineryModule() {
-        super(OKModular.instance);
+        super(OKModular.instance, CommandModular.NAME);
     }
 
     public static File getConfigDir() {
@@ -78,14 +83,30 @@ public class MachineryModule extends ModModuleBase {
     }
 
     @Override
-    protected void registerSubCommand(Map<String, ICommand> subcommand) {
-        super.registerSubCommand(subcommand);
-        subcommand.put(CommandModular.NAME, new CommandModular(this.getMod()));
+    protected LiteralArgumentBuilder<ICommandSender> constructModuleCommand(MinecraftServer server) {
+        return new CommandModular(this.getMod()).make();
     }
 
     @Override
     public void preInit(FMLPreInitializationEvent event) {
         configDir = event.getModConfigurationDirectory();
+
+        // Structure engine wiring (formerly done by the parent mod's CoreModule).
+        // Keep the config layout under config/omoshiroikamo/ so existing packs
+        // and structure JSONs continue to resolve unchanged.
+        StructureManager.setConfigRootName("omoshiroikamo");
+        StructureManager.setReloadCallback(CustomStructureRegistry::registerAll);
+        StructureManager.getInstance()
+            .initialize(configDir);
+
+        // Capabilities the machinery ports/proxies depend on. Idempotent, so
+        // harmless if the parent mod already registered its own copies.
+        CapabilityItemHandler.register();
+        CapabilityEnergy.register();
+        CapabilityFluidHandler.register();
+        CapabilityRedstone.register();
+        CapabilityLight.register();
+
         ModFluidGases.preInit();
         MachineryIntegration.preInit();
         MachineryBlocks.preInit();
@@ -118,11 +139,15 @@ public class MachineryModule extends ModModuleBase {
     }
 
     /**
-     * Register StructureLib's IMultiblockInfoContainer after CustomStructureRegistry.registerAll()
-     * so that structures are available when StructureLib queries them for NEI display.
-     * Called from OKModular.postInit() after StructureCompat.postInit().
+     * Register machinery structures with StructureLib, then register the
+     * {@link IMultiblockInfoContainer} for the controller so StructureLib can
+     * render machine previews in NEI. When running standalone this is the only
+     * caller of {@link CustomStructureRegistry#registerAll()}; when the parent
+     * mod is present it maintains its own separate engine (registerAll is
+     * idempotent per registry).
      */
     public static void postInitStructures() {
+        CustomStructureRegistry.registerAll();
         IMultiblockInfoContainer.registerTileClass(TEMachineController.class, new MachineControllerInfoContainer());
     }
 
