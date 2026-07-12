@@ -20,21 +20,21 @@ import net.minecraft.world.World;
 
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 
+import ruiseki.okcore.api.modular.IMachineController;
+import ruiseki.okcore.api.modular.IModularPort;
+import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okcore.api.structure.core.IStructureEntry;
+import ruiseki.okcore.api.structure.core.ISymbolMapping;
+import ruiseki.okcore.api.structure.core.TierStructureRef;
+import ruiseki.okcore.api.structure.core.TieredBlockMapping;
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okcore.structure.CustomStructureRegistry;
+import ruiseki.okcore.structure.StructureManager;
+import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.OKModular;
+import ruiseki.okmodular.api.recipe.visitor.PortRegistrationVisitor;
 import ruiseki.okmodular.common.network.PacketStructureTint;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.modular.IMachineController;
-import ruiseki.omoshiroikamo.api.modular.IModularPort;
-import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.omoshiroikamo.api.recipe.visitor.PortRegistrationVisitor;
-import ruiseki.omoshiroikamo.api.structure.core.IStructureEntry;
-import ruiseki.omoshiroikamo.api.structure.core.ISymbolMapping;
-import ruiseki.omoshiroikamo.api.structure.core.TierStructureRef;
-import ruiseki.omoshiroikamo.api.structure.core.TieredBlockMapping;
-import ruiseki.omoshiroikamo.core.common.structure.CustomStructureRegistry;
-import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
-import ruiseki.omoshiroikamo.core.common.util.Logger;
-import ruiseki.omoshiroikamo.core.helper.LangHelpers;
 
 /**
  * Handles structure-related logic for {@link TEMachineController}.

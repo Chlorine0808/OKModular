@@ -5,13 +5,13 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.persist.nbt.NBTPersist;
+import ruiseki.okcore.tileentity.legacy.AbstractTE;
+import ruiseki.okmodular.api.modular.IVisitablePort;
+import ruiseki.okmodular.api.modular.port.IVisPort;
+import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.modular.IModularPort;
-import ruiseki.omoshiroikamo.api.modular.port.IVisPort;
-import ruiseki.omoshiroikamo.api.recipe.visitor.IRecipeVisitor;
-import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
-import ruiseki.omoshiroikamo.core.tileentity.AbstractTE;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.aspects.IAspectContainer;
@@ -20,7 +20,7 @@ import thaumcraft.api.aspects.IAspectContainer;
  * Abstract base class for Vis ports.
  * Stores Vis as AspectList with unified 16-tier system.
  */
-public abstract class AbstractVisPortTE extends AbstractTE implements IModularPort, IAspectContainer, IVisPort {
+public abstract class AbstractVisPortTE extends AbstractTE implements IVisitablePort, IAspectContainer, IVisPort {
 
     @NBTPersist
     protected int tier = 0; // 0-15 (display: 1-16)

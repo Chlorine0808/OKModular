@@ -6,13 +6,13 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import ruiseki.okcore.client.util.IconRegistry;
+import ruiseki.okcore.energy.EnergyTransfer;
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.persist.nbt.NBTPersist;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.tile.energy.AbstractEnergyIOPortTE;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
-import ruiseki.omoshiroikamo.core.energy.EnergyTransfer;
-import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
 
 /**
  * Unified Energy Output Port TileEntity for all tiers (0-15).

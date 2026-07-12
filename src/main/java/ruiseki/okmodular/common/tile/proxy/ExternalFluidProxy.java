@@ -7,9 +7,9 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 
+import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okmodular.common.tile.TEMachineController;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.modular.IPortType;
 
 /**
  * External Fluid Port Proxy.

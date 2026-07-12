@@ -24,14 +24,13 @@ import cpw.mods.fml.common.event.FMLServerStartedEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppedEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
+import ruiseki.okcore.command.CommandMod;
+import ruiseki.okcore.enums.Mods;
+import ruiseki.okcore.helper.MinecraftHelpers;
+import ruiseki.okcore.init.ModBase;
+import ruiseki.okcore.proxy.ICommonProxy;
 import ruiseki.okmodular.client.nei.NEIConfig;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.core.command.CommandMod;
-import ruiseki.omoshiroikamo.core.helper.MinecraftHelpers;
-import ruiseki.omoshiroikamo.core.init.ModBase;
-import ruiseki.omoshiroikamo.core.integration.LibMods;
-import ruiseki.omoshiroikamo.core.proxy.ICommonProxy;
-import ruiseki.omoshiroikamo.integration.nei.NEIReloadHandlers;
 
 /**
  * OK Modular: modular multiblock machinery, split out of Omoshiroi Kamo.
@@ -83,11 +82,10 @@ public class OKModular extends ModBase {
         super.preInit(event);
         if (MinecraftHelpers.isClientSide()) {
             ModelRegistry.registerModid(Reference.MOD_ID);
-            if (LibMods.NotEnoughItems.isLoaded()) {
+            if (Mods.NotEnoughItems.isLoaded()) {
                 NEIConfig config = new NEIConfig();
                 MinecraftForge.EVENT_BUS.register(config);
                 config.loadConfig();
-                NEIReloadHandlers.register(NEIConfig::reloadModularMachineryRecipes);
             }
         }
     }
@@ -106,7 +104,7 @@ public class OKModular extends ModBase {
         // so CustomStructureRegistry.registerAll() has already been executed
         // by StructureCompat.postInit() in the parent mod.
         MachineryModule.postInitStructures();
-        if (MinecraftHelpers.isClientSide() && LibMods.NotEnoughItems.isLoaded()) {
+        if (MinecraftHelpers.isClientSide() && Mods.NotEnoughItems.isLoaded()) {
             NEIConfig.registerStructurePreviews();
         }
     }

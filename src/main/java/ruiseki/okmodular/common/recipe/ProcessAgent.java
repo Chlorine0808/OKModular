@@ -8,23 +8,23 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;
 
-import ruiseki.omoshiroikamo.api.condition.ConditionContext;
-import ruiseki.omoshiroikamo.api.modular.IModularPort;
-import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.omoshiroikamo.api.recipe.context.IRecipeContext;
-import ruiseki.omoshiroikamo.api.recipe.core.AbstractRecipeProcess;
-import ruiseki.omoshiroikamo.api.recipe.core.IModularRecipe;
-import ruiseki.omoshiroikamo.api.recipe.core.ITieredMachine;
-import ruiseki.omoshiroikamo.api.recipe.core.RecipeTickResult;
-import ruiseki.omoshiroikamo.api.recipe.io.BlockInput;
-import ruiseki.omoshiroikamo.api.recipe.io.IModularRecipeInput;
-import ruiseki.omoshiroikamo.api.recipe.io.IModularRecipeOutput;
-import ruiseki.omoshiroikamo.api.recipe.io.IRecipeInput;
-import ruiseki.omoshiroikamo.api.recipe.io.IRecipeOutput;
-import ruiseki.omoshiroikamo.api.recipe.parser.InputNBTRegistry;
-import ruiseki.omoshiroikamo.api.recipe.parser.OutputNBTRegistry;
-import ruiseki.omoshiroikamo.api.recipe.visitor.RecipeExecutionVisitor;
-import ruiseki.omoshiroikamo.api.structure.core.IStructureEntry;
+import ruiseki.okcore.api.condition.ConditionContext;
+import ruiseki.okcore.api.modular.IModularPort;
+import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okcore.api.recipe.context.IRecipeContext;
+import ruiseki.okcore.api.recipe.core.ITieredMachine;
+import ruiseki.okcore.api.structure.core.IStructureEntry;
+import ruiseki.okmodular.api.recipe.core.AbstractRecipeProcess;
+import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
+import ruiseki.okmodular.api.recipe.io.BlockInput;
+import ruiseki.okmodular.api.recipe.io.IModularRecipeInput;
+import ruiseki.okmodular.api.recipe.io.IModularRecipeOutput;
+import ruiseki.okmodular.api.recipe.io.IRecipeInput;
+import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
+import ruiseki.okmodular.api.recipe.parser.InputNBTRegistry;
+import ruiseki.okmodular.api.recipe.parser.OutputNBTRegistry;
+import ruiseki.okmodular.api.recipe.visitor.RecipeExecutionVisitor;
 
 public class ProcessAgent extends AbstractRecipeProcess {
 

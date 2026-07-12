@@ -4,6 +4,13 @@ import net.minecraft.inventory.IInventory;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.IFluidHandler;
 
+import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okcore.energy.IOKEnergyTile;
+import ruiseki.okcore.energy.integration.EnergyIntegrationRegistry;
+import ruiseki.okcore.energy.integration.IEnergyIntegrationDelegate;
+import ruiseki.okcore.enums.Mods;
+import ruiseki.okcore.gas.IGasHandler;
+import ruiseki.okcore.structure.BlockResolver;
 import ruiseki.okmodular.common.block.BlockEssentiaInputPort;
 import ruiseki.okmodular.common.block.BlockEssentiaInputPortME;
 import ruiseki.okmodular.common.block.BlockEssentiaOutputPort;
@@ -24,13 +31,6 @@ import ruiseki.okmodular.common.tile.proxy.ExternalFluidProxy;
 import ruiseki.okmodular.common.tile.proxy.ExternalGasProxy;
 import ruiseki.okmodular.common.tile.proxy.ExternalItemProxy;
 import ruiseki.okmodular.common.tile.proxy.ExternalManaProxy;
-import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.omoshiroikamo.core.common.structure.BlockResolver;
-import ruiseki.omoshiroikamo.core.energy.IOKEnergyTile;
-import ruiseki.omoshiroikamo.core.energy.capability.EnergyIntegrationRegistry;
-import ruiseki.omoshiroikamo.core.energy.capability.IEnergyIntegrationDelegate;
-import ruiseki.omoshiroikamo.core.gas.IGasHandler;
-import ruiseki.omoshiroikamo.core.integration.LibMods;
 // import ruiseki.okmodular.common.tile.proxy.ExternalVisProxy;
 
 /**
@@ -44,25 +44,25 @@ public class MachineryIntegration {
         registerBaseProxies();
 
         // Register mod-specific components (Blocks and Proxies)
-        if (LibMods.AppliedEnergistics2.isLoaded()) {
+        if (Mods.AppliedEnergistics2.isLoaded()) {
             AE2Integration.init();
         }
-        if (LibMods.AE2FluidCrafting.isLoaded()) {
+        if (Mods.AE2FluidCrafting.isLoaded()) {
             AE2FluidIntegration.init();
         }
-        if (LibMods.EnderIO.isLoaded()) {
+        if (Mods.EnderIO.isLoaded()) {
             EnderIOIntegration.init();
         }
-        if (LibMods.Mekanism.isLoaded()) {
+        if (Mods.Mekanism.isLoaded()) {
             MekanismIntegration.init();
         }
-        if (LibMods.Botania.isLoaded()) {
+        if (Mods.Botania.isLoaded()) {
             BotaniaIntegration.init();
         }
-        if (LibMods.Thaumcraft.isLoaded()) {
+        if (Mods.Thaumcraft.isLoaded()) {
             ThaumcraftIntegration.init();
         }
-        if (LibMods.ThaumicEnergistics.isLoaded()) {
+        if (Mods.ThaumicEnergistics.isLoaded()) {
             ThaumicEnergisticsIntegration.init();
         }
     }
@@ -182,24 +182,24 @@ public class MachineryIntegration {
 
             @Override
             public Integer tryExtract(Object te, ForgeDirection side, int amount, boolean simulate) {
-                return ruiseki.omoshiroikamo.core.energy.capability.enderio.EnderIOIntegration
+                return ruiseki.okcore.energy.integration.enderio.EnderIOIntegration
                     .tryExtract(te, side, amount, simulate);
             }
 
             @Override
             public Integer tryReceive(Object te, ForgeDirection side, int amount, boolean simulate) {
-                return ruiseki.omoshiroikamo.core.energy.capability.enderio.EnderIOIntegration
+                return ruiseki.okcore.energy.integration.enderio.EnderIOIntegration
                     .tryReceive(te, side, amount, simulate);
             }
 
             @Override
             public Integer getEnergyStored(Object te) {
-                return ruiseki.omoshiroikamo.core.energy.capability.enderio.EnderIOIntegration.getEnergyStored(te);
+                return ruiseki.okcore.energy.integration.enderio.EnderIOIntegration.getEnergyStored(te);
             }
 
             @Override
             public Integer getMaxEnergyStored(Object te) {
-                return ruiseki.omoshiroikamo.core.energy.capability.enderio.EnderIOIntegration.getMaxEnergyStored(te);
+                return ruiseki.okcore.energy.integration.enderio.EnderIOIntegration.getMaxEnergyStored(te);
             }
 
             @Override

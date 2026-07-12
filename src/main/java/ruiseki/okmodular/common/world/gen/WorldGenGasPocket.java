@@ -3,7 +3,7 @@ package ruiseki.okmodular.common.world.gen;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 
-import ruiseki.omoshiroikamo.core.world.gen.WorldGenMinableExtended;
+import ruiseki.okcore.world.gen.WorldGenMinableExtended;
 
 /**
  * WorldGenerator specialized for gas pockets.

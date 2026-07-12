@@ -7,8 +7,8 @@ import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.drawable.UITexture;
 import com.cleanroommc.modularui.value.sync.BooleanSyncValue;
 
+import ruiseki.okcore.client.gui.widget.CyclicVariantButtonWidget;
 import ruiseki.okmodular.Reference;
-import ruiseki.omoshiroikamo.core.client.gui.widget.CyclicVariantButtonWidget;
 
 public class ToggleWidget extends CyclicVariantButtonWidget {
 

@@ -15,11 +15,11 @@ import net.minecraft.world.World;
 
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
+import ruiseki.okcore.client.util.IconRegistry;
+import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tile.item.output.TEItemOutputPortME;
-import ruiseki.omoshiroikamo.api.enums.ModObject;
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 
 /**
  * ME Item Output Port - outputs items directly to AE2 ME Network.
@@ -29,7 +29,7 @@ import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 public class BlockItemOutputPortME extends AbstractPortBlock<TEItemOutputPortME> {
 
     protected BlockItemOutputPortME() {
-        super(ModObject.blockModularItemOutputME.name, TEItemOutputPortME.class);
+        super(OKMObjects.blockModularItemOutputME.name, TEItemOutputPortME.class);
         setHardness(5.0F);
         setResistance(10.0F);
         setTextureName("modularmachineryOverlay/base_modularports");

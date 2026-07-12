@@ -6,8 +6,8 @@ import java.util.List;
 
 import com.google.gson.JsonObject;
 
-import ruiseki.omoshiroikamo.api.recipe.core.IModularRecipe;
-import ruiseki.omoshiroikamo.core.common.util.Logger;
+import ruiseki.okcore.util.Logger;
+import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 
 /**
  * JSONLoader class for loading recipes from JSON files.

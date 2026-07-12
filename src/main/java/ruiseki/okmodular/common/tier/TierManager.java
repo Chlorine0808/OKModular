@@ -1,7 +1,7 @@
 package ruiseki.okmodular.common.tier;
 
+import ruiseki.okmodular.api.modular.ModularTier;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.api.modular.ModularTier;
 
 /**
  * Manages the number of enabled tiers for the modular machinery system.

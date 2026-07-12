@@ -22,21 +22,21 @@ import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.value.sync.SyncHandlers;
 import com.cleanroommc.modularui.widgets.slot.FluidSlot;
 
+import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okcore.client.gui.widget.TileWidget;
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.enums.RedstoneMode;
+import ruiseki.okcore.fluid.SmartTank;
+import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okcore.persist.nbt.NBTPersist;
+import ruiseki.okcore.tileentity.legacy.AbstractTE;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.api.modular.IVisitablePort;
+import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.enums.RedstoneMode;
-import ruiseki.omoshiroikamo.api.modular.IModularPort;
-import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.omoshiroikamo.api.recipe.visitor.IRecipeVisitor;
-import ruiseki.omoshiroikamo.core.client.gui.widget.TileWidget;
-import ruiseki.omoshiroikamo.core.fluid.SmartTank;
-import ruiseki.omoshiroikamo.core.helper.LangHelpers;
-import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
-import ruiseki.omoshiroikamo.core.tileentity.AbstractTE;
 
 public abstract class AbstractFluidPortTE extends AbstractTE
-    implements IModularPort, IFluidHandler, IGuiHolder<PosGuiData> {
+    implements IVisitablePort, IFluidHandler, IGuiHolder<PosGuiData> {
 
     @NBTPersist
     protected final EnumIO[] sides = new EnumIO[6];

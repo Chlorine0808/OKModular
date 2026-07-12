@@ -13,10 +13,10 @@ import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ruiseki.okcore.block.legacy.BlockOK;
+import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.common.tile.vis.TileVisBridge;
-import ruiseki.omoshiroikamo.api.enums.ModObject;
-import ruiseki.omoshiroikamo.core.block.BlockOK;
 
 /**
  * Bridges Vis from Vis Output Port to Thaumcraft Vis network.
@@ -26,7 +26,7 @@ import ruiseki.omoshiroikamo.core.block.BlockOK;
 public class BlockVisBridge extends BlockOK {
 
     public BlockVisBridge() {
-        super(ModObject.blockVisBridge.name, Material.iron);
+        super(OKMObjects.blockVisBridge.name, Material.iron);
         setHardness(5.0F);
         setResistance(10.0F);
         setStepSound(soundTypeMetal);

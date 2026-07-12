@@ -9,14 +9,14 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 
 import cpw.mods.fml.common.registry.GameRegistry;
+import ruiseki.okcore.util.Logger;
+import ruiseki.okcore.world.gen.SimpleMinableWorldGenerator;
+import ruiseki.okcore.world.gen.WorldGenMinableExtended;
 import ruiseki.okmodular.OKModular;
 import ruiseki.okmodular.common.block.BlockFluidBase;
 import ruiseki.okmodular.common.block.BlockLiquidBase;
 import ruiseki.okmodular.common.item.ItemBlockFluid;
 import ruiseki.okmodular.common.world.gen.WorldGenGasPocket;
-import ruiseki.omoshiroikamo.core.common.util.Logger;
-import ruiseki.omoshiroikamo.core.world.gen.SimpleMinableWorldGenerator;
-import ruiseki.omoshiroikamo.core.world.gen.WorldGenMinableExtended;
 
 /**
  * Registration class for all fluid materials.

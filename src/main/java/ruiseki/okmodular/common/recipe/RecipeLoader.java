@@ -9,11 +9,11 @@ import java.util.Map;
 
 import com.google.gson.JsonObject;
 
+import ruiseki.okcore.api.modular.IModularPort;
+import ruiseki.okcore.json.JsonErrorCollector;
+import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.Reference;
-import ruiseki.omoshiroikamo.api.modular.IModularPort;
-import ruiseki.omoshiroikamo.api.recipe.core.IModularRecipe;
-import ruiseki.omoshiroikamo.core.common.util.Logger;
-import ruiseki.omoshiroikamo.core.json.JsonErrorCollector;
+import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 
 public class RecipeLoader {
 

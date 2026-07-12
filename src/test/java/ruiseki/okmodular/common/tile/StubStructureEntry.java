@@ -7,14 +7,14 @@ import java.util.Set;
 
 import com.google.gson.JsonObject;
 
-import ruiseki.omoshiroikamo.api.condition.ConditionContext;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.structure.core.IStructureEntry;
-import ruiseki.omoshiroikamo.api.structure.core.IStructureLayer;
-import ruiseki.omoshiroikamo.api.structure.core.ISymbolMapping;
-import ruiseki.omoshiroikamo.api.structure.core.TierStructureRef;
-import ruiseki.omoshiroikamo.api.structure.io.IStructureRequirement;
-import ruiseki.omoshiroikamo.api.structure.visitor.IStructureVisitor;
+import ruiseki.okcore.api.condition.ConditionContext;
+import ruiseki.okcore.api.structure.core.IStructureEntry;
+import ruiseki.okcore.api.structure.core.IStructureLayer;
+import ruiseki.okcore.api.structure.core.ISymbolMapping;
+import ruiseki.okcore.api.structure.core.TierStructureRef;
+import ruiseki.okcore.api.structure.io.IStructureRequirement;
+import ruiseki.okcore.api.structure.visitor.IStructureVisitor;
+import ruiseki.okcore.enums.EnumIO;
 
 public class StubStructureEntry implements IStructureEntry {
 

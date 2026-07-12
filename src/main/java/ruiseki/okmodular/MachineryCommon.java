@@ -2,12 +2,12 @@ package ruiseki.okmodular;
 
 import net.minecraftforge.common.MinecraftForge;
 
+import ruiseki.okcore.init.ModBase;
+import ruiseki.okcore.network.PacketHandler;
+import ruiseki.okcore.proxy.CommonProxyComponent;
 import ruiseki.okmodular.common.handler.FluidPhysicsHandler;
+import ruiseki.okmodular.common.network.PacketReloadNEI;
 import ruiseki.okmodular.common.network.PacketStructureTint;
-import ruiseki.omoshiroikamo.core.init.ModBase;
-import ruiseki.omoshiroikamo.core.network.PacketHandler;
-import ruiseki.omoshiroikamo.core.network.packet.PacketReloadNEI;
-import ruiseki.omoshiroikamo.core.proxy.CommonProxyComponent;
 
 /**
  * Modular Machinery Backport module entry point.

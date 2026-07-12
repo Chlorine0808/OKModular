@@ -35,32 +35,33 @@ import com.gtnewhorizon.structurelib.alignment.IAlignmentLimits;
 import com.gtnewhorizon.structurelib.alignment.enumerable.ExtendedFacing;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 
+import ruiseki.okcore.api.condition.ConditionContext;
+import ruiseki.okcore.api.modular.IMachineController;
+import ruiseki.okcore.api.modular.IModularPort;
+import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okcore.api.recipe.context.IRecipeContext;
+import ruiseki.okcore.api.recipe.core.IMachineState;
+import ruiseki.okcore.api.recipe.core.ITieredMachine;
+import ruiseki.okcore.api.structure.core.IStructureEntry;
+import ruiseki.okcore.client.gui.handler.ItemStackHandlerBase;
+import ruiseki.okcore.enums.CraftingState;
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.enums.RedstoneMode;
+import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okcore.persist.nbt.NBTPersist;
+import ruiseki.okcore.structure.StructureManager;
+import ruiseki.okcore.tileentity.legacy.AbstractMBModifierTE;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.api.modular.IVisitablePort;
+import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.error.ErrorReason;
+import ruiseki.okmodular.api.recipe.io.IRecipeInput;
+import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.common.block.BlockMachineController;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
 import ruiseki.okmodular.common.recipe.ProcessAgent;
 import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
-import ruiseki.omoshiroikamo.api.condition.ConditionContext;
-import ruiseki.omoshiroikamo.api.enums.CraftingState;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.enums.RedstoneMode;
-import ruiseki.omoshiroikamo.api.modular.IMachineController;
-import ruiseki.omoshiroikamo.api.modular.IModularPort;
-import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.omoshiroikamo.api.recipe.context.IRecipeContext;
-import ruiseki.omoshiroikamo.api.recipe.core.IMachineState;
-import ruiseki.omoshiroikamo.api.recipe.core.IModularRecipe;
-import ruiseki.omoshiroikamo.api.recipe.core.ITieredMachine;
-import ruiseki.omoshiroikamo.api.recipe.error.ErrorReason;
-import ruiseki.omoshiroikamo.api.recipe.io.IRecipeInput;
-import ruiseki.omoshiroikamo.api.recipe.visitor.IRecipeVisitor;
-import ruiseki.omoshiroikamo.api.structure.core.IStructureEntry;
-import ruiseki.omoshiroikamo.core.client.gui.handler.ItemStackHandlerBase;
-import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
-import ruiseki.omoshiroikamo.core.helper.LangHelpers;
-import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
-import ruiseki.omoshiroikamo.core.tileentity.AbstractMBModifierTE;
 
 /**
  * Corresponds to the 'Q' symbol in structure definitions.
@@ -69,7 +70,7 @@ import ruiseki.omoshiroikamo.core.tileentity.AbstractMBModifierTE;
  * TODO: Improve holo indicator
  */
 public class TEMachineController extends AbstractMBModifierTE
-    implements IAlignment, IGuiHolder<PosGuiData>, IRecipeContext, IModularPort, ITieredMachine, IMachineController {
+    implements IAlignment, IGuiHolder<PosGuiData>, IRecipeContext, IVisitablePort, ITieredMachine, IMachineController {
 
     // ========== Blueprint Inventory ==========
     public static final int BLUEPRINT_SLOT = 0;

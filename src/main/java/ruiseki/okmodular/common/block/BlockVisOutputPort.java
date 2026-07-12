@@ -12,12 +12,12 @@ import net.minecraft.world.World;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tier.TierManager;
 import ruiseki.okmodular.common.tile.vis.output.TEVisOutputPort;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.api.enums.ModObject;
-import ruiseki.omoshiroikamo.core.helper.LangHelpers;
 
 /**
  * Vis Output Port block with unified 16-tier system.
@@ -28,7 +28,7 @@ public class BlockVisOutputPort extends AbstractPortBlock<TEVisOutputPort> {
     private static final int TIER_COUNT = 16;
 
     protected BlockVisOutputPort() {
-        super(ModObject.blockModularVisOutput.name, TEVisOutputPort.class);
+        super(OKMObjects.blockModularVisOutput.name, TEVisOutputPort.class);
         setHardness(5.0F);
         setResistance(10.0F);
         setTextureName("modularmachineryOverlay/base_modularports");

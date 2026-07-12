@@ -9,8 +9,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import ruiseki.omoshiroikamo.core.common.util.Logger;
-import ruiseki.omoshiroikamo.core.json.AbstractJsonReader;
+import ruiseki.okcore.json.AbstractJsonReader;
+import ruiseki.okcore.util.Logger;
 
 /**
  * Reader for Modular Machinery recipes.

@@ -20,14 +20,14 @@ import codechicken.nei.recipe.TemplateRecipeHandler;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
+import ruiseki.okcore.api.modular.IMachineController;
+import ruiseki.okcore.api.structure.core.BlockMapping;
+import ruiseki.okcore.api.structure.core.IStructureEntry;
+import ruiseki.okcore.api.structure.core.ISymbolMapping;
+import ruiseki.okcore.structure.CustomStructureRegistry;
+import ruiseki.okcore.structure.StructureManager;
 import ruiseki.okmodular.common.init.MachineryBlocks;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
-import ruiseki.omoshiroikamo.api.modular.IMachineController;
-import ruiseki.omoshiroikamo.api.structure.core.BlockMapping;
-import ruiseki.omoshiroikamo.api.structure.core.IStructureEntry;
-import ruiseki.omoshiroikamo.api.structure.core.ISymbolMapping;
-import ruiseki.omoshiroikamo.core.common.structure.CustomStructureRegistry;
-import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
 
 /**
  * NEI handler for a single ModularMachine structure preview.

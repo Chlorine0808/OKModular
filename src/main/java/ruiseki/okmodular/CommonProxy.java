@@ -1,7 +1,7 @@
 package ruiseki.okmodular;
 
-import ruiseki.omoshiroikamo.core.init.ModBase;
-import ruiseki.omoshiroikamo.core.proxy.CommonProxyComponent;
+import ruiseki.okcore.init.ModBase;
+import ruiseki.okcore.proxy.CommonProxyComponent;
 
 public class CommonProxy extends CommonProxyComponent {
 

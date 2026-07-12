@@ -15,6 +15,14 @@ import com.gtnewhorizon.structurelib.alignment.constructable.IMultiblockInfoCont
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import ruiseki.okcore.event.MemoryEventHandler;
+import ruiseki.okcore.helper.MinecraftHelpers;
+import ruiseki.okcore.init.ModModuleBase;
+import ruiseki.okcore.json.JsonErrorCollector;
+import ruiseki.okcore.proxy.ICommonProxy;
+import ruiseki.okcore.structure.BlockResolver;
+import ruiseki.okcore.structure.CustomStructureRegistry;
+import ruiseki.okcore.structure.StructureManager;
 import ruiseki.okmodular.common.command.CommandModular;
 import ruiseki.okmodular.common.fluid.EnumFluidMaterial;
 import ruiseki.okmodular.common.fluid.ModFluidGases;
@@ -23,20 +31,12 @@ import ruiseki.okmodular.common.init.MachineryItems;
 import ruiseki.okmodular.common.init.MachineryOreDict;
 import ruiseki.okmodular.common.integration.MachineryIntegration;
 import ruiseki.okmodular.common.integration.structurelib.MachineControllerInfoContainer;
+import ruiseki.okmodular.common.item.ItemFluidCanister;
+import ruiseki.okmodular.common.network.PacketReloadNEI;
 import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tier.TierConfigLoader;
 import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.okmodular.common.tile.TEMachineController;
-import ruiseki.omoshiroikamo.core.common.structure.BlockResolver;
-import ruiseki.omoshiroikamo.core.common.structure.CustomStructureRegistry;
-import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
-import ruiseki.omoshiroikamo.core.event.MemoryEventHandler;
-import ruiseki.omoshiroikamo.core.helper.MinecraftHelpers;
-import ruiseki.omoshiroikamo.core.init.ModModuleBase;
-import ruiseki.omoshiroikamo.core.item.ItemFluidCanister;
-import ruiseki.omoshiroikamo.core.json.JsonErrorCollector;
-import ruiseki.omoshiroikamo.core.network.packet.PacketReloadNEI;
-import ruiseki.omoshiroikamo.core.proxy.ICommonProxy;
 
 public class MachineryModule extends ModModuleBase {
 

@@ -12,13 +12,13 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.opengl.GL11;
 
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.persist.nbt.NBTPersist;
+import ruiseki.okcore.tileentity.legacy.AbstractTE;
+import ruiseki.okcore.util.ManaStorage;
+import ruiseki.okmodular.api.modular.IVisitablePort;
+import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.modular.IModularPort;
-import ruiseki.omoshiroikamo.api.recipe.visitor.IRecipeVisitor;
-import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
-import ruiseki.omoshiroikamo.core.tileentity.AbstractTE;
-import ruiseki.omoshiroikamo.core.util.ManaStorage;
 import vazkii.botania.api.mana.IManaPool;
 import vazkii.botania.api.mana.ManaNetworkEvent;
 import vazkii.botania.api.mana.spark.ISparkAttachable;
@@ -26,7 +26,7 @@ import vazkii.botania.api.mana.spark.ISparkEntity;
 import vazkii.botania.client.core.handler.HUDHandler;
 import vazkii.botania.common.core.handler.ManaNetworkHandler;
 
-public abstract class AbstractManaPortTE extends AbstractTE implements IModularPort, ISparkAttachable, IManaPool {
+public abstract class AbstractManaPortTE extends AbstractTE implements IVisitablePort, ISparkAttachable, IManaPool {
 
     @NBTPersist
     protected int tier = 0; // 0-15 (display: 1-16)

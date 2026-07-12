@@ -27,28 +27,29 @@ import com.google.common.collect.ImmutableList;
 
 import lombok.Getter;
 import lombok.Setter;
+import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okcore.client.gui.OKGuiTextures;
+import ruiseki.okcore.client.gui.widget.CyclicVariantButtonWidget;
+import ruiseki.okcore.client.gui.widget.TileWidget;
+import ruiseki.okcore.energy.integration.EnergyIntegrationConfig;
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.enums.RedstoneMode;
+import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okcore.persist.nbt.NBTPersist;
+import ruiseki.okcore.tileentity.legacy.AbstractEnergyTE;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.api.modular.IVisitablePort;
+import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
 import ruiseki.okmodular.client.gui.widget.ToggleWidget;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.enums.RedstoneMode;
-import ruiseki.omoshiroikamo.api.modular.IModularPort;
-import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.omoshiroikamo.api.recipe.visitor.IRecipeVisitor;
-import ruiseki.omoshiroikamo.config.general.energy.EnergyConfig;
-import ruiseki.omoshiroikamo.core.client.gui.OKGuiTextures;
-import ruiseki.omoshiroikamo.core.client.gui.widget.CyclicVariantButtonWidget;
-import ruiseki.omoshiroikamo.core.client.gui.widget.TileWidget;
-import ruiseki.omoshiroikamo.core.helper.LangHelpers;
-import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
-import ruiseki.omoshiroikamo.core.tileentity.AbstractEnergyTE;
 
 /**
  * Extends AbstractEnergyTE to leverage existing energy management system.
  * TODO: add RF-only, EU-only, or both ports
  * TODO: add ???-energy only ports and universal port if needed
  */
-public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE implements IModularPort, IGuiHolder<PosGuiData> {
+public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE
+    implements IVisitablePort, IGuiHolder<PosGuiData> {
 
     @NBTPersist
     protected final EnumIO[] sides = new EnumIO[6];
@@ -163,7 +164,7 @@ public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE implements
 
     @Override
     public void doUpdate() {
-        if (!ic2Registered && useIC2Compat && EnergyConfig.ic2Capability) {
+        if (!ic2Registered && useIC2Compat && EnergyIntegrationConfig.ic2Capability) {
             register();
         } else if (ic2Registered && !useIC2Compat) {
             deregister();
@@ -223,8 +224,8 @@ public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE implements
 
     public String getEnergyText() {
         if (energyMode == EnergyMode.EU) {
-            double eu = (double) getEnergyStored() / EnergyConfig.rftToEU;
-            double max = (double) getMaxEnergyStored() / EnergyConfig.rftToEU;
+            double eu = (double) getEnergyStored() / EnergyIntegrationConfig.rftToEU;
+            double max = (double) getMaxEnergyStored() / EnergyIntegrationConfig.rftToEU;
             return String.format("%.1f / %.1f EU", eu, max);
         } else {
             return getEnergyStored() + " / " + getMaxEnergyStored() + " RF";
@@ -233,7 +234,7 @@ public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE implements
 
     public String getEnergyUsedText() {
         if (energyMode == EnergyMode.EU) {
-            double eu = (double) energyStorage.getEnergyStored() / EnergyConfig.rftToEU;
+            double eu = (double) energyStorage.getEnergyStored() / EnergyIntegrationConfig.rftToEU;
             return LangHelpers.localize("gui.machinery.energy_used", String.format("%.1f EU/t", eu));
         } else {
             return LangHelpers.localize("gui.machinery.energy_used", energyStorage.getEnergyStored() + " RF/t");
