@@ -8,15 +8,15 @@ import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ruiseki.omoshiroikamo.core.common.util.Logger;
-import ruiseki.omoshiroikamo.core.init.ModBase;
-import ruiseki.omoshiroikamo.core.proxy.ClientProxyComponent;
 import ruiseki.okmodular.client.handler.FluidFogHandler;
 import ruiseki.okmodular.client.render.ItemPortRenderer;
 import ruiseki.okmodular.client.render.PortOverlayISBRH;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.block.BlockMachineCasing;
 import ruiseki.okmodular.common.block.BlockMachineController;
+import ruiseki.omoshiroikamo.core.common.util.Logger;
+import ruiseki.omoshiroikamo.core.init.ModBase;
+import ruiseki.omoshiroikamo.core.proxy.ClientProxyComponent;
 
 /**
  * Client-side module for Machinery.

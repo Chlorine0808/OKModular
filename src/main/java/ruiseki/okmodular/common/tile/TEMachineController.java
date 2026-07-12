@@ -36,6 +36,11 @@ import com.gtnewhorizon.structurelib.alignment.enumerable.ExtendedFacing;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.common.block.BlockMachineController;
+import ruiseki.okmodular.common.item.ItemMachineBlueprint;
+import ruiseki.okmodular.common.recipe.ProcessAgent;
+import ruiseki.okmodular.common.recipe.RecipeLoader;
+import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
 import ruiseki.omoshiroikamo.api.condition.ConditionContext;
 import ruiseki.omoshiroikamo.api.enums.CraftingState;
 import ruiseki.omoshiroikamo.api.enums.EnumIO;
@@ -56,11 +61,6 @@ import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
 import ruiseki.omoshiroikamo.core.helper.LangHelpers;
 import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
 import ruiseki.omoshiroikamo.core.tileentity.AbstractMBModifierTE;
-import ruiseki.okmodular.common.block.BlockMachineController;
-import ruiseki.okmodular.common.item.ItemMachineBlueprint;
-import ruiseki.okmodular.common.recipe.ProcessAgent;
-import ruiseki.okmodular.common.recipe.RecipeLoader;
-import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
 
 /**
  * Corresponds to the 'Q' symbol in structure definitions.
@@ -203,8 +203,8 @@ public class TEMachineController extends AbstractMBModifierTE
         }
 
         EnumIO newIo = typeMap.getOrDefault(portType, EnumIO.NONE);
-        player.addChatMessage(
-            new ChatComponentTranslation("chat.okmodular.port_io_set", portType.name(), newIo.name()));
+        player
+            .addChatMessage(new ChatComponentTranslation("chat.okmodular.port_io_set", portType.name(), newIo.name()));
 
         setFormed(false);
         clearStructureParts();

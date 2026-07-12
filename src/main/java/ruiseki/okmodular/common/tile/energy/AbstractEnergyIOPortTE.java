@@ -28,6 +28,8 @@ import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
+import ruiseki.okmodular.client.gui.widget.ToggleWidget;
 import ruiseki.omoshiroikamo.api.enums.EnumIO;
 import ruiseki.omoshiroikamo.api.enums.RedstoneMode;
 import ruiseki.omoshiroikamo.api.modular.IModularPort;
@@ -40,8 +42,6 @@ import ruiseki.omoshiroikamo.core.client.gui.widget.TileWidget;
 import ruiseki.omoshiroikamo.core.helper.LangHelpers;
 import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
 import ruiseki.omoshiroikamo.core.tileentity.AbstractEnergyTE;
-import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
-import ruiseki.okmodular.client.gui.widget.ToggleWidget;
 
 /**
  * Extends AbstractEnergyTE to leverage existing energy management system.

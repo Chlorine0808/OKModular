@@ -18,15 +18,15 @@ import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.oredict.OreDictionary;
 
+import ruiseki.okmodular.common.tile.TEMachineController;
+import ruiseki.okmodular.common.tile.essentia.AbstractEssentiaPortTE;
+import ruiseki.okmodular.common.tile.vis.AbstractVisPortTE;
 import ruiseki.omoshiroikamo.api.modular.IModularPort;
 import ruiseki.omoshiroikamo.api.modular.IPortType;
 import ruiseki.omoshiroikamo.api.recipe.core.IMachineState;
 import ruiseki.omoshiroikamo.api.recipe.core.IModularRecipe;
 import ruiseki.omoshiroikamo.core.gas.GasTankInfo;
 import ruiseki.omoshiroikamo.core.gas.IGasHandler;
-import ruiseki.okmodular.common.tile.TEMachineController;
-import ruiseki.okmodular.common.tile.essentia.AbstractEssentiaPortTE;
-import ruiseki.okmodular.common.tile.vis.AbstractVisPortTE;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.IAspectContainer;
 import vazkii.botania.api.mana.IManaPool;

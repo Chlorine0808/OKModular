@@ -9,12 +9,12 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import com.gtnewhorizon.gtnhlib.item.ItemTransfer;
 
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
-import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.tile.item.AbstractItemIOPortTE;
+import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.omoshiroikamo.api.enums.EnumIO;
+import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
+import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
 
 /**
  * Unified Item Output Port TileEntity for all tiers (0-15).

@@ -8,9 +8,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 
+import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.omoshiroikamo.core.network.CodecField;
 import ruiseki.omoshiroikamo.core.network.PacketCodec;
-import ruiseki.okmodular.common.tile.StructureTintCache;
 
 /**
  * Packet to synchronize structure tint colors from server to client.

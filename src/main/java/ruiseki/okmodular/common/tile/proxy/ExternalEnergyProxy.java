@@ -7,6 +7,7 @@ import cofh.api.energy.IEnergyConnection;
 import cofh.api.energy.IEnergyHandler;
 import cofh.api.energy.IEnergyProvider;
 import cofh.api.energy.IEnergyReceiver;
+import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.omoshiroikamo.api.enums.EnumIO;
 import ruiseki.omoshiroikamo.api.modular.IPortType;
 import ruiseki.omoshiroikamo.core.energy.IOKEnergyIO;
@@ -15,7 +16,6 @@ import ruiseki.omoshiroikamo.core.energy.IOKEnergySource;
 import ruiseki.omoshiroikamo.core.energy.IOKEnergyTile;
 import ruiseki.omoshiroikamo.core.energy.capability.EnergyIntegrationRegistry;
 import ruiseki.omoshiroikamo.core.energy.capability.IEnergyIntegrationDelegate;
-import ruiseki.okmodular.common.tile.TEMachineController;
 
 /**
  * External Energy Port Proxy.

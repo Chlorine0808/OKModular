@@ -4,13 +4,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.IFluidHandler;
 
-import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.omoshiroikamo.core.common.structure.BlockResolver;
-import ruiseki.omoshiroikamo.core.energy.IOKEnergyTile;
-import ruiseki.omoshiroikamo.core.energy.capability.EnergyIntegrationRegistry;
-import ruiseki.omoshiroikamo.core.energy.capability.IEnergyIntegrationDelegate;
-import ruiseki.omoshiroikamo.core.gas.IGasHandler;
-import ruiseki.omoshiroikamo.core.integration.LibMods;
 import ruiseki.okmodular.common.block.BlockEssentiaInputPort;
 import ruiseki.okmodular.common.block.BlockEssentiaInputPortME;
 import ruiseki.okmodular.common.block.BlockEssentiaOutputPort;
@@ -31,6 +24,13 @@ import ruiseki.okmodular.common.tile.proxy.ExternalFluidProxy;
 import ruiseki.okmodular.common.tile.proxy.ExternalGasProxy;
 import ruiseki.okmodular.common.tile.proxy.ExternalItemProxy;
 import ruiseki.okmodular.common.tile.proxy.ExternalManaProxy;
+import ruiseki.omoshiroikamo.api.modular.IPortType;
+import ruiseki.omoshiroikamo.core.common.structure.BlockResolver;
+import ruiseki.omoshiroikamo.core.energy.IOKEnergyTile;
+import ruiseki.omoshiroikamo.core.energy.capability.EnergyIntegrationRegistry;
+import ruiseki.omoshiroikamo.core.energy.capability.IEnergyIntegrationDelegate;
+import ruiseki.omoshiroikamo.core.gas.IGasHandler;
+import ruiseki.omoshiroikamo.core.integration.LibMods;
 // import ruiseki.okmodular.common.tile.proxy.ExternalVisProxy;
 
 /**

@@ -20,12 +20,12 @@ import com.gtnewhorizon.gtnhlib.eventbus.EventBusSubscriber;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
+import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.omoshiroikamo.api.enums.EnumIO;
 import ruiseki.omoshiroikamo.api.modular.IPortType;
 import ruiseki.omoshiroikamo.api.structure.core.IStructureEntry;
 import ruiseki.omoshiroikamo.core.item.ItemWrench;
 import ruiseki.omoshiroikamo.core.tileentity.ISidedIO;
-import ruiseki.okmodular.common.tile.TEMachineController;
 
 @EventBusSubscriber(side = Side.CLIENT)
 public class WrenchOverlayRenderer {

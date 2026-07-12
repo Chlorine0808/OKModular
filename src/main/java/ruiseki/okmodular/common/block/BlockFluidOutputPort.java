@@ -18,14 +18,14 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import ruiseki.okmodular.Reference;
-import ruiseki.omoshiroikamo.api.enums.ModObject;
-import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
-import ruiseki.omoshiroikamo.core.helper.LangHelpers;
-import ruiseki.omoshiroikamo.core.integration.waila.WailaUtils;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tier.TierManager;
 import ruiseki.okmodular.common.tile.fluid.output.TEFluidOutputPort;
+import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.omoshiroikamo.api.enums.ModObject;
+import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
+import ruiseki.omoshiroikamo.core.helper.LangHelpers;
+import ruiseki.omoshiroikamo.core.integration.waila.WailaUtils;
 
 /**
  * Fluid Output Port block with unified 16-tier system.

@@ -5,9 +5,9 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChunkCoordinates;
 
+import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.omoshiroikamo.api.enums.EnumIO;
 import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.okmodular.common.tile.TEMachineController;
 
 /**
  * External Item Port Proxy.
