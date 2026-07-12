@@ -187,3 +187,29 @@ material.vulcanium=Vulcanium
 material.chlonox=Chlonox
 material.leviathan=Leviathan
 material.perfect=Perfect
+
+# --- Wrench / Structure Wand (moved from the parent mod) ---
+item.wrench.name=Wrench
+item.structure_wand.name=Structure Wand
+chat.wand.pos1_set=[OmoshiroiKamo] Position 1 set: (%d, %d, %d)
+chat.wand.pos2_set=[OmoshiroiKamo] Position 2 set: (%d, %d, %d)
+chat.wand.scan_ready=[OmoshiroiKamo] Scan ready! (%d blocks)
+chat.wand.cleared=[OmoshiroiKamo] All positions cleared.
+chat.wand.set_pos1_first=[OmoshiroiKamo] Set Position 1 first! (Right-click a block)
+chat.wand.area_too_large=[OmoshiroiKamo] Area too large! Max %s blocks, got %s
+chat.wand.use_save_command=Use: /ok wand save <name>
+chat.wand.shift_right=Shift+Right-click to set Position 2
+tooltip.wand.right_click=Right-click: Set Position 1
+tooltip.wand.shift_right_click=Shift+Right-click: Set Position 2 & Prepare
+tooltip.wand.shift_left_click=Shift+Left-click: Clear all positions
+tooltip.wand.shift_left_clear=Shift+Left-click to clear
+tooltip.wand.pos1=Pos1: (%d, %d, %d)
+tooltip.wand.pos2=Pos2: (%d, %d, %d)
+tooltip.wand.pos_not_set=Not set
+tooltip.wand.size=Size: %dx%dx%d
+chat.okmodular.wrench_linked=Wrench linked to Controller at (%d, %d, %d)
+chat.okmodular.wrench_type_selected=Selected port type: %s
+chat.okmodular.wrench_unlinked=Unlinked.
+# --- Fluid Canister (moved from the parent mod) ---
+tooltip.holdshift=§7- hold §r§oSHIFT§r§7 for more info§r
+item.fluid_canister.name=Fluid Canister

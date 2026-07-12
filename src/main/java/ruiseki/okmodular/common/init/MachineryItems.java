@@ -5,9 +5,12 @@ import net.minecraft.item.ItemStack;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import lombok.Getter;
+import ruiseki.okcore.util.Logger;
+import ruiseki.okmodular.common.item.ItemFluidCanister;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
 import ruiseki.okmodular.common.item.ItemMaterialPart;
-import ruiseki.omoshiroikamo.core.common.util.Logger;
+import ruiseki.okmodular.common.item.ItemStructureWand;
+import ruiseki.okmodular.common.item.ItemWrench;
 
 public enum MachineryItems {
 
@@ -16,7 +19,10 @@ public enum MachineryItems {
     INGOT(new ItemMaterialPart("ingot")),
     PLATE(new ItemMaterialPart("plate")),
     // GEAR(new ItemMaterialPart("gear")),
-    DUST(new ItemMaterialPart("dust")),;
+    DUST(new ItemMaterialPart("dust")),
+    WRENCH(new ItemWrench()),
+    STRUCTURE_WAND(new ItemStructureWand()),
+    FLUID_CANISTER(new ItemFluidCanister()),;
     // spotless: on
 
     public static final MachineryItems[] VALUES = values();

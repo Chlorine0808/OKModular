@@ -185,3 +185,29 @@ material.vulcanium=ヴォルケニウム
 material.chlonox=クロノックス
 material.leviathan=リヴァイアサン
 material.perfect=パーフェクト
+
+# --- Wrench / Structure Wand (moved from the parent mod) ---
+item.wrench.name=レンチ
+item.structure_wand.name=ストラクチャーワンド
+chat.wand.pos1_set=[OmoshiroiKamo] 位置1を設定: (%d, %d, %d)
+chat.wand.pos2_set=[OmoshiroiKamo] 位置2を設定: (%d, %d, %d)
+chat.wand.scan_ready=[OmoshiroiKamo] スキャン準備完了! (%d ブロック)
+chat.wand.cleared=[OmoshiroiKamo] 全ての位置設定をリセット
+chat.wand.set_pos1_first=[OmoshiroiKamo] まず位置1を設定してください! (ブロックを右クリック)
+chat.wand.area_too_large=[OmoshiroiKamo] 範囲が広すぎます! 最大 %s ブロック, 現在 %s
+chat.wand.use_save_command=保存コマンド: /ok wand save <名前>
+chat.wand.shift_right=Shift+右クリックで位置2を設定
+tooltip.wand.right_click=右クリック: 位置1を設定
+tooltip.wand.shift_right_click=Shift+右クリック: 位置2を設定 & 準備
+tooltip.wand.shift_left_click=Shift+左クリック: 全ての位置設定をクリア
+tooltip.wand.shift_left_clear=Shift+左クリックでクリア
+tooltip.wand.pos1=Pos1: (%d, %d, %d)
+tooltip.wand.pos2=Pos2: (%d, %d, %d)
+tooltip.wand.pos_not_set=未設定
+tooltip.wand.size=サイズ: %dx%dx%d
+chat.okmodular.wrench_linked=レンチをコントローラにリンクしました: (%d, %d, %d)
+chat.okmodular.wrench_type_selected=ポートタイプを選択しました: %s
+chat.okmodular.wrench_unlinked=リンクを解除しました。
+# --- Fluid Canister (moved from the parent mod) ---
+tooltip.holdshift=§7- §r§oSHIFT§r§7キーで詳細を表示§r
+item.fluid_canister.name=流体キャニスター
