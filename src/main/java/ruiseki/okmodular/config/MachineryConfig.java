@@ -19,6 +19,10 @@ public class MachineryConfig {
         ConfigurationManager.registerConfig(MachineryConfig.class);
     }
 
+    @Config.Comment("Show a filled canister for every registered fluid in the creative tab / NEI")
+    @Config.DefaultBoolean(false)
+    public static boolean showAllCanisters;
+
     @Config.Comment("Default tint color for machine blocks (hex color code)")
     @Config.DefaultString("#FFFFFF")
     public static String defaultTintColor;

@@ -5,18 +5,22 @@ import net.minecraft.item.Item;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 
+import com.gtnewhorizon.gtnhlib.itemrendering.TexturedItemRenderer;
+
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ruiseki.okcore.init.ModBase;
+import ruiseki.okcore.proxy.ClientProxyComponent;
+import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.client.handler.FluidFogHandler;
 import ruiseki.okmodular.client.render.ItemPortRenderer;
 import ruiseki.okmodular.client.render.PortOverlayISBRH;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.block.BlockMachineCasing;
 import ruiseki.okmodular.common.block.BlockMachineController;
-import ruiseki.omoshiroikamo.core.common.util.Logger;
-import ruiseki.omoshiroikamo.core.init.ModBase;
-import ruiseki.omoshiroikamo.core.proxy.ClientProxyComponent;
+import ruiseki.okmodular.common.init.MachineryItems;
+import ruiseki.okmodular.common.item.ItemFluidCanister;
 
 /**
  * Client-side module for Machinery.
@@ -41,6 +45,7 @@ public class MachineryClient extends ClientProxyComponent {
         AbstractPortBlock.portRendererId = RenderingRegistry.getNextAvailableRenderId();
         RenderingRegistry.registerBlockHandler(PortOverlayISBRH.INSTANCE);
         Logger.info("MachineryClient: Registered PortOverlayISBRH with ID " + AbstractPortBlock.portRendererId);
+        TexturedItemRenderer.register((ItemFluidCanister) MachineryItems.FLUID_CANISTER.getItem());
 
         for (Object obj : Block.blockRegistry) {
             Block block = (Block) obj;
