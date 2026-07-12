@@ -64,4 +64,10 @@ dependencies {
     compileOnly('org.jetbrains:annotations:26.1.0')
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor('org.projectlombok:lombok:1.18.46')
+
+    // Versions kept in sync with OmoshiroiKamo's dependencies.gradle.
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
