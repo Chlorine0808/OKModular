@@ -19,25 +19,25 @@ import com.gtnewhorizon.gtnhlib.client.model.color.BlockColor;
 
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
+import ruiseki.okcore.api.modular.IModularPort;
+import ruiseki.okcore.block.legacy.AbstractTieredBlock;
+import ruiseki.okcore.client.util.IconRegistry;
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.integration.waila.WailaUtils;
+import ruiseki.okcore.tileentity.legacy.AbstractTE;
+import ruiseki.okcore.tileentity.legacy.ISidedIO;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.api.modular.IModularBlock;
+import ruiseki.okmodular.api.modular.IModularBlockTint;
+import ruiseki.okmodular.api.modular.ModularTier;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
+import ruiseki.okmodular.common.item.ItemWrench;
 import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.okmodular.common.tile.energy.AbstractEnergyIOPortTE;
 import ruiseki.okmodular.common.tile.fluid.AbstractFluidPortTE;
 import ruiseki.okmodular.common.tile.gas.AbstractGasPortTE;
 import ruiseki.okmodular.common.tile.item.AbstractItemIOPortTE;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.modular.IModularBlock;
-import ruiseki.omoshiroikamo.api.modular.IModularBlockTint;
-import ruiseki.omoshiroikamo.api.modular.IModularPort;
-import ruiseki.omoshiroikamo.api.modular.ModularTier;
-import ruiseki.omoshiroikamo.core.block.AbstractTieredBlock;
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
-import ruiseki.omoshiroikamo.core.integration.waila.WailaUtils;
-import ruiseki.omoshiroikamo.core.item.ItemWrench;
-import ruiseki.omoshiroikamo.core.tileentity.AbstractTE;
-import ruiseki.omoshiroikamo.core.tileentity.ISidedIO;
 
 public abstract class AbstractPortBlock<T extends AbstractTE> extends AbstractTieredBlock<T>
     implements IModularBlock, IModularBlockTint {

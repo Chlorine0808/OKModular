@@ -23,14 +23,14 @@ import com.gtnewhorizon.structurelib.alignment.enumerable.Rotation;
 
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
+import ruiseki.okcore.block.legacy.AbstractBlock;
+import ruiseki.okcore.datastructure.BlockPos;
+import ruiseki.okcore.helper.InventoryHelpers;
+import ruiseki.okmodular.OKMObjects;
+import ruiseki.okmodular.api.modular.IModularBlockTint;
 import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.api.enums.ModObject;
-import ruiseki.omoshiroikamo.api.modular.IModularBlockTint;
-import ruiseki.omoshiroikamo.core.block.AbstractBlock;
-import ruiseki.omoshiroikamo.core.datastructure.BlockPos;
-import ruiseki.omoshiroikamo.core.helper.InventoryHelpers;
 
 /**
  * Machine Controller - the brain of a Modular Machinery structure.
@@ -41,7 +41,7 @@ import ruiseki.omoshiroikamo.core.helper.InventoryHelpers;
 public class BlockMachineController extends AbstractBlock<TEMachineController> implements IModularBlockTint {
 
     protected BlockMachineController() {
-        super(ModObject.MODULAR_MACHINE_CONTROLLER.name, TEMachineController.class);
+        super(OKMObjects.MODULAR_MACHINE_CONTROLLER.name, TEMachineController.class);
         setHardness(5.0F);
         setResistance(10.0F);
         // Enable translucent overlay rendering

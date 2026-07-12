@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import ruiseki.omoshiroikamo.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 
 /**
  * 継承システムのテスト

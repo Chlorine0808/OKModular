@@ -12,12 +12,12 @@ import net.minecraft.world.World;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tier.TierManager;
 import ruiseki.okmodular.common.tile.essentia.output.TEEssentiaOutputPort;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.api.enums.ModObject;
-import ruiseki.omoshiroikamo.core.helper.LangHelpers;
 
 /**
  * Essentia Output Port block with unified 16-tier system.
@@ -28,7 +28,7 @@ public class BlockEssentiaOutputPort extends AbstractPortBlock<TEEssentiaOutputP
     private static final int TIER_COUNT = 16;
 
     protected BlockEssentiaOutputPort() {
-        super(ModObject.blockModularEssentiaOutput.name, TEEssentiaOutputPort.class);
+        super(OKMObjects.blockModularEssentiaOutput.name, TEEssentiaOutputPort.class);
         setHardness(5.0F);
         setResistance(10.0F);
         setTextureName("modularmachineryOverlay/base_modularports");

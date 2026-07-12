@@ -16,19 +16,19 @@ import codechicken.nei.recipe.HandlerInfo;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
+import ruiseki.okcore.addon.nei.IRecipeHandlerBase;
+import ruiseki.okcore.api.structure.core.IStructureEntry;
+import ruiseki.okcore.enums.Mods;
+import ruiseki.okcore.structure.CustomStructureRegistry;
+import ruiseki.okcore.structure.StructureManager;
+import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.MachineryModule;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.common.init.MachineryBlocks;
 import ruiseki.okmodular.common.init.MachineryItems;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
 import ruiseki.okmodular.common.recipe.RecipeLoader;
-import ruiseki.omoshiroikamo.api.recipe.core.IModularRecipe;
-import ruiseki.omoshiroikamo.api.structure.core.IStructureEntry;
-import ruiseki.omoshiroikamo.core.common.structure.CustomStructureRegistry;
-import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
-import ruiseki.omoshiroikamo.core.common.util.Logger;
-import ruiseki.omoshiroikamo.core.integration.LibMods;
-import ruiseki.omoshiroikamo.core.integration.nei.IRecipeHandlerBase;
 
 /**
  * NEI configuration for OK Modular.
@@ -42,7 +42,7 @@ public class NEIConfig implements IConfigureNEI {
      */
     @SubscribeEvent
     public void registerHandlerInfo(NEIRegisterHandlerInfosEvent event) {
-        if (!LibMods.BlockRenderer6343.isLoaded()) return;
+        if (!Mods.BlockRenderer6343.isLoaded()) return;
 
         // Register icon for the generic preview handler
         event.registerHandlerInfo(
@@ -97,7 +97,7 @@ public class NEIConfig implements IConfigureNEI {
      * TODO: Enable 'P' button in structure preview (Name is currently null)
      */
     public static void registerStructurePreviews() {
-        if (!LibMods.BlockRenderer6343.isLoaded()) return;
+        if (!Mods.BlockRenderer6343.isLoaded()) return;
         if (!FMLCommonHandler.instance()
             .getEffectiveSide()
             .isClient()) return;
@@ -165,7 +165,7 @@ public class NEIConfig implements IConfigureNEI {
         if (FMLCommonHandler.instance()
             .getEffectiveSide()
             .isServer()) return;
-        if (!LibMods.BlockRenderer6343.isLoaded()) return;
+        if (!Mods.BlockRenderer6343.isLoaded()) return;
 
         List<String> groups = new ArrayList<>(MachineryModule.getCachedGroupNames());
         List<IModularRecipe> allRecipes = RecipeLoader.getInstance()

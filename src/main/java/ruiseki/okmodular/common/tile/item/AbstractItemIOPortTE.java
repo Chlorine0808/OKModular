@@ -29,21 +29,21 @@ import com.cleanroommc.modularui.widgets.slot.ItemSlot;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import com.cleanroommc.modularui.widgets.slot.SlotGroup;
 
+import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okcore.client.gui.OKGuiTextures;
+import ruiseki.okcore.client.gui.handler.ItemStackHandlerBase;
+import ruiseki.okcore.client.gui.widget.TileWidget;
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.enums.RedstoneMode;
+import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okcore.persist.nbt.NBTPersist;
+import ruiseki.okcore.tileentity.legacy.AbstractStorageTE;
+import ruiseki.okcore.util.SlotDefinition;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.api.modular.IVisitablePort;
+import ruiseki.okmodular.api.modular.port.IItemPort;
+import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.enums.RedstoneMode;
-import ruiseki.omoshiroikamo.api.modular.IModularPort;
-import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.omoshiroikamo.api.modular.port.IItemPort;
-import ruiseki.omoshiroikamo.api.recipe.visitor.IRecipeVisitor;
-import ruiseki.omoshiroikamo.core.client.gui.OKGuiTextures;
-import ruiseki.omoshiroikamo.core.client.gui.handler.ItemStackHandlerBase;
-import ruiseki.omoshiroikamo.core.client.gui.widget.TileWidget;
-import ruiseki.omoshiroikamo.core.helper.LangHelpers;
-import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
-import ruiseki.omoshiroikamo.core.tileentity.AbstractStorageTE;
-import ruiseki.omoshiroikamo.core.util.SlotDefinition;
 
 /**
  * Item Input Port TileEntity.
@@ -52,7 +52,7 @@ import ruiseki.omoshiroikamo.core.util.SlotDefinition;
  * TODO: enable both IO from NONE side to export catalyst items like GTNH
  */
 public abstract class AbstractItemIOPortTE extends AbstractStorageTE
-    implements IModularPort, IGuiHolder<PosGuiData>, IItemPort {
+    implements IVisitablePort, IGuiHolder<PosGuiData>, IItemPort {
 
     @NBTPersist
     protected final EnumIO[] sides = new EnumIO[6];

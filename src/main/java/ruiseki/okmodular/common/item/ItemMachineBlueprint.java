@@ -19,13 +19,13 @@ import com.gtnewhorizon.structurelib.alignment.constructable.ConstructableUtilit
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ruiseki.okcore.api.structure.core.IStructureEntry;
+import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okcore.item.legacy.ItemOK;
+import ruiseki.okcore.structure.CustomStructureRegistry;
+import ruiseki.okcore.structure.StructureManager;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.common.tile.TEMachineController;
-import ruiseki.omoshiroikamo.api.structure.core.IStructureEntry;
-import ruiseki.omoshiroikamo.core.common.structure.CustomStructureRegistry;
-import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
-import ruiseki.omoshiroikamo.core.helper.LangHelpers;
-import ruiseki.omoshiroikamo.core.item.ItemOK;
 
 /**
  * Machine Blueprint item that defines which custom structure a controller

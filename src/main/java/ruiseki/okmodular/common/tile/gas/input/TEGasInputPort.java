@@ -3,10 +3,10 @@ package ruiseki.okmodular.common.tile.gas.input;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import ruiseki.okcore.client.util.IconRegistry;
+import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.tile.gas.AbstractGasPortTE;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 
 /**
  * Unified Gas Input Port TileEntity for all tiers (0-15).

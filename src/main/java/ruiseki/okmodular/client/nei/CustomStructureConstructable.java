@@ -11,7 +11,7 @@ import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ruiseki.omoshiroikamo.api.modular.IMachineController;
+import ruiseki.okcore.api.modular.IMachineController;
 
 /**
  * IConstructable implementation for each custom structure.

@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ruiseki.omoshiroikamo.api.structure.core.ISymbolMapping;
-import ruiseki.omoshiroikamo.api.structure.core.TieredBlockMapping;
+import ruiseki.okcore.api.structure.core.ISymbolMapping;
+import ruiseki.okcore.api.structure.core.TieredBlockMapping;
 
 /**
  * MachineTierRecognitionTest

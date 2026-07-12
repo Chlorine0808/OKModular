@@ -6,11 +6,11 @@ import net.minecraftforge.common.util.ForgeDirection;
 import mekanism.api.gas.Gas;
 import mekanism.api.gas.GasStack;
 import mekanism.api.gas.ITubeConnection;
+import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.gas.GasTankInfo;
+import ruiseki.okcore.gas.IGasHandler;
 import ruiseki.okmodular.common.tile.TEMachineController;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.omoshiroikamo.core.gas.GasTankInfo;
-import ruiseki.omoshiroikamo.core.gas.IGasHandler;
 
 /**
  * External Gas Port Proxy.

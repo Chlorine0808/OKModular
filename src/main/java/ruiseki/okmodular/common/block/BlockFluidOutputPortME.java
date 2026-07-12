@@ -15,11 +15,11 @@ import net.minecraft.world.World;
 
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
+import ruiseki.okcore.client.util.IconRegistry;
+import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tile.fluid.output.TEFluidOutputPortME;
-import ruiseki.omoshiroikamo.api.enums.ModObject;
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 
 /**
  * ME Fluid Output Port - outputs fluids directly to AE2 ME Network.
@@ -29,7 +29,7 @@ import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 public class BlockFluidOutputPortME extends AbstractPortBlock<TEFluidOutputPortME> {
 
     protected BlockFluidOutputPortME() {
-        super(ModObject.blockModularFluidOutputME.name, TEFluidOutputPortME.class);
+        super(OKMObjects.blockModularFluidOutputME.name, TEFluidOutputPortME.class);
         setHardness(5.0F);
         setResistance(10.0F);
         setTextureName("modularmachineryOverlay/base_modularports");

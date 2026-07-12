@@ -6,13 +6,13 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.persist.nbt.NBTPersist;
+import ruiseki.okcore.tileentity.legacy.AbstractTE;
+import ruiseki.okmodular.api.modular.IVisitablePort;
+import ruiseki.okmodular.api.modular.port.IEssentiaPort;
+import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.modular.IModularPort;
-import ruiseki.omoshiroikamo.api.modular.port.IEssentiaPort;
-import ruiseki.omoshiroikamo.api.recipe.visitor.IRecipeVisitor;
-import ruiseki.omoshiroikamo.core.persist.nbt.NBTPersist;
-import ruiseki.omoshiroikamo.core.tileentity.AbstractTE;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.aspects.IAspectContainer;
@@ -21,7 +21,7 @@ import thaumcraft.api.aspects.IAspectContainer;
  * Stores multiple Aspects using AspectList with unified 16-tier system.
  */
 public abstract class AbstractEssentiaPortTE extends AbstractTE
-    implements IModularPort, IAspectContainer, IEssentiaPort {
+    implements IVisitablePort, IAspectContainer, IEssentiaPort {
 
     @NBTPersist
     protected int tier = 0; // 0-15 (display: 1-16)

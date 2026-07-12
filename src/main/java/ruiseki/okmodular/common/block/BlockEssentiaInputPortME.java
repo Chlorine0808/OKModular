@@ -9,11 +9,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 
+import ruiseki.okcore.client.util.IconRegistry;
+import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tile.essentia.input.TEEssentiaInputPortME;
-import ruiseki.omoshiroikamo.api.enums.ModObject;
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 
 /**
  * pulls Essentia from Thaumic Energistics ME network.
@@ -22,7 +22,7 @@ import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
 public class BlockEssentiaInputPortME extends AbstractPortBlock<TEEssentiaInputPortME> {
 
     protected BlockEssentiaInputPortME() {
-        super(ModObject.blockModularEssentiaInputME.name, TEEssentiaInputPortME.class);
+        super(OKMObjects.blockModularEssentiaInputME.name, TEEssentiaInputPortME.class);
         setHardness(5.0F);
         setResistance(10.0F);
         setTextureName("modularmachineryOverlay/base_modularports");

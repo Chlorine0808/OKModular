@@ -10,14 +10,14 @@ import java.util.Set;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import ruiseki.omoshiroikamo.api.recipe.core.IModularRecipe;
-import ruiseki.omoshiroikamo.api.recipe.core.ModularRecipe;
-import ruiseki.omoshiroikamo.api.recipe.io.IRecipeOutput;
-import ruiseki.omoshiroikamo.api.recipe.parser.DecoratorParser;
-import ruiseki.omoshiroikamo.api.recipe.parser.RecipeParserRegistry;
-import ruiseki.omoshiroikamo.core.common.util.Logger;
-import ruiseki.omoshiroikamo.core.json.JsonErrorCollector;
-import ruiseki.omoshiroikamo.core.json.ParsingContext;
+import ruiseki.okcore.json.JsonErrorCollector;
+import ruiseki.okcore.json.ParsingContext;
+import ruiseki.okcore.util.Logger;
+import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.core.ModularRecipe;
+import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
+import ruiseki.okmodular.api.recipe.parser.DecoratorParser;
+import ruiseki.okmodular.api.recipe.parser.RecipeParserRegistry;
 
 /**
  * Loader class that converts JSON objects into ModularRecipe instances.

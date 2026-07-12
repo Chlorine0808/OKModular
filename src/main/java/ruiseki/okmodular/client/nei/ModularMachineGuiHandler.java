@@ -18,15 +18,15 @@ import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import blockrenderer6343.api.utils.CreativeItemSource;
 import blockrenderer6343.client.utils.ConstructableData;
 import blockrenderer6343.integration.nei.GuiMultiblockHandler;
+import ruiseki.okcore.api.modular.IMachineController;
+import ruiseki.okcore.api.structure.core.IStructureEntry;
+import ruiseki.okcore.api.structure.visitor.StructureValidationVisitor;
+import ruiseki.okcore.structure.CustomStructureRegistry;
+import ruiseki.okcore.structure.StructureManager;
+import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.common.init.MachineryBlocks;
 import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.okmodular.common.tile.TEMachineController;
-import ruiseki.omoshiroikamo.api.modular.IMachineController;
-import ruiseki.omoshiroikamo.api.structure.core.IStructureEntry;
-import ruiseki.omoshiroikamo.api.structure.visitor.StructureValidationVisitor;
-import ruiseki.omoshiroikamo.core.common.structure.CustomStructureRegistry;
-import ruiseki.omoshiroikamo.core.common.structure.StructureManager;
-import ruiseki.omoshiroikamo.core.common.util.Logger;
 
 // For debugging
 // import blockrenderer6343.client.renderer.WorldSceneRenderer;

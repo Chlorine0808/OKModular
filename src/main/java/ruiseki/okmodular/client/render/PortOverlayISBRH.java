@@ -17,15 +17,15 @@ import com.gtnewhorizon.structurelib.alignment.enumerable.Rotation;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import ruiseki.okcore.api.modular.ISidedTexture;
+import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okcore.helper.RenderHelpers;
+import ruiseki.okcore.tileentity.legacy.ISidedIO;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.block.BlockMachineCasing;
 import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.api.enums.EnumIO;
-import ruiseki.omoshiroikamo.api.modular.ISidedTexture;
-import ruiseki.omoshiroikamo.core.helper.RenderHelpers;
-import ruiseki.omoshiroikamo.core.tileentity.ISidedIO;
 
 /**
  * ISBRH for rendering port overlays.

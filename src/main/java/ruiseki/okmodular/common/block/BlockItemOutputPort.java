@@ -17,15 +17,15 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
+import ruiseki.okcore.client.util.IconRegistry;
+import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okcore.integration.waila.WailaUtils;
+import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tier.TierManager;
 import ruiseki.okmodular.common.tile.item.output.TEItemOutputPort;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.omoshiroikamo.api.enums.ModObject;
-import ruiseki.omoshiroikamo.core.client.util.IconRegistry;
-import ruiseki.omoshiroikamo.core.helper.LangHelpers;
-import ruiseki.omoshiroikamo.core.integration.waila.WailaUtils;
 
 /**
  * Item Output Port block with unified 16-tier system.
@@ -39,7 +39,7 @@ public class BlockItemOutputPort extends AbstractPortBlock<TEItemOutputPort> {
 
     protected BlockItemOutputPort() {
         // Pass single TE class - we override createTileEntity and registerTileEntity
-        super(ModObject.blockModularItemOutput.name, TEItemOutputPort.class);
+        super(OKMObjects.blockModularItemOutput.name, TEItemOutputPort.class);
         setHardness(5.0F);
         setResistance(10.0F);
         setTextureName("modularmachineryOverlay/base_modularports");

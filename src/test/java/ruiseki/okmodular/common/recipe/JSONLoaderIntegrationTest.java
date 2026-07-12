@@ -11,18 +11,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ruiseki.omoshiroikamo.api.condition.BiomeCondition;
-import ruiseki.omoshiroikamo.api.condition.Conditions;
-import ruiseki.omoshiroikamo.api.condition.ICondition;
-import ruiseki.omoshiroikamo.api.modular.IPortType;
-import ruiseki.omoshiroikamo.api.recipe.core.IModularRecipe;
-import ruiseki.omoshiroikamo.api.recipe.decorator.BonusOutputDecorator;
-import ruiseki.omoshiroikamo.api.recipe.decorator.ChanceRecipeDecorator;
-import ruiseki.omoshiroikamo.api.recipe.decorator.RequirementDecorator;
-import ruiseki.omoshiroikamo.api.recipe.expression.IExpression;
-import ruiseki.omoshiroikamo.api.recipe.expression.MapRangeExpression;
-import ruiseki.omoshiroikamo.api.recipe.io.IRecipeInput;
-import ruiseki.omoshiroikamo.api.recipe.io.IRecipeOutput;
+import ruiseki.okcore.api.condition.BiomeCondition;
+import ruiseki.okcore.api.condition.Conditions;
+import ruiseki.okcore.api.condition.ICondition;
+import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okcore.api.recipe.expression.IExpression;
+import ruiseki.okcore.api.recipe.expression.MapRangeExpression;
+import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.decorator.BonusOutputDecorator;
+import ruiseki.okmodular.api.recipe.decorator.ChanceRecipeDecorator;
+import ruiseki.okmodular.api.recipe.decorator.RequirementDecorator;
+import ruiseki.okmodular.api.recipe.io.IRecipeInput;
+import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 
 /**
  * JSONLoader 統合テスト
