@@ -197,7 +197,7 @@ chat.wand.scan_ready=[OKModular] Scan ready! (%d blocks)
 chat.wand.cleared=[OKModular] All positions cleared.
 chat.wand.set_pos1_first=[OKModular] Set Position 1 first! (Right-click a block)
 chat.wand.area_too_large=[OKModular] Area too large! Max %s blocks, got %s
-chat.wand.use_save_command=Use: /ok wand save <name>
+chat.wand.use_save_command=Use: /okmodular modular wand save <name>
 chat.wand.shift_right=Shift+Right-click to set Position 2
 tooltip.wand.right_click=Right-click: Set Position 1
 tooltip.wand.shift_right_click=Shift+Right-click: Set Position 2 & Prepare
@@ -219,3 +219,13 @@ config.worldGenConfig=World Generation Settings
 config.heliumGasGen=Helium
 config.chlorineGasGen=Chlorine
 config.fluorineGasGen=Fluorine
+
+# --- Structure wand command ---
+command.okmodular.wand_usage=Usage: /okmodular modular wand save <name>
+command.okmodular.wand_player_only=This command must be run by a player.
+command.okmodular.wand_no_pending=No pending scan. Select an area with the structure wand first.
+command.okmodular.wand_different_dimension=The selected area is in another dimension.
+command.okmodular.wand_scanning=Scanning %s blocks...
+command.okmodular.scan_success=%s
+command.okmodular.scan_file=Saved as: %s
+command.okmodular.scan_failed=Scan failed: %s

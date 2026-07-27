@@ -8,14 +8,14 @@ import ruiseki.okcore.command.CommandMod;
 import ruiseki.okcore.init.ModBase;
 
 /**
- * Modular machinery subcommand handler.
- * Builds: /&lt;modid&gt; modular &lt;reload|list|wand&gt;
+ * Structure wand subcommand handler.
+ * Builds: /&lt;modid&gt; modular wand save &lt;name&gt;
  */
-public class CommandModular extends CommandMod {
+public class CommandModularWand extends CommandMod {
 
-    public static final String NAME = "modular";
+    public static final String NAME = "wand";
 
-    public CommandModular(ModBase mod) {
+    public CommandModularWand(ModBase mod) {
         super(mod, NAME);
     }
 
@@ -26,8 +26,6 @@ public class CommandModular extends CommandMod {
 
     @Override
     public LiteralArgumentBuilder<ICommandSender> make() {
-        return super.make().then(new CommandModularReload(getMod()).make())
-            .then(new CommandModularList(getMod()).make())
-            .then(new CommandModularWand(getMod()).make());
+        return super.make().then(new CommandModularWandSave(getMod()).make());
     }
 }
