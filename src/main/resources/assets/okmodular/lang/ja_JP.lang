@@ -211,3 +211,9 @@ chat.okmodular.wrench_unlinked=リンクを解除しました。
 # --- Fluid Canister (moved from the parent mod) ---
 tooltip.holdshift=§7- §r§oSHIFT§r§7キーで詳細を表示§r
 item.fluid_canister.name=流体キャニスター
+
+# --- World generation config (moved from the parent mod) ---
+config.worldGenConfig=ワールド生成の設定
+config.heliumGasGen=ヘリウム
+config.chlorineGasGen=塩素
+config.fluorineGasGen=フッ素

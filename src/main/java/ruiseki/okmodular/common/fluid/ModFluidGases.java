@@ -11,12 +11,13 @@ import net.minecraftforge.fluids.FluidRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ruiseki.okcore.util.Logger;
 import ruiseki.okcore.world.gen.SimpleMinableWorldGenerator;
+import ruiseki.okcore.world.gen.WorldGenGasPocket;
 import ruiseki.okcore.world.gen.WorldGenMinableExtended;
 import ruiseki.okmodular.OKModular;
 import ruiseki.okmodular.common.block.BlockFluidBase;
 import ruiseki.okmodular.common.block.BlockLiquidBase;
 import ruiseki.okmodular.common.item.ItemBlockFluid;
-import ruiseki.okmodular.common.world.gen.WorldGenGasPocket;
+import ruiseki.okmodular.config.WorldGenConfig;
 
 /**
  * Registration class for all fluid materials.
@@ -67,18 +68,22 @@ public class ModFluidGases {
     private static void registerWorldGen() {
         List<WorldGenMinableExtended> generators = new ArrayList<>();
 
-        if (BLOCKS.containsKey(EnumFluidMaterial.HELIUM)) {
-            generators.add(new WorldGenGasPocket(BLOCKS.get(EnumFluidMaterial.HELIUM), 20, 1, 10, 60));
-        }
-        if (BLOCKS.containsKey(EnumFluidMaterial.CHLORINE)) {
-            generators.add(new WorldGenGasPocket(BLOCKS.get(EnumFluidMaterial.CHLORINE), 15, 1, 5, 30));
-        }
-        if (BLOCKS.containsKey(EnumFluidMaterial.FLUORINE)) {
-            generators.add(new WorldGenGasPocket(BLOCKS.get(EnumFluidMaterial.FLUORINE), 10, 1, 5, 20));
-        }
+        addGasPocket(generators, EnumFluidMaterial.HELIUM, WorldGenConfig.helium);
+        addGasPocket(generators, EnumFluidMaterial.CHLORINE, WorldGenConfig.chlorine);
+        addGasPocket(generators, EnumFluidMaterial.FLUORINE, WorldGenConfig.fluorine);
 
         if (!generators.isEmpty()) {
             GameRegistry.registerWorldGenerator(new SimpleMinableWorldGenerator(OKModular.instance, generators), 10);
         }
+    }
+
+    private static void addGasPocket(List<WorldGenMinableExtended> generators, EnumFluidMaterial mat,
+        WorldGenConfig.GasPocketGenSettings cfg) {
+        if (!cfg.enable) return;
+
+        BlockFluidBase block = BLOCKS.get(mat);
+        if (block == null) return;
+
+        generators.add(new WorldGenGasPocket(block, cfg.pocketSize, cfg.pocketsPerChunk, cfg.minHeight, cfg.maxHeight));
     }
 }
