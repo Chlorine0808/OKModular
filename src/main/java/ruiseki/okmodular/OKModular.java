@@ -26,6 +26,7 @@ import ruiseki.okcore.init.ModBase;
 import ruiseki.okcore.proxy.ICommonProxy;
 import ruiseki.okmodular.client.nei.NEIConfig;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.okmodular.config.WorldGenConfig;
 
 /**
  * OK Modular: modular multiblock machinery, split out of Omoshiroi Kamo.
@@ -42,6 +43,7 @@ public class OKModular extends ModBase {
     static {
         try {
             MachineryConfig.registerConfig();
+            WorldGenConfig.registerConfig();
         } catch (ConfigException e) {
             throw new RuntimeException(e);
         }

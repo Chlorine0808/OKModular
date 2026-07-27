@@ -213,3 +213,9 @@ chat.okmodular.wrench_unlinked=Unlinked.
 # --- Fluid Canister (moved from the parent mod) ---
 tooltip.holdshift=§7- hold §r§oSHIFT§r§7 for more info§r
 item.fluid_canister.name=Fluid Canister
+
+# --- World generation config (moved from the parent mod) ---
+config.worldGenConfig=World Generation Settings
+config.heliumGasGen=Helium
+config.chlorineGasGen=Chlorine
+config.fluorineGasGen=Fluorine
