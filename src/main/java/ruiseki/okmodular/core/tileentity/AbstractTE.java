@@ -26,7 +26,7 @@ import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 import ruiseki.okmodular.integration.waila.IWailaTileInfoProvider;
 
 /**
- * Base class for tile entities in Omoshiroi Kamo mod.
+ * Base class for tile entities in OK Modular.
  * <p>
  * Provides common functionality such as:
  * <ul>

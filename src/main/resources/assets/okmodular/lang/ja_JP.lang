@@ -195,7 +195,7 @@ chat.wand.scan_ready=[OKModular] スキャン準備完了! (%d ブロック)
 chat.wand.cleared=[OKModular] 全ての位置設定をリセット
 chat.wand.set_pos1_first=[OKModular] まず位置1を設定してください! (ブロックを右クリック)
 chat.wand.area_too_large=[OKModular] 範囲が広すぎます! 最大 %s ブロック, 現在 %s
-chat.wand.use_save_command=保存コマンド: /ok wand save <名前>
+chat.wand.use_save_command=保存コマンド: /okmodular modular wand save <名前>
 chat.wand.shift_right=Shift+右クリックで位置2を設定
 tooltip.wand.right_click=右クリック: 位置1を設定
 tooltip.wand.shift_right_click=Shift+右クリック: 位置2を設定 & 準備
@@ -217,3 +217,13 @@ config.worldGenConfig=ワールド生成の設定
 config.heliumGasGen=ヘリウム
 config.chlorineGasGen=塩素
 config.fluorineGasGen=フッ素
+
+# --- Structure wand command ---
+command.okmodular.wand_usage=使い方: /okmodular modular wand save <名前>
+command.okmodular.wand_player_only=このコマンドはプレイヤーが実行してください。
+command.okmodular.wand_no_pending=スキャン待ちの選択範囲がありません。先にストラクチャーワンドで範囲を選択してください。
+command.okmodular.wand_different_dimension=選択範囲が別のディメンションにあります。
+command.okmodular.wand_scanning=%s ブロックをスキャン中...
+command.okmodular.scan_success=%s
+command.okmodular.scan_file=保存しました: %s
+command.okmodular.scan_failed=スキャン失敗: %s

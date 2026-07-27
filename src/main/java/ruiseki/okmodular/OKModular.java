@@ -30,7 +30,7 @@ import ruiseki.okmodular.config.WorldGenConfig;
 
 /**
  * OK Modular: modular multiblock machinery, split out of Omoshiroi Kamo.
- * Depends on Omoshiroi Kamo as its core library (api/core packages).
+ * Depends on OKCore as its core library (api/core packages).
  */
 @Mod(
     modid = Reference.MOD_ID,
