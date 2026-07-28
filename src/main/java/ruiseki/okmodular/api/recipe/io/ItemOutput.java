@@ -21,6 +21,7 @@ import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.modular.port.IItemPort;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
+import ruiseki.okmodular.api.recipe.expression.ArithmeticExpression;
 import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.INBTWriteExpression;
@@ -391,10 +392,7 @@ public class ItemOutput extends AbstractModularRecipeOutput {
         result.nbtListOp = this.nbtListOp;
         result.nbtMatchMode = this.nbtMatchMode;
         result.index = this.index;
-        // The multiplier went into the copied stack's size above. An expression
-        // carries over unscaled, matching how FluidOutput and the other outputs
-        // treat theirs.
-        result.amountExpr = this.amountExpr;
+        result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
 
         return result;
     }

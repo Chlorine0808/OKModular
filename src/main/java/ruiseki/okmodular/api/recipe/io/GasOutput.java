@@ -13,6 +13,7 @@ import mekanism.api.gas.GasStack;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.recipe.expression.ArithmeticExpression;
 import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
 import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
@@ -151,7 +152,7 @@ public class GasOutput extends AbstractModularRecipeOutput {
         GasOutput result = new GasOutput(gasName, amount * multiplier);
         result.interval = this.interval;
         result.index = this.index;
-        result.amountExpr = this.amountExpr;
+        result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         return result;
     }
 

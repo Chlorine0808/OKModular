@@ -98,9 +98,37 @@ public class ItemOutputAmountTest {
     public void test式がcopyで保持される() {
         ItemOutput original = read("{ \"item\": \"minecraft:gold_nugget\", \"amount\": \"2 + 3\" }");
 
-        IRecipeOutput copied = original.copy(2);
+        IRecipeOutput copied = original.copy(1);
 
         assertEquals(5, copied.getRequiredAmount(emptyContext()), "copy で式が失われてはいけない");
+    }
+
+    @Test
+    @DisplayName("【batch】式で書いた amount も batch 倍される")
+    public void test式がbatchで倍される() {
+        ItemOutput original = read("{ \"item\": \"minecraft:gold_nugget\", \"amount\": \"2 + 3\" }");
+
+        // 出力は copy(batchSize) されたうえで apply(..., 1, ...) で呼ばれるので、
+        // copy が式をスケールしないと batch が式に効かなくなる
+        IRecipeOutput batched = original.copy(3);
+
+        assertEquals(15, batched.getRequiredAmount(emptyContext()), "batch 3 なら 3 倍されるべき");
+        assertEquals(5, original.getRequiredAmount(emptyContext()), "元のインスタンスは変わらないべき");
+    }
+
+    @Test
+    @DisplayName("【batch】スケールされた式も NBT 往復できる")
+    public void testスケールされた式がNBT往復する() {
+        ItemOutput batched = (ItemOutput) read("{ \"item\": \"minecraft:gold_nugget\", \"amount\": \"2 + 3\" }")
+            .copy(3);
+
+        NBTTagCompound nbt = new NBTTagCompound();
+        batched.writeToNBT(nbt);
+
+        ItemOutput restored = new ItemOutput((net.minecraft.item.ItemStack) null);
+        restored.readFromNBT(nbt);
+
+        assertEquals(15, restored.getRequiredAmount(emptyContext()), "スケール後の式が復元できるべき");
     }
 
     @Test

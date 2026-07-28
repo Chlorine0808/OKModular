@@ -12,6 +12,7 @@ import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
+import ruiseki.okmodular.api.recipe.expression.ArithmeticExpression;
 import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.core.energy.IOKEnergySink;
@@ -139,7 +140,7 @@ public class EnergyOutput extends AbstractModularRecipeOutput {
     @Override
     public IRecipeOutput copy(int multiplier) {
         EnergyOutput result = new EnergyOutput(amount * multiplier, isPerTick());
-        result.amountExpr = this.amountExpr;
+        result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         result.interval = this.interval;
         result.index = this.index;
         return result;

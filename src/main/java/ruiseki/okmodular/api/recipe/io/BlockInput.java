@@ -23,6 +23,7 @@ import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
+import ruiseki.okmodular.api.recipe.expression.ArithmeticExpression;
 import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
 import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
@@ -362,7 +363,7 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
         result.nbtListOp = this.nbtListOp;
         result.nbtMatchMode = this.nbtMatchMode;
         result.interval = this.interval;
-        result.amountExpr = this.amountExpr;
+        result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         return result;
     }
 
