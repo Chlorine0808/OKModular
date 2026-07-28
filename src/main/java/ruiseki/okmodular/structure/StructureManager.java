@@ -1,11 +1,7 @@
 package ruiseki.okmodular.structure;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -15,9 +11,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
-import ruiseki.okmodular.api.structure.core.IStructureLayer;
 import ruiseki.okmodular.api.structure.core.ISymbolMapping;
-import ruiseki.okmodular.api.structure.core.StructureShapeWithMappings;
 import ruiseki.okmodular.api.structure.io.StructureJsonReader;
 import ruiseki.okmodular.api.structure.io.StructureJsonWriter;
 import ruiseki.okmodular.api.structure.visitor.StructureValidationVisitor;
@@ -34,9 +28,6 @@ public class StructureManager {
     /** Cached structure definitions (name -> IStructureEntry). */
     private final Map<String, IStructureEntry> structureEntries = new LinkedHashMap<>();
 
-    /** Default mappings for each file. */
-    private final Map<String, Map<Character, ISymbolMapping>> fileDefaultMappings = new HashMap<>();
-
     /** Custom structures that have recipe groups. */
     private final Map<String, IStructureEntry> customStructures = new LinkedHashMap<>();
 
@@ -45,30 +36,15 @@ public class StructureManager {
     private boolean initialized = false;
 
     /**
-     * Name of the directory under config/ that holds structure JSONs.
-     * Owning mods may override this before initialize() to keep an existing
-     * config layout (e.g. "omoshiroikamo").
+     * Optional generator invoked before loading to create missing defaults.
+     *
+     * Unset: nothing ships default structure JSONs yet. Wire this up when sample machines are
+     * authored, so a fresh config directory gets them written on first launch.
      */
-    private static String configRootName = Reference.MOD_ID;
-
-    /** Structure files loaded on init/reload; registered by owning mods. */
-    private static final List<String> registeredStructureFiles = new ArrayList<>();
-
-    /** Optional generator invoked before loading to create missing defaults. */
     private static Consumer<File> defaultStructureGenerator;
 
     /** Optional callback fired after reload() (e.g. StructureLib refresh). */
     private static Runnable reloadCallback;
-
-    public static void setConfigRootName(String name) {
-        configRootName = name;
-    }
-
-    public static void registerStructureFile(String name) {
-        if (!registeredStructureFiles.contains(name)) {
-            registeredStructureFiles.add(name);
-        }
-    }
 
     public static void setDefaultStructureGenerator(Consumer<File> generator) {
         defaultStructureGenerator = generator;
@@ -77,9 +53,6 @@ public class StructureManager {
     public static void setReloadCallback(Runnable callback) {
         reloadCallback = callback;
     }
-
-    /** Names that have already triggered a warning (prevents log spam). */
-    private final Set<String> warnedStructures = new HashSet<>();
 
     private StructureManager() {}
 
@@ -102,7 +75,7 @@ public class StructureManager {
         if (initialized) return;
 
         try {
-            this.configDir = new File(minecraftDir, configRootName);
+            this.configDir = new File(minecraftDir, Reference.MOD_ID);
             if (!configDir.exists()) {
                 configDir.mkdirs();
             }
@@ -114,9 +87,6 @@ public class StructureManager {
                 defaultStructureGenerator.accept(configDir);
             }
 
-            for (String name : registeredStructureFiles) {
-                loadStructureFile(name);
-            }
             loadCustomStructures();
 
             if (errorCollector.hasErrors()) {
@@ -139,50 +109,6 @@ public class StructureManager {
         errorCollector.notifyPlayer(player);
         JsonErrorCollector.getInstance()
             .notifyPlayer(player);
-    }
-
-    /**
-     * Load a single structure JSON file.
-     */
-    private void loadStructureFile(String name) {
-        try {
-            File file = new File(configDir, "structures/" + name + ".json");
-            if (!file.exists()) return;
-
-            StructureJsonReader reader = new StructureJsonReader(file);
-            StructureJsonReader.FileData fileData = reader.readFile(file);
-
-            if (fileData != null) {
-                int successCount = 0;
-                int errorCount = 0;
-
-                for (IStructureEntry entry : fileData.structures.values()) {
-                    if (validateAndRegister(entry, fileData.defaultMappings, name + ".json", false)) {
-                        successCount++;
-                    } else {
-                        errorCount++;
-                    }
-                }
-
-                // Always register default mappings even if some structures failed
-                fileDefaultMappings.put(name, fileData.defaultMappings);
-
-                if (fileData.dirty) {
-                    saveMigratedFile(file, fileData);
-                }
-
-                if (successCount > 0 || errorCount > 0) {
-                    Logger.info(
-                        name + ".json: "
-                            + successCount
-                            + " structure(s) loaded successfully, "
-                            + errorCount
-                            + " failed validation");
-                }
-            }
-        } catch (Exception e) {
-            errorCollector.collect(StructureException.loadFailed(name + ".json", e));
-        }
     }
 
     /**
@@ -231,89 +157,11 @@ public class StructureManager {
         return true; // Successfully registered
     }
 
-    public String[][] getShape(String fileKey, String structureName) {
-        return getInstance().getShapeInternal(fileKey, structureName);
-    }
-
-    public static String[][] getSolarArrayShape(int tier) {
-        return getInstance().getShape("solar_array", "solarArrayTier" + tier);
-    }
-
-    public static String[][] getOreMinerShape(int tier) {
-        return getInstance().getShape("ore_miner", "oreExtractorTier" + tier);
-    }
-
-    public static String[][] getResMinerShape(int tier) {
-        return getInstance().getShape("res_miner", "resExtractorTier" + tier);
-    }
-
-    public static String[][] getBeaconShape(int tier) {
-        return getInstance().getShape("quantum_beacon", "beaconTier" + tier);
-    }
-
-    private String[][] getShapeInternal(String fileKey, String structureName) {
-        if (!initialized) return null;
-
-        IStructureEntry entry = structureEntries.get(structureName);
-        if (entry == null) {
-            warnOnce(fileKey + ":" + structureName, "Structure not found: " + structureName);
-            return null;
-        }
-
-        List<IStructureLayer> layers = entry.getLayers();
-        if (layers.isEmpty()) return null;
-
-        // Convert List of layers to String[][]: [Layer][Row]
-        String[][] result = new String[layers.size()][];
-        for (int i = 0; i < layers.size(); i++) {
-            result[i] = layers.get(i)
-                .getRows()
-                .toArray(new String[0]);
-        }
-        return result;
-    }
-
-    /**
-     * Compatibility bridge for existing code using StructureShapeWithMappings.
-     */
-    public StructureShapeWithMappings getShapeWithMappings(String fileKey, String structureName) {
-        if (!initialized) return null;
-
-        IStructureEntry entry = structureEntries.get(structureName);
-        if (entry == null) return null;
-
-        String[][] shape = getShape(fileKey, structureName);
-        Map<Character, Object> mappings = new HashMap<>();
-
-        // 1. Defaults
-        Map<Character, ISymbolMapping> defaults = fileDefaultMappings.get(fileKey);
-        if (defaults != null) {
-            mappings.putAll(defaults);
-        }
-
-        // 2. Overrides
-        mappings.putAll(entry.getMappings());
-
-        return new StructureShapeWithMappings(shape, mappings, entry.getControllerOffset());
-    }
-
-    private void warnOnce(String key, String message) {
-        if (!warnedStructures.contains(key)) {
-            Logger.warn(message);
-            warnedStructures.add(key);
-        }
-    }
-
     public void reload() {
         structureEntries.clear();
-        fileDefaultMappings.clear();
         customStructures.clear();
-        warnedStructures.clear();
         errorCollector.clear();
 
-        for (String name : registeredStructureFiles) {
-            loadStructureFile(name);
-        }
         loadCustomStructures();
 
         if (reloadCallback != null) {
