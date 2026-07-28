@@ -136,8 +136,7 @@ public class MachineryRecipeLoader {
                         output.getClass()
                             .getSimpleName());
                     Logger.warn(warnMsg);
-                    JsonErrorCollector.getInstance()
-                        .collect("MachineryRecipeLoader", warnMsg);
+                    collectQuietly(warnMsg);
                     return null;
                 }
             }
@@ -153,9 +152,27 @@ public class MachineryRecipeLoader {
             String errorMsg = String
                 .format("Failed to parse recipe '%s' in %s: %s", registryName, fileName, e.getMessage());
             Logger.error(errorMsg);
-            JsonErrorCollector.getInstance()
-                .collect("MachineryRecipeLoader", errorMsg);
+            collectQuietly(errorMsg);
             return null;
+        }
+    }
+
+    /**
+     * Records a message with the JSON error collector without letting the report
+     * itself abort loading.
+     * <p>
+     * The collector logs through OKCore's mod instance, which only exists once FML
+     * has constructed it. Outside a running game — unit tests, standalone tooling —
+     * that call throws, and since these reports are made from inside a catch block,
+     * the throw would escape past it and kill the whole load. The message has
+     * already reached the log by the time we get here.
+     */
+    private static void collectQuietly(String message) {
+        try {
+            JsonErrorCollector.getInstance()
+                .collect("MachineryRecipeLoader", message);
+        } catch (Throwable t) {
+            Logger.warn("Could not record the message in the JSON error collector: {}", t.toString());
         }
     }
 
