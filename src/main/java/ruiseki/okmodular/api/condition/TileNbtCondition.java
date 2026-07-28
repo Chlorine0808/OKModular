@@ -90,7 +90,7 @@ public class TileNbtCondition implements ICondition {
      * Reads either the spelled-out form or the shorthand.
      *
      * <pre>
-     * { "key": "energy", "op": "ge", "value": 1000 }
+     * { "key": "energy", "op": "greater_or_equal", "value": 1000 }
      * { "tile_nbt": "energy >= 1000" }
      * </pre>
      */
