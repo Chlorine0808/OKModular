@@ -19,7 +19,6 @@ import ruiseki.okcore.helper.MinecraftHelpers;
 import ruiseki.okcore.init.ModModuleBase;
 import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okcore.proxy.ICommonProxy;
-import ruiseki.okmodular.common.command.CommandModular;
 import ruiseki.okmodular.common.fluid.EnumFluidMaterial;
 import ruiseki.okmodular.common.fluid.ModFluidGases;
 import ruiseki.okmodular.common.init.MachineryBlocks;
@@ -48,8 +47,11 @@ public class MachineryModule extends ModModuleBase {
     private static File configDir;
     private static List<String> cachedGroupNames = new ArrayList<>();
 
+    /** Module identifier. Not a command literal any more - see {@link #constructModuleCommand}. */
+    public static final String NAME = "modular";
+
     public MachineryModule() {
-        super(OKModular.instance, CommandModular.NAME);
+        super(OKModular.instance, NAME);
     }
 
     public static File getConfigDir() {
@@ -82,9 +84,14 @@ public class MachineryModule extends ModModuleBase {
         return true;
     }
 
+    /**
+     * No module subtree: this mod is the machinery mod, so a `modular` level under /okmodular would
+     * only repeat the mod's own name. {@link OKModular#constructBaseCommand} attaches the
+     * subcommands to the root instead.
+     */
     @Override
     protected LiteralArgumentBuilder<ICommandSender> constructModuleCommand(MinecraftServer server) {
-        return new CommandModular(this.getMod()).make();
+        return null;
     }
 
     @Override
