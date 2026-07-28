@@ -92,7 +92,7 @@ Retrieve the current state of the machine.
 - `energy_max` / `energy_capacity`: Maximum energy capacity.
 - `energy_f` / `energy_free`: Available energy space (`max - stored`).
 - `energy_p` / `energy_percent`: Energy fill percentage (0.0 ~ 1.0).
-- `energy_per_tick`: Energy consumption/generation per tick (supported machines only).
+- `energy_per_tick`: Energy drawn per tick — the total of the running recipe's `perTick` inputs.
 
 ### Fluid
 - **Variables (Global)**
@@ -124,6 +124,12 @@ Performance multipliers provided by the structure definition.
 - `batch`: Current batch size.
 - `speed_multi`: Speed multiplier.
 - `energy_multi`: Energy multiplier.
+
+> [!NOTE]
+> **The batch size is applied to amounts for you.** An amount written as an expression,
+> such as `"amount": "2 + tier"`, is tripled when the machine runs a batch of three.
+> Do not multiply by `batch` inside the expression — that applies it twice. The `batch`
+> variable is for when the batch size itself is what you want to reason about.
 
 ---
 
