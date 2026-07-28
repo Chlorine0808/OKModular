@@ -177,15 +177,27 @@
 | 7 | **任意置換** | `outputs`| `"replace": "stone", "block": "gold", "optional": true` | 石あれば金に置換（終了時） |
 
 #### 動的NBTの例
+
+設置するブロックの TileEntity に NBT を書き込みます。値には式が使えます。
+
 ```json
 "outputs": [{
   "symbol": "D",
   "block": "modid:battery",
-  "nbt": {
-    "energy": { "type": "nbt", "path": "machine_power" }
-  }
+  "nbt": [
+    "nbt('energy') = nbt('C', 'stored_power')",
+    "nbt('tier') = tier.casing"
+  ]
 }]
 ```
+
+左辺が書き込み先（設置するブロックの NBT）、右辺は任意の式です。
+右辺の `nbt('C', ...)` のようにシンボルを使えば、**別のブロックから読んで書き込む**ことができます。
+
+> [!NOTE]
+> `"nbt"` をオブジェクトで書く旧形式（`{"energy": {"type":"nbt","path":"..."}}`）は
+> レガシー扱いです。`path` キーは読まれない（実装は `key` を見る）ため、この形式は**動作しません**。
+> 上の配列形式を使ってください。
 
 ### 外部ブロック NBT 操作 (Block Nbt Output)
 構造体内の任意のブロック（TileEntity）の NBT を直接操作します。これは `block` による置換とは異なり、ブロックそのものを変えずに内部データのみを数値的に変更します。
