@@ -32,10 +32,6 @@ public class ProcessAgent extends AbstractRecipeProcess {
     private final IRecipeContext context;
     private int currentBatchSize = 1;
     private double workProgress;
-    private double baseEnergyPerTick;
-    private double baseEnergyOutputPerTick;
-    private double baseManaPerTick;
-    private double baseManaOutputPerTick;
 
     public ProcessAgent(IRecipeContext context) {
         this.context = context;
@@ -107,21 +103,6 @@ public class ProcessAgent extends AbstractRecipeProcess {
         // now that we do, so an expression-valued duration takes effect.
         setMaxProgress(recipe.getDuration(context));
 
-        // Cache base energy/mana values BEFORE applying multipliers
-        this.baseEnergyPerTick = this.energyPerTick;
-        this.baseEnergyOutputPerTick = this.energyOutputPerTick;
-        this.baseManaPerTick = this.manaPerTick;
-        this.baseManaOutputPerTick = this.manaOutputPerTick;
-
-        // Apply initial multipliers
-        if (this.context instanceof ITieredMachine tiered) {
-            double eMultiplier = tiered.getEnergyMultiplier();
-            this.energyPerTick = (int) Math.round(this.baseEnergyPerTick * eMultiplier);
-            this.energyOutputPerTick = (int) Math.round(this.baseEnergyOutputPerTick * eMultiplier);
-            this.manaPerTick = (int) Math.round(this.baseManaPerTick * eMultiplier);
-            this.manaOutputPerTick = (int) Math.round(this.baseManaOutputPerTick * eMultiplier);
-        }
-
         this.workProgress = this.progress;
 
         // Consume and setup state (Specific to ProcessAgent)
@@ -144,7 +125,67 @@ public class ProcessAgent extends AbstractRecipeProcess {
         cacheVisitor.setBatchSize(currentBatchSize);
         recipe.accept(cacheVisitor);
 
+        // Both visitors have run, so the per-tick lists are complete and can be
+        // totalled for reporting.
+        recomputePerTickTotals(context);
+
         return true;
+    }
+
+    /**
+     * Totals the per-tick resource amounts so they can be reported.
+     * <p>
+     * Nothing ever set these fields, so {@link #getEnergyPerTick()} answered zero for
+     * every running machine — and with it {@link IMachineState} and the
+     * <code>energy_per_tick</code> recipe variable. The consumption itself was never
+     * affected: that is driven by the per-tick inputs, which is exactly what this
+     * sums.
+     * <p>
+     * These are amounts actually drawn, so no multiplier is applied on top. The
+     * engine has no route that scales a resource input by the machine's energy
+     * multiplier — a recipe applies it by writing <code>energy_multi</code> into the
+     * amount, which is already reflected in what we sum here.
+     *
+     * @param context The context to evaluate expression-valued amounts against
+     */
+    // Package-private so the totalling can be tested without a TileEntity.
+    void recomputePerTickTotals(ConditionContext context) {
+        int energyIn = 0;
+        int manaIn = 0;
+        for (IModularRecipeInput input : perTickInputs) {
+            int amount = (int) input.getRequiredAmount(context);
+            switch (input.getPortType()) {
+                case ENERGY:
+                    energyIn += amount;
+                    break;
+                case MANA:
+                    manaIn += amount;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        int energyOut = 0;
+        int manaOut = 0;
+        for (IModularRecipeOutput output : perTickOutputs) {
+            int amount = (int) output.getRequiredAmount(context);
+            switch (output.getPortType()) {
+                case ENERGY:
+                    energyOut += amount;
+                    break;
+                case MANA:
+                    manaOut += amount;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        this.energyPerTick = energyIn;
+        this.manaPerTick = manaIn;
+        this.energyOutputPerTick = energyOut;
+        this.manaOutputPerTick = manaOut;
     }
 
     private void clearCaches() {
@@ -226,17 +267,13 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
         double speedMultiplier = 1.0;
         if (this.context instanceof ITieredMachine tiered) {
+            speedMultiplier = tiered.getSpeedMultiplier();
+
             IStructureEntry entry = tiered.getStructureEntry();
             if (entry != null && entry.isDynamic()) {
-                // Re-evaluate multipliers
-                speedMultiplier = tiered.getSpeedMultiplier();
-                double eMultiplier = tiered.getEnergyMultiplier();
-                this.energyPerTick = (int) Math.round(this.baseEnergyPerTick * eMultiplier);
-                this.energyOutputPerTick = (int) Math.round(this.baseEnergyOutputPerTick * eMultiplier);
-                this.manaPerTick = (int) Math.round(this.baseManaPerTick * eMultiplier);
-                this.manaOutputPerTick = (int) Math.round(this.baseManaOutputPerTick * eMultiplier);
-            } else {
-                speedMultiplier = tiered.getSpeedMultiplier();
+                // A dynamic structure's amounts can change while it runs, so the
+                // reported totals are re-summed rather than left at their start value.
+                recomputePerTickTotals(context);
             }
         }
 
@@ -325,10 +362,6 @@ public class ProcessAgent extends AbstractRecipeProcess {
         this.manaPerTick = 0;
         this.manaOutputPerTick = 0;
         this.workProgress = 0;
-        this.baseEnergyPerTick = 0;
-        this.baseEnergyOutputPerTick = 0;
-        this.baseManaPerTick = 0;
-        this.baseManaOutputPerTick = 0;
         clearCaches();
     }
 
@@ -336,6 +369,13 @@ public class ProcessAgent extends AbstractRecipeProcess {
         this.cachedOutputs.add(output);
     }
 
+    /**
+     * The energy drawn per tick by the running recipe.
+     * <p>
+     * Summed from the per-tick inputs by {@link #recomputePerTickTotals}. The setters
+     * below exist for a caller that needs to override what gets reported; they are not
+     * how the value is normally arrived at.
+     */
     public int getEnergyPerTick() {
         return energyPerTick;
     }
@@ -467,10 +507,6 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
         if (running || waitingForOutput) {
             nbt.setDouble("workProgress", workProgress);
-            nbt.setDouble("baseEnergyPerTick", baseEnergyPerTick);
-            nbt.setDouble("baseEnergyOutputPerTick", baseEnergyOutputPerTick);
-            nbt.setDouble("baseManaPerTick", baseManaPerTick);
-            nbt.setDouble("baseManaOutputPerTick", baseManaOutputPerTick);
 
             NBTTagList outputList = new NBTTagList();
             for (IRecipeOutput output : cachedOutputs) {
@@ -512,10 +548,6 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
         if (running || waitingForOutput) {
             workProgress = nbt.getDouble("workProgress");
-            baseEnergyPerTick = nbt.getDouble("baseEnergyPerTick");
-            baseEnergyOutputPerTick = nbt.getDouble("baseEnergyOutputPerTick");
-            baseManaPerTick = nbt.getDouble("baseManaPerTick");
-            baseManaOutputPerTick = nbt.getDouble("baseManaOutputPerTick");
 
             if (currentRecipeName != null && !currentRecipeName.isEmpty()) {
                 this.currentRecipe = RecipeLoader.getInstance()
