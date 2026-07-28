@@ -8,7 +8,7 @@
         {
           "symbol": "S",
           "replace": "minecraft:chest",
-          "nbt": "energy >= 1000"
+          "nbt": "nbt('energy') >= 1000"
         }
       ],
       "outputs": [
@@ -31,7 +31,7 @@
         {
           "symbol": "S",
           "block": "minecraft:chest",
-          "nbt": "energy = 5000"
+          "nbt": "nbt('energy') = 5000"
         }
       ]
     },
@@ -48,7 +48,7 @@
         {
           "symbol": "S",
           "block": "minecraft:chest",
-          "nbt": "energy += 100"
+          "nbt": "nbt('energy') += 100"
         }
       ]
     },
@@ -59,14 +59,14 @@
         {
           "symbol": "S",
           "replace": "minecraft:chest",
-          "nbt": "energy >= 500"
+          "nbt": "nbt('energy') >= 500"
         }
       ],
       "outputs": [
         {
           "symbol": "S",
           "block": "minecraft:chest",
-          "nbt": "energy -= 500"
+          "nbt": "nbt('energy') -= 500"
         },
         {
           "item": "minecraft:diamond",
@@ -87,7 +87,7 @@
         {
           "symbol": "S",
           "block": "minecraft:chest",
-          "nbt": "multiplier *= 2"
+          "nbt": "nbt('multiplier') *= 2"
         }
       ]
     },
@@ -98,14 +98,14 @@
         {
           "symbol": "S",
           "replace": "minecraft:chest",
-          "nbt": "temperature > 100"
+          "nbt": "nbt('temperature') > 100"
         }
       ],
       "outputs": [
         {
           "symbol": "S",
           "block": "minecraft:chest",
-          "nbt": "temperature /= 2"
+          "nbt": "nbt('temperature') /= 2"
         }
       ]
     },
@@ -123,9 +123,9 @@
           "symbol": "S",
           "block": "minecraft:chest",
           "nbt": [
-            "energy = 10000",
-            "temperature = 300",
-            "efficiency = 0.95"
+            "nbt('energy') = 10000",
+            "nbt('temperature') = 300",
+            "nbt('efficiency') = 0.95"
           ]
         }
       ]
@@ -138,9 +138,9 @@
           "symbol": "S",
           "replace": "minecraft:chest",
           "nbt": [
-            "energy >= 1000",
-            "temperature < 500",
-            "efficiency > 0.5"
+            "nbt('energy') >= 1000",
+            "nbt('temperature') < 500",
+            "nbt('efficiency') > 0.5"
           ]
         }
       ],
@@ -165,9 +165,9 @@
           "symbol": "S",
           "block": "minecraft:chest",
           "nbt": [
-            "data.machine.energy = 5000",
-            "data.machine.temperature = 100",
-            "data.player.level = 10"
+            "nbt('data.machine.energy') = 5000",
+            "nbt('data.machine.temperature') = 100",
+            "nbt('data.player.level') = 10"
           ]
         }
       ]
@@ -186,9 +186,9 @@
           "symbol": "S",
           "block": "minecraft:chest",
           "nbt": [
-            "CustomName = 'Power Storage'",
-            "owner = 'Player1'",
-            "status = 'active'"
+            "nbt('CustomName') = 'Power Storage'",
+            "nbt('owner') = 'Player1'",
+            "nbt('status') = 'active'"
           ]
         }
       ]
@@ -207,12 +207,12 @@
           "symbol": "S",
           "block": "minecraft:chest",
           "nbt": [
-            "byteValue = 127b",
-            "shortValue = 32767s",
-            "intValue = 2147483647i",
-            "longValue = 9223372036854775807L",
-            "floatValue = 3.14159f",
-            "doubleValue = 2.718281828d"
+            "nbt('byteValue') = 127b",
+            "nbt('shortValue') = 32767s",
+            "nbt('intValue') = 2147483647i",
+            "nbt('longValue') = 9223372036854775807L",
+            "nbt('floatValue') = 3.14159f",
+            "nbt('doubleValue') = 2.718281828d"
           ]
         }
       ]
@@ -225,8 +225,8 @@
           "symbol": "S",
           "replace": "minecraft:chest",
           "nbt": [
-            "energy >= 5000",
-            "status == 'ready'"
+            "nbt('energy') >= 5000",
+            "nbt('status') == 'ready'"
           ]
         },
         {
@@ -239,9 +239,9 @@
           "symbol": "S",
           "block": "minecraft:chest",
           "nbt": [
-            "energy -= 5000",
-            "status = 'processing'",
-            "processCount += 1"
+            "nbt('energy') -= 5000",
+            "nbt('status') = 'processing'",
+            "nbt('processCount') += 1"
           ]
         },
         {

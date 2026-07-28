@@ -77,7 +77,7 @@
         {
           "item": "minecraft:diamond",
           "amount": 1,
-          "nbt": "customData.bonus = tier.glass * 10 + tier.casing * 5"
+          "nbt": "nbt('customData.bonus') = tier.glass * 10 + tier.casing * 5"
         }
       ]
     },
