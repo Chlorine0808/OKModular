@@ -1,12 +1,15 @@
 package ruiseki.okmodular;
 
+import net.minecraft.command.ICommandSender;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
 
 import org.apache.logging.log4j.Level;
 
 import com.gtnewhorizon.gtnhlib.client.model.loading.ModelRegistry;
 import com.gtnewhorizon.gtnhlib.config.ConfigException;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -25,6 +28,9 @@ import ruiseki.okcore.helper.MinecraftHelpers;
 import ruiseki.okcore.init.ModBase;
 import ruiseki.okcore.proxy.ICommonProxy;
 import ruiseki.okmodular.client.nei.NEIConfig;
+import ruiseki.okmodular.common.command.CommandModularList;
+import ruiseki.okmodular.common.command.CommandModularReload;
+import ruiseki.okmodular.common.command.CommandModularWand;
 import ruiseki.okmodular.config.MachineryConfig;
 import ruiseki.okmodular.config.WorldGenConfig;
 
@@ -65,9 +71,21 @@ public class OKModular extends ModBase {
         registerModule(new MachineryModule());
     }
 
-    // The base /okmodular command is built by ModBase.constructBaseCommand;
-    // MachineryModule contributes the `modular` subtree via constructModuleCommand.
     // TODO: restore the "okm" alias once okcore's CommandMod exposes aliasing.
+
+    /**
+     * Attaches the machinery subcommands to the root, giving /okmodular &lt;reload|list|wand&gt;.
+     *
+     * They used to arrive through MachineryModule.constructModuleCommand, which nests one literal
+     * per module and produced /okmodular modular &lt;...&gt; - a level that only repeated the mod's
+     * own name once the machinery became its own mod.
+     */
+    @Override
+    protected LiteralArgumentBuilder<ICommandSender> constructBaseCommand(MinecraftServer server) {
+        return super.constructBaseCommand(server).then(new CommandModularReload(this).make())
+            .then(new CommandModularList(this).make())
+            .then(new CommandModularWand(this).make());
+    }
 
     @Override
     @EventHandler
