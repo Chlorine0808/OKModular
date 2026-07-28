@@ -103,7 +103,7 @@ public class BiomeCondition implements ICondition {
     @Override
     public String getDescription() {
         StringBuilder sb = new StringBuilder();
-        sb.append(StatCollector.translateToLocal("okcore.condition.biome.base"));
+        sb.append(StatCollector.translateToLocal("okmodular.condition.biome.base"));
         if (!allowedBiomes.isEmpty()) sb.append(" Biomes:")
             .append(allowedBiomes);
         if (!allowedTags.isEmpty()) sb.append(" Tags:")

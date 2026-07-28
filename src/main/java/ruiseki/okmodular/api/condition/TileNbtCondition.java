@@ -64,7 +64,7 @@ public class TileNbtCondition implements ICondition {
 
     @Override
     public String getDescription() {
-        return StatCollector.translateToLocalFormatted("okcore.condition.tile_nbt", key, op.symbol, value);
+        return StatCollector.translateToLocalFormatted("okmodular.condition.tile_nbt", key, op.symbol, value);
     }
 
     @Override

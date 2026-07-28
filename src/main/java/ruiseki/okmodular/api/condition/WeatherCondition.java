@@ -42,7 +42,7 @@ public class WeatherCondition implements ICondition {
     @Override
     public String getDescription() {
         return StatCollector.translateToLocal(
-            "okcore.condition.weather." + weather.name()
+            "okmodular.condition.weather." + weather.name()
                 .toLowerCase());
     }
 
