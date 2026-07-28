@@ -47,7 +47,9 @@ public class RecipeJsonMergeUtil {
     }
 
     private static boolean isNonInheritable(String key) {
-        return key.equals("abstract") || key.equals("parent") || key.equals("registryName");
+        return key.equals("abstract") || key.equals("parent")
+            || key.equals("registryName")
+            || key.equals(MachineryJsonReader.SOURCE_FILE_KEY);
     }
 
     private static boolean isMergeableArray(String key) {
