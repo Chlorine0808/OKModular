@@ -105,9 +105,9 @@ public class BlockMachineCasing extends BlockOK implements IModularBlockTint, IB
     @Override
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister reg) {
-        // JSON model rendering handles textures via blockstates JSON,
-        // so we don't register standard icons via super.
-        // Instead, we register tier-based base textures for use in JSON models
+        // The icon is picked per tier from metadata rather than per design, so the single
+        // blockIcon that super registers is unusable here. getIcon() indexes this array.
+        // NOTE: only tier_0_base .. tier_5_base exist; higher tiers log a missing texture.
         for (int i = 0; i < TIERS; i++) {
             tierIcons[i] = reg.registerIcon(Reference.PREFIX_MOD + "modular/tier_" + i + "_base");
         }
@@ -120,11 +120,6 @@ public class BlockMachineCasing extends BlockOK implements IModularBlockTint, IB
             return null;
         }
         return tierIcons[meta];
-    }
-
-    @Override
-    public String getTextureName() {
-        return "modular/casing_" + designName;
     }
 
     @Override
