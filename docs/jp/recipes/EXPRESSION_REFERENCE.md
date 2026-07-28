@@ -92,7 +92,7 @@ OmoshiroiKamo の式パーサー (`ExpressionParser`) で使用できる変数�
 - `energy_max` / `energy_capacity`: マシンの最大エネルギー容量。
 - `energy_f` / `energy_free`: エネルギーの空き容量 (`max - stored`)。
 - `energy_p` / `energy_percent`: エネルギーの充填率 (0.0 ~ 1.0)。
-- `energy_per_tick`: 1ティックあたりのエネルギー消費/生成量（対応マシンのみ）。
+- `energy_per_tick`: 1ティックあたりのエネルギー消費量。稼働中の `perTick` 入力の合計。
 
 ### 流体 (Fluid)
 - **変数 (全体量)**
@@ -124,6 +124,11 @@ OmoshiroiKamo の式パーサー (`ExpressionParser`) で使用できる変数�
 - `batch`: 現在のバッチサイズ。
 - `speed_multi`: 速度倍率。
 - `energy_multi`: エネルギー倍率。
+
+> [!NOTE]
+> **バッチサイズは量に自動で掛かります。** `"amount": "2 + tier"` のように式で書いた量も、
+> バッチ 3 で稼働すれば 3 倍になります。式の中で `batch` を掛ける必要はありません
+> （掛けると二重になります）。`batch` 変数は「バッチサイズそのものを条件に使いたい」場合のものです。
 
 ---
 
