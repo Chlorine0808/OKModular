@@ -28,7 +28,10 @@ public class DecoratorParser {
     private static final List<DecoratorEntry> entries = new ArrayList<>();
 
     static {
-        register("requirement", RequirementDecorator::fromJson, json -> json.has("condition"));
+        register(
+            "requirement",
+            RequirementDecorator::fromJson,
+            json -> json.has("condition") || json.has("requirements"));
 
         register(
             "weighted_random",

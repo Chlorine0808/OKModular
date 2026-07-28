@@ -286,7 +286,7 @@
 | `chance` | レシピの成功確率を制御 | `chance` |
 | `bonus` | 確率で追加の出力を生成 | `chance` + `outputs` |
 | `weighted_random` | 重み付きリストから出力を選択 | `outputs`（各要素に `weight`）／ `pool` ／ `rolls` |
-| `requirement` | 実行中に追加の条件をチェック | `condition` |
+| `requirement` | 実行中に追加の条件・触媒をチェック | `condition` / `requirements` |
 | `harvest_block` | ブロック破壊時の採掘特性を変える | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
 | `per_position_probability` | 座標ごとに確率でブロック出力を差し替える | `chance` + `symbol` + `output` |
 | `bonus_block_output` | 確率で追加のブロック出力を生成 | `chance` + `outputs`（先頭が `type: "block"`） |
@@ -319,6 +319,38 @@
 ```
 
 `weighted_random` の `rolls` を省略すると 1 回抽選、`weight` を省略すると 1 として扱われます。
+
+### requirement decorator
+
+`condition`（追加の条件）と `requirements`（触媒）のどちらか、または両方を取ります。
+
+```json
+"decorators": [
+  {
+    "type": "requirement",
+    "condition": "tier.glass >= 2",
+    "requirements": [
+      { "item": "minecraft:redstone", "amount": 10 },
+      { "energy": 10000 }
+    ]
+  }
+]
+```
+
+`requirements` の各要素は**入力と同じ書式**で、**消費されません**（触媒）。稼働開始時と毎 tick チェックされ、
+足りなくなるとレシピが止まります。`consume: true` を書いても無視されます — 消費する追加入力が欲しい場合は
+`inputs` に書いてください。そちらなら読んだときに消費されると分かります。
+
+> [!NOTE]
+> **同じことは非消費入力で直接書けます。** 下は上の `requirements` と等価です。
+> ```json
+> "inputs": [ { "item": "minecraft:redstone", "amount": 10, "consume": false } ]
+> ```
+> decorator 側で書く利点は、`parent` を使ったレシピ継承で**親が触媒要件を配れる**点です
+> （子の `inputs` に手を入れずに済む）。
+>
+> なお構造 JSON 側にも `requirements` がありますが**別物**で、あちらは
+> 「アイテム入力ポートが最低 1 個必要」のような**ポート数の指定**です。
 
 ## 6. エクスプレッション (Expression)
 一部のパラメータ（デコレータの確率など）には、数値を動的に算出する `Expression` を使用できます。数値定数を直接記述する代わりに、以下のオブジェクト形式を使用できます。

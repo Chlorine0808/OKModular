@@ -125,8 +125,17 @@ public abstract class RecipeDecorator implements IModularRecipe {
         return internal.getTotalItemInputCount();
     }
 
+    /**
+     * Presents this decorator to the visitor, not the recipe underneath it.
+     * <p>
+     * {@link IRecipeVisitor#visit(ruiseki.okmodular.api.recipe.core.IRecipe)} walks
+     * whatever {@link #getInputs()} and {@link #getOutputs()} return, so handing over
+     * the wrapped recipe would hide anything a decorator contributes — which is how
+     * the engine sees a recipe's inputs at all. Decorators that leave both lists alone
+     * are unaffected, since those calls delegate.
+     */
     @Override
     public void accept(IRecipeVisitor visitor) {
-        internal.accept(visitor);
+        visitor.visit(this);
     }
 }
