@@ -92,9 +92,7 @@ public class MachineryModule extends ModModuleBase {
         configDir = event.getModConfigurationDirectory();
 
         // Structure engine wiring (formerly done by the parent mod's CoreModule).
-        // Keep the config layout under config/omoshiroikamo/ so existing packs
-        // and structure JSONs continue to resolve unchanged.
-        StructureManager.setConfigRootName("omoshiroikamo");
+        // The config root is this mod's ID, matching RecipeLoader and TierConfigLoader.
         StructureManager.setReloadCallback(CustomStructureRegistry::registerAll);
         StructureManager.getInstance()
             .initialize(configDir);
@@ -112,6 +110,9 @@ public class MachineryModule extends ModModuleBase {
         MachineryBlocks.preInit();
         BlockResolver.registerHintBlock(MachineryBlocks.CASING_PLAIN.getBlock());
         CustomStructureRegistry.registerControllerBlock(MachineryBlocks.MACHINE_CONTROLLER.getBlock());
+        // Fallback for the 'F' symbol when a structure declares no mapping for it. The parent mod's
+        // MultiBlockModule used to supply this; the plain casing is this mod's equivalent.
+        CustomStructureRegistry.registerDefaultStructureBlock(MachineryBlocks.CASING_PLAIN.getBlock());
         MachineryItems.preInit();
         MachineryOreDict.init();
 

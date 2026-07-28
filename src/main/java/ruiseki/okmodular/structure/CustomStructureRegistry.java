@@ -39,7 +39,7 @@ public class CustomStructureRegistry {
 
     // Registered by MachineryModule.preInit()
     private static Block controllerBlock = null;
-    // Registered by MultiBlockModule (or any module providing a default structure block)
+    // Registered by MachineryModule.preInit()
     private static Block defaultStructureBlock = null;
 
     public static void registerControllerBlock(Block block) {
