@@ -256,14 +256,46 @@
 - **`not`**: `{ "not": { condition } }`
 - `xor`, `nand`, `nor` も同様に対応しています。
 
+### 条件の 3 つの書き方
+
+どの条件も次の 3 通りで書けます。パーサはこの順に解釈します。
+
+| # | 書き方 | 例 |
+|---|--------|-----|
+| 1 | `type` を明示 | `{ "type": "comparison", "left": 10, "operator": ">", "right": 5 }` |
+| 2 | **キーで型を名指し**（値は 1 つのオブジェクト） | `{ "comparison": { "left": 10, "operator": ">", "right": 5 } }` |
+| 3 | プロパティから推論 | `{ "biome": "Plains" }` |
+
+形式 2 は「内側のオブジェクトがその型として成立する」ときだけ型宣言として扱われます。
+`{ "chance": { "type": "map_range", … } }` のように**値が式オブジェクトである場合は形式 3** として解釈されるので、
+式が失われることはありません。
+
+`tile_nbt` は 2 通りの書き方があります。
+
+```json
+{ "tile_nbt": "energy >= 1000" }
+{ "key": "energy", "op": "greater_or_equal", "value": 1000 }
+```
+
 ## 5. デコレータ (Decorators)
 デコレータはレシピの実行中や終了時に追加の挙動を与えます。
-(※ `type` プロパティを省略した場合、使用されているキーから型が推論されます)
+条件と同じ 3 つの書き方（`type` 明示 / キーで型を名指し / プロパティから推論）が使えます。
 
-- `chance`: レシピの成功確率を制御。
-- `bonus`: 確率で追加の出力を生成。
-- `requirement`: 実行中に追加の構造的要件をチェック。
-- `weighted_random`: 重み付きリストから出力を選択。
+| type 名 | 動作 | 推論に使われるプロパティ |
+|---------|------|------------------------|
+| `chance` | レシピの成功確率を制御 | `chance` |
+| `bonus` | 確率で追加の出力を生成 | `chance` + `outputs` |
+| `weighted_random` | 重み付きリストから出力を選択 | `outputs`（各要素に `weight`）／ `pool` ／ `rolls` |
+| `requirement` | 実行中に追加の条件をチェック | `condition` |
+| `harvest_block` | ブロック破壊時の採掘特性を変える | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
+| `per_position_probability` | 座標ごとに確率でブロック出力を差し替える | `chance` + `symbol` + `output` |
+| `bonus_block_output` | 確率で追加のブロック出力を生成 | `chance` + `outputs`（先頭が `type: "block"`） |
+| `random_block_output` | 候補からブロック出力を抽選 | `count` / `selections` |
+
+> [!NOTE]
+> `harvest_block` / `per_position_probability` / `bonus_block_output` / `random_block_output` は
+> 以前 camelCase（`harvest` / `perPositionProbability` / `bonusBlockOutput` / `randomBlockOutput`）で
+> 登録されていました。旧名もエイリアスとして残っているので既存のレシピパックはそのまま動きます。
 
 ```json
 "decorators": [
@@ -275,9 +307,18 @@
       "chance": 0.1,
       "outputs": [{ "item": "minecraft:diamond", "amount": 1 }]
     }
+  },
+  {
+    "type": "weighted_random",
+    "outputs": [
+      { "weight": 70, "item": "minecraft:flint",  "amount": 1 },
+      { "weight": 30, "item": "minecraft:gravel", "amount": 1 }
+    ]
   }
 ]
 ```
+
+`weighted_random` の `rolls` を省略すると 1 回抽選、`weight` を省略すると 1 として扱われます。
 
 ## 6. エクスプレッション (Expression)
 一部のパラメータ（デコレータの確率など）には、数値を動的に算出する `Expression` を使用できます。数値定数を直接記述する代わりに、以下のオブジェクト形式を使用できます。
