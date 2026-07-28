@@ -79,7 +79,7 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
      *
      * Expected format:
      * {
-     * "type": "perPositionProbability",
+     * "type": "per_position_probability",
      * "chance": { "type": "constant", "value": 0.3 },
      * "symbol": "L",
      * "output": { "symbol": "L", "block": "modid:blockname:meta" }
