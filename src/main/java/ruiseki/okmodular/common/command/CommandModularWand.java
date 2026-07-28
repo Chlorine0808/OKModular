@@ -9,7 +9,7 @@ import ruiseki.okcore.init.ModBase;
 
 /**
  * Structure wand subcommand handler.
- * Builds: /&lt;modid&gt; modular wand save &lt;name&gt;
+ * Builds: /&lt;modid&gt; wand save &lt;name&gt;
  */
 public class CommandModularWand extends CommandMod {
 
