@@ -52,7 +52,7 @@ public class Conditions {
         ConditionParserRegistry.register(
             "tile_nbt",
             TileNbtCondition::fromJson,
-            json -> json.has("key") && json.has("op") && json.has("value"));
+            json -> json.has("tile_nbt") || (json.has("key") && json.has("op") && json.has("value")));
 
         // Logical Operators
         ConditionParserRegistry.register("and", OpAnd::fromJson, json -> json.has("conditions") || json.has("and"));
