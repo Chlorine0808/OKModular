@@ -17,6 +17,7 @@ tooltip.machineBlueprint.build=Sneak+Right-click controller to build
 message.machineBlueprint.empty=This blueprint is blank
 okmodular.nei.required_tiers=Required Tiers:
 okmodular.nei.tier_format=Tier %d
+okmodular.nei.duration_expression=Duration: %s (depends on the machine)
 tile.modular_machine_controller.name=Machine Controller
 tile.vis_bridge.name=Vis Bridge
 machinery.casing.format=%s %s

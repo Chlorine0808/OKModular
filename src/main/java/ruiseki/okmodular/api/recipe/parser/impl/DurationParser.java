@@ -16,14 +16,16 @@ public class DurationParser implements IRecipePropertyParser {
         if (element.getAsJsonPrimitive()
             .isString()) {
             IExpression expr = ExpressionParser.parseExpression(element.getAsString());
-            builder.durationExpr(expr);
-
-            // Leave a static value behind for callers with no machine to evaluate
-            // against - NEI, validation. A constant expression folds to a real
-            // number; anything reading machine or world state cannot, and keeps the
-            // builder's default.
             Integer folded = foldToConstant(expr);
-            if (folded != null) builder.duration(folded);
+
+            if (folded != null) {
+                // A constant expression is a number written the long way. Keeping it
+                // as an expression would only deny NEI and validation a value they
+                // could have read.
+                builder.duration(folded);
+            } else {
+                builder.durationExpr(expr);
+            }
         } else {
             builder.duration(element.getAsInt());
         }
