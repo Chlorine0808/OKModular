@@ -46,6 +46,7 @@ import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
+import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.core.IMachineState;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.core.ITieredMachine;
@@ -463,6 +464,12 @@ public class TEMachineController extends AbstractMBModifierTE
         if (name == null) return null;
         return StructureManager.getInstance()
             .getCustomStructure(name);
+    }
+
+    @Override
+    public DurationPolicy getDurationPolicy() {
+        IStructureEntry entry = getStructureEntry();
+        return entry != null ? entry.getDurationPolicy() : DurationPolicy.ON_START;
     }
 
     public String getCustomStructureName() {
