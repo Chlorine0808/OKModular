@@ -110,7 +110,7 @@
                 {
                     "item": "minecraft:diamond_sword",
                     "amount": 1,
-                    "nbt": "display.Name = 'Excalibur'"
+                    "nbt": "nbt('display.Name') = 'Excalibur'"
                 }
             ]
         },
@@ -135,8 +135,8 @@
                     "item": "minecraft:diamond_sword",
                     "amount": 1,
                     "nbt": [
-                        "display.Name = 'Legendary Blade'",
-                        "display.Lore = ['Line 1', 'Line 2']"
+                        "nbt('display.Name') = 'Legendary Blade'",
+                        "nbt('display.Lore') = ['Line 1', 'Line 2']"
                     ],
                     "nbtlist": {
                         "path": "ench",

@@ -14,7 +14,7 @@
         {
           "item": "minecraft:diamond",
           "amount": 1,
-          "nbt": "customData.result = 10 + 5"
+          "nbt": "nbt('customData.result') = 10 + 5"
         }
       ]
     },
@@ -31,7 +31,7 @@
         {
           "item": "minecraft:diamond",
           "amount": 1,
-          "nbt": "customData.result = 100 - 25"
+          "nbt": "nbt('customData.result') = 100 - 25"
         }
       ]
     },
@@ -48,7 +48,7 @@
         {
           "item": "minecraft:diamond",
           "amount": 1,
-          "nbt": "customData.result = 12 * 8"
+          "nbt": "nbt('customData.result') = 12 * 8"
         }
       ]
     },
@@ -65,7 +65,7 @@
         {
           "item": "minecraft:diamond",
           "amount": 1,
-          "nbt": "customData.result = 100 / 4"
+          "nbt": "nbt('customData.result') = 100 / 4"
         }
       ]
     },
@@ -82,7 +82,7 @@
         {
           "item": "minecraft:diamond",
           "amount": 1,
-          "nbt": "customData.result = 17 % 5"
+          "nbt": "nbt('customData.result') = 17 % 5"
         }
       ]
     },
@@ -99,7 +99,7 @@
         {
           "item": "minecraft:diamond",
           "amount": 1,
-          "nbt": "customData.result = (10 + 5) * 2"
+          "nbt": "nbt('customData.result') = (10 + 5) * 2"
         }
       ]
     },
@@ -116,7 +116,7 @@
         {
           "item": "minecraft:diamond",
           "amount": 1,
-          "nbt": "customData.result = ((10 + 5) * 2 - 3) / 4"
+          "nbt": "nbt('customData.result') = ((10 + 5) * 2 - 3) / 4"
         }
       ]
     },
@@ -127,7 +127,7 @@
         {
           "item": "minecraft:iron_ingot",
           "amount": 1,
-          "nbt": "customData.value > 10"
+          "nbt": "nbt('customData.value') > 10"
         }
       ],
       "outputs": [
@@ -144,7 +144,7 @@
         {
           "item": "minecraft:iron_ingot",
           "amount": 1,
-          "nbt": "customData.value <= 100"
+          "nbt": "nbt('customData.value') <= 100"
         }
       ],
       "outputs": [
@@ -161,7 +161,7 @@
         {
           "item": "minecraft:iron_ingot",
           "amount": 1,
-          "nbt": "customData.level == 5"
+          "nbt": "nbt('customData.level') == 5"
         }
       ],
       "outputs": [
@@ -178,14 +178,14 @@
         {
           "item": "minecraft:diamond_sword",
           "amount": 1,
-          "nbt": "display.Name != 'Broken Sword'"
+          "nbt": "nbt('display.Name') != 'Broken Sword'"
         }
       ],
       "outputs": [
         {
           "item": "minecraft:diamond_sword",
           "amount": 1,
-          "nbt": "customData.repaired = 1"
+          "nbt": "nbt('customData.repaired') = 1"
         }
       ]
     },
@@ -202,7 +202,7 @@
         {
           "item": "minecraft:nether_star",
           "amount": 1,
-          "nbt": "customData.createdOnDay = day"
+          "nbt": "nbt('customData.createdOnDay') = day"
         }
       ]
     },
@@ -219,7 +219,7 @@
         {
           "item": "minecraft:nether_star",
           "amount": 1,
-          "nbt": "customData.createdAtTime = time"
+          "nbt": "nbt('customData.createdAtTime') = time"
         }
       ]
     },
@@ -236,7 +236,7 @@
         {
           "item": "minecraft:nether_star",
           "amount": 1,
-          "nbt": "customData.moonPhase = moon_phase"
+          "nbt": "nbt('customData.moonPhase') = moon_phase"
         }
       ]
     },
@@ -253,7 +253,7 @@
         {
           "item": "minecraft:nether_star",
           "amount": 1,
-          "nbt": "customData.bonus = day * 10 + time / 1000"
+          "nbt": "nbt('customData.bonus') = day * 10 + time / 1000"
         }
       ]
     },
@@ -264,7 +264,7 @@
         {
           "item": "minecraft:iron_ingot",
           "amount": 1,
-          "nbt": "customData.level >= 5 && customData.power > 100"
+          "nbt": "nbt('customData.level') >= 5 && nbt('customData.power') > 100"
         }
       ],
       "outputs": [
@@ -281,7 +281,7 @@
         {
           "item": "minecraft:iron_ingot",
           "amount": 1,
-          "nbt": "customData.type == 1 || customData.type == 2"
+          "nbt": "nbt('customData.type') == 1 || nbt('customData.type') == 2"
         }
       ],
       "outputs": [
@@ -298,14 +298,14 @@
         {
           "item": "minecraft:diamond_sword",
           "amount": 1,
-          "nbt": "(customData.level >= 10 && customData.durability > 50) || customData.blessed == 1"
+          "nbt": "(nbt('customData.level') >= 10 && nbt('customData.durability') > 50) || nbt('customData.blessed') == 1"
         }
       ],
       "outputs": [
         {
           "item": "minecraft:diamond_sword",
           "amount": 1,
-          "nbt": "customData.powered = 1"
+          "nbt": "nbt('customData.powered') = 1"
         }
       ]
     },
@@ -323,12 +323,12 @@
           "item": "minecraft:diamond",
           "amount": 1,
           "nbt": [
-            "math.addition = 100 + 50",
-            "math.subtraction = 100 - 50",
-            "math.multiplication = 10 * 5",
-            "math.division = 100 / 4",
-            "math.modulo = 17 % 5",
-            "math.complex = (10 + 5) * 2 - 3"
+            "nbt('math.addition') = 100 + 50",
+            "nbt('math.subtraction') = 100 - 50",
+            "nbt('math.multiplication') = 10 * 5",
+            "nbt('math.division') = 100 / 4",
+            "nbt('math.modulo') = 17 % 5",
+            "nbt('math.complex') = (10 + 5) * 2 - 3"
           ]
         }
       ]
@@ -346,7 +346,7 @@
         {
           "item": "minecraft:diamond",
           "amount": 1,
-          "nbt": "customData.negative = -50"
+          "nbt": "nbt('customData.negative') = -50"
         }
       ]
     },
@@ -363,7 +363,7 @@
         {
           "item": "minecraft:diamond",
           "amount": 1,
-          "nbt": "customData.result = 100 + -25"
+          "nbt": "nbt('customData.result') = 100 + -25"
         }
       ]
     },
@@ -374,7 +374,7 @@
         {
           "item": "minecraft:diamond",
           "amount": 1,
-          "nbt": "customData.level * 10 >= 100"
+          "nbt": "nbt('customData.level') * 10 >= 100"
         }
       ],
       "outputs": [
