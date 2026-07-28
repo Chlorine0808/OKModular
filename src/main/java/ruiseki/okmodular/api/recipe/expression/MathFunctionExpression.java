@@ -59,6 +59,26 @@ public class MathFunctionExpression implements IExpression {
         this.arguments = arguments;
     }
 
+    /**
+     * Reproduces the call as a recipe script.
+     * <p>
+     * Callers persist expressions by writing this string to NBT or JSON and parsing
+     * it back later, so the result has to be readable by
+     * {@link ExpressionParser#parseExpression}.
+     */
+    @Override
+    public String toString() {
+        StringBuilder text = new StringBuilder(functionName).append('(');
+        if (arguments != null) {
+            for (int i = 0; i < arguments.size(); i++) {
+                if (i > 0) text.append(", ");
+                text.append(arguments.get(i));
+            }
+        }
+        return text.append(')')
+            .toString();
+    }
+
     @Override
     public EvaluationValue evaluate(ConditionContext context) {
         if (functionName.equals("random")) {

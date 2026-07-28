@@ -47,6 +47,19 @@ public class ArithmeticExpression implements IExpression {
         return EvaluationValue.ZERO;
     }
 
+    /**
+     * Reproduces the expression as a recipe script.
+     * <p>
+     * Callers persist expressions by writing this string to NBT or JSON and parsing
+     * it back later, so the result has to be readable by
+     * {@link ExpressionParser#parseExpression}. The parentheses are what keep
+     * <code>(1 + 2) * 3</code> from coming back as <code>1 + 2 * 3</code>.
+     */
+    @Override
+    public String toString() {
+        return "(" + left + " " + operation + " " + right + ")";
+    }
+
     public static IExpression fromJson(JsonObject json) {
         IExpression left = ExpressionsParser.parse(json.get("left"));
         IExpression right = ExpressionsParser.parse(json.get("right"));
