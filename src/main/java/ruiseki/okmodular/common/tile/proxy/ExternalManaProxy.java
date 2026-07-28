@@ -3,8 +3,8 @@ package ruiseki.okmodular.common.tile.proxy;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChunkCoordinates;
 
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.common.tile.TEMachineController;
 import vazkii.botania.api.mana.IManaPool;
 import vazkii.botania.api.mana.spark.ISparkAttachable;

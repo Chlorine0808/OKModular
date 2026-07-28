@@ -8,14 +8,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;
 
-import ruiseki.okcore.api.condition.ConditionContext;
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.api.recipe.context.IRecipeContext;
-import ruiseki.okcore.api.recipe.core.ITieredMachine;
-import ruiseki.okcore.api.structure.core.IStructureEntry;
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.AbstractRecipeProcess;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.core.ITieredMachine;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
 import ruiseki.okmodular.api.recipe.io.BlockInput;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeInput;
@@ -25,6 +24,7 @@ import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.parser.InputNBTRegistry;
 import ruiseki.okmodular.api.recipe.parser.OutputNBTRegistry;
 import ruiseki.okmodular.api.recipe.visitor.RecipeExecutionVisitor;
+import ruiseki.okmodular.api.structure.core.IStructureEntry;
 
 public class ProcessAgent extends AbstractRecipeProcess {
 

@@ -17,7 +17,7 @@ import com.gtnewhorizon.structurelib.alignment.enumerable.Rotation;
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.modular.ISidedTexture;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.block.BlockMachineCasing;

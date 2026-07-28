@@ -12,12 +12,12 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import ruiseki.okcore.api.modular.IPortType;
 import ruiseki.okcore.datastructure.BlockPos;
 import ruiseki.okcore.datastructure.DimPos;
-import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.modular.IExternalPortProxy;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.common.tile.TEMachineController;
 

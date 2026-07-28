@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
 
 /**
  * Interface for modular recipes.

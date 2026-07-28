@@ -1,6 +1,5 @@
 package ruiseki.okmodular.api.modular;
 
-import ruiseki.okcore.api.modular.IModularPort;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.core.tileentity.ISidedIO;
 

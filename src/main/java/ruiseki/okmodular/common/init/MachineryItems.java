@@ -5,12 +5,12 @@ import net.minecraft.item.ItemStack;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import lombok.Getter;
-import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.common.item.ItemFluidCanister;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
 import ruiseki.okmodular.common.item.ItemMaterialPart;
 import ruiseki.okmodular.common.item.ItemStructureWand;
 import ruiseki.okmodular.common.item.ItemWrench;
+import ruiseki.okmodular.util.Logger;
 
 public enum MachineryItems {
 

@@ -14,8 +14,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Loads and manages tier display names from JSON config.

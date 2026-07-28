@@ -6,12 +6,12 @@ import net.minecraftforge.common.util.ForgeDirection;
 import com.google.gson.JsonObject;
 
 import mekanism.api.gas.GasStack;
-import ruiseki.okcore.api.condition.ConditionContext;
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.api.recipe.expression.ConstantExpression;
-import ruiseki.okcore.api.recipe.expression.ExpressionParser;
-import ruiseki.okcore.api.recipe.expression.ExpressionsParser;
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
+import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
+import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.core.gas.IGasHandler;
 

@@ -1,7 +1,7 @@
 package ruiseki.okmodular.api.recipe.visitor;
 
-import ruiseki.okcore.api.modular.IMachineController;
-import ruiseki.okcore.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IMachineController;
+import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 
 /**

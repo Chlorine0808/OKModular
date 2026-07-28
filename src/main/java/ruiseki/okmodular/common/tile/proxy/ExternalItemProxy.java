@@ -5,8 +5,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChunkCoordinates;
 
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.common.tile.TEMachineController;
 
 /**

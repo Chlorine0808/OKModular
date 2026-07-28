@@ -19,19 +19,19 @@ import com.google.gson.JsonObject;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
-import ruiseki.okcore.api.condition.ConditionContext;
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.api.recipe.context.IRecipeContext;
-import ruiseki.okcore.api.recipe.expression.ConstantExpression;
-import ruiseki.okcore.api.recipe.expression.ExpressionParser;
-import ruiseki.okcore.api.recipe.expression.ExpressionsParser;
-import ruiseki.okcore.api.recipe.expression.IExpression;
-import ruiseki.okcore.api.recipe.expression.INBTWriteExpression;
-import ruiseki.okcore.api.recipe.expression.NBTListOperation;
-import ruiseki.okcore.util.Logger;
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
+import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
+import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
+import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
+import ruiseki.okmodular.api.recipe.expression.INBTWriteExpression;
+import ruiseki.okmodular.api.recipe.expression.NBTListOperation;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Recipe output that changes blocks at structure positions.

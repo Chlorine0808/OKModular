@@ -19,9 +19,6 @@ import ruiseki.okcore.helper.MinecraftHelpers;
 import ruiseki.okcore.init.ModModuleBase;
 import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okcore.proxy.ICommonProxy;
-import ruiseki.okcore.structure.BlockResolver;
-import ruiseki.okcore.structure.CustomStructureRegistry;
-import ruiseki.okcore.structure.StructureManager;
 import ruiseki.okmodular.common.command.CommandModular;
 import ruiseki.okmodular.common.fluid.EnumFluidMaterial;
 import ruiseki.okmodular.common.fluid.ModFluidGases;
@@ -42,6 +39,9 @@ import ruiseki.okmodular.core.capabilities.item.CapabilityItemHandler;
 import ruiseki.okmodular.core.capabilities.light.CapabilityLight;
 import ruiseki.okmodular.core.capabilities.redstone.CapabilityRedstone;
 import ruiseki.okmodular.core.event.MemoryEventHandler;
+import ruiseki.okmodular.structure.BlockResolver;
+import ruiseki.okmodular.structure.CustomStructureRegistry;
+import ruiseki.okmodular.structure.StructureManager;
 
 public class MachineryModule extends ModModuleBase {
 

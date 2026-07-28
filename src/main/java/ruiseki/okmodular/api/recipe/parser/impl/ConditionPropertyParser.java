@@ -2,8 +2,8 @@ package ruiseki.okmodular.api.recipe.parser.impl;
 
 import com.google.gson.JsonElement;
 
-import ruiseki.okcore.api.condition.ConditionParserRegistry;
-import ruiseki.okcore.api.condition.ICondition;
+import ruiseki.okmodular.api.condition.ConditionParserRegistry;
+import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.recipe.core.ModularRecipe;
 import ruiseki.okmodular.api.recipe.parser.IRecipePropertyParser;
 

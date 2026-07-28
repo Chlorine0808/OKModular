@@ -6,7 +6,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.tile.energy.AbstractEnergyIOPortTE;

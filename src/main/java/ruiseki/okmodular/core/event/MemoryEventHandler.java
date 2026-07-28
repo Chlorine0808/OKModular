@@ -11,7 +11,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import ruiseki.okcore.util.Logger;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Handles world-related and connection-related events to manage memory and

@@ -1,8 +1,9 @@
 // Add any additional repositories for your dependencies here.
 
 repositories {
-    // OmoshiroiKamo is consumed from the local Maven repository during development.
-    // Run `./gradlew publishToMavenLocal` in the OmoshiroiKamo project first.
+    // Lets a locally published OKCore (`./gradlew publishToMavenLocal` in the OKCore project)
+    // win when both mods are being worked on at once. CI has an empty ~/.m2 and falls through
+    // to JitPack, which serves OKCore as com.github.Shigure-Ruiseki:OKCore.
     mavenLocal()
     maven { url 'https://jitpack.io' }
 }

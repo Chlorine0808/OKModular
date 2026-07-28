@@ -4,10 +4,10 @@ import java.util.Random;
 
 import com.google.gson.JsonObject;
 
-import ruiseki.okcore.api.condition.ConditionContext;
-import ruiseki.okcore.api.recipe.expression.ExpressionsParser;
-import ruiseki.okcore.api.recipe.expression.IExpression;
+import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
 
 /**
  * Decorator that adds a random chance for the recipe to meet its conditions.

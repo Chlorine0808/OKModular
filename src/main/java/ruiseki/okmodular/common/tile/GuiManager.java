@@ -24,10 +24,10 @@ import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.cleanroommc.modularui.widgets.slot.ItemSlot;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.api.modular.IPortType;
 import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.error.ErrorReason;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeOutput;

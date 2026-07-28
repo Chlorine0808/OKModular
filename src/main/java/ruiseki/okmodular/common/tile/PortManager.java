@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.api.structure.core.IStructureEntry;
-import ruiseki.okcore.api.structure.io.IStructureRequirement;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.structure.core.IStructureEntry;
+import ruiseki.okmodular.api.structure.io.IStructureRequirement;
 
 /**
  * Manages port collections for TEMachineController.

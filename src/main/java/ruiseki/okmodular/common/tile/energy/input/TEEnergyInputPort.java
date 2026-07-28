@@ -8,7 +8,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import cpw.mods.fml.common.Optional;
 import mekanism.api.lasers.ILaserReceptor;
-import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.tile.energy.AbstractEnergyIOPortTE;

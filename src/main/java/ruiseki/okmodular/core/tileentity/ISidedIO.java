@@ -2,7 +2,7 @@ package ruiseki.okmodular.core.tileentity;
 
 import net.minecraftforge.common.util.ForgeDirection;
 
-import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okmodular.api.enums.EnumIO;
 
 public interface ISidedIO extends ITile {
 

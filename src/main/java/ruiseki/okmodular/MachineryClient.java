@@ -12,7 +12,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ruiseki.okcore.init.ModBase;
 import ruiseki.okcore.proxy.ClientProxyComponent;
-import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.client.handler.FluidFogHandler;
 import ruiseki.okmodular.client.render.ItemPortRenderer;
 import ruiseki.okmodular.client.render.PortOverlayISBRH;
@@ -21,6 +20,7 @@ import ruiseki.okmodular.common.block.BlockMachineCasing;
 import ruiseki.okmodular.common.block.BlockMachineController;
 import ruiseki.okmodular.common.init.MachineryItems;
 import ruiseki.okmodular.common.item.ItemFluidCanister;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Client-side module for Machinery.

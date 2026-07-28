@@ -19,11 +19,11 @@ import com.gtnewhorizon.gtnhlib.client.model.color.BlockColor;
 
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.modular.IModularBlock;
 import ruiseki.okmodular.api.modular.IModularBlockTint;
+import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.modular.ModularTier;
 import ruiseki.okmodular.client.util.IconRegistry;

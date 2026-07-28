@@ -11,16 +11,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import ruiseki.okcore.api.condition.BiomeCondition;
-import ruiseki.okcore.api.condition.Conditions;
-import ruiseki.okcore.api.condition.ICondition;
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.api.recipe.expression.IExpression;
-import ruiseki.okcore.api.recipe.expression.MapRangeExpression;
+import ruiseki.okmodular.api.condition.BiomeCondition;
+import ruiseki.okmodular.api.condition.Conditions;
+import ruiseki.okmodular.api.condition.ICondition;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.decorator.BonusOutputDecorator;
 import ruiseki.okmodular.api.recipe.decorator.ChanceRecipeDecorator;
 import ruiseki.okmodular.api.recipe.decorator.RequirementDecorator;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
+import ruiseki.okmodular.api.recipe.expression.MapRangeExpression;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 

@@ -2,8 +2,8 @@ package ruiseki.okmodular.api.recipe.io;
 
 import net.minecraft.nbt.NBTTagCompound;
 
-import ruiseki.okcore.api.condition.ConditionContext;
 import ruiseki.okcore.json.IJsonMaterial;
+import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 

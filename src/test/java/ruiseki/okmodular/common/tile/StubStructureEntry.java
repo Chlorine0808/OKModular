@@ -7,14 +7,14 @@ import java.util.Set;
 
 import com.google.gson.JsonObject;
 
-import ruiseki.okcore.api.condition.ConditionContext;
-import ruiseki.okcore.api.structure.core.IStructureEntry;
-import ruiseki.okcore.api.structure.core.IStructureLayer;
-import ruiseki.okcore.api.structure.core.ISymbolMapping;
-import ruiseki.okcore.api.structure.core.TierStructureRef;
-import ruiseki.okcore.api.structure.io.IStructureRequirement;
-import ruiseki.okcore.api.structure.visitor.IStructureVisitor;
-import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.structure.core.IStructureEntry;
+import ruiseki.okmodular.api.structure.core.IStructureLayer;
+import ruiseki.okmodular.api.structure.core.ISymbolMapping;
+import ruiseki.okmodular.api.structure.core.TierStructureRef;
+import ruiseki.okmodular.api.structure.io.IStructureRequirement;
+import ruiseki.okmodular.api.structure.visitor.IStructureVisitor;
 
 public class StubStructureEntry implements IStructureEntry {
 

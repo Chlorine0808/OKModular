@@ -35,8 +35,8 @@ import ruiseki.okcore.datastructure.DimPos;
 import ruiseki.okcore.datastructure.EnumFacingMap;
 import ruiseki.okcore.helper.MinecraftHelpers;
 import ruiseki.okcore.helper.PlayerHelpers;
-import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.OKModular;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * @author rubensworks

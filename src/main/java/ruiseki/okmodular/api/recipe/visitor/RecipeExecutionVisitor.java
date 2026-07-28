@@ -2,8 +2,8 @@ package ruiseki.okmodular.api.recipe.visitor;
 
 import java.util.List;
 
-import ruiseki.okcore.api.condition.ConditionContext;
-import ruiseki.okcore.api.modular.IModularPort;
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.recipe.core.AbstractRecipeProcess;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeInput;

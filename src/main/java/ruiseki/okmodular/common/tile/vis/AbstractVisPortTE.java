@@ -5,7 +5,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.modular.port.IVisPort;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;

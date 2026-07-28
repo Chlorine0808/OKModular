@@ -9,11 +9,11 @@ import net.minecraft.util.EnumChatFormatting;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 
-import ruiseki.okcore.api.structure.core.IStructureEntry;
 import ruiseki.okcore.command.CommandMod;
 import ruiseki.okcore.init.ModBase;
-import ruiseki.okcore.structure.CustomStructureRegistry;
-import ruiseki.okcore.structure.StructureManager;
+import ruiseki.okmodular.api.structure.core.IStructureEntry;
+import ruiseki.okmodular.structure.CustomStructureRegistry;
+import ruiseki.okmodular.structure.StructureManager;
 
 public class CommandModularList extends CommandMod {
 

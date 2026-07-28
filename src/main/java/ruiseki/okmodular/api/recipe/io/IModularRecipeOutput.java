@@ -2,9 +2,9 @@ package ruiseki.okmodular.api.recipe.io;
 
 import java.util.List;
 
-import ruiseki.okcore.api.condition.ConditionContext;
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
 
 /**
  * Interface for recipe outputs that work with the Modular Port system.

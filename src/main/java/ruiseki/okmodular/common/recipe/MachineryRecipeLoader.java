@@ -12,12 +12,12 @@ import com.google.gson.JsonObject;
 
 import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okcore.json.ParsingContext;
-import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.core.ModularRecipe;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.parser.DecoratorParser;
 import ruiseki.okmodular.api.recipe.parser.RecipeParserRegistry;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Loader class that converts JSON objects into ModularRecipe instances.

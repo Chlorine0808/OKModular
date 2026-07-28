@@ -17,8 +17,8 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonReader;
 
-import ruiseki.okcore.structure.BlockCompat;
-import ruiseki.okcore.util.Logger;
+import ruiseki.okmodular.structure.BlockCompat;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Migrates recipe JSON files on disk by applying block ID remaps from BlockCompat.

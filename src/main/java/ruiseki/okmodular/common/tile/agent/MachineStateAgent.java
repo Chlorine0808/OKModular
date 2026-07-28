@@ -18,9 +18,9 @@ import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 import net.minecraftforge.oredict.OreDictionary;
 
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.api.recipe.core.IMachineState;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.recipe.core.IMachineState;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.okmodular.common.tile.essentia.AbstractEssentiaPortTE;

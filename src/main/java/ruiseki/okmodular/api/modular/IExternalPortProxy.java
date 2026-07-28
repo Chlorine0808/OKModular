@@ -3,8 +3,6 @@ package ruiseki.okmodular.api.modular;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
 
-import ruiseki.okcore.api.modular.IMachineController;
-
 /**
  * Marker interface for external port proxies (like chests, tanks, energy cells)
  * that are linked to a controller and act as a modular port. Extends

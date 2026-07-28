@@ -27,11 +27,11 @@ import appeng.me.helpers.AENetworkProxy;
 import appeng.me.helpers.IGridProxyable;
 import appeng.util.Platform;
 import appeng.util.item.AEItemStack;
-import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okcore.helper.InventoryHelpers;
-import ruiseki.okcore.util.Logger;
+import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * ME Output Port - outputs items directly to AE2 ME Network.
