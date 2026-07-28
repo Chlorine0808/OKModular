@@ -227,3 +227,65 @@ command.okmodular.wand_scanning=%s ブロックをスキャン中...
 command.okmodular.scan_success=%s
 command.okmodular.scan_file=保存しました: %s
 command.okmodular.scan_failed=スキャン失敗: %s
+
+# --- Machine GUI status and controls (moved from the parent mod) ---
+gui.status.idle=待機中
+gui.status.processing=レシピ処理中: %d%%
+gui.status.output_full=出力が満杯です: %s
+gui.status.insert_blueprint=ブループリントを挿入してください
+gui.status.block_mismatch=ブロック不一致または構造体が不完全です
+gui.status.structure_mismatch=構造が一致しません
+gui.status.structure_not_formed=構造が形成されていません
+gui.status.missing_definition=構造定義が見つかりません
+gui.status.invalid_definition=無効な構造定義です
+gui.status.requirements_not_met=構造体の要件を満たしていません
+gui.status.unknown=不明なエラー
+gui.progress=進捗: %.1f%%
+gui.energy_transfer=転送量: %s RF/t
+gui.mana_info=%d マナ
+gui.redstone_mode.always_on=常にオン
+gui.redstone_mode.always_off=常にオフ
+gui.redstone_mode.high_on=レッドストーン信号でオン
+gui.redstone_mode.high_off=レッドストーン信号でオフ
+gui.search_bar.tool_tip=右クリックで検索バーをクリア
+gui.not_in_effect=無効
+
+# --- Port types (never had entries; the wrench and GUI showed raw keys) ---
+gui.port_type=ポート種別を %s に設定しました
+gui.port_type.format=%s (%s)
+gui.port_type.ITEM=アイテム
+gui.port_type.FLUID=液体
+gui.port_type.ENERGY=エネルギー
+gui.port_type.MANA=マナ
+gui.port_type.GAS=ガス
+gui.port_type.ESSENTIA=エッセンチア
+gui.port_type.VIS=ヴィス
+gui.port_type.BLOCK=ブロック
+gui.port_type.NONE=なし
+
+# --- GUI / NEI text that never had entries in either mod ---
+chat.okmodular.port_io_fixed=このポートのIOモードは構造体で固定されており変更できません。
+gui.modular.inputs=入力
+gui.modular.no_input=入力なし
+recipe.tooltip=レシピ
+gui.io.none=なし
+gui.io.input=入力
+gui.io.output=出力
+gui.io.both=入出力
+gui.craftingState.idle=待機中
+gui.craftingState.running=稼働中
+gui.craftingState.error=エラー
+
+# --- Recipe conditions (were keyed under okcore, which never defined them) ---
+okmodular.condition.biome.base=バイオーム条件
+okmodular.condition.block=必要なブロック: %s
+okmodular.condition.block_below=直下に必要なブロック: %s
+okmodular.condition.dimension=許可されるディメンション: %s
+okmodular.condition.tile_nbt=TileのNBT %s %s %s
+okmodular.condition.weather.CLEAR=晴天が必要です
+okmodular.condition.weather.RAIN=降雨が必要です
+okmodular.condition.weather.THUNDER=雷雨が必要です
+
+# --- en_US only until now ---
+tooltip.machinery.deprecated=§e[非推奨]
+tooltip.machinery.deprecated.hint=§7このブロックは旧システムを使用しています。

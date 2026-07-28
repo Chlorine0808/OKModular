@@ -229,3 +229,61 @@ command.okmodular.wand_scanning=Scanning %s blocks...
 command.okmodular.scan_success=%s
 command.okmodular.scan_file=Saved as: %s
 command.okmodular.scan_failed=Scan failed: %s
+
+# --- Machine GUI status and controls (moved from the parent mod) ---
+gui.status.idle=Idle
+gui.status.processing=Processing: %d%%
+gui.status.output_full=Output Full: %s
+gui.status.insert_blueprint=Insert Blueprint
+gui.status.block_mismatch=Block mismatch or incomplete structure
+gui.status.structure_mismatch=Structure mismatch
+gui.status.structure_not_formed=Structure not formed
+gui.status.missing_definition=Structure definition missing
+gui.status.invalid_definition=Invalid structure definition
+gui.status.requirements_not_met=Requirement not met
+gui.status.unknown=Unknown error
+gui.progress=Progress: %.1f%%
+gui.energy_transfer=Transfer: %s RF/t
+gui.mana_info=%d Mana
+gui.redstone_mode.always_on=Always on
+gui.redstone_mode.always_off=Always off
+gui.redstone_mode.high_on=On with redstone signal
+gui.redstone_mode.high_off=Off with redstone signal
+gui.search_bar.tool_tip=Right click to clear the search bar
+gui.not_in_effect=Not in effect
+
+# --- Port types (never had entries; the wrench and GUI showed raw keys) ---
+gui.port_type=Port type set to: %s
+gui.port_type.format=%s (%s)
+gui.port_type.ITEM=Item
+gui.port_type.FLUID=Fluid
+gui.port_type.ENERGY=Energy
+gui.port_type.MANA=Mana
+gui.port_type.GAS=Gas
+gui.port_type.ESSENTIA=Essentia
+gui.port_type.VIS=Vis
+gui.port_type.BLOCK=Block
+gui.port_type.NONE=None
+
+# --- GUI / NEI text that never had entries in either mod ---
+chat.okmodular.port_io_fixed=This port's IO mode is fixed by the structure and cannot be changed.
+gui.modular.inputs=Inputs
+gui.modular.no_input=No inputs
+recipe.tooltip=Recipe
+gui.io.none=None
+gui.io.input=Input
+gui.io.output=Output
+gui.io.both=Both
+gui.craftingState.idle=Idle
+gui.craftingState.running=Running
+gui.craftingState.error=Error
+
+# --- Recipe conditions (were keyed under okcore, which never defined them) ---
+okmodular.condition.biome.base=Biome condition
+okmodular.condition.block=Requires block: %s
+okmodular.condition.block_below=Requires block below: %s
+okmodular.condition.dimension=Allowed dimensions: %s
+okmodular.condition.tile_nbt=Tile NBT %s %s %s
+okmodular.condition.weather.CLEAR=Requires clear weather
+okmodular.condition.weather.RAIN=Requires rain
+okmodular.condition.weather.THUNDER=Requires a thunderstorm

@@ -37,7 +37,7 @@ public class BlockBelowCondition implements ICondition {
     @Override
     public String getDescription() {
         ItemStack stack = new ItemStack(targetBlock, 1, targetMeta == -1 ? 0 : targetMeta);
-        return StatCollector.translateToLocalFormatted("okcore.condition.block_below", stack.getDisplayName());
+        return StatCollector.translateToLocalFormatted("okmodular.condition.block_below", stack.getDisplayName());
     }
 
     @Override

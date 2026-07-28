@@ -48,7 +48,7 @@ public class BlockCondition implements ICondition {
 
     @Override
     public String getDescription() {
-        return StatCollector.translateToLocalFormatted("okcore.condition.block", targetBlockName);
+        return StatCollector.translateToLocalFormatted("okmodular.condition.block", targetBlockName);
     }
 
     @Override

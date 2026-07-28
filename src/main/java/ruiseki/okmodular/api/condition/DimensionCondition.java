@@ -28,7 +28,7 @@ public class DimensionCondition implements ICondition {
 
     @Override
     public String getDescription() {
-        return StatCollector.translateToLocalFormatted("okcore.condition.dimension", allowedDimensions.toString());
+        return StatCollector.translateToLocalFormatted("okmodular.condition.dimension", allowedDimensions.toString());
     }
 
     @Override
