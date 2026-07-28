@@ -4,7 +4,6 @@ import net.minecraft.init.Items;
 import net.minecraft.util.ResourceLocation;
 
 import com.cleanroommc.modularui.api.drawable.IDrawable;
-import com.cleanroommc.modularui.drawable.AdaptableUITexture;
 import com.cleanroommc.modularui.drawable.ItemDrawable;
 import com.cleanroommc.modularui.drawable.UITexture;
 
@@ -19,11 +18,6 @@ public final class OKGuiTextures {
         .imageSize(18, 18)
         .adaptable(1)
         .name("vanilla_search")
-        .build();
-
-    public static final UITexture BREEDER_PROGRESS = UITexture.builder()
-        .location(Reference.MOD_ID, "gui/widgets/progress_breeder")
-        .imageSize(36, 36)
         .build();
 
     public static final UITexture ENERGY_BAR = UITexture.builder()
@@ -47,44 +41,6 @@ public final class OKGuiTextures {
         .location(Reference.MOD_ID, "gui/progress_white")
         .imageSize(64, 32)
         .build();
-
-    public static final UITexture ROOST_SLOT = UITexture.builder()
-        .location(Reference.MOD_ID, "gui/slot/roost_slot")
-        .imageSize(18, 18)
-        .build();
-
-    public static final UITexture FOOD_SLOT = UITexture.builder()
-        .location(Reference.MOD_ID, "gui/slot/food_slot")
-        .imageSize(18, 18)
-        .build();
-
-    public static final UITexture EMPTY_SLOT = UITexture.builder()
-        .location(Reference.MOD_ID, "gui/slot/empty_slot")
-        .imageSize(18, 18)
-        .build();
-
-    public static final UITexture VARIABLE_SLOT = UITexture.builder()
-        .location(Reference.MOD_ID, "gui/slot/variable_slot")
-        .imageSize(18, 18)
-        .build();
-
-    public static final AdaptableUITexture DML_INVENTORY_TEXTURE = (AdaptableUITexture) UITexture.builder()
-        .location(Reference.MOD_ID, "gui/deepMobLearning/player_inventory")
-        .imageSize(256, 256)
-        .xy(0, 0, 177, 91)
-        .adaptable(4)
-        .tiled()
-        .build();
-
-    public static final AdaptableUITexture DML_INVENTORY_SLOT = (AdaptableUITexture) UITexture.builder()
-        .location(Reference.MOD_ID, "gui/deepMobLearning/player_inventory")
-        .imageSize(256, 256)
-        .xy(8, 8, 18, 18)
-        .adaptable(1)
-        .tiled()
-        .build();
-
-    private static final ResourceLocation GUI_CONTROLS = new ResourceLocation(Reference.MOD_ID, "gui/gui_controls.png");
 
     private static final ResourceLocation ICON_LOCATION = new ResourceLocation(Reference.MOD_ID, "gui/icons");
 
@@ -182,12 +138,6 @@ public final class OKGuiTextures {
         .location(Reference.MOD_ID, "gui/gui_controls.png")
         .imageSize(256, 256)
         .xy(71, 216, 26, 26)
-        .build();
-
-    public static final UITexture SLEEPING_BAG = UITexture.builder()
-        .location(Reference.MOD_ID, "textures/items/backpack/sleepingBag.png")
-        .imageSize(16, 16)
-        .xy(0, 0, 16, 16)
         .build();
 
     public static UITexture icon(String name, int x, int y) {
