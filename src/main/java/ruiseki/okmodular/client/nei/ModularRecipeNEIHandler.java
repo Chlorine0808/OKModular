@@ -10,6 +10,7 @@ import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.fluids.FluidStack;
@@ -28,6 +29,7 @@ import ruiseki.okcore.addon.nei.PositionedFluidTank;
 import ruiseki.okcore.addon.nei.RecipeHandlerBase;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.io.FluidInput;
 import ruiseki.okmodular.api.recipe.io.FluidOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
@@ -438,6 +440,10 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
             currentY += 4;
             final int arrowY = currentY;
             final int duration = recipe.getDuration();
+            // A duration that reads machine state cannot be evaluated here: NEI
+            // renders recipes with no machine to evaluate against. Rather than show
+            // a number that would be wrong for every machine, show the expression.
+            final IExpression durationExpr = recipe.getDurationExpression();
             this.arrowRect = new Rectangle(166 / 2 - 6, arrowY, 12, 12);
             allParts.add(new LayoutPartRenderer(new INEIPositionedRenderer() {
 
@@ -457,11 +463,18 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
                 @Override
                 public void handleTooltip(List<String> currenttip) {
                     currenttip.add(NEIClientUtils.translate("recipe.tooltip"));
+                    // The label has ~100px to work with, so a long expression is
+                    // only fully readable here
+                    if (durationExpr != null) {
+                        currenttip.add(
+                            EnumChatFormatting.GRAY + StatCollector
+                                .translateToLocalFormatted("okmodular.nei.duration_expression", durationExpr));
+                    }
                 }
             }));
 
-            float timeInSeconds = duration / 20.0f;
-            String timeString = String.format("%.2f", timeInSeconds) + "seconds";
+            String timeString = durationExpr != null ? durationExpr.toString()
+                : String.format("%.2f", duration / 20.0f) + "seconds";
 
             PositionedText timeText = new PositionedText(
                 timeString,
