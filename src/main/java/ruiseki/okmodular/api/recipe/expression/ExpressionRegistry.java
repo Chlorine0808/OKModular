@@ -142,13 +142,31 @@ public class ExpressionRegistry {
         registerVariable("e", name -> ConstantExpression.E);
 
         // --- Functions ---
+        // nbt('key') / nbt('a.b.c') — the machine's own NBT
+        // nbt('S', 'key') / nbt('S', 'a.b.c') — the TileEntity at structure symbol S
+        //
+        // The target is an argument rather than part of the syntax, so every NBT
+        // access reads the same way. The two-argument form used to be documented but
+        // not implemented: the second argument was silently discarded and the symbol
+        // was read as the key.
         registerFunction("nbt", (args, parser) -> {
             if (args.isEmpty()) throw parser.error("nbt() requires at least one argument");
-            IExpression firstArg = args.get(0);
-            if (firstArg instanceof StringLiteralExpression strExpr) {
-                return new NbtExpression(strExpr.getStringValue(), EvaluationValue.ZERO, '\0');
+            if (args.size() > 2) {
+                throw parser.error("nbt() takes a key, or a symbol and a key - got " + args.size() + " arguments");
             }
-            throw parser.error("nbt() first argument must be a string literal");
+
+            if (args.size() == 1) {
+                return new NbtExpression(stringArgument(args.get(0), parser, "nbt() key"), EvaluationValue.ZERO, '\0');
+            }
+
+            String symbol = stringArgument(args.get(0), parser, "nbt() symbol");
+            if (symbol.length() != 1) {
+                throw parser.error("nbt() symbol must be a single character, got '" + symbol + "'");
+            }
+            return new NbtExpression(
+                stringArgument(args.get(1), parser, "nbt() key"),
+                EvaluationValue.ZERO,
+                symbol.charAt(0));
         });
 
         registerFunction("essentia", (args, parser) -> {
@@ -258,6 +276,18 @@ public class ExpressionRegistry {
     public static IExpression createFunction(String name, List<IExpression> args, ExpressionParser parser) {
         IFunctionFactory factory = FUNCTION_REGISTRY.get(name.toLowerCase());
         return factory != null ? factory.create(args, parser) : null;
+    }
+
+    /**
+     * Reads a function argument that has to be a literal string.
+     *
+     * @param what what the argument is, for the error message
+     */
+    private static String stringArgument(IExpression arg, ExpressionParser parser, String what) {
+        if (arg instanceof StringLiteralExpression strExpr) {
+            return strExpr.getStringValue();
+        }
+        throw parser.error(what + " must be a string literal, e.g. nbt('energy')");
     }
 
     public static void registerVariable(String name, Function<String, IExpression> factory) {
