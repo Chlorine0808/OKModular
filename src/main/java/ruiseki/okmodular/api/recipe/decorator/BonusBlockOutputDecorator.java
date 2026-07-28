@@ -78,7 +78,7 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
      *
      * Expected format:
      * {
-     * "type": "bonusBlockOutput",
+     * "type": "bonus_block_output",
      * "chance": { "type": "constant", "value": 0.5 },
      * "outputs": [
      * { "type": "block", "symbol": "L", "block": "modid:blockname:meta", "count": 4 }

@@ -33,28 +33,35 @@ public class DecoratorParser {
         register("weighted_random", WeightedRandomDecorator::fromJson, json -> json.has("rolls") || json.has("pool"));
 
         register(
-            "randomBlockOutput",
+            "random_block_output",
             RandomBlockOutputDecorator::fromJson,
             json -> json.has("count") || json.has("selections"));
 
         register(
-            "harvest",
+            "harvest_block",
             HarvestBlockDecorator::fromJson,
             json -> json.has("fortune") || json.has("silkTouch") || json.has("shear") || json.has("harvestLevel"));
 
         register(
-            "perPositionProbability",
+            "per_position_probability",
             PerPositionProbabilityDecorator::fromJson,
             json -> json.has("chance") && json.has("symbol") && json.has("output"));
 
         register(
-            "bonusBlockOutput",
+            "bonus_block_output",
             BonusBlockOutputDecorator::fromJson,
             json -> json.has("chance") && json.has("outputs") && isFirstOutputBlock(json.getAsJsonArray("outputs")));
 
         register("bonus", BonusOutputDecorator::fromJson, json -> json.has("chance") && json.has("outputs"));
 
         register("chance", ChanceRecipeDecorator::fromJson, json -> json.has("chance"));
+
+        // The camelCase names this registry used before. Recipe packs written
+        // against them stay resolvable.
+        alias("randomBlockOutput", "random_block_output");
+        alias("harvest", "harvest_block");
+        alias("perPositionProbability", "per_position_probability");
+        alias("bonusBlockOutput", "bonus_block_output");
     }
 
     public static void register(String type, BiFunction<IModularRecipe, JsonObject, IModularRecipe> parser,
@@ -62,6 +69,22 @@ public class DecoratorParser {
         DecoratorEntry entry = new DecoratorEntry(type, parser, detector);
         registry.put(type, entry);
         entries.add(entry);
+    }
+
+    /**
+     * Registers an additional name for an already registered decorator type.
+     * <p>
+     * Aliases resolve by name only — they are not added to the inference list, so
+     * no detector is evaluated twice.
+     *
+     * @param alias  The additional name to accept
+     * @param target The type name passed to {@link #register}
+     */
+    public static void alias(String alias, String target) {
+        DecoratorEntry entry = registry.get(target);
+        if (entry != null) {
+            registry.put(alias, entry);
+        }
     }
 
     public static IModularRecipe parse(IModularRecipe recipe, JsonElement element) {
