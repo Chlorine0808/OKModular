@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.api.recipe.io.BlockInput;
 import ruiseki.okmodular.api.recipe.io.EnergyInput;
 import ruiseki.okmodular.api.recipe.io.EssentiaInput;
@@ -17,6 +16,7 @@ import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.ItemInput;
 import ruiseki.okmodular.api.recipe.io.ManaInput;
 import ruiseki.okmodular.api.recipe.io.VisInput;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Registry to reconstruct IRecipeInput from NBT.

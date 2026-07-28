@@ -17,18 +17,18 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ruiseki.okcore.addon.nei.IRecipeHandlerBase;
-import ruiseki.okcore.api.structure.core.IStructureEntry;
 import ruiseki.okcore.enums.Mods;
-import ruiseki.okcore.structure.CustomStructureRegistry;
-import ruiseki.okcore.structure.StructureManager;
-import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.MachineryModule;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.common.init.MachineryBlocks;
 import ruiseki.okmodular.common.init.MachineryItems;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
 import ruiseki.okmodular.common.recipe.RecipeLoader;
+import ruiseki.okmodular.structure.CustomStructureRegistry;
+import ruiseki.okmodular.structure.StructureManager;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * NEI configuration for OK Modular.

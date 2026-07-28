@@ -22,11 +22,11 @@ import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.cleanroommc.modularui.value.sync.SyncHandlers;
 import com.cleanroommc.modularui.widgets.slot.FluidSlot;
 
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;

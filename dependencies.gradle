@@ -34,12 +34,10 @@
  * For more details, see https://docs.gradle.org/8.0.1/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
 dependencies {
-    // OKCore. During development this comes from the local Maven repository via
-    // `./gradlew publishToMavenLocal` on the OKCore okmodular-migration branch.
-    // TODO: pin an explicit version once the migration branch is merged and tagged.
-    // NOTE: pinned to the local slim okmodular-migration branch (structure
-    // engine + APIs only); switch to "+" or a tag once merged upstream.
-    implementation("ruiseki.okcore:OKCore:26.07.10.0-okmodular-migration.2+1b8b739ae5:dev") { transitive = false }
+    // OKCore, resolved from JitPack so this builds without a local publish.
+    // The structure engine and the structure/condition/recipe/modular APIs are NOT part of
+    // OKCore; this mod carries its own under ruiseki.okmodular.{api,structure,util}.
+    implementation("com.github.Shigure-Ruiseki:OKCore:26.07.10.0:dev") { transitive = false }
 
     // GTNHLib and ModularUI2 must be at least the versions OKCore requires
     // (see OKCore Reference.DEPENDENCIES); StructureLib kept in sync with the

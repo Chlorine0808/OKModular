@@ -20,9 +20,9 @@ import com.gtnewhorizon.gtnhlib.eventbus.EventBusSubscriber;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.api.structure.core.IStructureEntry;
-import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.common.item.ItemWrench;
 import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.okmodular.core.tileentity.ISidedIO;

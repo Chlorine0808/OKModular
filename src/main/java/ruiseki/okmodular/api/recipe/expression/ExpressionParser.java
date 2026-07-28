@@ -1,0 +1,473 @@
+package ruiseki.okmodular.api.recipe.expression;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.google.gson.JsonObject;
+
+import ruiseki.okmodular.api.condition.ComparisonCondition;
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.condition.ICondition;
+import ruiseki.okmodular.api.condition.OpAnd;
+import ruiseki.okmodular.api.condition.OpNot;
+import ruiseki.okmodular.api.condition.OpOr;
+
+/**
+ * A simple recursive descent parser for expressions and conditions.
+ * Supports arithmetic, comparison, variables (day, time, moon), and nbt('key')
+ * function.
+ */
+public class ExpressionParser {
+
+    private final String input;
+    private int pos = -1, ch;
+
+    public ExpressionParser(String input) {
+        this.input = input;
+    }
+
+    private void nextChar() {
+        ch = (++pos < input.length()) ? input.charAt(pos) : -1;
+    }
+
+    private boolean isSpace(int c) {
+        return c == ' ' || c == '\n' || c == '\r' || c == '\t';
+    }
+
+    private boolean eat(int charToEat) {
+        while (isSpace(ch)) nextChar();
+        if (ch == charToEat) {
+            nextChar();
+            return true;
+        }
+        return false;
+    }
+
+    public RecipeScriptException error(String message) {
+        return new RecipeScriptException(input, Math.max(0, pos), message);
+    }
+
+    public Object parse() {
+        nextChar();
+        Object x = parseLogicalOr();
+        while (isSpace(ch)) nextChar();
+        if (pos < input.length()) throw error("Unexpected token: '" + (char) ch + "'");
+        return x;
+    }
+
+    public IExpression parseExpression() {
+        Object res = parse();
+        if (res instanceof IExpression expression) return expression;
+        throw error("Expected numeric expression, got action or condition");
+    }
+
+    public IAction parseAction() {
+        Object res = parse();
+        if (res instanceof IAction action) return action;
+        if (res instanceof IExpression expression) {
+            return new IAction() {
+
+                @Override
+                public void execute(ConditionContext context) {
+                    expression.evaluate(context);
+                }
+            };
+        }
+        throw error("Expected action or expression");
+    }
+
+    // 1. OR: x || y
+    private Object parseLogicalOr() {
+        Object x = parseLogicalAnd();
+        while (eat('|')) {
+            if (!eat('|')) throw error("Expected '||'");
+            Object y = parseLogicalAnd();
+            if (x instanceof ICondition cx && y instanceof ICondition cy) {
+                List<ICondition> children = new ArrayList<>();
+                children.add(cx);
+                children.add(cy);
+                x = new OpOr(children);
+            } else {
+                throw error("OR (||) requires condition operands");
+            }
+        }
+        return x;
+    }
+
+    // 2. AND: x && y
+    private Object parseLogicalAnd() {
+        Object x = parseComparison();
+        while (eat('&')) {
+            if (!eat('&')) throw error("Expected '&&'");
+            Object y = parseComparison();
+            if (x instanceof ICondition cx && y instanceof ICondition cy) {
+                List<ICondition> children = new ArrayList<>();
+                children.add(cx);
+                children.add(cy);
+                x = new OpAnd(children);
+            } else {
+                throw error("AND (&&) requires condition operands");
+            }
+        }
+        return x;
+    }
+
+    private IExpression asExpression(Object obj) {
+        if (obj instanceof IExpression expr) return expr;
+        if (obj instanceof ICondition cond) {
+            return new IExpression() {
+
+                @Override
+                public EvaluationValue evaluate(ConditionContext context) {
+                    return cond.isMet(context) ? EvaluationValue.TRUE : EvaluationValue.FALSE;
+                }
+
+                @Override
+                public String toString() {
+                    return cond.toString();
+                }
+            };
+        }
+        throw error("Expected numeric expression or condition");
+    }
+
+    private ICondition asCondition(Object obj) {
+        if (obj instanceof ICondition cond) return cond;
+        if (obj instanceof IExpression expr) {
+            return new ICondition() {
+
+                @Override
+                public boolean isMet(ConditionContext context) {
+                    return expr.evaluate(context)
+                        .asBoolean();
+                }
+
+                @Override
+                public String getDescription() {
+                    return expr.toString();
+                }
+
+                @Override
+                public void write(JsonObject json) {}
+
+                @Override
+                public String toString() {
+                    return expr.toString();
+                }
+            };
+        }
+        throw error("Expected condition or numeric expression");
+    }
+
+    // 3. Comparison: x == y, x != y, ...
+    private Object parseComparison() {
+        Object x = parseAdditiveExpression();
+        while (true) {
+            String op = "";
+            if (eat('=')) {
+                if (eat('=')) {
+                    op = "==";
+                } else {
+                    // Check for assignment (single '=')
+                    return parseAssignment(x, "=");
+                }
+            } else if (eat('!')) {
+                if (eat('=')) {
+                    op = "!=";
+                } else {
+                    pos--; // Backtrack '!'
+                    nextChar();
+                    return x;
+                }
+            } else if (eat('+')) {
+                if (eat('=')) {
+                    return parseAssignment(x, "+=");
+                } else {
+                    pos--; // Backtrack '+'
+                    nextChar();
+                    return x;
+                }
+            } else if (eat('-')) {
+                if (eat('=')) {
+                    return parseAssignment(x, "-=");
+                } else {
+                    pos--; // Backtrack '-'
+                    nextChar();
+                    return x;
+                }
+            } else if (eat('*')) {
+                if (eat('=')) {
+                    return parseAssignment(x, "*=");
+                } else {
+                    pos--; // Backtrack '*'
+                    nextChar();
+                    return x;
+                }
+            } else if (eat('/')) {
+                if (eat('=')) {
+                    return parseAssignment(x, "/=");
+                } else {
+                    pos--; // Backtrack '/'
+                    nextChar();
+                    return x;
+                }
+            } else if (eat('>')) {
+                if (eat('=')) op = ">=";
+                else op = ">";
+            } else if (eat('<')) {
+                if (eat('=')) op = "<=";
+                else op = "<";
+            } else {
+                return x;
+            }
+
+            if (!op.isEmpty()) {
+                Object y = parseAdditiveExpression();
+                x = new ComparisonCondition(asExpression(x), asExpression(y), op);
+            }
+        }
+    }
+
+    /**
+     * Parse assignment operator (=, +=, -=, *=, /=).
+     * Left-hand side must be an NbtExpression or DotNotationNBTExpression.
+     */
+    private Object parseAssignment(Object left, String operation) {
+        // Parse right-hand side
+        Object right = parseAdditiveExpression();
+
+        if (left instanceof NbtExpression nbtExpr) {
+            String nbtKey = nbtExpr.getNbtKey();
+            return new NBTAssignmentExpression(
+                nbtKey,
+                Arrays.asList(nbtKey.split("\\.")),
+                asExpression(right),
+                operation);
+        } else if (left instanceof DotNotationNBTExpression dotExpr) {
+            String nbtKey = dotExpr.getFullPath();
+            List<String> pathSegments = new ArrayList<>(dotExpr.getPathSegments());
+            return new NBTAssignmentExpression(nbtKey, pathSegments, asExpression(right), operation);
+        }
+
+        throw error("Assignment left-hand side must be an NBT path (e.g., display.Name)");
+    }
+
+    // expression = term ( ( "+" | "-" ) term )*
+    private Object parseAdditiveExpression() {
+        Object x = parseTerm();
+        for (;;) {
+            if (eat('+')) x = new ArithmeticExpression(asExpression(x), asExpression(parseTerm()), "+");
+            else if (eat('-')) x = new ArithmeticExpression(asExpression(x), asExpression(parseTerm()), "-");
+            else return x;
+        }
+    }
+
+    // term = factor ( ( "*" | "/" | "%" ) factor )*
+    private Object parseTerm() {
+        Object x = parseFactor();
+        for (;;) {
+            if (eat('*')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "*");
+            else if (eat('/')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "/");
+            else if (eat('%')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "%");
+            else return x;
+        }
+    }
+
+    private Object parseFactor() {
+        if (eat('+')) return parseFactor(); // unary plus
+        if (eat('-')) return new ArithmeticExpression(new ConstantExpression(0), asExpression(parseFactor()), "-");
+        if (eat('!')) {
+            return new OpNot(asCondition(parseFactor()));
+        }
+
+        int startPos = this.pos;
+        // Array literals: ['item1', 'item2', ...]
+        if (ch == '[') {
+            nextChar(); // skip '['
+            List<IExpression> elements = new ArrayList<>();
+
+            while (isSpace(ch)) nextChar();
+
+            // Parse array elements
+            while (ch != ']' && ch != -1) {
+                // Parse element (can be string or expression)
+                Object element = parseLogicalOr();
+                elements.add(asExpression(element));
+
+                while (isSpace(ch)) nextChar();
+
+                // Check for comma or end of array
+                if (ch == ',') {
+                    nextChar(); // skip comma
+                    while (isSpace(ch)) nextChar();
+                } else if (ch != ']') {
+                    throw error("Expected ',' or ']' in array literal");
+                }
+            }
+
+            if (!eat(']')) {
+                throw error("Expected closing ']' for array literal");
+            }
+
+            return new ArrayLiteralExpression(elements);
+        }
+        // String literals: 'text' or "text"
+        else if (ch == '\'' || ch == '"') {
+            char quote = (char) ch;
+            nextChar(); // skip opening quote
+            int strStart = this.pos;
+            while (ch != quote && ch != -1) {
+                nextChar();
+            }
+            if (ch != quote) {
+                throw error("Expected closing quote '" + quote + "'");
+            }
+            String stringValue = input.substring(strStart, this.pos);
+            nextChar(); // skip closing quote
+            return new StringLiteralExpression(stringValue);
+        } else if (eat('(') || eat('{')) { // parentheses or braces
+            char close = (input.charAt(pos - 1) == '(') ? ')' : '}';
+            Object res = parseLogicalOr();
+            if (!eat(close)) throw error("Expected closing '" + close + "'");
+            return res;
+        } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
+            while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
+            return new ConstantExpression(Double.parseDouble(input.substring(startPos, this.pos)));
+        } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) { // variables, functions, or NBT paths
+            // Parse first segment
+            List<String> pathSegments = new ArrayList<>();
+            StringBuilder segment = new StringBuilder();
+
+            while ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= '0' && ch <= '9')) {
+                segment.append((char) ch);
+                nextChar();
+            }
+            pathSegments.add(segment.toString());
+
+            // Check for dot notation (NBT path)
+            while (ch == '.') {
+                nextChar(); // skip '.'
+                segment = new StringBuilder();
+                while ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= '0' && ch <= '9')) {
+                    segment.append((char) ch);
+                    nextChar();
+                }
+                if (segment.length() == 0) {
+                    throw error("Expected identifier after '.'");
+                }
+                pathSegments.add(segment.toString());
+            }
+            if (pathSegments.isEmpty()) {
+                throw error("Expected identifier");
+            }
+            String name = pathSegments.get(0);
+
+            // Check if this is a function call
+            if (eat('(')) {
+                List<IExpression> args = new ArrayList<>();
+                if (!eat(')')) {
+                    while (true) {
+                        Object arg = parseLogicalOr();
+                        args.add(asExpression(arg));
+                        if (eat(',')) {
+                            continue;
+                        }
+                        if (eat(')')) {
+                            break;
+                        }
+                        throw error("Expected ',' or ')' after function argument");
+                    }
+                }
+
+                IExpression funcExpr = ExpressionRegistry.createFunction(name, args, this);
+                if (funcExpr != null) {
+                    return funcExpr;
+                }
+
+                throw error("Unknown function: '" + name + "'");
+            }
+
+            // Check if this is a dot notation NBT path (multiple segments)
+            if (pathSegments.size() > 1) {
+                // Check for tier.component syntax FIRST
+                if (pathSegments.get(0)
+                    .equalsIgnoreCase("tier")) {
+                    // tier.component must have exactly 2 segments
+                    if (pathSegments.size() != 2) {
+                        throw error(
+                            "Invalid tier expression: expected 'tier.componentName', got "
+                                + String.join(".", pathSegments));
+                    }
+                    String componentName = pathSegments.get(1);
+                    return new ComponentTierExpression(componentName);
+                }
+
+                // Otherwise treat as NBT path: display.Name, ench.lvl, etc.
+                String fullPath = String.join(".", pathSegments);
+                return new DotNotationNBTExpression(fullPath, pathSegments);
+            }
+
+            // Single segment - check for known variables
+            IExpression varExpr = ExpressionRegistry.getVariable(name);
+            if (varExpr != null) {
+                return varExpr;
+            } else {
+                throw error("Unknown variable: '" + name + "'");
+            }
+        } else {
+            throw error("Unexpected character: '" + (char) ch + "'");
+        }
+    }
+
+    public static IExpression parseExpression(String input) {
+        Object res = new ExpressionParser(input).parse();
+        if (res instanceof IExpression expr) return expr;
+        if (res instanceof ICondition cond) {
+            return new IExpression() {
+
+                @Override
+                public EvaluationValue evaluate(ConditionContext context) {
+                    return cond.isMet(context) ? EvaluationValue.TRUE : EvaluationValue.FALSE;
+                }
+
+                @Override
+                public String toString() {
+                    return cond.toString();
+                }
+            };
+        }
+        throw new RuntimeException("Input is not a numeric expression: " + input);
+    }
+
+    public static ICondition parseCondition(String input) {
+        Object res = new ExpressionParser(input).parse();
+        if (res instanceof ICondition cond) return cond;
+        if (res instanceof IExpression expr) {
+            return new ICondition() {
+
+                @Override
+                public boolean isMet(ConditionContext context) {
+                    return expr.evaluate(context)
+                        .asBoolean();
+                }
+
+                @Override
+                public String getDescription() {
+                    return expr.toString();
+                }
+
+                @Override
+                public void write(JsonObject json) {
+                    // Not needed for dynamic conditions generated during parsing
+                }
+
+                @Override
+                public String toString() {
+                    return expr.toString();
+                }
+            };
+        }
+        throw new RuntimeException("Input is not a condition: " + input);
+    }
+}

@@ -4,9 +4,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.IFluidHandler;
 
-import ruiseki.okcore.api.modular.IPortType;
 import ruiseki.okcore.enums.Mods;
-import ruiseki.okcore.structure.BlockResolver;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.common.block.BlockEssentiaInputPort;
 import ruiseki.okmodular.common.block.BlockEssentiaInputPortME;
 import ruiseki.okmodular.common.block.BlockEssentiaOutputPort;
@@ -31,6 +30,7 @@ import ruiseki.okmodular.core.energy.IOKEnergyTile;
 import ruiseki.okmodular.core.energy.capability.EnergyIntegrationRegistry;
 import ruiseki.okmodular.core.energy.capability.IEnergyIntegrationDelegate;
 import ruiseki.okmodular.core.gas.IGasHandler;
+import ruiseki.okmodular.structure.BlockResolver;
 // import ruiseki.okmodular.common.tile.proxy.ExternalVisProxy;
 
 /**

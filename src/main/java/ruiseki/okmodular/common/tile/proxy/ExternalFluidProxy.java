@@ -7,8 +7,8 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
 
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.enums.EnumIO;
+import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.common.tile.TEMachineController;
 
 /**

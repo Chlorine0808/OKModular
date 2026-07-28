@@ -3,10 +3,10 @@ package ruiseki.okmodular.api.recipe.decorator;
 import java.util.List;
 import java.util.Map;
 
-import ruiseki.okcore.api.condition.ConditionContext;
-import ruiseki.okcore.api.condition.ICondition;
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.api.modular.IPortType;
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.condition.ICondition;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;

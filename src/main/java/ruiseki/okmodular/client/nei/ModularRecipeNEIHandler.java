@@ -26,9 +26,6 @@ import codechicken.nei.recipe.GuiUsageRecipe;
 import codechicken.nei.recipe.TemplateRecipeHandler;
 import ruiseki.okcore.addon.nei.PositionedFluidTank;
 import ruiseki.okcore.addon.nei.RecipeHandlerBase;
-import ruiseki.okcore.api.structure.core.IStructureEntry;
-import ruiseki.okcore.structure.CustomStructureRegistry;
-import ruiseki.okcore.structure.StructureManager;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.io.FluidInput;
@@ -37,6 +34,7 @@ import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.ItemInput;
 import ruiseki.okmodular.api.recipe.io.ItemOutput;
+import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.client.nei.modular.layout.LayoutPartEnergy;
 import ruiseki.okmodular.client.nei.modular.layout.LayoutPartEssentia;
 import ruiseki.okmodular.client.nei.modular.layout.LayoutPartFactory;
@@ -52,6 +50,8 @@ import ruiseki.okmodular.client.nei.modular.renderer.PositionedText;
 import ruiseki.okmodular.common.init.MachineryBlocks;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
 import ruiseki.okmodular.common.recipe.RecipeLoader;
+import ruiseki.okmodular.structure.CustomStructureRegistry;
+import ruiseki.okmodular.structure.StructureManager;
 
 public class ModularRecipeNEIHandler extends RecipeHandlerBase {
 

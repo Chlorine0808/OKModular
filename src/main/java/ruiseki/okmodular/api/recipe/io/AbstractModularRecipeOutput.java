@@ -4,11 +4,11 @@ import java.util.List;
 
 import com.google.gson.JsonObject;
 
-import ruiseki.okcore.api.condition.ConditionContext;
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.api.recipe.expression.ExpressionParser;
-import ruiseki.okcore.api.recipe.expression.IExpression;
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
 
 /**
  * Abstract base class for recipe outputs that work with the Modular Port system.

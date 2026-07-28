@@ -1,0 +1,107 @@
+package ruiseki.okmodular.api.condition;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.StatCollector;
+
+import com.google.gson.JsonObject;
+
+import ruiseki.okmodular.api.recipe.expression.EvaluationValue;
+
+/**
+ * Condition that checks an NBT value of the TileEntity at the current position.
+ */
+public class TileNbtCondition implements ICondition {
+
+    private final String key;
+    private final ComparisonOp op;
+    private final double value;
+
+    public TileNbtCondition(String key, ComparisonOp op, double value) {
+        this.key = key;
+        this.op = op;
+        this.value = value;
+    }
+
+    @Override
+    public boolean isMet(ConditionContext context) {
+        if (context == null || context.getWorld() == null) return false;
+
+        String teCacheKey = "te_nbt_" + context.getX() + "_" + context.getY() + "_" + context.getZ();
+        EvaluationValue teNbtValue = context.getCachedValue(teCacheKey);
+        NBTTagCompound nbt;
+
+        if (teNbtValue != null && teNbtValue.isNbt() && teNbtValue.asNbt() instanceof NBTTagCompound nbtTagCompound) {
+            nbt = nbtTagCompound;
+        } else {
+            TileEntity te = context.getWorld()
+                .getTileEntity(context.getX(), context.getY(), context.getZ());
+            if (te == null) return false;
+            nbt = new NBTTagCompound();
+            te.writeToNBT(nbt);
+            context.setCachedValue(teCacheKey, new EvaluationValue(nbt));
+        }
+
+        if (!nbt.hasKey(key)) return false;
+
+        double actualValue = nbt.getDouble(key);
+
+        switch (op) {
+            case GREATER_THAN:
+                return actualValue > value;
+            case GREATER_OR_EQUAL:
+                return actualValue >= value;
+            case LESS_THAN:
+                return actualValue < value;
+            case LESS_OR_EQUAL:
+                return actualValue <= value;
+            case EQUAL:
+                return Math.abs(actualValue - value) < 0.0001;
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    public String getDescription() {
+        return StatCollector.translateToLocalFormatted("okcore.condition.tile_nbt", key, op.symbol, value);
+    }
+
+    @Override
+    public void write(JsonObject json) {
+        json.addProperty("type", "tile_nbt");
+        json.addProperty("key", key);
+        json.addProperty(
+            "op",
+            op.name()
+                .toLowerCase());
+        json.addProperty("value", value);
+    }
+
+    public static ICondition fromJson(JsonObject json) {
+        String key = json.get("key")
+            .getAsString();
+        ComparisonOp op = ComparisonOp.valueOf(
+            json.get("op")
+                .getAsString()
+                .toUpperCase());
+        double value = json.get("value")
+            .getAsDouble();
+        return new TileNbtCondition(key, op, value);
+    }
+
+    public enum ComparisonOp {
+
+        GREATER_THAN(">"),
+        GREATER_OR_EQUAL(">="),
+        LESS_THAN("<"),
+        LESS_OR_EQUAL("<="),
+        EQUAL("==");
+
+        public final String symbol;
+
+        ComparisonOp(String symbol) {
+            this.symbol = symbol;
+        }
+    }
+}

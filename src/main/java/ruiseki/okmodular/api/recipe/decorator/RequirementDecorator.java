@@ -2,9 +2,9 @@ package ruiseki.okmodular.api.recipe.decorator;
 
 import com.google.gson.JsonObject;
 
-import ruiseki.okcore.api.condition.ConditionContext;
-import ruiseki.okcore.api.condition.ConditionParserRegistry;
-import ruiseki.okcore.api.condition.ICondition;
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.condition.ConditionParserRegistry;
+import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 
 /**

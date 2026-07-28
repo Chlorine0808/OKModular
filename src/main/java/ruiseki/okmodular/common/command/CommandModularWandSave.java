@@ -14,10 +14,10 @@ import com.mojang.brigadier.context.CommandContext;
 import ruiseki.okcore.command.CommandMod;
 import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okcore.init.ModBase;
-import ruiseki.okcore.structure.StructureConstants;
-import ruiseki.okcore.structure.StructureScanner;
-import ruiseki.okcore.structure.WandSelectionManager;
 import ruiseki.okmodular.MachineryModule;
+import ruiseki.okmodular.structure.StructureConstants;
+import ruiseki.okmodular.structure.StructureScanner;
+import ruiseki.okmodular.structure.WandSelectionManager;
 
 /**
  * Saves the area selected with the structure wand as a structure JSON.

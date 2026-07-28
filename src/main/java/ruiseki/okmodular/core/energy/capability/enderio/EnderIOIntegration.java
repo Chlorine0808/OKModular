@@ -6,7 +6,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 import crazypants.enderio.power.IInternalPowerProvider;
 import crazypants.enderio.power.IInternalPowerReceiver;
 import crazypants.enderio.power.IPowerStorage;
-import ruiseki.okcore.util.Logger;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * EnderIO integration handler using direct API access.

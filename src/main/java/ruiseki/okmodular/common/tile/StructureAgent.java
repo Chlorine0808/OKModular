@@ -20,21 +20,21 @@ import net.minecraft.world.World;
 
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 
-import ruiseki.okcore.api.modular.IMachineController;
-import ruiseki.okcore.api.modular.IModularPort;
-import ruiseki.okcore.api.modular.IPortType;
-import ruiseki.okcore.api.structure.core.IStructureEntry;
-import ruiseki.okcore.api.structure.core.ISymbolMapping;
-import ruiseki.okcore.api.structure.core.TierStructureRef;
-import ruiseki.okcore.api.structure.core.TieredBlockMapping;
-import ruiseki.okcore.enums.EnumIO;
 import ruiseki.okcore.helper.LangHelpers;
-import ruiseki.okcore.structure.CustomStructureRegistry;
-import ruiseki.okcore.structure.StructureManager;
-import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.OKModular;
+import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.modular.IMachineController;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.visitor.PortRegistrationVisitor;
+import ruiseki.okmodular.api.structure.core.IStructureEntry;
+import ruiseki.okmodular.api.structure.core.ISymbolMapping;
+import ruiseki.okmodular.api.structure.core.TierStructureRef;
+import ruiseki.okmodular.api.structure.core.TieredBlockMapping;
 import ruiseki.okmodular.common.network.PacketStructureTint;
+import ruiseki.okmodular.structure.CustomStructureRegistry;
+import ruiseki.okmodular.structure.StructureManager;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Handles structure-related logic for {@link TEMachineController}.

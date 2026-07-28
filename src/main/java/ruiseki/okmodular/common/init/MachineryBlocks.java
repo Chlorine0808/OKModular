@@ -4,7 +4,6 @@ import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-import ruiseki.okcore.util.Logger;
 import ruiseki.okmodular.common.block.BlockEnergyInputPort;
 import ruiseki.okmodular.common.block.BlockEnergyOutputPort;
 import ruiseki.okmodular.common.block.BlockFluidInputPort;
@@ -15,6 +14,7 @@ import ruiseki.okmodular.common.block.BlockMachineCasing;
 import ruiseki.okmodular.common.block.BlockMachineController;
 import ruiseki.okmodular.core.block.BlockOK;
 import ruiseki.okmodular.core.block.IBlock;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Block registration for the Machinery module.

@@ -12,11 +12,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import cofh.api.item.IToolHammer;
-import ruiseki.okcore.api.modular.IMachineController;
-import ruiseki.okcore.api.modular.IPortType;
 import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okmodular.OKModular;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.api.modular.IMachineController;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.common.network.PacketToggleSide;
 import ruiseki.okmodular.core.item.ItemOK;
 import ruiseki.okmodular.core.tileentity.ISidedIO;
