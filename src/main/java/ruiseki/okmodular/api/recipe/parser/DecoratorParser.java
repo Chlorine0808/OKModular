@@ -30,7 +30,11 @@ public class DecoratorParser {
     static {
         register("requirement", RequirementDecorator::fromJson, json -> json.has("condition"));
 
-        register("weighted_random", WeightedRandomDecorator::fromJson, json -> json.has("rolls") || json.has("pool"));
+        register(
+            "weighted_random",
+            WeightedRandomDecorator::fromJson,
+            json -> json.has("rolls") || json.has("pool")
+                || (json.has("outputs") && isFirstOutputWeighted(json.getAsJsonArray("outputs"))));
 
         register(
             "random_block_output",
@@ -165,6 +169,18 @@ public class DecoratorParser {
         if (!entry.detector.test(body)) return null;
 
         return new AbstractMap.SimpleEntry<>(entry, body);
+    }
+
+    /**
+     * Tells a weighted pool from a plain bonus list: only the former's entries carry
+     * a weight. Both spell their entries out under "outputs", and weighted_random is
+     * offered the object before bonus is.
+     */
+    private static boolean isFirstOutputWeighted(JsonArray outputs) {
+        if (outputs == null || outputs.size() == 0) return false;
+        JsonElement first = outputs.get(0);
+        return first.isJsonObject() && first.getAsJsonObject()
+            .has("weight");
     }
 
     private static boolean isFirstOutputBlock(JsonArray outputs) {

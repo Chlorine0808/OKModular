@@ -99,17 +99,36 @@ public class WeightedRandomDecorator extends RecipeDecorator {
         return rolls;
     }
 
+    /**
+     * Reads a weighted pool in either shape.
+     * <p>
+     * The documented shape puts the entries under <code>outputs</code> and lets each
+     * one carry its weight alongside its own output properties:
+     *
+     * <pre>
+     * { "type": "weighted_random", "outputs": [ { "weight": 70, "item": "minecraft:flint" } ] }
+     * </pre>
+     *
+     * The older shape uses <code>pool</code> with a nested <code>output</code>
+     * object, and is still accepted. <code>rolls</code> defaults to one pick per
+     * completion.
+     */
     public static IModularRecipe fromJson(IModularRecipe recipe, JsonObject json) {
-        int rolls = json.get("rolls")
-            .getAsInt();
+        int rolls = json.has("rolls") ? json.get("rolls")
+            .getAsInt() : 1;
+
+        JsonArray arr = json.has("outputs") ? json.getAsJsonArray("outputs") : json.getAsJsonArray("pool");
+        if (arr == null) {
+            throw new IllegalArgumentException("weighted_random needs an \"outputs\" (or \"pool\") array: " + json);
+        }
+
         List<WeightedOutputEntry> pool = new ArrayList<>();
-        JsonArray arr = json.getAsJsonArray("pool");
         for (JsonElement e : arr) {
             JsonObject obj = e.getAsJsonObject();
-            int weight = obj.get("weight")
-                .getAsInt();
-            IRecipeOutput out = OutputParserRegistry.parse(obj.getAsJsonObject("output"));
-            pool.add(new WeightedOutputEntry(out, weight));
+            int weight = obj.has("weight") ? obj.get("weight")
+                .getAsInt() : 1;
+            JsonObject outputJson = obj.has("output") ? obj.getAsJsonObject("output") : obj;
+            pool.add(new WeightedOutputEntry(OutputParserRegistry.parse(outputJson), weight));
         }
         return new WeightedRandomDecorator(recipe, pool, rolls);
     }
