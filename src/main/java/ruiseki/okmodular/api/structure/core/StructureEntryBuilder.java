@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.structure.io.IStructureRequirement;
@@ -36,6 +37,7 @@ public class StructureEntryBuilder {
     private double batchMax = 1.0;
     private IExpression batchMaxExpr = new ConstantExpression(1.0);
     private boolean dynamic = false;
+    private DurationPolicy durationPolicy = DurationPolicy.ON_START;
     private int tier = 0;
     private String defaultFacing;
     private final List<TierStructureRef> tierStructures = new ArrayList<>();
@@ -165,6 +167,17 @@ public class StructureEntryBuilder {
         return this;
     }
 
+    /**
+     * Sets when machines built from this structure re-resolve an
+     * expression-valued recipe duration. Null leaves the default in place.
+     */
+    public StructureEntryBuilder setDurationPolicy(DurationPolicy durationPolicy) {
+        if (durationPolicy != null) {
+            this.durationPolicy = durationPolicy;
+        }
+        return this;
+    }
+
     public StructureEntryBuilder addTierStructure(TierStructureRef ref) {
         this.tierStructures.add(ref);
         return this;
@@ -192,6 +205,7 @@ public class StructureEntryBuilder {
             batchMax,
             batchMaxExpr,
             dynamic,
+            durationPolicy,
             tier,
             defaultFacing,
             externalPorts,
