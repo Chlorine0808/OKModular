@@ -10,7 +10,6 @@ import java.util.Map;
 import com.google.gson.JsonObject;
 
 import ruiseki.okcore.json.JsonErrorCollector;
-import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.util.Logger;
@@ -39,7 +38,7 @@ public class RecipeLoader {
     }
 
     public void loadAll(File configDir) {
-        File recipesDir = new File(configDir, Reference.MOD_ID + "/modular/recipes");
+        File recipesDir = new File(configDir, "recipes");
         Logger.info("Loading recipes from: " + recipesDir.getAbsolutePath());
         if (!recipesDir.exists()) {
             recipesDir.mkdirs();
@@ -76,7 +75,7 @@ public class RecipeLoader {
         JsonErrorCollector.getInstance()
             .clear();
         JsonErrorCollector.getInstance()
-            .setConfigDir(new File(configDir, Reference.MOD_ID));
+            .setConfigDir(configDir);
 
         Logger.info("Reloading recipes...");
         recipeVersion++;
@@ -142,7 +141,7 @@ public class RecipeLoader {
      */
     public static List<String> scanGroupNames(File configDir) {
         RecipeLoader instance = getInstance();
-        File recipesDir = new File(configDir, Reference.MOD_ID + "/modular/recipes");
+        File recipesDir = new File(configDir, "recipes");
 
         if (instance.reader == null || !instance.reader.getPath()
             .equals(recipesDir)) {

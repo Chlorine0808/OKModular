@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 import net.minecraft.entity.player.EntityPlayer;
 
 import ruiseki.okcore.json.JsonErrorCollector;
-import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.api.structure.core.ISymbolMapping;
 import ruiseki.okmodular.api.structure.io.StructureJsonReader;
@@ -83,14 +82,20 @@ public class StructureManager {
      * Anything that writes a structure file must use this, or the result will not be loaded.
      */
     public File getStructuresDir() {
-        return new File(configDir, "modular/structures");
+        return new File(configDir, "structures");
     }
 
-    public void initialize(File minecraftDir) {
+    /**
+     * @param modConfigDir this mod's config root, already resolved (see
+     *                     {@link ruiseki.okmodular.MachineryModule#getConfigDir()}). Minecraft's
+     *                     {@code config/} is <b>not</b> accepted -- structures would then be looked
+     *                     for one level too high.
+     */
+    public void initialize(File modConfigDir) {
         if (initialized) return;
 
         try {
-            this.configDir = new File(minecraftDir, Reference.MOD_ID);
+            this.configDir = modConfigDir;
             if (!configDir.exists()) {
                 configDir.mkdirs();
             }

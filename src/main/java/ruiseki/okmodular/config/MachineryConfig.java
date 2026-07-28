@@ -8,11 +8,7 @@ import ruiseki.okmodular.Reference;
 
 @Config.Comment("Modular Machinery settings")
 @Config.LangKey(Reference.CONFIG + "modularConfig")
-@Config(
-    modid = Reference.MOD_ID,
-    category = "Modular",
-    configSubDirectory = Reference.MOD_ID + "/modular",
-    filename = "modular")
+@Config(modid = Reference.MOD_ID, category = "Modular", configSubDirectory = Reference.CONFIG_DIR, filename = "modular")
 public class MachineryConfig {
 
     public static void registerConfig() throws ConfigException {

@@ -54,6 +54,11 @@ public class MachineryModule extends ModModuleBase {
         super(OKModular.instance, NAME);
     }
 
+    /**
+     * This mod's config root, already resolved (e.g. {@code config/okmodular}) --
+     * <b>not</b> Minecraft's {@code config/}. Append leaf names directly; do not prepend
+     * {@link Reference#CONFIG_DIR} again.
+     */
     public static File getConfigDir() {
         return configDir;
     }
@@ -96,7 +101,8 @@ public class MachineryModule extends ModModuleBase {
 
     @Override
     public void preInit(FMLPreInitializationEvent event) {
-        configDir = event.getModConfigurationDirectory();
+        // Resolve this mod's config root exactly once. Everything downstream appends leaf names to it.
+        configDir = new File(event.getModConfigurationDirectory(), Reference.CONFIG_DIR);
 
         // Structure engine wiring (formerly done by the parent mod's CoreModule).
         // The config root is this mod's ID, matching RecipeLoader and TierConfigLoader.
