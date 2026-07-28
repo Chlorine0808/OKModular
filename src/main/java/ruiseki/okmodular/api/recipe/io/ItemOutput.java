@@ -68,7 +68,7 @@ public class ItemOutput extends AbstractModularRecipeOutput {
     @Override
     public void apply(List<IModularPort> ports, int multiplier, ConditionContext context) {
         if (output == null) return;
-        int remaining = output.stackSize * multiplier;
+        int remaining = (int) (getRequiredAmount(context) * multiplier);
         for (IModularPort port : ports) {
             if (port.getPortType() != IPortType.Type.ITEM) continue;
             if (port.getPortDirection() != IPortType.Direction.OUTPUT
@@ -217,8 +217,16 @@ public class ItemOutput extends AbstractModularRecipeOutput {
     }
 
     @Override
-    public long getRequiredAmount() {
+    public long getRequiredAmount(ConditionContext context) {
+        if (amountExpr != null && context != null) {
+            return (long) Math.max(0, amountExpr.evaluateDouble(context));
+        }
         return output != null ? output.stackSize : count;
+    }
+
+    @Override
+    public long getRequiredAmount() {
+        return getRequiredAmount(null);
     }
 
     @Override
@@ -232,6 +240,21 @@ public class ItemOutput extends AbstractModularRecipeOutput {
             String modeStr = json.get("nbtmatch")
                 .getAsString();
             this.nbtMatchMode = NBTMatchMode.fromString(modeStr);
+        }
+
+        // "amount" may be a recipe script instead of a number. ItemJson only reads
+        // numbers and falls back to 1, which is the right static stand-in for a
+        // stack whose real size is decided at runtime.
+        if (json.has("amount")) {
+            JsonElement amountElement = json.get("amount");
+            if (amountElement.isJsonPrimitive() && amountElement.getAsJsonPrimitive()
+                .isString()) {
+                this.amountExpr = ExpressionParser.parseExpression(amountElement.getAsString());
+            } else {
+                this.amountExpr = null;
+            }
+        } else {
+            this.amountExpr = null;
         }
 
         ItemJson itemJson = new ItemJson();
@@ -296,7 +319,11 @@ public class ItemOutput extends AbstractModularRecipeOutput {
                 "item",
                 GameData.getItemRegistry()
                     .getNameForObject(output.getItem()));
-            if (output.stackSize != 1) json.addProperty("amount", output.stackSize);
+            if (amountExpr != null) {
+                json.addProperty("amount", amountExpr.toString());
+            } else if (output.stackSize != 1) {
+                json.addProperty("amount", output.stackSize);
+            }
             if (output.getItemDamage() != 0) json.addProperty("meta", output.getItemDamage());
         }
         if (interval > 0) json.addProperty("pertick", interval);
@@ -345,16 +372,29 @@ public class ItemOutput extends AbstractModularRecipeOutput {
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        if (output == null) return new ItemOutput((ItemStack) null);
-        ItemStack copy = output.copy();
-        copy.stackSize *= multiplier;
-        ItemOutput result = new ItemOutput(copy);
+        ItemOutput result;
+        if (output == null) {
+            // An unresolved item still has to carry its settings across, or a copy
+            // silently loses the amount expression and the NBT work along with it.
+            result = new ItemOutput((ItemStack) null);
+            result.count = this.count;
+        } else {
+            ItemStack copy = output.copy();
+            copy.stackSize *= multiplier;
+            result = new ItemOutput(copy);
+        }
+        result.rawItemName = this.rawItemName;
+        result.rawOreName = this.rawOreName;
 
         result.interval = this.interval;
         result.nbtExpressions = this.nbtExpressions;
         result.nbtListOp = this.nbtListOp;
         result.nbtMatchMode = this.nbtMatchMode;
         result.index = this.index;
+        // The multiplier went into the copied stack's size above. An expression
+        // carries over unscaled, matching how FluidOutput and the other outputs
+        // treat theirs.
+        result.amountExpr = this.amountExpr;
 
         return result;
     }
@@ -373,6 +413,7 @@ public class ItemOutput extends AbstractModularRecipeOutput {
             nbt.setTag("output", stackTag);
         }
         nbt.setInteger("index", index);
+        if (amountExpr != null) nbt.setString("amountExpr", amountExpr.toString());
 
         // Save NBT expressions
         if (nbtExpressions != null && !nbtExpressions.isEmpty()) {
@@ -409,6 +450,14 @@ public class ItemOutput extends AbstractModularRecipeOutput {
             this.output = ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("output"));
         }
         this.index = nbt.hasKey("index") ? nbt.getInteger("index") : -1;
+
+        if (nbt.hasKey("amountExpr")) {
+            try {
+                this.amountExpr = ExpressionParser.parseExpression(nbt.getString("amountExpr"));
+            } catch (Exception e) {
+                Logger.error("Failed to restore item amount expression: " + e.getMessage());
+            }
+        }
 
         // Restore NBT expressions
         if (nbt.hasKey("nbtExpressions")) {
