@@ -154,6 +154,59 @@ Performance multipliers provided by the structure definition.
 - `nbt('key')`: Retrieve NBT from the machine itself.
 - `nbt('symbol', 'key')`: Retrieve NBT from a block at a specific symbol position.
 
+### All NBT access goes through `nbt(...)`
+
+**The target is always an argument.** Nested paths go inside the argument string,
+separated by dots.
+
+```
+nbt('energy')                a top-level key on the machine itself
+nbt('display.Name')          a nested path on the machine itself
+nbt('S', 'stored_energy')    the TileEntity at structure symbol S
+nbt('S', 'a.b.c')            a nested path on that TileEntity
+```
+
+> [!WARNING]
+> **Bare dot notation — writing `display.Name` as an expression on its own — has
+> been removed.** It could not express any target other than the machine itself,
+> and worse, `S.energy` was indistinguishable from "the `energy` inside my own `S`
+> tag". Writing one now raises an error naming the `nbt('...')` replacement.
+>
+> **`tier.glass` and other `tier.` names still work** — those are component tiers,
+> not NBT.
+
+#### Writing (assignment)
+
+Put `nbt(...)` on the left of an assignment. Intermediate compounds are created
+for you.
+
+```json
+"nbt": "nbt('customData.level') = 7"
+"nbt": "nbt('temperature') += 50"
+"nbt": "nbt('display.Name') = 'Excalibur'"
+```
+
+- Operators: `=` `+=` `-=` `*=` `/=`
+- **You cannot assign through a symbol** (`nbt('S', 'x') = 1` is an error). Writes
+  land on the NBT owned by the field the expression was written in — the output
+  item, or the block being placed — whereas a symbol names a block to read from
+
+#### Type suffixes
+
+A suffix on a number pins the NBT tag type. Without one, the value is written as a
+double.
+
+| Suffix | Type | Example |
+|---|---|---|
+| `b` / `B` | byte | `127b` |
+| `s` / `S` | short | `32767s` |
+| `i` / `I` | int | `2147483647i` |
+| `L` | long | `9223372036854775807L` |
+| `f` / `F` | float | `3.14159f` |
+| `d` / `D` | double | `2.718281828d` |
+
+Long is uppercase only — a lowercase `l` reads too easily as a `1`.
+
 ---
 
 ## 5. Design Tips

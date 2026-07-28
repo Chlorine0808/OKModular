@@ -181,11 +181,21 @@ If you find a bug, please create an issue.
 "outputs": [{
   "symbol": "D",
   "block": "modid:battery",
-  "nbt": {
-    "energy": { "type": "nbt", "path": "machine_power" }
-  }
+  "nbt": [
+    "nbt('energy') = nbt('C', 'stored_power')",
+    "nbt('tier') = tier.casing"
+  ]
 }]
 ```
+
+The left-hand side is the destination — the NBT of the block being placed — and the
+right-hand side is any expression. Using a symbol on the right, as in
+`nbt('C', ...)`, lets you **read from another block and write the result here**.
+
+> [!NOTE]
+> The older object form (`{"energy": {"type":"nbt","path":"..."}}`) is legacy and
+> **does not work**: it uses a `path` key, while the implementation reads `key`. Use
+> the array form above.
 
 ### External Block NBT Manipulation (Block Nbt Output)
 Manipulate NBT data of any TileEntity within the structure. Unlike `block` replacement, this modifies internal data numerically without changing the block itself.
