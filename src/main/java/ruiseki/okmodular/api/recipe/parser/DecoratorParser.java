@@ -1,5 +1,6 @@
 package ruiseki.okmodular.api.recipe.parser;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -79,28 +80,68 @@ public class DecoratorParser {
     }
 
     private static IModularRecipe parseSingle(IModularRecipe recipe, JsonObject json) {
-        DecoratorEntry target = null;
-
+        // 1. Explicit "type" field
         if (json.has("type")) {
-            String type = json.get("type")
-                .getAsString();
-            target = registry.get(type);
-        } else {
-            for (DecoratorEntry entry : entries) {
-                if (entry.detector.test(json)) {
-                    target = entry;
-                    break;
-                }
+            DecoratorEntry target = registry.get(
+                json.get("type")
+                    .getAsString());
+            if (target != null) {
+                return target.parser.apply(recipe, json);
+            }
+            // Fall through: an unknown type name should not hide a decorator the
+            // remaining properties already identify.
+        }
+
+        // 2. Nested form — the key names the type, its value holds the properties:
+        // { "bonus": { "chance": 0.3, "outputs": [...] } }
+        Map.Entry<DecoratorEntry, JsonObject> nested = findNested(json);
+        if (nested != null) {
+            return nested.getKey().parser.apply(recipe, nested.getValue());
+        }
+
+        // 3. Infer from the properties present
+        for (DecoratorEntry entry : entries) {
+            if (entry.detector.test(json)) {
+                return entry.parser.apply(recipe, json);
             }
         }
 
-        if (target != null) {
-            return target.parser.apply(recipe, json);
+        if (json.has("type")) {
+            throw new IllegalArgumentException(
+                "Unknown decorator type '" + json.get("type")
+                    .getAsString() + "', and its properties match no known decorator: " + json.entrySet());
         }
+        throw new IllegalArgumentException("Could not infer decorator type from properties: " + json.entrySet());
+    }
 
-        String msg = json.has("type") ? "Unknown decorator type: " + json.get("type")
-            .getAsString() : "Could not infer decorator type from properties: " + json.entrySet();
-        throw new IllegalArgumentException(msg);
+    /**
+     * Detects the nested form <code>{ "&lt;type&gt;": { ...properties } }</code>.
+     * <p>
+     * The inner object must satisfy the target's own detector. Without that check,
+     * <code>{ "chance": { "type": "map_range", ... } }</code> — a chance decorator
+     * whose probability is an expression object — would be mistaken for a nested
+     * declaration and lose its expression.
+     *
+     * @return the matched entry paired with the inner object, or null if this is not the nested form
+     */
+    private static Map.Entry<DecoratorEntry, JsonObject> findNested(JsonObject json) {
+        if (json.entrySet()
+            .size() != 1) return null;
+
+        Map.Entry<String, JsonElement> only = json.entrySet()
+            .iterator()
+            .next();
+        if (!only.getValue()
+            .isJsonObject()) return null;
+
+        DecoratorEntry entry = registry.get(only.getKey());
+        if (entry == null) return null;
+
+        JsonObject body = only.getValue()
+            .getAsJsonObject();
+        if (!entry.detector.test(body)) return null;
+
+        return new AbstractMap.SimpleEntry<>(entry, body);
     }
 
     private static boolean isFirstOutputBlock(JsonArray outputs) {
