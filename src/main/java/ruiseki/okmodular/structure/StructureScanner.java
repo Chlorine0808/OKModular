@@ -40,11 +40,13 @@ public class StructureScanner {
      * @param name      structure name
      * @param x1,       y1, z1 start coordinates
      * @param x2,       y2, z2 end coordinates
-     * @param configDir configuration directory
+     * @param outputDir directory the JSON is written to. Pass
+     *                  {@link StructureManager#getStructuresDir()} so the result is picked up on
+     *                  the next load or reload.
      * @return true on success
      */
     public static ScanResult scan(World world, String name, int x1, int y1, int z1, int x2, int y2, int z2,
-        File configDir) {
+        File outputDir) {
 
         // Normalize coordinates (smallest becomes the start point)
         int minX = Math.min(x1, x2);
@@ -146,13 +148,13 @@ public class StructureScanner {
         JsonArray array = new JsonArray();
         array.add(entry.serialize());
 
-        // Save to disk - in a 'custom' subdirectory
-        File customDir = new File(configDir, "structures/custom");
-        if (!customDir.exists()) {
-            customDir.mkdirs();
+        // Save straight into the directory StructureManager loads from. A subdirectory would never
+        // be read back, because loadCustomStructures() does not recurse.
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
         }
 
-        File outputFile = new File(customDir, name + ".json");
+        File outputFile = new File(outputDir, name + ".json");
         Gson gson = new GsonBuilder().setPrettyPrinting()
             .create();
 

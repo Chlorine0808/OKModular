@@ -15,6 +15,7 @@ import ruiseki.okcore.proxy.ClientProxyComponent;
 import ruiseki.okmodular.client.handler.FluidFogHandler;
 import ruiseki.okmodular.client.render.ItemPortRenderer;
 import ruiseki.okmodular.client.render.PortOverlayISBRH;
+import ruiseki.okmodular.client.render.StructureWandRenderer;
 import ruiseki.okmodular.common.block.AbstractPortBlock;
 import ruiseki.okmodular.common.block.BlockMachineCasing;
 import ruiseki.okmodular.common.block.BlockMachineController;
@@ -63,5 +64,6 @@ public class MachineryClient extends ClientProxyComponent {
     public void registerEventHooks() {
         super.registerEventHooks();
         MinecraftForge.EVENT_BUS.register(new FluidFogHandler());
+        MinecraftForge.EVENT_BUS.register(new StructureWandRenderer());
     }
 }

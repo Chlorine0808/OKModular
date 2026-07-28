@@ -71,6 +71,21 @@ public class StructureManager {
         return errorCollector.hasErrors();
     }
 
+    /**
+     * This mod's config root (e.g. {@code config/okmodular}).
+     */
+    public File getConfigDir() {
+        return configDir;
+    }
+
+    /**
+     * The single directory structure JSON is both read from and written to.
+     * Anything that writes a structure file must use this, or the result will not be loaded.
+     */
+    public File getStructuresDir() {
+        return new File(configDir, "modular/structures");
+    }
+
     public void initialize(File minecraftDir) {
         if (initialized) return;
 
@@ -193,7 +208,7 @@ public class StructureManager {
     }
 
     private void loadCustomStructures() {
-        File customDir = new File(configDir, "modular/structures");
+        File customDir = getStructuresDir();
         if (!customDir.exists()) {
             customDir.mkdirs();
             return;

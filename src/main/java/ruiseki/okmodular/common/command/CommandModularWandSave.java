@@ -14,14 +14,14 @@ import com.mojang.brigadier.context.CommandContext;
 import ruiseki.okcore.command.CommandMod;
 import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okcore.init.ModBase;
-import ruiseki.okmodular.MachineryModule;
 import ruiseki.okmodular.structure.StructureConstants;
+import ruiseki.okmodular.structure.StructureManager;
 import ruiseki.okmodular.structure.StructureScanner;
 import ruiseki.okmodular.structure.WandSelectionManager;
 
 /**
  * Saves the area selected with the structure wand as a structure JSON.
- * Builds: /&lt;modid&gt; modular wand save &lt;name&gt;
+ * Builds: /&lt;modid&gt; wand save &lt;name&gt;
  */
 public class CommandModularWandSave extends CommandMod {
 
@@ -74,7 +74,7 @@ public class CommandModularWandSave extends CommandMod {
             printErrorToChat(
                 sender,
                 LangHelpers.localize(
-                    "chat.wand.area_too_large",
+                    "chat.okmodular.wand.area_too_large",
                     String.format("%,d", StructureConstants.MAX_WAND_SCAN_BLOCKS),
                     String.format("%,d", blockCount)));
             return Command.SINGLE_SUCCESS;
@@ -94,7 +94,8 @@ public class CommandModularWandSave extends CommandMod {
             pending.pos2.posX,
             pending.pos2.posY,
             pending.pos2.posZ,
-            MachineryModule.getConfigDir());
+            StructureManager.getInstance()
+                .getStructuresDir());
 
         if (!result.success) {
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.scan_failed", result.message));
