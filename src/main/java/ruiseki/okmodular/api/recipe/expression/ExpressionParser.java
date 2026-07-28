@@ -358,7 +358,16 @@ public class ExpressionParser {
             return res;
         } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
             while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
-            return new ConstantExpression(Double.parseDouble(input.substring(startPos, this.pos)));
+            String literal = input.substring(startPos, this.pos);
+
+            // An NBT type suffix pins the tag type: 127b is written as a byte, not as
+            // a double that happens to hold 127.
+            if (NbtLiteralExpression.isTypeSuffix(ch)) {
+                String withSuffix = literal + (char) ch;
+                nextChar();
+                return new NbtLiteralExpression(NBTTypeInference.parseValue(withSuffix), withSuffix);
+            }
+            return new ConstantExpression(Double.parseDouble(literal));
         } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) { // variables, functions, or NBT paths
             // Parse first segment
             List<String> pathSegments = new ArrayList<>();

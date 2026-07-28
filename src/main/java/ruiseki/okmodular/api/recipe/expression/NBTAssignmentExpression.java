@@ -55,7 +55,11 @@ public class NBTAssignmentExpression implements IAction, IExpression {
         }
 
         // Apply operation
-        if (evalVal.isString()) {
+        if (evalVal.isNbt() && "=".equals(operation)) {
+            // A typed literal (127b, 1.5f) already knows what tag it is. Writing it
+            // through the numeric path below would flatten every type to double.
+            targetNbt.setTag(targetKey, evalVal.asNbt());
+        } else if (evalVal.isString()) {
             targetNbt.setString(targetKey, evalVal.asString());
         } else if (evalVal.isBoolean()) {
             targetNbt.setBoolean(targetKey, evalVal.asBoolean());
