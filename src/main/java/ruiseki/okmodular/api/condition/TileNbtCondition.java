@@ -4,6 +4,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.StatCollector;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import ruiseki.okmodular.api.recipe.expression.EvaluationValue;
@@ -12,6 +13,13 @@ import ruiseki.okmodular.api.recipe.expression.EvaluationValue;
  * Condition that checks an NBT value of the TileEntity at the current position.
  */
 public class TileNbtCondition implements ICondition {
+
+    /**
+     * Two-character symbols come first so <code>&gt;=</code> is never read as
+     * <code>&gt;</code> with a stray <code>=</code> left over.
+     */
+    private static final ComparisonOp[] OPS_LONGEST_FIRST = { ComparisonOp.GREATER_OR_EQUAL, ComparisonOp.LESS_OR_EQUAL,
+        ComparisonOp.EQUAL, ComparisonOp.GREATER_THAN, ComparisonOp.LESS_THAN };
 
     private final String key;
     private final ComparisonOp op;
@@ -78,7 +86,20 @@ public class TileNbtCondition implements ICondition {
         json.addProperty("value", value);
     }
 
+    /**
+     * Reads either the spelled-out form or the shorthand.
+     *
+     * <pre>
+     * { "key": "energy", "op": "ge", "value": 1000 }
+     * { "tile_nbt": "energy >= 1000" }
+     * </pre>
+     */
     public static ICondition fromJson(JsonObject json) {
+        JsonElement shorthand = json.get("tile_nbt");
+        if (shorthand != null && shorthand.isJsonPrimitive()) {
+            return fromShorthand(shorthand.getAsString());
+        }
+
         String key = json.get("key")
             .getAsString();
         ComparisonOp op = ComparisonOp.valueOf(
@@ -88,6 +109,29 @@ public class TileNbtCondition implements ICondition {
         double value = json.get("value")
             .getAsDouble();
         return new TileNbtCondition(key, op, value);
+    }
+
+    private static ICondition fromShorthand(String text) {
+        for (ComparisonOp op : OPS_LONGEST_FIRST) {
+            int at = text.indexOf(op.symbol);
+            // An operator at position 0 would leave no key in front of it.
+            if (at <= 0) continue;
+
+            String key = text.substring(0, at)
+                .trim();
+            String value = text.substring(at + op.symbol.length())
+                .trim();
+            if (key.isEmpty() || value.isEmpty()) continue;
+
+            try {
+                return new TileNbtCondition(key, op, Double.parseDouble(value));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException(
+                    "A tile_nbt condition compares against a number, but read \"" + value + "\" in: " + text);
+            }
+        }
+        throw new IllegalArgumentException(
+            "A tile_nbt condition reads <key> <op> <number>, as in \"energy >= 1000\", but got: " + text);
     }
 
     public enum ComparisonOp {
