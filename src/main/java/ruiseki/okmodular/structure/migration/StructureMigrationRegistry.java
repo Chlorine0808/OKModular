@@ -15,12 +15,14 @@ import ruiseki.okmodular.util.VersionComparator;
  */
 public class StructureMigrationRegistry {
 
+    /**
+     * Registered migrators, ordered oldest target version first.
+     *
+     * Empty: the migrators this registry shipped with rewrote the parent mod's block names and
+     * stopped matching anything once the machinery split moved them out of it. Register an
+     * {@link IDataMigrator} here when the structure JSON format changes.
+     */
     private static final List<IDataMigrator> MIGRATORS = new ArrayList<>();
-
-    static {
-        MIGRATORS.add(new V1_SnakeCaseMigrator()); // v1.5.4.1
-        MIGRATORS.add(new V2_ModularCasingMigrator()); // v2.0.1
-    }
 
     /**
      * Applies migrations to the given structure JSON if its version is older than
@@ -56,7 +58,8 @@ public class StructureMigrationRegistry {
      * with the mod version would be seen as older than a migrator's target whenever the mod
      * version sorts below it, re-running every migrator on every load.
      *
-     * @return the highest target version among the registered migrators
+     * @return the highest target version among the registered migrators, or "0.0.0" when none are
+     *         registered, which leaves every future migrator free to run against these files
      */
     public static String getLatestDataVersion() {
         String latest = "0.0.0";

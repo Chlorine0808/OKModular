@@ -2,33 +2,35 @@ package ruiseki.okmodular.structure;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import ruiseki.okmodular.Reference;
 
 /**
- * Utility for block ID compatibility following name refactoring (camelCase to snake_case).
+ * Remap table for block IDs that were renamed or removed, applied when reading structure and
+ * recipe JSON so files written against an older build still resolve.
+ *
+ * The table is empty: the entries this class shipped with targeted the parent mod's block names
+ * and never matched anything once the machinery split moved the class out of it. Add entries here
+ * when a block this mod owns is renamed or removed.
  */
 public class BlockCompat {
 
-    private static final Pattern CAMEL_CASE_PATTERN = Pattern.compile("([a-z])([A-Z])");
-    private static final String MOD_PREFIX = Reference.MOD_ID + ":";
-
+    /** Maps an old block name (without domain or meta) to its replacement name. */
     private static final Map<String, String> REMOVED_BLOCK_REMAPS = new HashMap<>();
-    static {
-        REMOVED_BLOCK_REMAPS.put("modular_machine_casing", "casing_plain");
-    }
 
     /**
-     * Remaps a removed or renamed block ID to its replacement.
-     * Returns the new full block ID (with meta suffix preserved) if a remap exists,
-     * or {@code null} if no remap is needed.
+     * Remaps a removed or renamed block ID to its replacement, preserving the domain and the meta
+     * suffix. Returns {@code null} when no remap applies.
      *
-     * Example: "omoshiroikamo:modular_machine_casing:0" -> "omoshiroikamo:casing_plain:0"
+     * The domain is carried over rather than matched against this mod's ID, so a table entry works
+     * for whichever mod owns the block being remapped.
+     *
+     * Example, given an entry {@code old_casing -> casing_plain}:
+     * "somemod:old_casing:0" -> "somemod:casing_plain:0"
+     *
+     * @param id the full block ID, optionally with a meta suffix
+     * @return the remapped ID, or {@code null} if no remap exists for it
      */
     public static String remapRemovedBlocks(String id) {
-        if (id == null || !id.startsWith(MOD_PREFIX)) return null;
+        if (id == null) return null;
 
         String[] parts = id.split(":", 3);
         if (parts.length < 2) return null;
@@ -36,63 +38,10 @@ public class BlockCompat {
         String newName = REMOVED_BLOCK_REMAPS.get(parts[1]);
         if (newName == null) return null;
 
-        StringBuilder sb = new StringBuilder(MOD_PREFIX).append(newName);
+        StringBuilder sb = new StringBuilder(parts[0]).append(":")
+            .append(newName);
         if (parts.length > 2) sb.append(":")
             .append(parts[2]);
         return sb.toString();
-    }
-
-    /**
-     * Converts a block ID from camelCase to snake_case if it belongs to this mod.
-     * Example: "omoshiroikamo:blockCrystal" -> "omoshiroikamo:block_crystal"
-     * Example: "omoshiroikamo:blockCrystal:0" -> "omoshiroikamo:block_crystal:0"
-     *
-     * This method is idempotent: if it's already snake_case, it returns the same string.
-     *
-     * @param id The block ID string to remap
-     * @return The remapped ID, or the original if no conversion is needed
-     */
-    public static String camelToSnake(String id) {
-        if (id == null || !id.startsWith(MOD_PREFIX)) {
-            return id;
-        }
-
-        // Handle meta values (e.g., "modid:name:0")
-        String[] parts = id.split(":", 3);
-        if (parts.length < 2) {
-            return id;
-        }
-
-        String name = parts[1];
-
-        // Skip if there are no uppercase letters
-        if (!hasUppercase(name)) {
-            return id;
-        }
-
-        // Perform snake_case conversion
-        Matcher matcher = CAMEL_CASE_PATTERN.matcher(name);
-        String newName = matcher.replaceAll("$1_$2")
-            .toLowerCase();
-
-        // Reconstruct ID
-        StringBuilder sb = new StringBuilder();
-        sb.append(MOD_PREFIX)
-            .append(newName);
-        if (parts.length > 2) {
-            sb.append(":")
-                .append(parts[2]);
-        }
-
-        return sb.toString();
-    }
-
-    private static boolean hasUppercase(String s) {
-        for (int i = 0; i < s.length(); i++) {
-            if (Character.isUpperCase(s.charAt(i))) {
-                return true;
-            }
-        }
-        return false;
     }
 }
