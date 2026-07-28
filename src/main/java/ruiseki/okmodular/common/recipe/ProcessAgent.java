@@ -102,6 +102,10 @@ public class ProcessAgent extends AbstractRecipeProcess {
         // Initialize state via base start logic
         super.start(recipe, inputPorts);
 
+        // start() takes the static duration because it has no context. Re-resolve it
+        // now that we do, so an expression-valued duration takes effect.
+        setMaxProgress(recipe.getDuration(context));
+
         // Cache base energy/mana values BEFORE applying multipliers
         this.baseEnergyPerTick = this.energyPerTick;
         this.baseEnergyOutputPerTick = this.energyOutputPerTick;

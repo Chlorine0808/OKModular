@@ -8,6 +8,7 @@ import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
@@ -42,6 +43,16 @@ public abstract class RecipeDecorator implements IModularRecipe {
     @Override
     public int getDuration() {
         return internal.getDuration();
+    }
+
+    @Override
+    public int getDuration(ConditionContext context) {
+        return internal.getDuration(context);
+    }
+
+    @Override
+    public IExpression getDurationExpression() {
+        return internal.getDurationExpression();
     }
 
     @Override
