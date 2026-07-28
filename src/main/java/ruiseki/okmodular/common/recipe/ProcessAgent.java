@@ -13,6 +13,7 @@ import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.AbstractRecipeProcess;
+import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.core.ITieredMachine;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
@@ -237,6 +238,12 @@ public class ProcessAgent extends AbstractRecipeProcess {
             } else {
                 speedMultiplier = tiered.getSpeedMultiplier();
             }
+        }
+
+        // Machines that opted in re-resolve the work amount every tick. See
+        // DurationPolicy for what moving the denominator does to the progress bar.
+        if (this.context instanceof ITieredMachine tiered && tiered.getDurationPolicy() == DurationPolicy.PER_TICK) {
+            setMaxProgress(currentRecipe.getDuration(context));
         }
 
         // 1. Tick-based resource consumption
