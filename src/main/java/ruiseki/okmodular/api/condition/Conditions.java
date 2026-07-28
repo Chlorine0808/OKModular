@@ -59,8 +59,12 @@ public class Conditions {
         ConditionParserRegistry.register("or", OpOr::fromJson, json -> json.has("conditions") || json.has("or"));
         ConditionParserRegistry.register("not", OpNot::fromJson, json -> json.has("condition") || json.has("not"));
 
-        ConditionParserRegistry.register("nand", OpNand::fromJson);
-        ConditionParserRegistry.register("nor", OpNor::fromJson);
+        // Their fromJson reads exactly like and/or/xor do; only the detector was
+        // missing, which left { "nand": [...] } unresolvable unless "type" was
+        // spelled out. "conditions" is not offered here because "and" is registered
+        // first and would claim it.
+        ConditionParserRegistry.register("nand", OpNand::fromJson, json -> json.has("nand"));
+        ConditionParserRegistry.register("nor", OpNor::fromJson, json -> json.has("nor"));
         ConditionParserRegistry.register("xor", OpXor::fromJson, json -> json.has("xor"));
     }
 }
