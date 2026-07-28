@@ -1,7 +1,6 @@
 package ruiseki.okmodular.api.recipe.expression;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.google.gson.JsonObject;
@@ -231,26 +230,32 @@ public class ExpressionParser {
 
     /**
      * Parse assignment operator (=, +=, -=, *=, /=).
-     * Left-hand side must be an NbtExpression or DotNotationNBTExpression.
+     * <p>
+     * The target must be an {@link NbtExpression}, i.e. written as
+     * <code>nbt('key')</code>. That is the only thing an assignment can name, so
+     * anything else is a mistake worth reporting rather than a form to support.
      */
     private Object parseAssignment(Object left, String operation) {
         // Parse right-hand side
         Object right = parseAdditiveExpression();
 
         if (left instanceof NbtExpression nbtExpr) {
-            String nbtKey = nbtExpr.getNbtKey();
+            if (nbtExpr.getSymbol() != '\0') {
+                // Writes land on whatever NBT the surrounding field owns - the output
+                // stack, or the block being placed. A symbol names a block to read
+                // from, so assigning through one has no target.
+                throw error(
+                    "Cannot assign through a symbol. nbt('" + nbtExpr.getSymbol()
+                        + "', ...) reads another block; write to this output's own NBT instead");
+            }
             return new NBTAssignmentExpression(
-                nbtKey,
-                Arrays.asList(nbtKey.split("\\.")),
+                nbtExpr.getNbtKey(),
+                nbtExpr.getPathSegments(),
                 asExpression(right),
                 operation);
-        } else if (left instanceof DotNotationNBTExpression dotExpr) {
-            String nbtKey = dotExpr.getFullPath();
-            List<String> pathSegments = new ArrayList<>(dotExpr.getPathSegments());
-            return new NBTAssignmentExpression(nbtKey, pathSegments, asExpression(right), operation);
         }
 
-        throw error("Assignment left-hand side must be an NBT path (e.g., display.Name)");
+        throw error("Assignment target must be an NBT access, e.g. nbt('display.Name') = 'Sword'");
     }
 
     // expression = term ( ( "+" | "-" ) term )*
@@ -388,9 +393,9 @@ public class ExpressionParser {
                 throw error("Unknown function: '" + name + "'");
             }
 
-            // Check if this is a dot notation NBT path (multiple segments)
+            // Dotted names: only tier.component remains. NBT paths go through nbt(),
+            // where the target is an argument - see below.
             if (pathSegments.size() > 1) {
-                // Check for tier.component syntax FIRST
                 if (pathSegments.get(0)
                     .equalsIgnoreCase("tier")) {
                     // tier.component must have exactly 2 segments
@@ -403,9 +408,14 @@ public class ExpressionParser {
                     return new ComponentTierExpression(componentName);
                 }
 
-                // Otherwise treat as NBT path: display.Name, ench.lvl, etc.
+                // Bare dot notation used to mean "an NBT path on this machine". It was
+                // dropped because it cannot express any other target: S.energy reads
+                // identically to a two-level path on the machine itself, so a symbol
+                // and a nested key were indistinguishable.
                 String fullPath = String.join(".", pathSegments);
-                return new DotNotationNBTExpression(fullPath, pathSegments);
+                throw error(
+                    "Dotted names are no longer NBT paths. Write nbt('" + fullPath
+                        + "') for this machine, or nbt('<symbol>', '<key>') for another block");
             }
 
             // Single segment - check for known variables
