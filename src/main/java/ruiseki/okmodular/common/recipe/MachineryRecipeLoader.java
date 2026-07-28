@@ -128,7 +128,7 @@ public class MachineryRecipeLoader {
             // Validate outputs — catch typos in item/block names before they silently break at runtime
             for (IRecipeOutput output : recipe.getOutputs()) {
                 if (!output.validate()) {
-                    String fileName = ParsingContext.getCurrentFileName();
+                    String fileName = resolveFileName(json);
                     String warnMsg = String.format(
                         "Recipe '%s' in %s has an invalid output (%s). Skipping.",
                         registryName,
@@ -149,7 +149,7 @@ public class MachineryRecipeLoader {
 
             return recipe;
         } catch (Exception e) {
-            String fileName = ParsingContext.getCurrentFileName();
+            String fileName = resolveFileName(json);
             String errorMsg = String
                 .format("Failed to parse recipe '%s' in %s: %s", registryName, fileName, e.getMessage());
             Logger.error(errorMsg);
@@ -157,5 +157,20 @@ public class MachineryRecipeLoader {
                 .collect("MachineryRecipeLoader", errorMsg);
             return null;
         }
+    }
+
+    /**
+     * Names the file a recipe came from.
+     * <p>
+     * {@link MachineryJsonReader} stamps each recipe with its origin because this
+     * loader is handed every file's recipes already flattened into one list.
+     * {@link ParsingContext} is the fallback for recipes built by other callers.
+     */
+    private static String resolveFileName(JsonObject json) {
+        if (json.has(MachineryJsonReader.SOURCE_FILE_KEY)) {
+            return json.get(MachineryJsonReader.SOURCE_FILE_KEY)
+                .getAsString();
+        }
+        return ParsingContext.getCurrentFileName();
     }
 }
