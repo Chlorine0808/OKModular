@@ -152,10 +152,30 @@ Performance multipliers provided by the structure definition.
 
 ## 5. Design Tips
 
+### Where expressions are accepted
+
+| Field | Evaluated |
+|-------|-----------|
+| `duration` | **Once, when the recipe starts** (every tick if the structure sets `"durationPolicy": "perTick"`) |
+| `amount` on inputs and outputs | Each time it is consumed or produced |
+| Resource amounts such as `energy` and `mana` | As above |
+| A decorator's `chance` | When it is rolled |
+| `condition` / `conditions` | Every tick while running |
+
 ### Common Pitfalls
 - **Quotes in JSON**: Expressions themselves must be strings in JSON, e.g., `"amount": "tier * 2"`.
 - **Case Sensitivity**: Variable names are all **lowercase** (e.g., `tier`, not `Tier`).
 - **Characters**: Do not use full-width or non-standard characters for operators or variable names.
+- **Putting `speed_multi` in `duration`**: the engine applies the speed multiplier every
+  tick, so writing it here applies it **twice**. A duration is a work amount, not a time.
+  Energy is the reverse: writing `energy_multi` into `energy` is the correct route.
+
+### How this looks in NEI
+
+NEI has no machine, so it cannot evaluate machine-dependent variables like `tier` or
+`speed_multi`. When a `duration` is a machine-dependent expression, NEI shows **the
+expression itself** instead of a time. Expressions written purely from constants are
+folded to a number at load time and still show as seconds.
 
 ### Performance
 Since expressions may be evaluated every tick, avoid extremely complex logic or excessive use of wide-range `count_blocks` queries.

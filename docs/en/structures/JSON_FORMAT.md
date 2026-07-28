@@ -26,6 +26,26 @@ A file can contain a single object or an array of objects. A special object name
 | `tier` | Integer | Machine tier (default: 0). |
 | `tierMap` | Object | Definition of Tiers provided by each part of the structure. |
 | `defaultFacing` | String | Default facing is horizontal. You can modify it to vertical (`UP`, `DOWN`). |
+| `durationPolicy` | String | When an expression-valued recipe `duration` is evaluated (`onStart` / `perTick`, default: `onStart`). |
+
+### durationPolicy
+
+Decides when a recipe's `duration` is evaluated, for durations written as
+expressions. It has no effect on durations written as plain numbers.
+
+| Value | Behaviour |
+|-------|-----------|
+| `onStart` (default) | Evaluated once when the recipe starts and fixed for that run. |
+| `perTick` | Re-evaluated every tick, so things that change mid-run — weather, moon phase — take effect. |
+
+> [!CAUTION]
+> `perTick` moves the **denominator** of the progress bar. The bar jumps when the
+> value drops, and the recipe completes the moment the duration falls below the
+> work already done. Leave it on `onStart` unless the duration genuinely depends on
+> something that changes while the machine runs.
+
+Independent of the `dynamic` flag, which re-evaluates the performance multipliers:
+`dynamic` governs those, `durationPolicy` governs the recipe's work amount.
 
 ### 2.2 Tier Map Details
 The `tierMap` allows you to assign specific Tiers to parts of the machine based on the materials (blocks) used.
