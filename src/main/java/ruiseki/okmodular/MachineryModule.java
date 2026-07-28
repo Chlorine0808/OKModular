@@ -128,6 +128,9 @@ public class MachineryModule extends ModModuleBase {
         }
         MemoryEventHandler.registerOnWorldUnload(world -> StructureTintCache.clearDimension(world));
         MemoryEventHandler.registerOnClientDisconnect(StructureTintCache::clearAll);
+        // Subscribe the handler itself, otherwise the callbacks above can never fire.
+        // The parent mod does this from its own @Mod class; this mod carries its own copy.
+        MemoryEventHandler.INSTANCE.register();
 
         // Pre-scan recipe group names so NEI can register handlers
         // before RecipeLoader.loadAll() runs in postInit
