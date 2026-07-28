@@ -8,7 +8,11 @@ import ruiseki.okmodular.Reference;
 
 @Config.Comment("World generation settings")
 @Config.LangKey(Reference.CONFIG + "worldGenConfig")
-@Config(modid = Reference.MOD_ID, category = "worldGen", configSubDirectory = Reference.MOD_ID, filename = "worldgen")
+@Config(
+    modid = Reference.MOD_ID,
+    category = "worldGen",
+    configSubDirectory = Reference.CONFIG_DIR,
+    filename = "worldgen")
 public class WorldGenConfig {
 
     public static void registerConfig() throws ConfigException {

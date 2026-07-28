@@ -27,4 +27,23 @@ public class Reference {
     public static final String PREFIX_MODEL = PREFIX_MOD + "models/";
     public static final String CONFIG = "config.";
     public static final String TOOLTIP = "tooltip.";
+
+    /**
+     * This mod's config directory, relative to Minecraft's {@code config/}.
+     * <p>
+     * Single source of truth for the config layout. Everything under it is one level deep:
+     *
+     * <pre>
+     * config/okmodular/
+     *   modular.cfg      worldgen.cfg      tiers.json
+     *   recipes/         structures/
+     * </pre>
+     *
+     * Must stay a compile-time constant: {@code @Config(configSubDirectory = ...)} is an annotation
+     * attribute, so this cannot be computed at runtime.
+     * <p>
+     * Whoever resolves this against the Minecraft config directory hands the result around; nothing
+     * downstream prepends it again. See {@link MachineryModule#getConfigDir()}.
+     */
+    public static final String CONFIG_DIR = MOD_ID;
 }

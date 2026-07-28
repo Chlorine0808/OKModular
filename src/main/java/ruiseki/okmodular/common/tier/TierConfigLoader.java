@@ -27,7 +27,7 @@ public class TierConfigLoader {
     public static final TierConfigLoader INSTANCE = new TierConfigLoader();
 
     private static final String DEFAULT_LOCALE = "en_US";
-    private static final String CONFIG_RELATIVE_PATH = Reference.MOD_ID + "/modular/tiers.json";
+    private static final String CONFIG_RELATIVE_PATH = "tiers.json";
 
     // tierID -> locale -> displayName
     private final Map<Integer, Map<String, String>> tierNames = new HashMap<>();
