@@ -258,12 +258,31 @@ public class ExpressionParser {
         throw error("Assignment target must be an NBT access, e.g. nbt('display.Name') = 'Sword'");
     }
 
+    /**
+     * Eats a binary operator, unless it begins a compound assignment.
+     * <p>
+     * <code>+= -= *= /=</code> are handled by {@link #parseComparison}, which sits
+     * above this layer. Without this check the arithmetic layer eats the
+     * <code>+</code> of <code>+=</code> first and the <code>=</code> is left with
+     * nothing to attach to — which is why every compound assignment used to fail
+     * with "Unexpected character: '='" despite parseComparison supporting them.
+     */
+    private boolean eatBinaryOperator(int op) {
+        while (isSpace(ch)) nextChar();
+        if (ch != op) return false;
+        if (pos + 1 < input.length() && input.charAt(pos + 1) == '=') return false;
+
+        nextChar();
+        return true;
+    }
+
     // expression = term ( ( "+" | "-" ) term )*
     private Object parseAdditiveExpression() {
         Object x = parseTerm();
         for (;;) {
-            if (eat('+')) x = new ArithmeticExpression(asExpression(x), asExpression(parseTerm()), "+");
-            else if (eat('-')) x = new ArithmeticExpression(asExpression(x), asExpression(parseTerm()), "-");
+            if (eatBinaryOperator('+')) x = new ArithmeticExpression(asExpression(x), asExpression(parseTerm()), "+");
+            else if (eatBinaryOperator('-'))
+                x = new ArithmeticExpression(asExpression(x), asExpression(parseTerm()), "-");
             else return x;
         }
     }
@@ -272,8 +291,9 @@ public class ExpressionParser {
     private Object parseTerm() {
         Object x = parseFactor();
         for (;;) {
-            if (eat('*')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "*");
-            else if (eat('/')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "/");
+            if (eatBinaryOperator('*')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "*");
+            else if (eatBinaryOperator('/'))
+                x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "/");
             else if (eat('%')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "%");
             else return x;
         }
