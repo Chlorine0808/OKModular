@@ -10,9 +10,18 @@ import com.google.gson.JsonObject;
 import ruiseki.okmodular.api.condition.ConditionContext;
 
 /**
- * Action that assigns a value to an NBT key in the current context's working NBT.
+ * Assigns a value to an NBT key.
+ * <p>
+ * Reachable two ways, because there are two situations:
+ * <ul>
+ * <li>{@link #applyToNBT} — write into a compound the caller owns. This is how an
+ * output stack or a placed block gets its NBT, and it is what the recipe IO classes
+ * call.</li>
+ * <li>{@link #execute} — write into the context's working NBT, for use as a
+ * standalone action.</li>
+ * </ul>
  */
-public class NBTAssignmentExpression implements IAction, IExpression {
+public class NBTAssignmentExpression implements IAction, IExpression, INBTWriteExpression {
 
     private final String nbtKey;
     private final List<String> pathSegments;
@@ -30,6 +39,13 @@ public class NBTAssignmentExpression implements IAction, IExpression {
     @Override
     public void execute(ConditionContext context) {
         NBTTagCompound nbt = context.getWorkingNBT();
+        if (nbt == null) return;
+
+        applyToNBT(nbt, context);
+    }
+
+    @Override
+    public void applyToNBT(NBTTagCompound nbt, ConditionContext context) {
         if (nbt == null) return;
 
         EvaluationValue evalVal = valueExpression.evaluate(context);
