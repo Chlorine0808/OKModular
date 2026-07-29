@@ -226,6 +226,32 @@ public class NbtAccessSyntaxTest {
     }
 
     @Test
+    @DisplayName("【回帰防止】machine property を書く代入で落ちない")
+    public void testMachinePropertyを書く代入で落ちない() {
+        // 実機クラッシュの再現。マシンが無い context で tier を評価すると
+        // getRecipeContext() が null で NPE になっていた。NBT 書き込みが
+        // 繋がるまで到達しなかったので露見していなかった
+        NBTTagCompound nbt = new NBTTagCompound();
+        assertDoesNotThrow(
+            () -> ((INBTWriteExpression) parse("nbt('forgedAtTier') = tier")).applyToNBT(nbt, null),
+            "マシンが無くても落ちてはいけない");
+        assertEquals(0.0, nbt.getDouble("forgedAtTier"), "マシンが無ければ 0");
+    }
+
+    @Test
+    @DisplayName("【回帰防止】代入式が往復できる")
+    public void test代入式が往復する() {
+        IExpression expr = parse("nbt('customData.level') += 5");
+
+        String script = expr.toString();
+        assertTrue(script.startsWith("nbt('customData.level')"), "呼び出し形式で書き出すべき: " + script);
+
+        // 旧実装は "customData.level += 5" を出し、再パースで
+        // 「ドット記法は廃止」エラーになっていた
+        assertDoesNotThrow(() -> parse(script), "書き出した式を読み直せるべき");
+    }
+
+    @Test
     @DisplayName("4 種類の複合代入すべてが通る")
     public void test4種類の複合代入() {
         for (String op : new String[] { "+=", "-=", "*=", "/=" }) {

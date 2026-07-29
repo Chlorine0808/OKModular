@@ -7,6 +7,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
@@ -129,6 +130,28 @@ public class ItemOutputAmountTest {
         restored.readFromNBT(nbt);
 
         assertEquals(15, restored.getRequiredAmount(emptyContext()), "スケール後の式が復元できるべき");
+    }
+
+    @Test
+    @DisplayName("【回帰防止】machine property を書く NBT 式が JSON 往復で壊れない")
+    public void testMachinePropertyを書くNBT式が往復する() {
+        // ItemOutput.write は expr.toString() を書き出すので、代入式が
+        // 呼び出し形式で書かれないと読み直せない
+        ItemOutput output = read(
+            "{ \"item\": \"minecraft:iron_sword\", \"amount\": 1, \"nbt\": \"nbt('forgedAtTier') = tier\" }");
+
+        JsonObject written = new JsonObject();
+        output.write(written);
+        String script = written.getAsJsonArray("nbt")
+            .get(0)
+            .getAsString();
+
+        assertTrue(script.startsWith("nbt('forgedAtTier')"), "呼び出し形式で書き出すべき: " + script);
+        assertDoesNotThrow(
+            () -> ItemOutput.fromJson(
+                new JsonParser().parse("{ \"item\": \"minecraft:iron_sword\", \"nbt\": \"" + script + "\" }")
+                    .getAsJsonObject()),
+            "書き出した式を読み直せるべき");
     }
 
     @Test

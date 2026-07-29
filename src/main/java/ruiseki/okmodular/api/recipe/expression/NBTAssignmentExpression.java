@@ -108,9 +108,16 @@ public class NBTAssignmentExpression implements IAction, IExpression, INBTWriteE
         return valueExpression.evaluate(context);
     }
 
+    /**
+     * Reproduces the assignment as a recipe script.
+     * <p>
+     * The target is written in call form, because that is the only form the parser
+     * accepts now. Emitting a bare <code>key = value</code> would not parse back: a
+     * dotless name resolves as a variable, and a dotted one is rejected outright.
+     */
     @Override
     public String toString() {
-        return nbtKey + " " + operation + " " + valueExpression;
+        return "nbt('" + nbtKey + "') " + operation + " " + valueExpression;
     }
 
     public static NBTAssignmentExpression fromJson(JsonObject json) {
