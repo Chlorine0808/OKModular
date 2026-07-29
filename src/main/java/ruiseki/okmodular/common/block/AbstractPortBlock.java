@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -157,30 +158,30 @@ public abstract class AbstractPortBlock<T extends AbstractTE> extends AbstractTi
     }
 
     /**
-     * A dye in hand paints the port; sneaking with one strips the colour.
+     * A dye in hand paints the port; a water bucket washes the colour off.
      *
-     * This is the route that does not need another mod installed. The gesture
-     * matches AE2's Color Applicator, where sneaking is also what clears a colour.
+     * This is the route that needs no other mod installed. Anything else falls through
+     * to the normal click, so opening a port's GUI is unaffected.
      *
      * <p>
-     * Any other item falls through to the normal click, so opening a port's GUI is
-     * unaffected. A dye always consumes the click even when the colour did not change
-     * - a player holding a dye is trying to paint, not to open a screen.
+     * A painting item consumes the click even when the colour did not change - a
+     * player holding a dye is reaching to paint, not to open a screen. The dye itself
+     * is only spent on an actual change, and the water bucket is never spent: washing
+     * paint off is a configuration step, not a use of the water.
      */
     @Override
     public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX,
         float hitY, float hitZ) {
         ItemStack held = player.getHeldItem();
-        EnumDye dye = held == null ? null : EnumDye.getColorFromDye(held);
-        if (dye == null) {
+        PortColor wanted = colorAppliedBy(held);
+        if (wanted == null) {
             return super.onBlockActivated(world, x, y, z, player, side, hitX, hitY, hitZ);
         }
 
-        PortColor wanted = player.isSneaking() ? PortColor.NONE : PortColor.fromDye(dye);
         boolean changed = recolourBlock(world, x, y, z, ForgeDirection.getOrientation(side), wanted.toColorIndex());
 
         if (changed && !world.isRemote) {
-            if (!player.capabilities.isCreativeMode) {
+            if (wanted.isColored() && !player.capabilities.isCreativeMode) {
                 consumeOne(player, held);
             }
             player.addChatMessage(
@@ -191,6 +192,20 @@ public abstract class AbstractPortBlock<T extends AbstractTE> extends AbstractTi
                     : new ChatComponentTranslation("chat.okmodular.port_color_cleared"));
         }
         return true;
+    }
+
+    /**
+     * The colour this item would apply, or null if it is not something that paints.
+     *
+     * A water bucket answers {@link PortColor#NONE}, which is how a colour is taken
+     * back off.
+     */
+    private static PortColor colorAppliedBy(ItemStack held) {
+        if (held == null) return null;
+        if (held.getItem() == Items.water_bucket) return PortColor.NONE;
+
+        EnumDye dye = EnumDye.getColorFromDye(held);
+        return dye == null ? null : PortColor.fromDye(dye);
     }
 
     private static void consumeOne(EntityPlayer player, ItemStack held) {
