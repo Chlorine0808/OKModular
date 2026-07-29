@@ -10,9 +10,18 @@ import com.google.gson.JsonObject;
 import ruiseki.okmodular.api.condition.ConditionContext;
 
 /**
- * Action that assigns a value to an NBT key in the current context's working NBT.
+ * Assigns a value to an NBT key.
+ * <p>
+ * Reachable two ways, because there are two situations:
+ * <ul>
+ * <li>{@link #applyToNBT} — write into a compound the caller owns. This is how an
+ * output stack or a placed block gets its NBT, and it is what the recipe IO classes
+ * call.</li>
+ * <li>{@link #execute} — write into the context's working NBT, for use as a
+ * standalone action.</li>
+ * </ul>
  */
-public class NBTAssignmentExpression implements IAction, IExpression {
+public class NBTAssignmentExpression implements IAction, IExpression, INBTWriteExpression {
 
     private final String nbtKey;
     private final List<String> pathSegments;
@@ -30,6 +39,13 @@ public class NBTAssignmentExpression implements IAction, IExpression {
     @Override
     public void execute(ConditionContext context) {
         NBTTagCompound nbt = context.getWorkingNBT();
+        if (nbt == null) return;
+
+        applyToNBT(nbt, context);
+    }
+
+    @Override
+    public void applyToNBT(NBTTagCompound nbt, ConditionContext context) {
         if (nbt == null) return;
 
         EvaluationValue evalVal = valueExpression.evaluate(context);
@@ -55,7 +71,11 @@ public class NBTAssignmentExpression implements IAction, IExpression {
         }
 
         // Apply operation
-        if (evalVal.isString()) {
+        if (evalVal.isNbt() && "=".equals(operation)) {
+            // A typed literal (127b, 1.5f) already knows what tag it is. Writing it
+            // through the numeric path below would flatten every type to double.
+            targetNbt.setTag(targetKey, evalVal.asNbt());
+        } else if (evalVal.isString()) {
             targetNbt.setString(targetKey, evalVal.asString());
         } else if (evalVal.isBoolean()) {
             targetNbt.setBoolean(targetKey, evalVal.asBoolean());
@@ -88,9 +108,16 @@ public class NBTAssignmentExpression implements IAction, IExpression {
         return valueExpression.evaluate(context);
     }
 
+    /**
+     * Reproduces the assignment as a recipe script.
+     * <p>
+     * The target is written in call form, because that is the only form the parser
+     * accepts now. Emitting a bare <code>key = value</code> would not parse back: a
+     * dotless name resolves as a variable, and a dotted one is rejected outright.
+     */
     @Override
     public String toString() {
-        return nbtKey + " " + operation + " " + valueExpression;
+        return "nbt('" + nbtKey + "') " + operation + " " + valueExpression;
     }
 
     public static NBTAssignmentExpression fromJson(JsonObject json) {

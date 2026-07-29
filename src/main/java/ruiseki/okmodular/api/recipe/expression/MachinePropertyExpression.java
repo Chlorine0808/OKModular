@@ -24,6 +24,15 @@ public class MachinePropertyExpression implements IExpression {
 
     @Override
     public EvaluationValue evaluate(ConditionContext context) {
+        // Every property here reads machine state, so a context without a machine has
+        // nothing to report. NEI renders recipes with no machine, and so does any
+        // standalone evaluation of an expression.
+        if (context == null || context.getRecipeContext() == null
+            || context.getRecipeContext()
+                .getMachineState() == null) {
+            return EvaluationValue.ZERO;
+        }
+
         String cacheKey = "prop_" + propertyName;
         EvaluationValue cached = context.getCachedValue(cacheKey);
         if (cached != null) {

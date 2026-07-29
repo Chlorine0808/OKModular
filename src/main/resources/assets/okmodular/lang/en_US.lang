@@ -284,7 +284,6 @@ okmodular.condition.biome.base=Biome condition
 okmodular.condition.block=Requires block: %s
 okmodular.condition.block_below=Requires block below: %s
 okmodular.condition.dimension=Allowed dimensions: %s
-okmodular.condition.tile_nbt=Tile NBT %s %s %s
 okmodular.condition.weather.CLEAR=Requires clear weather
 okmodular.condition.weather.RAIN=Requires rain
 okmodular.condition.weather.THUNDER=Requires a thunderstorm

@@ -177,15 +177,27 @@
 | 7 | **任意置換** | `outputs`| `"replace": "stone", "block": "gold", "optional": true` | 石あれば金に置換（終了時） |
 
 #### 動的NBTの例
+
+設置するブロックの TileEntity に NBT を書き込みます。値には式が使えます。
+
 ```json
 "outputs": [{
   "symbol": "D",
   "block": "modid:battery",
-  "nbt": {
-    "energy": { "type": "nbt", "path": "machine_power" }
-  }
+  "nbt": [
+    "nbt('energy') = nbt('C', 'stored_power')",
+    "nbt('tier') = tier.casing"
+  ]
 }]
 ```
+
+左辺が書き込み先（設置するブロックの NBT）、右辺は任意の式です。
+右辺の `nbt('C', ...)` のようにシンボルを使えば、**別のブロックから読んで書き込む**ことができます。
+
+> [!NOTE]
+> `"nbt"` をオブジェクトで書く旧形式（`{"energy": {"type":"nbt","path":"..."}}`）は
+> レガシー扱いです。`path` キーは読まれない（実装は `key` を見る）ため、この形式は**動作しません**。
+> 上の配列形式を使ってください。
 
 ### 外部ブロック NBT 操作 (Block Nbt Output)
 構造体内の任意のブロック（TileEntity）の NBT を直接操作します。これは `block` による置換とは異なり、ブロックそのものを変えずに内部データのみを数値的に変更します。
@@ -230,7 +242,7 @@
     - `pattern`: 文字列の配列。
     - `keys`: パターン文字と条件オブジェクトのマッピング。
 - `block_below`: マシンの「下（Y-1）」にあるブロックを判定します。現在は `offset` + `block` の組み合わせが推奨されます。
-- `tile_nbt`: マシンのTileEntityのNBT値をチェック。
+- ~~`tile_nbt`~~: **廃止**。`{ "expression": "nbt('energy') >= 1000" }` と書いてください（下記）。
 - `weather`: 現在の天候を判定。(`rain`, `thunder`, `clear`)
 - `comparison`: 二つの式を比較します（`left`, `right`, `operator`）。
 - `expression`: 数学的な文字列式を直接記述します。
@@ -270,12 +282,30 @@
 `{ "chance": { "type": "map_range", … } }` のように**値が式オブジェクトである場合は形式 3** として解釈されるので、
 式が失われることはありません。
 
-`tile_nbt` は 2 通りの書き方があります。
+### NBT を条件にする
+
+`expression` の中で `nbt(...)` を使います。**`tile_nbt` は廃止されました。**
 
 ```json
-{ "tile_nbt": "energy >= 1000" }
-{ "key": "energy", "op": "greater_or_equal", "value": 1000 }
+{ "expression": "nbt('energy') >= 1000" }
+{ "expression": "nbt('customData.heat') < 500" }
+{ "expression": "nbt('S', 'stored_power') > 0" }
+{ "expression": "nbt('mode') != 3" }
 ```
+
+`tile_nbt` は独自の比較パーサを持ち、**階層パス・別ブロック・`!=` のいずれも書けませんでした**。
+`nbt()` はすべて書けるため置き換えました。
+
+> [!IMPORTANT]
+> **キーが存在しない場合の扱いが違います。**
+> `tile_nbt` は「キーが無ければ条件不成立」でしたが、`nbt()` は **0 を返します**。
+> `>=` の比較では同じ結果になりますが、`<=` や `< ` では**逆になります**（0 は条件を満たしてしまう）。
+>
+> キーの存在自体を条件にしたい場合は `has_nbt(...)` を併用してください。
+> ```json
+> { "expression": "has_nbt('heat') && nbt('heat') <= 100" }
+> ```
+> 引数の形は `nbt()` と同じです（`has_nbt('key')` / `has_nbt('S', 'key')`）。
 
 ## 5. デコレータ (Decorators)
 デコレータはレシピの実行中や終了時に追加の挙動を与えます。

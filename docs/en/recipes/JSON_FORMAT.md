@@ -181,11 +181,21 @@ If you find a bug, please create an issue.
 "outputs": [{
   "symbol": "D",
   "block": "modid:battery",
-  "nbt": {
-    "energy": { "type": "nbt", "path": "machine_power" }
-  }
+  "nbt": [
+    "nbt('energy') = nbt('C', 'stored_power')",
+    "nbt('tier') = tier.casing"
+  ]
 }]
 ```
+
+The left-hand side is the destination — the NBT of the block being placed — and the
+right-hand side is any expression. Using a symbol on the right, as in
+`nbt('C', ...)`, lets you **read from another block and write the result here**.
+
+> [!NOTE]
+> The older object form (`{"energy": {"type":"nbt","path":"..."}}`) is legacy and
+> **does not work**: it uses a `path` key, while the implementation reads `key`. Use
+> the array form above.
 
 ### External Block NBT Manipulation (Block Nbt Output)
 Manipulate NBT data of any TileEntity within the structure. Unlike `block` replacement, this modifies internal data numerically without changing the block itself.
@@ -230,7 +240,7 @@ Available types:
     - `pattern`: Array of strings.
     - `keys`: Mapping of pattern characters to condition objects.
 - `block_below`: Checks for a specific block below the machine (Y-1). Using `offset` + `block` is now recommended instead.
-- `tile_nbt`: Checks NBT values of the machine's TileEntity.
+- ~~`tile_nbt`~~: **Removed.** Write `{ "expression": "nbt('energy') >= 1000" }` instead (below).
 - `weather`: Checks current weather. (`rain`, `thunder`, `clear`)
 - `comparison`: Compares two expressions (`left`, `right`, `operator`).
 - `expression`: Direct mathematical string expression.
@@ -270,12 +280,31 @@ Form 2 only counts as a type declaration when the inner object holds up as that
 type on its own. So `{ "chance": { "type": "map_range", … } }`, where the value is
 an expression object, is read as form 3 and the expression is not lost.
 
-`tile_nbt` accepts two spellings:
+### Conditions on NBT
+
+Use `nbt(...)` inside an `expression`. **`tile_nbt` has been removed.**
 
 ```json
-{ "tile_nbt": "energy >= 1000" }
-{ "key": "energy", "op": "greater_or_equal", "value": 1000 }
+{ "expression": "nbt('energy') >= 1000" }
+{ "expression": "nbt('customData.heat') < 500" }
+{ "expression": "nbt('S', 'stored_power') > 0" }
+{ "expression": "nbt('mode') != 3" }
 ```
+
+`tile_nbt` had its own comparison parser and could express **none** of the above
+beyond the first line — no nested paths, no other blocks, no `!=`. `nbt()` covers
+all of them.
+
+> [!IMPORTANT]
+> **They differ on a key that is not there.** `tile_nbt` treated an absent key as
+> failing the condition; `nbt()` answers **0**. For `>=` comparisons the outcome is
+> the same, but for `<=` and `<` it is **reversed** — 0 satisfies them.
+>
+> When the key's presence is itself part of the condition, pair it with `has_nbt(...)`:
+> ```json
+> { "expression": "has_nbt('heat') && nbt('heat') <= 100" }
+> ```
+> Its arguments take the same form as `nbt()` (`has_nbt('key')` / `has_nbt('S', 'key')`).
 
 ## 5. Decorators
 Decorators provide additional behavior during or after recipe execution. They

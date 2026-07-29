@@ -1,7 +1,6 @@
 package ruiseki.okmodular.api.recipe.expression;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.google.gson.JsonObject;
@@ -83,14 +82,11 @@ public class ExpressionParser {
         while (eat('|')) {
             if (!eat('|')) throw error("Expected '||'");
             Object y = parseLogicalAnd();
-            if (x instanceof ICondition cx && y instanceof ICondition cy) {
-                List<ICondition> children = new ArrayList<>();
-                children.add(cx);
-                children.add(cy);
-                x = new OpOr(children);
-            } else {
-                throw error("OR (||) requires condition operands");
-            }
+
+            List<ICondition> children = new ArrayList<>();
+            children.add(asCondition(x));
+            children.add(asCondition(y));
+            x = new OpOr(children);
         }
         return x;
     }
@@ -101,14 +97,14 @@ public class ExpressionParser {
         while (eat('&')) {
             if (!eat('&')) throw error("Expected '&&'");
             Object y = parseComparison();
-            if (x instanceof ICondition cx && y instanceof ICondition cy) {
-                List<ICondition> children = new ArrayList<>();
-                children.add(cx);
-                children.add(cy);
-                x = new OpAnd(children);
-            } else {
-                throw error("AND (&&) requires condition operands");
-            }
+
+            // Operands are coerced rather than required to be conditions already.
+            // A bare expression is truthy when non-zero, which is what lets
+            // has_nbt('heat') && nbt('heat') <= 100 read the way it looks.
+            List<ICondition> children = new ArrayList<>();
+            children.add(asCondition(x));
+            children.add(asCondition(y));
+            x = new OpAnd(children);
         }
         return x;
     }
@@ -231,34 +227,59 @@ public class ExpressionParser {
 
     /**
      * Parse assignment operator (=, +=, -=, *=, /=).
-     * Left-hand side must be an NbtExpression or DotNotationNBTExpression.
+     * <p>
+     * The target must be an {@link NbtExpression}, i.e. written as
+     * <code>nbt('key')</code>. That is the only thing an assignment can name, so
+     * anything else is a mistake worth reporting rather than a form to support.
      */
     private Object parseAssignment(Object left, String operation) {
         // Parse right-hand side
         Object right = parseAdditiveExpression();
 
         if (left instanceof NbtExpression nbtExpr) {
-            String nbtKey = nbtExpr.getNbtKey();
+            if (nbtExpr.getSymbol() != '\0') {
+                // Writes land on whatever NBT the surrounding field owns - the output
+                // stack, or the block being placed. A symbol names a block to read
+                // from, so assigning through one has no target.
+                throw error(
+                    "Cannot assign through a symbol. nbt('" + nbtExpr.getSymbol()
+                        + "', ...) reads another block; write to this output's own NBT instead");
+            }
             return new NBTAssignmentExpression(
-                nbtKey,
-                Arrays.asList(nbtKey.split("\\.")),
+                nbtExpr.getNbtKey(),
+                nbtExpr.getPathSegments(),
                 asExpression(right),
                 operation);
-        } else if (left instanceof DotNotationNBTExpression dotExpr) {
-            String nbtKey = dotExpr.getFullPath();
-            List<String> pathSegments = new ArrayList<>(dotExpr.getPathSegments());
-            return new NBTAssignmentExpression(nbtKey, pathSegments, asExpression(right), operation);
         }
 
-        throw error("Assignment left-hand side must be an NBT path (e.g., display.Name)");
+        throw error("Assignment target must be an NBT access, e.g. nbt('display.Name') = 'Sword'");
+    }
+
+    /**
+     * Eats a binary operator, unless it begins a compound assignment.
+     * <p>
+     * <code>+= -= *= /=</code> are handled by {@link #parseComparison}, which sits
+     * above this layer. Without this check the arithmetic layer eats the
+     * <code>+</code> of <code>+=</code> first and the <code>=</code> is left with
+     * nothing to attach to — which is why every compound assignment used to fail
+     * with "Unexpected character: '='" despite parseComparison supporting them.
+     */
+    private boolean eatBinaryOperator(int op) {
+        while (isSpace(ch)) nextChar();
+        if (ch != op) return false;
+        if (pos + 1 < input.length() && input.charAt(pos + 1) == '=') return false;
+
+        nextChar();
+        return true;
     }
 
     // expression = term ( ( "+" | "-" ) term )*
     private Object parseAdditiveExpression() {
         Object x = parseTerm();
         for (;;) {
-            if (eat('+')) x = new ArithmeticExpression(asExpression(x), asExpression(parseTerm()), "+");
-            else if (eat('-')) x = new ArithmeticExpression(asExpression(x), asExpression(parseTerm()), "-");
+            if (eatBinaryOperator('+')) x = new ArithmeticExpression(asExpression(x), asExpression(parseTerm()), "+");
+            else if (eatBinaryOperator('-'))
+                x = new ArithmeticExpression(asExpression(x), asExpression(parseTerm()), "-");
             else return x;
         }
     }
@@ -267,8 +288,9 @@ public class ExpressionParser {
     private Object parseTerm() {
         Object x = parseFactor();
         for (;;) {
-            if (eat('*')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "*");
-            else if (eat('/')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "/");
+            if (eatBinaryOperator('*')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "*");
+            else if (eatBinaryOperator('/'))
+                x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "/");
             else if (eat('%')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "%");
             else return x;
         }
@@ -333,7 +355,16 @@ public class ExpressionParser {
             return res;
         } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
             while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
-            return new ConstantExpression(Double.parseDouble(input.substring(startPos, this.pos)));
+            String literal = input.substring(startPos, this.pos);
+
+            // An NBT type suffix pins the tag type: 127b is written as a byte, not as
+            // a double that happens to hold 127.
+            if (NbtLiteralExpression.isTypeSuffix(ch)) {
+                String withSuffix = literal + (char) ch;
+                nextChar();
+                return new NbtLiteralExpression(NBTTypeInference.parseValue(withSuffix), withSuffix);
+            }
+            return new ConstantExpression(Double.parseDouble(literal));
         } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) { // variables, functions, or NBT paths
             // Parse first segment
             List<String> pathSegments = new ArrayList<>();
@@ -388,9 +419,9 @@ public class ExpressionParser {
                 throw error("Unknown function: '" + name + "'");
             }
 
-            // Check if this is a dot notation NBT path (multiple segments)
+            // Dotted names: only tier.component remains. NBT paths go through nbt(),
+            // where the target is an argument - see below.
             if (pathSegments.size() > 1) {
-                // Check for tier.component syntax FIRST
                 if (pathSegments.get(0)
                     .equalsIgnoreCase("tier")) {
                     // tier.component must have exactly 2 segments
@@ -403,9 +434,14 @@ public class ExpressionParser {
                     return new ComponentTierExpression(componentName);
                 }
 
-                // Otherwise treat as NBT path: display.Name, ench.lvl, etc.
+                // Bare dot notation used to mean "an NBT path on this machine". It was
+                // dropped because it cannot express any other target: S.energy reads
+                // identically to a two-level path on the machine itself, so a symbol
+                // and a nested key were indistinguishable.
                 String fullPath = String.join(".", pathSegments);
-                return new DotNotationNBTExpression(fullPath, pathSegments);
+                throw error(
+                    "Dotted names are no longer NBT paths. Write nbt('" + fullPath
+                        + "') for this machine, or nbt('<symbol>', '<key>') for another block");
             }
 
             // Single segment - check for known variables
