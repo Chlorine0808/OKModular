@@ -391,6 +391,55 @@ public class PortColorGroupingTest {
                 .getColor());
     }
 
+    // ========== 1 色分の絞り込み（走行中の機械が毎 tick 呼ぶ） ==========
+
+    @Test
+    @DisplayName("塗っていないポートしか無ければリストをそのまま返す")
+    public void testSelectは無色だけならコピーしない() {
+        List<IModularPort> ports = ports(StubPort.item("a", PortColor.NONE), StubPort.item("b", PortColor.NONE));
+
+        assertSame(ports, PortColorGrouping.select(ports, PortColor.NONE), "走行中は毎 tick 呼ばれる。色を使っていない機械でコピーを作らない");
+    }
+
+    @Test
+    @DisplayName("指定した色と無色を拾う")
+    public void testSelectは指定色と無色を拾う() {
+        List<IModularPort> ports = ports(
+            StubPort.item("red", PortColor.RED),
+            StubPort.item("blue", PortColor.BLUE),
+            StubPort.energy("shared", PortColor.NONE),
+            StubPort.controller());
+
+        assertEquals(names("red", "shared", "controller"), names(PortColorGrouping.select(ports, PortColor.RED)));
+    }
+
+    /**
+     * 走行中に塗り替えられた場合の受け皿。
+     *
+     * レシピは開始した群の色を覚えているが、その色のポートが 1 つも無くなることがある。
+     * そのとき**無色のポートに落ちる**ので、レシピは完走できてアイテムが宙に浮かない。
+     */
+    @Test
+    @DisplayName("その色のポートが無くなっても無色に落ちる")
+    public void testSelectは色が消えても無色に落ちる() {
+        List<IModularPort> ports = ports(
+            StubPort.item("blue", PortColor.BLUE),
+            StubPort.energy("shared", PortColor.NONE));
+
+        assertEquals(
+            names("shared"),
+            names(PortColorGrouping.select(ports, PortColor.GREEN)),
+            "緑のポートが無くなっても、走っているレシピは無色のポートで完走できるべき");
+    }
+
+    @Test
+    @DisplayName("null の色は無色として扱う")
+    public void testSelectはNullを無色として扱う() {
+        List<IModularPort> ports = ports(StubPort.item("red", PortColor.RED), StubPort.item("shared", PortColor.NONE));
+
+        assertEquals(names("shared"), names(PortColorGrouping.select(ports, null)));
+    }
+
     // ========== 補助 ==========
 
     private static List<IModularPort> ports(StubPort... ports) {

@@ -52,7 +52,11 @@ public final class PortColorGrouping {
         private final List<IModularPort> inputs;
         private final List<IModularPort> outputs;
 
-        Group(PortColor color, List<IModularPort> inputs, List<IModularPort> outputs) {
+        /**
+         * For a caller that already knows the split. {@link PortColorGrouping#group}
+         * is what produces the groups a machine should actually try, in order.
+         */
+        public Group(PortColor color, List<IModularPort> inputs, List<IModularPort> outputs) {
             this.color = color;
             this.inputs = inputs;
             this.outputs = outputs;
@@ -127,6 +131,15 @@ public final class PortColorGrouping {
         }
     }
 
+    private static boolean hasPainted(List<IModularPort> ports) {
+        for (IModularPort port : ports) {
+            if (isEverywhere(port)) continue;
+            PortColor color = port.getPortColor();
+            if (color != null && color.isColored()) return true;
+        }
+        return false;
+    }
+
     private static boolean hasUnpainted(List<IModularPort> ports) {
         for (IModularPort port : ports) {
             if (isEverywhere(port)) continue;
@@ -137,17 +150,31 @@ public final class PortColorGrouping {
     }
 
     /**
-     * The ports one group sees: its own colour first, then everything unpainted.
+     * The ports one colour sees: its own colour first, then everything unpainted,
+     * then the ports that belong to every group.
      *
-     * Ordering inside a group is stable - painted before unpainted, original order
-     * within each - because recipe matching walks the list and stops at the first
-     * port that fits. An unstable order would make which port gets used vary.
+     * Ordering is stable - painted before unpainted, original order within each -
+     * because recipe matching walks the list and stops at the first port that fits.
+     * An unstable order would change which port gets used from tick to tick.
+     *
+     * <p>
+     * A running machine calls this every tick to find the ports its recipe belongs
+     * to, so a machine with no paint on it gets the list handed straight back rather
+     * than copied. <strong>The result is not necessarily a new list</strong>; do not
+     * modify it.
+     *
+     * <p>
+     * Asking for a colour no port carries answers the unpainted ports, which is what
+     * lets a recipe still finish after its group was repainted underneath it.
      */
-    private static List<IModularPort> select(List<IModularPort> ports, PortColor color) {
+    public static List<IModularPort> select(List<IModularPort> ports, PortColor color) {
+        PortColor wanted = color == null ? PortColor.NONE : color;
+        if (!wanted.isColored() && !hasPainted(ports)) return ports;
+
         List<IModularPort> selected = new ArrayList<>(ports.size());
-        if (color.isColored()) {
+        if (wanted.isColored()) {
             for (IModularPort port : ports) {
-                if (!isEverywhere(port) && port.getPortColor() == color) selected.add(port);
+                if (!isEverywhere(port) && port.getPortColor() == wanted) selected.add(port);
             }
         }
         for (IModularPort port : ports) {
