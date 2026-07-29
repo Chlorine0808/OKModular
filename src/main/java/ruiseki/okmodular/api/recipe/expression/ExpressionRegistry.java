@@ -149,25 +149,15 @@ public class ExpressionRegistry {
         // access reads the same way. The two-argument form used to be documented but
         // not implemented: the second argument was silently discarded and the symbol
         // was read as the key.
-        registerFunction("nbt", (args, parser) -> {
-            if (args.isEmpty()) throw parser.error("nbt() requires at least one argument");
-            if (args.size() > 2) {
-                throw parser.error("nbt() takes a key, or a symbol and a key - got " + args.size() + " arguments");
-            }
+        registerFunction("nbt", (args, parser) -> readNbtAccess(args, parser, "nbt"));
 
-            if (args.size() == 1) {
-                return new NbtExpression(stringArgument(args.get(0), parser, "nbt() key"), EvaluationValue.ZERO, '\0');
-            }
-
-            String symbol = stringArgument(args.get(0), parser, "nbt() symbol");
-            if (symbol.length() != 1) {
-                throw parser.error("nbt() symbol must be a single character, got '" + symbol + "'");
-            }
-            return new NbtExpression(
-                stringArgument(args.get(1), parser, "nbt() key"),
-                EvaluationValue.ZERO,
-                symbol.charAt(0));
-        });
+        // has_nbt('key') / has_nbt('S', 'key') — presence rather than value.
+        // nbt() answers 0 for an absent key, which is indistinguishable from a key
+        // holding 0. That is harmless for >= but wrong for <=, where an absent key
+        // would otherwise pass.
+        registerFunction(
+            "has_nbt",
+            (args, parser) -> new NbtPresenceExpression(readNbtAccess(args, parser, "has_nbt")));
 
         registerFunction("essentia", (args, parser) -> {
             if (args.isEmpty()) throw parser.error("essentia() requires 1 argument (aspect name)");
@@ -276,6 +266,33 @@ public class ExpressionRegistry {
     public static IExpression createFunction(String name, List<IExpression> args, ExpressionParser parser) {
         IFunctionFactory factory = FUNCTION_REGISTRY.get(name.toLowerCase());
         return factory != null ? factory.create(args, parser) : null;
+    }
+
+    /**
+     * Reads the argument form shared by the NBT accessors: a key, or a symbol and a
+     * key. Both <code>nbt()</code> and <code>has_nbt()</code> take exactly this, so
+     * the rule is defined once.
+     *
+     * @param name the function name, for error messages
+     */
+    private static NbtExpression readNbtAccess(List<IExpression> args, ExpressionParser parser, String name) {
+        if (args.isEmpty()) throw parser.error(name + "() requires at least one argument");
+        if (args.size() > 2) {
+            throw parser.error(name + "() takes a key, or a symbol and a key - got " + args.size() + " arguments");
+        }
+
+        if (args.size() == 1) {
+            return new NbtExpression(stringArgument(args.get(0), parser, name + "() key"), EvaluationValue.ZERO, '\0');
+        }
+
+        String symbol = stringArgument(args.get(0), parser, name + "() symbol");
+        if (symbol.length() != 1) {
+            throw parser.error(name + "() symbol must be a single character, got '" + symbol + "'");
+        }
+        return new NbtExpression(
+            stringArgument(args.get(1), parser, name + "() key"),
+            EvaluationValue.ZERO,
+            symbol.charAt(0));
     }
 
     /**

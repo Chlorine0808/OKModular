@@ -82,14 +82,11 @@ public class ExpressionParser {
         while (eat('|')) {
             if (!eat('|')) throw error("Expected '||'");
             Object y = parseLogicalAnd();
-            if (x instanceof ICondition cx && y instanceof ICondition cy) {
-                List<ICondition> children = new ArrayList<>();
-                children.add(cx);
-                children.add(cy);
-                x = new OpOr(children);
-            } else {
-                throw error("OR (||) requires condition operands");
-            }
+
+            List<ICondition> children = new ArrayList<>();
+            children.add(asCondition(x));
+            children.add(asCondition(y));
+            x = new OpOr(children);
         }
         return x;
     }
@@ -100,14 +97,14 @@ public class ExpressionParser {
         while (eat('&')) {
             if (!eat('&')) throw error("Expected '&&'");
             Object y = parseComparison();
-            if (x instanceof ICondition cx && y instanceof ICondition cy) {
-                List<ICondition> children = new ArrayList<>();
-                children.add(cx);
-                children.add(cy);
-                x = new OpAnd(children);
-            } else {
-                throw error("AND (&&) requires condition operands");
-            }
+
+            // Operands are coerced rather than required to be conditions already.
+            // A bare expression is truthy when non-zero, which is what lets
+            // has_nbt('heat') && nbt('heat') <= 100 read the way it looks.
+            List<ICondition> children = new ArrayList<>();
+            children.add(asCondition(x));
+            children.add(asCondition(y));
+            x = new OpAnd(children);
         }
         return x;
     }

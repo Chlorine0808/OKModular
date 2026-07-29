@@ -60,7 +60,18 @@ public class NbtExpression implements IExpression {
 
     @Override
     public EvaluationValue evaluate(ConditionContext context) {
-        if (context == null || context.getWorld() == null) return defaultValue;
+        NBTBase found = resolveTag(context);
+        return found != null ? new EvaluationValue(found) : defaultValue;
+    }
+
+    /**
+     * Resolves the tag this expression points at, or null if it is not there.
+     * <p>
+     * Separate from {@link #evaluate} because "absent" and "zero" are different
+     * questions, and {@link NbtPresenceExpression} needs to tell them apart.
+     */
+    public NBTBase resolveTag(ConditionContext context) {
+        if (context == null || context.getWorld() == null) return null;
 
         ChunkCoordinates pos = null;
         if (symbol != '\0' && context.getRecipeContext() != null) {
@@ -73,7 +84,7 @@ public class NbtExpression implements IExpression {
             pos = new ChunkCoordinates(context.getX(), context.getY(), context.getZ());
         }
 
-        if (pos == null) return defaultValue;
+        if (pos == null) return null;
 
         String teCacheKey = "te_nbt_" + pos.posX + "_" + pos.posY + "_" + pos.posZ;
         EvaluationValue teNbtValue = context.getCachedValue(teCacheKey);
@@ -84,14 +95,13 @@ public class NbtExpression implements IExpression {
         } else {
             TileEntity te = context.getWorld()
                 .getTileEntity(pos.posX, pos.posY, pos.posZ);
-            if (te == null) return defaultValue;
+            if (te == null) return null;
             nbt = new NBTTagCompound();
             te.writeToNBT(nbt);
             context.setCachedValue(teCacheKey, new EvaluationValue(nbt));
         }
 
-        NBTBase found = navigatePath(nbt, pathSegments);
-        return found != null ? new EvaluationValue(found) : defaultValue;
+        return navigatePath(nbt, pathSegments);
     }
 
     /**

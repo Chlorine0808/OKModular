@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 /**
@@ -97,78 +96,38 @@ public class ConditionParserRegistryTest {
     }
 
     // ========================================
-    // tile_nbt の 2 形式
+    // tile_nbt の廃止と、その代替
     // ========================================
 
     @Test
-    @DisplayName("【tile_nbt】shorthand が key / op / value に分解される")
-    public void testTileNbtのShorthand() {
-        ICondition result = parse("{ \"tile_nbt\": \"energy >= 1000\" }");
-        assertInstanceOf(TileNbtCondition.class, result);
-
-        JsonObject written = new JsonObject();
-        result.write(written);
-        assertEquals(
-            "energy",
-            written.get("key")
-                .getAsString());
-        assertEquals(
-            "greater_or_equal",
-            written.get("op")
-                .getAsString(),
-            ">= が > + 余りの = として読まれていないべき");
-        assertEquals(
-            1000.0,
-            written.get("value")
-                .getAsDouble());
+    @DisplayName("【廃止】tile_nbt は解決されない")
+    public void testTileNbtは廃止された() {
+        // 独自の比較パーサを持ち、階層パス・別ブロック・!= のいずれも書けなかった。
+        // expression + nbt() が上位互換なので削除した
+        assertNull(parse("{ \"tile_nbt\": \"energy >= 1000\" }"));
+        assertNull(parse("{ \"key\": \"energy\", \"op\": \"greater_or_equal\", \"value\": 1000 }"));
     }
 
     @Test
-    @DisplayName("【tile_nbt】2 文字演算子が 1 文字として読まれない")
-    public void testTileNbtの2文字演算子() {
-        JsonObject lessOrEqual = new JsonObject();
-        parse("{ \"tile_nbt\": \"heat <= 500\" }").write(lessOrEqual);
-        assertEquals(
-            "less_or_equal",
-            lessOrEqual.get("op")
-                .getAsString());
-
-        JsonObject equal = new JsonObject();
-        parse("{ \"tile_nbt\": \"stage == 3\" }").write(equal);
-        assertEquals(
-            "equal",
-            equal.get("op")
-                .getAsString());
+    @DisplayName("【代替】expression + nbt() で書ける")
+    public void testNbt関数で代替できる() {
+        assertNotNull(parse("{ \"expression\": \"nbt('energy') >= 1000\" }"), "式条件として成立するべき");
     }
 
     @Test
-    @DisplayName("【tile_nbt】1 文字演算子も読める")
-    public void testTileNbtの1文字演算子() {
-        JsonObject written = new JsonObject();
-        parse("{ \"tile_nbt\": \"energy > 100\" }").write(written);
-        assertEquals(
-            "greater_than",
-            written.get("op")
-                .getAsString());
-        assertEquals(
-            100.0,
-            written.get("value")
-                .getAsDouble());
+    @DisplayName("【代替】has_nbt() でキーの存在を条件にできる")
+    public void testHasNbtで存在確認できる() {
+        // tile_nbt は「キーが無ければ false」だったが、nbt() は 0 を返すので
+        // `<= 100` のような比較では逆の結果になる。has_nbt() がその差を埋める
+        assertNotNull(parse("{ \"expression\": \"has_nbt('heat') && nbt('heat') <= 100\" }"));
     }
 
     @Test
-    @DisplayName("【tile_nbt】spelled-out 形式も従来どおり読める")
-    public void testTileNbtのKeyOpValue形式() {
-        ICondition result = parse("{ \"key\": \"energy\", \"op\": \"greater_or_equal\", \"value\": 1000 }");
-        assertInstanceOf(TileNbtCondition.class, result);
-    }
-
-    @Test
-    @DisplayName("【tile_nbt】比較対象が数値でなければ弾く")
-    public void testTileNbtの不正なshorthand() {
-        // parse は例外をログに変えて null を返す既存挙動
-        assertNull(parse("{ \"tile_nbt\": \"energy >= たくさん\" }"));
-        assertNull(parse("{ \"tile_nbt\": \"演算子がない\" }"));
+    @DisplayName("【代替】nbt() は階層パスと別ブロックも書ける（tile_nbt では不可能だった）")
+    public void testNbtは表現力が高い() {
+        assertNotNull(parse("{ \"expression\": \"nbt('customData.heat') >= 50\" }"), "階層パス");
+        assertNotNull(parse("{ \"expression\": \"nbt('S', 'stored') >= 50\" }"), "別ブロック");
+        assertNotNull(parse("{ \"expression\": \"nbt('mode') != 3\" }"), "!= 比較");
     }
 
     // ========================================

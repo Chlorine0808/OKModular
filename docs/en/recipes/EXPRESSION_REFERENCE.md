@@ -153,6 +153,7 @@ Performance multipliers provided by the structure definition.
     - Example: `count_blocks(1, "minecraft:iron_block")`
 - `nbt('key')`: Retrieve NBT from the machine itself.
 - `nbt('symbol', 'key')`: Retrieve NBT from a block at a specific symbol position.
+- `has_nbt('key')` / `has_nbt('symbol', 'key')`: Whether the key **exists**, rather than what it holds.
 
 ### All NBT access goes through `nbt(...)`
 
