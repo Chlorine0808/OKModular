@@ -67,6 +67,26 @@ public abstract class AbstractPortBlock<T extends AbstractTE> extends AbstractTi
         isFullSize = isOpaque = false;
     }
 
+    /**
+     * The tint a port at this position renders with.
+     *
+     * A colour a player painted on wins; failing that the machine's structure tint,
+     * and failing that the configured default. Both the block colour handler and the
+     * port renderer go through here so a painted port cannot end up visible in one and
+     * not the other.
+     */
+    public static int tintAt(IBlockAccess world, int x, int y, int z) {
+        Integer structureColor = StructureTintCache.get(world, x, y, z);
+        int fallback = structureColor != null ? structureColor : MachineryConfig.getDefaultTintColorInt();
+
+        TileEntity te = world.getTileEntity(x, y, z);
+        if (te instanceof IModularPort port) {
+            return port.getPortColor()
+                .tintOr(fallback);
+        }
+        return fallback;
+    }
+
     @Override
     protected void registerBlockColor() {
         BlockColor.registerBlockColors(new IModularBlockTint() {
@@ -74,13 +94,7 @@ public abstract class AbstractPortBlock<T extends AbstractTE> extends AbstractTi
             @Override
             public int colorMultiplier(IBlockAccess world, int x, int y, int z, int tintIndex) {
                 if (tintIndex == 0) {
-                    // Get color from cache
-                    Integer structureColor = StructureTintCache.get(world, x, y, z);
-                    if (structureColor != null) {
-                        return structureColor;
-                    }
-                    // Fall back to config color
-                    return MachineryConfig.getDefaultTintColorInt();
+                    return tintAt(world, x, y, z);
                 }
                 return 0xFFFFFFFF; // White for non-tinted layers
             }
