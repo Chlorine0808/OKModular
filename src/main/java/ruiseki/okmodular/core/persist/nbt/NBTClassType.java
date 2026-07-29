@@ -737,10 +737,26 @@ public abstract class NBTClassType<T> {
                     tag.setString(name, object.name());
                 }
 
+                /**
+                 * Null when the stored name does not match any constant, which
+                 * {@code persistedFieldAction} takes as "leave the field alone".
+                 *
+                 * This used to be {@code Enum.valueOf}, which throws. A name that
+                 * does not resolve is not an error worth escalating - it happens
+                 * whenever a save crosses builds that renamed or removed a constant,
+                 * or was edited by hand - and an exception raised while a tile entity
+                 * loads takes the chunk with it.
+                 */
                 @Override
                 public Enum readPersistedField(String name, NBTTagCompound tag) {
                     String value = tag.getString(name);
-                    return Enum.valueOf((Class<Enum>) type, value);
+                    for (Object candidate : type.getEnumConstants()) {
+                        if (((Enum) candidate).name()
+                            .equals(value)) {
+                            return (Enum) candidate;
+                        }
+                    }
+                    return null;
                 }
 
                 @Override
@@ -849,6 +865,18 @@ public abstract class NBTClassType<T> {
                     }
                 } else {
                     T object = readPersistedField(name, tag);
+                    if (object == null && field.getType()
+                        .isEnum()) {
+                        // The stored name matched no constant, so keep whatever the
+                        // field was initialised to. Guessing the first constant would
+                        // be worse than useless for an enum whose order means
+                        // something - PortColor starts at WHITE, not "unpainted".
+                        //
+                        // Narrowed to enums on purpose: for other types a null read
+                        // is a real value. An ItemStack field, for one, is cleared by
+                        // loading a tag that holds no item.
+                        return;
+                    }
                     field.set(castTile, object);
                 }
             }
