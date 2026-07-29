@@ -107,6 +107,12 @@ public class MachinePropertyExpression implements IExpression {
                 .getEnergyCapacity();
             return new EvaluationValue(max - stored);
         });
+        register(
+            "energy_per_tick",
+            ctx -> new EvaluationValue(
+                ctx.getRecipeContext()
+                    .getMachineState()
+                    .getEnergyPerTick()));
 
         register(
             "fluid",
