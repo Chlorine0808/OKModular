@@ -904,6 +904,15 @@ public class TEMachineController extends AbstractMBModifierTE
         nbt.setTag("processAgent", agentNbt);
         // Save ExtendedFacing
         nbt.setByte("extendedFacing", (byte) extendedFacing.ordinal());
+        // Save External Port Configs. Without this the wrench appears to work and
+        // then loses everything on reload: the only reason configured external
+        // ports survive today is that applyFixedPortConfigs rebuilds the ones the
+        // structure JSON declares, every time the structure forms.
+        //
+        // Those JSON-derived entries get written too. They are redundant - the next
+        // formation re-derives them - but telling them apart would mean tracking
+        // where each entry came from, which costs more than the bytes do.
+        ExternalPortConfigCodec.write(nbt, externalPortConfigs);
     }
 
     @Override
