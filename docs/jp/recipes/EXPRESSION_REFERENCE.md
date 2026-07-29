@@ -71,44 +71,67 @@ OmoshiroiKamo の式パーサー (`ExpressionParser`) で使用できる変数�
 
 マシンの現在の状態を取得します。
 
-### アイテム (Item)
-- **変数 (全体量)**
-    - `item` / `item_total`: 現在蓄積されているアイテムの総数。
-    - `item_in` / `item_out`: 搬入 / 搬出ポートのアイテム合計数。
-    - `item_max` / `item_capacity`: マシンの最大アイテムスロット数。
-    - `item_f` / `item_free` / `item_space`: アイテム全体の空き容量。
-    - `item_p` / `item_percent`: アイテムの充填率 (0.0 ~ 1.0)。
-- **関数 (種類指定)**
-    - `item("id")`: 指定した ID または OreDict のアイテムの現在蓄積量。
-    - `item_in("id")` / `item_out("id")`: 指定アイテムの搬入 / 搬出ポート量。
-    - `item_f("id")` / `item_f_in("id")` / `item_f_out("id")`: 指定アイテムの受け入れ可能数。
-- **スロット情報 (関数)**
-    - `item_slot()`: 合計スロット数。
-    - `item_slot_in()` / `item_slot_out()`: 入力 / 出力ごとのスロット数。
-    - `item_slot_empty()`: 空きスロット数。
+### 資源プロパティは全資源種で同じ形
 
-### エネルギー (Energy)
-- `energy` / `energy_stored` / `energy_total`: 現在蓄積されているエネルギー量。
-- `energy_max` / `energy_capacity`: マシンの最大エネルギー容量。
-- `energy_f` / `energy_free`: エネルギーの空き容量 (`max - stored`)。
-- `energy_p` / `energy_percent`: エネルギーの充填率 (0.0 ~ 1.0)。
-- `energy_per_tick`: 1ティックあたりのエネルギー消費量。稼働中の `perTick` 入力の合計。
+**7 つの資源種はすべて同じ接尾辞を持ちます。** 以下の `K` を資源種の名前に読み替えてください。
 
-### 流体 (Fluid)
-- **変数 (全体量)**
-    - `fluid` / `fluid_stored` / `fluid_total`: 現在蓄積されている流体の総量。
-    - `fluid_in` / `fluid_out`: 搬入 / 搬出ポートの流体合計量。
-    - `fluid_max` / `fluid_capacity`: 流体タンクの最大容量。
-    - `fluid_p` / `fluid_percent`: 流体の充填率 (0.0 ~ 1.0)。
-- **関数 (種類指定)**
-    - `fluid("name")`: 指定した名前の流体の現在蓄積量。
-    - `fluid_in("name")` / `fluid_out("name")`: 指定した流体の搬入 / 搬出ポート量。
+`K` = `item` / `fluid` / `gas` / `energy` / `mana` / `essentia` / `vis`
 
-### その他リソース
-- **マナ (Mana)**: `mana`, `mana_max`, `mana_p`
-- **ガス (Gas)**: `gas`, `gas_max`, `gas_p`
-- **エッセンティア (Essentia)**: `essentia("aspectName")`
-- **Vis**: `vis("aspectName")`
+| 書き方 | 意味 |
+|---|---|
+| `K` / `K_stored` / `K_total` / `total_K` | 現在の保持量 |
+| `K_max` / `K_capacity` / `total_K_max` / `total_K_capacity` | 容量 |
+| `K_f` / `K_free` / `K_space` | 空き |
+| `K_p` / `K_percent` | 充填率 (0.0 〜 1.0) |
+
+たとえば `gas_stored` `total_vis` `essentia_percent` はすべてこの表から導かれる名前です。
+
+**搬入側と搬出側が別の格納になる資源種**（`item` / `fluid` / `gas`）は、さらに方向つきの名前を持ちます。
+
+| 書き方 | 意味 |
+|---|---|
+| `K_in` / `K_out` | 搬入側 / 搬出側の量 |
+| `K_f_in` / `K_f_out` | 搬入側 / 搬出側の空き |
+
+`energy` / `mana` / `essentia` / `vis` は単一のプールなので、方向つきの名前はありません
+（方向を指定しても選ぶものが無く、答えは合計と同じになるため）。
+
+### 種類を指定する関数
+
+量を「その資源種の合計」ではなく「特定の流体・ガス・アスペクト・アイテム」で知りたい場合は、
+同じ名前に引数を 1 つ渡します。引数は必ず 1 つで、多くても少なくてもエラーになります。
+
+```
+fluid("water")        item("minecraft:stone")     essentia("ignis")
+fluid_in("water")     item_out("minecraft:iron_ingot")
+fluid_f_out("lava")   item_f_in("minecraft:coal")
+```
+
+**どの形が引数を取れるかは資源種によって違います。** 種類を名指しできるのは、
+その資源種が複数の種類を持つ場合だけです。
+
+| 資源種 | 引数を取れる形 |
+|---|---|
+| `item` | `item` / `item_in` / `item_out` / `item_f` / `item_f_in` / `item_f_out` |
+| `fluid` / `gas` | `K` / `K_in` / `K_out` / `K_f_in` / `K_f_out` |
+| `essentia` / `vis` | `K` のみ |
+| `energy` / `mana` | なし（単一の種類の単一プールなので名指しする対象が無い） |
+
+### 資源種ごとの補足
+
+- **エネルギー**: `power` / `power_p` は `energy` / `energy_p` の別名です。
+  `energy_per_tick` は 1 ティックあたりのエネルギー消費量（稼働中の `perTick` 入力の合計）で、
+  保持量ではないので上の表には含まれません。
+- **アイテム**: 容量は「スロット数 × 64」で表されます。
+  ただし `item_f` は容量から引いた値ではなく**実際に入る個数**です
+  （スタック上限が種類ごとに違うため、引き算では実態と合いません）。
+- **アイテムのスロット情報**: `item_slot()` 合計スロット数 /
+  `item_slot_in()` `item_slot_out()` 方向ごとのスロット数 / `item_slot_empty()` 空きスロット数。
+
+> [!NOTE]
+> **方向を指定した空きは、共有容量からの引き算ではありません。**
+> 流体とガスは搬入タンクと搬出タンクが別物なので、`fluid_f_in` は搬入タンクの空きだけを答えます。
+> 一方 `fluid_f`（方向なし）は「容量 - 保持量」です。
 
 ### 統計・状態
 - `recipe_count`: マシンが処理したレシピの累計回数。
