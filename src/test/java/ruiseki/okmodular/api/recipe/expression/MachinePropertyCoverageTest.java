@@ -2,6 +2,7 @@ package ruiseki.okmodular.api.recipe.expression;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -54,6 +55,10 @@ public class MachinePropertyCoverageTest {
         return List.of(ExpressionNameFreezeTest.MACHINE_PROPERTIES);
     }
 
+    private static List<String> everyDefinedProperty() {
+        return new ArrayList<>(MachinePropertyExpression.propertyNames());
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("machineProperties")
     @DisplayName("登録された機械プロパティは評価すると値を返す")
@@ -67,5 +72,26 @@ public class MachinePropertyCoverageTest {
             () -> "'" + name
                 + "' が 0 を返した。ExpressionRegistry には登録されているが "
                 + "MachinePropertyExpression に定義が無い（= 黙って 0 になる）可能性が高い");
+    }
+
+    /**
+     * 生きたレジストリを列挙する版。
+     *
+     * 上の凍結リストは「名前が消えたこと」を捕まえるが、
+     * 資源種のループが**新しく生やした名前**は凍結リストに載っていないので見ない。
+     * こちらは逆に、消失は捕まえられないが（列挙対象からも消えるので）
+     * **今あるすべての名前が実際に動くこと**を確かめる。
+     *
+     * 登録が定義テーブルから駆動されるようになったので、
+     * 「登録はあるが定義が無い」は構造的に起こらない。これはその裏取り。
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("everyDefinedProperty")
+    @DisplayName("定義されたプロパティはすべてパースでき、値を返す")
+    public void test定義された全プロパティが動く(String name) {
+        double value = ExpressionParser.parseExpression(name)
+            .evaluateDouble(StubMachineContext.withMachine());
+
+        assertNotEquals(0.0, value, () -> "'" + name + "' が 0 を返した");
     }
 }

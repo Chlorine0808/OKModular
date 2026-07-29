@@ -29,6 +29,19 @@ public interface IPortType {
         public boolean isStorable() {
             return this != BLOCK && this != NONE;
         }
+
+        /**
+         * Whether input and output are separate storage for this kind, so that
+         * asking about a direction gives a different answer than asking about the
+         * machine as a whole.
+         *
+         * Fluids, gases and items are held in per-direction tanks and slots.
+         * Energy, mana, essentia and vis are single pools, so a direction has
+         * nothing to select and the total is the only answer.
+         */
+        public boolean hasDirectionalStorage() {
+            return this == FLUID || this == GAS || this == ITEM;
+        }
     }
 
     enum Direction {

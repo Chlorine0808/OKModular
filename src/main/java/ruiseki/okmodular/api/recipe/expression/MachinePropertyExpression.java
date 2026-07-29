@@ -1,17 +1,35 @@
 package ruiseki.okmodular.api.recipe.expression;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.google.gson.JsonObject;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.recipe.core.IMachineState;
 
 /**
  * Expression that evaluates to a property of the machine (e.g., energy,
  * progress).
+ *
+ * <p>
+ * The resource properties are <em>generated</em>, one family per resource kind,
+ * rather than written out per kind. Every storable kind answers the same four
+ * questions - how much is held, what the capacity is, how much room is left, and
+ * the ratio of the first two - and kinds with separate input and output storage
+ * answer four more. Spelling that out by hand is what left the previous version
+ * ragged: gas had no {@code gas_stored}, essentia and vis had no totals, and
+ * {@code essentia_free} existed as a definition but was never registered as a
+ * name. Generating the family makes those holes impossible.
+ *
+ * <p>
+ * Adding a resource kind therefore adds no names here. It appends a constant to
+ * {@link IPortType.Type} and a branch to the accessors on
+ * {@link IMachineState}.
  */
 public class MachinePropertyExpression implements IExpression {
 
@@ -64,6 +82,20 @@ public class MachinePropertyExpression implements IExpression {
         }
     }
 
+    /**
+     * Every property name that can be evaluated.
+     *
+     * <p>
+     * A name has to be both defined here and registered in
+     * {@link ExpressionRegistry} to be usable from a recipe. Keeping two
+     * hand-written lists in step failed in both directions - names that parsed and
+     * silently evaluated to 0, and names that evaluated fine but were rejected by
+     * the parser - so the registry reads this instead of repeating it.
+     */
+    public static Set<String> propertyNames() {
+        return Collections.unmodifiableSet(definitions.keySet());
+    }
+
     private static void register(String name, Function<ConditionContext, EvaluationValue> getter) {
         definitions.put(name.toLowerCase(), new PropertyDefinition(name, getter));
     }
@@ -75,426 +107,119 @@ public class MachinePropertyExpression implements IExpression {
         }
     }
 
+    // --- machine readers -------------------------------------------------
+    // evaluate() has already checked that both of these are present.
+
+    private static IMachineState machine(ConditionContext ctx) {
+        return ctx.getRecipeContext()
+            .getMachineState();
+    }
+
+    private static EvaluationValue amount(ConditionContext ctx, IPortType.Type kind, IPortType.Direction dir) {
+        return new EvaluationValue(machine(ctx).getAmount(kind, dir, null));
+    }
+
+    private static EvaluationValue space(ConditionContext ctx, IPortType.Type kind, IPortType.Direction dir) {
+        return new EvaluationValue(machine(ctx).getSpace(kind, dir, null));
+    }
+
+    private static EvaluationValue capacity(ConditionContext ctx, IPortType.Type kind) {
+        return new EvaluationValue(machine(ctx).getCapacity(kind));
+    }
+
+    private static EvaluationValue ratio(ConditionContext ctx, IPortType.Type kind) {
+        IMachineState state = machine(ctx);
+        long max = state.getCapacity(kind);
+        long held = state.getAmount(kind, IPortType.Direction.BOTH, null);
+        return new EvaluationValue(max > 0 ? (double) held / max : 0);
+    }
+
+    /**
+     * Register the property family for one resource kind.
+     *
+     * The four base names and their aliases exist for every storable kind. The
+     * directional names only exist where a direction selects different storage -
+     * offering {@code energy_in} would suggest energy has an input pool of its own
+     * when the answer would just be the total.
+     */
+    private static void registerResourceFamily(IPortType.Type kind) {
+        String k = kind.name()
+            .toLowerCase();
+
+        register(k, ctx -> amount(ctx, kind, IPortType.Direction.BOTH));
+        register(k + "_max", ctx -> capacity(ctx, kind));
+        register(k + "_f", ctx -> space(ctx, kind, IPortType.Direction.BOTH));
+        register(k + "_p", ctx -> ratio(ctx, kind));
+
+        alias(k + "_stored", k);
+        alias(k + "_total", k);
+        alias("total_" + k, k);
+        alias(k + "_capacity", k + "_max");
+        alias("total_" + k + "_max", k + "_max");
+        alias("total_" + k + "_capacity", k + "_max");
+        alias(k + "_free", k + "_f");
+        alias(k + "_space", k + "_f");
+        alias(k + "_percent", k + "_p");
+
+        if (!kind.hasDirectionalStorage()) {
+            return;
+        }
+
+        register(k + "_in", ctx -> amount(ctx, kind, IPortType.Direction.INPUT));
+        register(k + "_out", ctx -> amount(ctx, kind, IPortType.Direction.OUTPUT));
+        register(k + "_f_in", ctx -> space(ctx, kind, IPortType.Direction.INPUT));
+        register(k + "_f_out", ctx -> space(ctx, kind, IPortType.Direction.OUTPUT));
+    }
+
     static {
-        // Core properties
-        register(
-            "energy",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getStoredEnergy()));
-        register(
-            "energy_max",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getEnergyCapacity()));
-        register("energy_p", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getStoredEnergy();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getEnergyCapacity();
-            return new EvaluationValue(max > 0 ? (double) stored / max : 0);
-        });
-        register("energy_f", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getStoredEnergy();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getEnergyCapacity();
-            return new EvaluationValue(max - stored);
-        });
-        register(
-            "energy_per_tick",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getEnergyPerTick()));
+        for (IPortType.Type kind : IPortType.Type.values()) {
+            if (kind.isStorable()) {
+                registerResourceFamily(kind);
+            }
+        }
 
-        register(
-            "fluid",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getStoredFluid()));
-        register(
-            "fluid_max",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getFluidCapacity()));
-        register("fluid_p", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getStoredFluid();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getFluidCapacity();
-            return new EvaluationValue(max > 0 ? (double) stored / max : 0);
-        });
-        register("fluid_f", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getStoredFluid();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getFluidCapacity();
-            return new EvaluationValue(max - stored);
-        });
+        // Energy keeps one property outside the family: what the running recipe draws
+        // per tick is not an amount held.
+        register("energy_per_tick", ctx -> new EvaluationValue(machine(ctx).getEnergyPerTick()));
+        alias("power", "energy");
+        alias("power_p", "energy_p");
 
-        register(
-            "mana",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getStoredMana()));
-        register(
-            "mana_max",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getManaCapacity()));
-        register("mana_p", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getStoredMana();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getManaCapacity();
-            return new EvaluationValue(max > 0 ? (double) stored / max : 0);
-        });
-        register("mana_f", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getStoredMana();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getManaCapacity();
-            return new EvaluationValue(max - stored);
-        });
+        // --- recipe progress ---
+        register("progress", ctx -> new EvaluationValue(machine(ctx).getProgressPercent()));
+        register("is_running", ctx -> new EvaluationValue(machine(ctx).isRunning()));
+        register("is_waiting", ctx -> new EvaluationValue(machine(ctx).isWaitingForOutput()));
+        alias("progress_percent", "progress");
 
-        register(
-            "fluid_in",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTotalFluidInput()));
-        register(
-            "fluid_out",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTotalFluidOutput()));
-        register(
-            "fluid_f_in",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTotalFluidInputSpace()));
-        register(
-            "fluid_f_out",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTotalFluidOutputSpace()));
-
-        register(
-            "gas_in",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTotalGasInput()));
-        register(
-            "gas_out",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTotalGasOutput()));
-        register(
-            "gas_f_in",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTotalGasInputSpace()));
-        register(
-            "gas_f_out",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTotalGasOutputSpace()));
-
-        register(
-            "item",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getItemCount(IPortType.Direction.BOTH, null)));
-        register(
-            "item_max",
-            ctx -> new EvaluationValue(
-                (double) ctx.getRecipeContext()
-                    .getMachineState()
-                    .getItemSlotCount(IPortType.Direction.BOTH, false) * 64));
-        register("item_p", ctx -> {
-            double count = ctx.getRecipeContext()
-                .getMachineState()
-                .getItemCount(IPortType.Direction.BOTH, null);
-            double limit = ctx.getRecipeContext()
-                .getMachineState()
-                .getItemSlotCount(IPortType.Direction.BOTH, false) * 64.0;
-            return new EvaluationValue(limit > 0 ? count / limit : 0);
-        });
-        register(
-            "item_f",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getItemSpace(IPortType.Direction.BOTH, null)));
-
-        register(
-            "progress",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getProgressPercent()));
-        register(
-            "is_running",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .isRunning()));
-        register(
-            "is_waiting",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .isWaitingForOutput()));
-        register(
-            "tier",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTier()));
-        register(
-            "batch",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getBatchSize()));
-        register(
-            "speed_multi",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getSpeedMultiplier()));
-        register(
-            "energy_multi",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getEnergyMultiplier()));
-
-        register(
-            "timeplaced",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTimePlaced()));
-        register(
-            "timecontinue",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTimeContinuous()));
-        register(
-            "recipeprocessed",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getRecipeProcessedCount()));
-        register(
-            "recipeprocessedtype",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getRecipeProcessedTypesCount()));
-
-        register(
-            "gas",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTotalStoredGas()));
-        register("gas_p", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getTotalStoredGas();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getGasCapacity();
-            return new EvaluationValue(max > 0 ? (double) stored / max : 0);
-        });
-        register("gas_f", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getTotalStoredGas();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getGasCapacity();
-            return new EvaluationValue(max - stored);
-        });
-
-        // Resource capacities and totals
-        register(
-            "essentia",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTotalStoredEssentia()));
-        register("essentia_p", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getTotalStoredEssentia();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getEssentiaCapacity();
-            return new EvaluationValue(max > 0 ? (double) stored / max : 0);
-        });
-        register("essentia_f", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getTotalStoredEssentia();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getEssentiaCapacity();
-            return new EvaluationValue(max - stored);
-        });
-        register(
-            "essentia_max",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getEssentiaCapacity()));
-
-        register(
-            "vis",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getTotalStoredVis()));
-        register("vis_p", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getTotalStoredVis();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getVisCapacity();
-            return new EvaluationValue(max > 0 ? (double) stored / max : 0);
-        });
-        register("vis_f", ctx -> {
-            long stored = ctx.getRecipeContext()
-                .getMachineState()
-                .getTotalStoredVis();
-            long max = ctx.getRecipeContext()
-                .getMachineState()
-                .getVisCapacity();
-            return new EvaluationValue(max - stored);
-        });
-        register(
-            "vis_max",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getVisCapacity()));
-        register(
-            "gas_max",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getMachineState()
-                    .getGasCapacity()));
-
-        // Environment
+        // --- structure ---
+        register("tier", ctx -> new EvaluationValue(machine(ctx).getTier()));
         register(
             "facing",
             ctx -> new EvaluationValue(
                 ctx.getRecipeContext()
                     .getFacing()
                     .ordinal()));
-        register(
-            "world_seed",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getWorld()
-                    .getSeed()));
 
-        // Aliases
-        alias("power", "energy");
-        alias("power_p", "energy_p");
-        alias("energy_stored", "energy");
-        alias("energy_total", "energy");
-        alias("total_energy", "energy");
-
-        alias("energy_capacity", "energy_max");
-        alias("total_energy_max", "energy_max");
-        alias("total_energy_capacity", "energy_max");
-
-        alias("energy_free", "energy_f");
-        alias("energy_percent", "energy_p");
-
-        alias("mana_stored", "mana");
-        alias("mana_total", "mana");
-        alias("total_mana", "mana");
-        alias("mana_capacity", "mana_max");
-        alias("total_mana_max", "mana_max");
-        alias("total_mana_capacity", "mana_max");
-        alias("mana_free", "mana_f");
-        alias("mana_percent", "mana_p");
-
-        alias("fluid_stored", "fluid");
-        alias("fluid_total", "fluid");
-        alias("total_fluid", "fluid");
-        alias("fluid_capacity", "fluid_max");
-        alias("total_fluid_max", "fluid_max");
-        alias("total_fluid_capacity", "fluid_max");
-        alias("fluid_free", "fluid_f");
-        alias("fluid_percent", "fluid_p");
-
-        alias("gas_total", "gas");
-        alias("total_gas", "gas");
-        alias("gas_capacity", "gas_max");
-        alias("gas_free", "gas_f");
-        alias("gas_percent", "gas_p");
-
-        alias("essentia_capacity", "essentia_max");
-        alias("essentia_percent", "essentia_p");
-        alias("essentia_free", "essentia_f");
-        alias("vis_capacity", "vis_max");
-        alias("vis_percent", "vis_p");
-        alias("vis_free", "vis_f");
-
-        alias("item_total", "item");
-        alias("item_capacity", "item_max");
-        alias("item_space", "item_f");
-        alias("item_free", "item_f");
-        alias("item_percent", "item_p");
-
-        alias("progress_percent", "progress");
+        // --- recipe modifiers ---
+        register("batch", ctx -> new EvaluationValue(machine(ctx).getBatchSize()));
+        register("speed_multi", ctx -> new EvaluationValue(machine(ctx).getSpeedMultiplier()));
+        register("energy_multi", ctx -> new EvaluationValue(machine(ctx).getEnergyMultiplier()));
         alias("batch_size", "batch");
         alias("current_batch", "batch");
+        alias("speed_multiplier", "speed_multi");
+        alias("multiplier_speed", "speed_multi");
+        alias("energy_multiplier", "energy_multi");
+        alias("multiplier_energy", "energy_multi");
 
+        // --- counters ---
+        register("timeplaced", ctx -> new EvaluationValue(machine(ctx).getTimePlaced()));
+        register("timecontinue", ctx -> new EvaluationValue(machine(ctx).getTimeContinuous()));
+        register("recipeprocessed", ctx -> new EvaluationValue(machine(ctx).getRecipeProcessedCount()));
+        register("recipeprocessedtype", ctx -> new EvaluationValue(machine(ctx).getRecipeProcessedTypesCount()));
         alias("recipe_count", "recipeprocessed");
         alias("count_recipe", "recipeprocessed");
         alias("recipe_types_count", "recipeprocessedtype");
         alias("count_recipe_type", "recipeprocessedtype");
         alias("count_recipe_types", "recipeprocessedtype");
-
-        alias("speed_multiplier", "speed_multi");
-        alias("multiplier_speed", "speed_multi");
-        alias("energy_multiplier", "energy_multi");
-        alias("multiplier_energy", "energy_multi");
     }
 
     public static MachinePropertyExpression fromJson(JsonObject json) {

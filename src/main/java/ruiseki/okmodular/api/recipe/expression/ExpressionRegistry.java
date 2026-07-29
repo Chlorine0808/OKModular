@@ -53,108 +53,14 @@ public class ExpressionRegistry {
         registerWorldProperty("random_seed");
 
         // --- Machine Properties ---
-        registerMachineProperty("energy");
-        registerMachineProperty("energy_stored");
-        registerMachineProperty("energy_total");
-        registerMachineProperty("total_energy");
-        registerMachineProperty("energy_max");
-        registerMachineProperty("energy_capacity");
-        registerMachineProperty("total_energy_max");
-        registerMachineProperty("total_energy_capacity");
-        registerMachineProperty("energy_f");
-        registerMachineProperty("energy_free");
-        registerMachineProperty("energy_p");
-        registerMachineProperty("energy_percent");
-        registerMachineProperty("energy_per_tick");
-        registerMachineProperty("progress");
-        registerMachineProperty("progress_percent");
-        registerMachineProperty("is_running");
-        registerMachineProperty("is_waiting");
-        registerMachineProperty("tier");
-        registerMachineProperty("timeplaced");
-        registerMachineProperty("timecontinue");
-        registerMachineProperty("recipeprocessed");
-        registerMachineProperty("recipe_count");
-        registerMachineProperty("count_recipe");
-        registerMachineProperty("recipeprocessedtype");
-        registerMachineProperty("recipe_types_count");
-        registerMachineProperty("count_recipe_type");
-        registerMachineProperty("count_recipe_types");
-        registerMachineProperty("mana");
-        registerMachineProperty("mana_stored");
-        registerMachineProperty("mana_total");
-        registerMachineProperty("total_mana");
-        registerMachineProperty("mana_max");
-        registerMachineProperty("mana_capacity");
-        registerMachineProperty("total_mana_max");
-        registerMachineProperty("total_mana_capacity");
-        registerMachineProperty("mana_f");
-        registerMachineProperty("mana_free");
-        registerMachineProperty("mana_p");
-        registerMachineProperty("mana_percent");
-        registerMachineProperty("fluid");
-        registerMachineProperty("fluid_stored");
-        registerMachineProperty("fluid_total");
-        registerMachineProperty("total_fluid");
-        registerMachineProperty("fluid_max");
-        registerMachineProperty("fluid_capacity");
-        registerMachineProperty("total_fluid_max");
-        registerMachineProperty("total_fluid_capacity");
-        registerMachineProperty("fluid_f");
-        registerMachineProperty("fluid_free");
-        registerMachineProperty("fluid_p");
-        registerMachineProperty("fluid_percent");
-        registerMachineProperty("fluid_in");
-        registerMachineProperty("fluid_out");
-        registerMachineProperty("fluid_f_in");
-        registerMachineProperty("fluid_f_out");
-        registerMachineProperty("gas");
-        registerMachineProperty("gas_total");
-        registerMachineProperty("total_gas");
-        registerMachineProperty("gas_max");
-        registerMachineProperty("gas_capacity");
-        registerMachineProperty("gas_f");
-        registerMachineProperty("gas_free");
-        registerMachineProperty("gas_p");
-        registerMachineProperty("gas_percent");
-        registerMachineProperty("gas_in");
-        registerMachineProperty("gas_out");
-        registerMachineProperty("gas_f_in");
-        registerMachineProperty("gas_f_out");
-        registerMachineProperty("essentia");
-        registerMachineProperty("essentia_p");
-        registerMachineProperty("essentia_f");
-        registerMachineProperty("essentia_max");
-        registerMachineProperty("essentia_capacity");
-        registerMachineProperty("vis");
-        registerMachineProperty("vis_p");
-        registerMachineProperty("vis_f");
-        registerMachineProperty("vis_max");
-        registerMachineProperty("vis_capacity");
-
-        // Item totals. The function forms (item("id")) are registered further down;
-        // these are the bare variables that read the machine as a whole.
-        registerMachineProperty("item");
-        registerMachineProperty("item_total");
-        registerMachineProperty("item_max");
-        registerMachineProperty("item_capacity");
-        registerMachineProperty("item_f");
-        registerMachineProperty("item_free");
-        registerMachineProperty("item_space");
-        registerMachineProperty("item_p");
-        registerMachineProperty("item_percent");
-        registerMachineProperty("facing");
-
-        // --- Structural Properties ---
-        registerMachineProperty("batch");
-        registerMachineProperty("batch_size");
-        registerMachineProperty("current_batch");
-        registerMachineProperty("speed_multi");
-        registerMachineProperty("speed_multiplier");
-        registerMachineProperty("multiplier_speed");
-        registerMachineProperty("energy_multi");
-        registerMachineProperty("energy_multiplier");
-        registerMachineProperty("multiplier_energy");
+        // Driven from the definition table rather than repeated here. A name needs
+        // both a definition and a registration to work, and keeping two hand-written
+        // lists in step failed in both directions: names that parsed and then
+        // silently evaluated to 0, and names that evaluated fine but were rejected
+        // by the parser. Reading one from the other removes the failure mode.
+        for (String property : MachinePropertyExpression.propertyNames()) {
+            registerMachineProperty(property);
+        }
 
         // --- Constants ---
         registerVariable("pi", name -> ConstantExpression.PI);
