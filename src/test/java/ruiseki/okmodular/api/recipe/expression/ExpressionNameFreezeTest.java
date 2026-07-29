@@ -1,7 +1,7 @@
 package ruiseki.okmodular.api.recipe.expression;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +59,7 @@ public class ExpressionNameFreezeTest {
      * 変数として使える機械プロパティ。
      * ExpressionRegistry の registerMachineProperty 87 件を書き写したもの。
      */
-    // spotless: off
+    // spotless:off
     private static final String[] MACHINE_PROPERTIES = {
         "batch", "batch_size", "count_recipe", "count_recipe_type", "count_recipe_types",
         "current_batch",
@@ -128,7 +128,7 @@ public class ExpressionNameFreezeTest {
         // 環境
         "can_see_sky()", "can_see_void()", "count_blocks('minecraft:stone')",
     };
-    // spotless: on
+    // spotless:on
 
     private static List<String> allVariables() {
         List<String> names = new ArrayList<>();
