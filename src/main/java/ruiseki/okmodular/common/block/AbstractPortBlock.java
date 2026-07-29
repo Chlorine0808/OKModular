@@ -26,6 +26,7 @@ import ruiseki.okmodular.api.modular.IModularBlockTint;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.modular.ModularTier;
+import ruiseki.okmodular.api.modular.PortColor;
 import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.item.ItemWrench;
@@ -99,6 +100,42 @@ public abstract class AbstractPortBlock<T extends AbstractTE> extends AbstractTi
     @Override
     public boolean isSideSolid(IBlockAccess world, int x, int y, int z, ForgeDirection side) {
         return false;
+    }
+
+    /**
+     * Paints this port, which is what divides a machine's ports into groups that run
+     * recipes independently.
+     *
+     * <p>
+     * This is the Forge hook other mods' painting tools reach for. AE2's Color
+     * Applicator tries its own colour interface first and then falls back to here
+     * with {@code AEColor.ordinal()}, which is the same numbering {@link PortColor}
+     * declares its constants in, so the argument is an index straight into it.
+     *
+     * <p>
+     * Answers false when the colour is already what was asked for. Tools spend paint
+     * or power on a true, and repainting a port the same colour should not cost the
+     * player anything.
+     *
+     * @param colour vanilla wool metadata: 0 white through 15 black, 16 to strip
+     */
+    @Override
+    public boolean recolourBlock(World world, int x, int y, int z, ForgeDirection side, int colour) {
+        TileEntity te = world.getTileEntity(x, y, z);
+        if (!(te instanceof AbstractTE port)) return false;
+
+        PortColor wanted = PortColor.fromColorIndex(colour);
+        if (port.getPortColor() == wanted) return false;
+
+        // The client is told a colour change happened so the tool behaves, but only
+        // the server writes it - the colour reaches the client in the tile entity's
+        // own update packet.
+        if (world.isRemote) return true;
+
+        port.setPortColor(wanted);
+        port.markDirty();
+        world.markBlockForUpdate(x, y, z);
+        return true;
     }
 
     @Override
