@@ -100,6 +100,65 @@ public interface IMachineState {
     }
 
     /**
+     * Get the remaining room for a resource kind.
+     *
+     * Space is not one formula for every kind, and the difference is deliberate:
+     *
+     * <ul>
+     * <li>Items ask the machine directly. Stack limits differ per item, so
+     * "slots * 64 minus count" is not the number that actually fits.</li>
+     * <li>Fluids and gases keep separate input and output tanks, so a direction
+     * has its own figure and must not be derived from the shared capacity.</li>
+     * <li>Everything else is capacity minus what is held.</li>
+     * </ul>
+     *
+     * {@code BOTH} with a name is a combination the per-kind getters never
+     * offered. Input and output are separate storage, so it is their sum.
+     * {@code BOTH} without a name keeps the capacity-minus-held form that the
+     * existing {@code *_f} properties compute, so their values do not move.
+     *
+     * @param kind the resource kind. Kinds that hold no amount answer 0.
+     * @param dir  {@code BOTH} asks about the machine as a whole.
+     * @param name a specific fluid / gas / aspect / item, or null or empty to ask
+     *             about the kind as a whole.
+     */
+    default long getSpace(IPortType.Type kind, IPortType.Direction dir, String name) {
+        boolean byName = name != null && !name.isEmpty();
+
+        switch (kind) {
+            case ITEM:
+                return getItemSpace(dir, byName ? name : null);
+            case FLUID:
+                switch (dir) {
+                    case INPUT:
+                        return byName ? getFluidInputSpace(name) : getTotalFluidInputSpace();
+                    case OUTPUT:
+                        return byName ? getFluidOutputSpace(name) : getTotalFluidOutputSpace();
+                    default:
+                        return byName ? getFluidInputSpace(name) + getFluidOutputSpace(name)
+                            : getFluidCapacity() - getStoredFluid();
+                }
+            case GAS:
+                switch (dir) {
+                    case INPUT:
+                        return byName ? getGasInputSpace(name) : getTotalGasInputSpace();
+                    case OUTPUT:
+                        return byName ? getGasOutputSpace(name) : getTotalGasOutputSpace();
+                    default:
+                        return byName ? getGasInputSpace(name) + getGasOutputSpace(name)
+                            : getGasCapacity() - getTotalStoredGas();
+                }
+            case ENERGY:
+            case MANA:
+            case ESSENTIA:
+            case VIS:
+                return getCapacity(kind) - getAmount(kind, dir, name);
+            default:
+                return 0L;
+        }
+    }
+
+    /**
      * Get the current energy stored.
      */
     long getStoredEnergy();
