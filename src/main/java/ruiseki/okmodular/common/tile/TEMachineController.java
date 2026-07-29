@@ -45,6 +45,8 @@ import ruiseki.okmodular.api.modular.IMachineController;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.modular.IVisitablePort;
+import ruiseki.okmodular.api.modular.PortColor;
+import ruiseki.okmodular.api.modular.PortColorGrouping;
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.core.IMachineState;
@@ -57,6 +59,7 @@ import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
 import ruiseki.okmodular.common.block.BlockMachineController;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
+import ruiseki.okmodular.common.recipe.ColoredRecipeSearch;
 import ruiseki.okmodular.common.recipe.ProcessAgent;
 import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
@@ -134,6 +137,16 @@ public class TEMachineController extends AbstractMBModifierTE
     private long currentRecipeSeed = 0;
     @NBTPersist
     private long currentRecipeStartTick = 0;
+
+    /**
+     * Colour group the running recipe belongs to.
+     *
+     * Persisted because a machine can be saved mid-recipe, and its output has to go
+     * back to the same colour it came from. The colour is stored rather than the port
+     * list because ports are resolved on formation, not loaded from NBT.
+     */
+    @NBTPersist
+    private PortColor activeRecipeColor = PortColor.NONE;
 
     private final MachineStateAgent machineStateAgent = new MachineStateAgent(this);
 
@@ -554,12 +567,15 @@ public class TEMachineController extends AbstractMBModifierTE
         // Try to output if waiting
         if (processAgent.isWaitingForOutput()) {
             ConditionContext context = new ConditionContext(worldObj, xCoord, yCoord, zCoord);
-            if (processAgent.diagnoseBlockOutputFull(getOutputPorts(), context)) {
+            // Same colour the recipe started in. This path passes getOutputPorts()
+            // rather than the contextual list, as it always has.
+            List<IModularPort> waitingOutputs = PortColorGrouping.select(getOutputPorts(), activeRecipeColor);
+            if (processAgent.diagnoseBlockOutputFull(waitingOutputs, context)) {
                 lastProcessErrorReason = ErrorReason.BLOCK_OUTPUT_FULL;
             } else {
                 lastProcessErrorReason = ErrorReason.WAITING_OUTPUT;
             }
-            if (processAgent.tryOutput(getOutputPorts(), context)) {
+            if (processAgent.tryOutput(waitingOutputs, context)) {
                 lastProcessErrorReason = ErrorReason.NONE;
                 if (!worldObj.isRemote) {
                     machineStateAgent.recordRecipeCompletion(processAgent.getCurrentRecipe());
@@ -573,8 +589,7 @@ public class TEMachineController extends AbstractMBModifierTE
         // If running, tick and look-ahead search for next recipe
         if (processAgent.isRunning()) {
             ConditionContext context = new ConditionContext(worldObj, xCoord, yCoord, zCoord);
-            ProcessAgent.TickResult result = processAgent
-                .tick(getContextualInputPorts(), getContextualOutputPorts(), context);
+            ProcessAgent.TickResult result = processAgent.tick(activeInputPorts(), activeOutputPorts(), context);
 
             if (result == ProcessAgent.TickResult.NO_ENERGY) {
                 lastProcessErrorReason = ErrorReason.NO_ENERGY;
@@ -608,7 +623,7 @@ public class TEMachineController extends AbstractMBModifierTE
 
             // If complete, immediately try to output and start next
             if (result == ProcessAgent.TickResult.READY_OUTPUT) {
-                if (processAgent.tryOutput(getContextualOutputPorts(), context)) {
+                if (processAgent.tryOutput(activeOutputPorts(), context)) {
                     lastProcessErrorReason = ErrorReason.NONE;
                     if (!worldObj.isRemote) {
                         machineStateAgent.recordRecipeCompletion(processAgent.getCurrentRecipe());
@@ -639,45 +654,53 @@ public class TEMachineController extends AbstractMBModifierTE
             nextRecipe = null;
         }
 
-        // Use cached recipe if available, otherwise search
-        IModularRecipe recipe = nextRecipe;
-        if (recipe == null) {
-            String[] groups = recipeGroups.toArray(new String[0]);
-            List<IModularPort> inputs = getContextualInputPorts();
-            recipe = RecipeLoader.getInstance()
-                .findMatch(groups, inputs);
-        }
+        final IModularRecipe lookAhead = nextRecipe;
         nextRecipe = null; // Clear cache
+        final String[] groupNames = recipeGroups.toArray(new String[0]);
 
-        if (recipe != null) {
-            // Check if output fits before starting
-            IPortType.Type insufficientType = recipe.checkOutputCapacity(getContextualOutputPorts());
-            if (insufficientType != null) {
-                setProcessError(
-                    ErrorReason.OUTPUT_CAPACITY_INSUFFICIENT,
-                    LangHelpers.localize("gui.port_type." + insufficientType.name()));
-                return;
-            }
+        // Each colour group is offered the look-ahead result first, since checking one
+        // recipe against a port list is far cheaper than searching every candidate.
+        // The look-ahead searched the unfiltered port list, so it may well not apply
+        // to the group being considered.
+        ColoredRecipeSearch.Selection selection = ColoredRecipeSearch
+            .search(PortColorGrouping.group(getContextualInputPorts(), getContextualOutputPorts()), inputs -> {
+                if (lookAhead != null && lookAhead.matchesInput(inputs)) return lookAhead;
+                return RecipeLoader.getInstance()
+                    .findMatch(groupNames, inputs);
+            });
 
-            if (!recipe.canOutput(getContextualOutputPorts())) {
-                setProcessError(ErrorReason.OUTPUT_FULL);
-                return;
-            }
-
+        if (selection.isRunnable()) {
+            activeRecipeColor = selection.getColor();
             currentRecipeSeed = worldObj.getTotalWorldTime() ^ worldObj.getSeed()
                 ^ ((long) xCoord << 32 | (zCoord & 0xFFFFFFFFL));
             currentRecipeStartTick = worldObj.getTotalWorldTime();
             ConditionContext context = getConditionContext();
-            if (processAgent.startRecipe(recipe, getContextualInputPorts(), getContextualOutputPorts(), context))
+            if (processAgent.startRecipe(selection.getRecipe(), selection.getInputs(), selection.getOutputs(), context))
                 lastProcessErrorReason = ErrorReason.NONE;
             else lastProcessErrorReason = ErrorReason.NO_INPUT;
-        } else {
-            lastProcessErrorReason = ErrorReason.NO_MATCHING_RECIPE;
+            return;
+        }
 
-            // Check if it's actually NO_INPUT
-            if (processAgent.diagnoseIdle(getContextualInputPorts()) == ProcessAgent.TickResult.NO_INPUT) {
-                lastProcessErrorReason = ErrorReason.INPUT_MISSING;
+        // A recipe was found but no group could run it. The one reported is from the
+        // highest-priority colour that got that far.
+        if (selection.getRecipe() != null) {
+            if (selection.getInsufficientType() != null) {
+                setProcessError(
+                    ErrorReason.OUTPUT_CAPACITY_INSUFFICIENT,
+                    LangHelpers.localize(
+                        "gui.port_type." + selection.getInsufficientType()
+                            .name()));
+            } else {
+                setProcessError(ErrorReason.OUTPUT_FULL);
             }
+            return;
+        }
+
+        lastProcessErrorReason = ErrorReason.NO_MATCHING_RECIPE;
+
+        // Check if it's actually NO_INPUT
+        if (processAgent.diagnoseIdle(getContextualInputPorts()) == ProcessAgent.TickResult.NO_INPUT) {
+            lastProcessErrorReason = ErrorReason.INPUT_MISSING;
         }
     }
 
@@ -718,6 +741,22 @@ public class TEMachineController extends AbstractMBModifierTE
         this.cachedInputPorts = null;
         this.cachedOutputPorts = null;
         this.nextRecipe = null;
+    }
+
+    /**
+     * The input ports the running recipe is allowed to draw from.
+     *
+     * Filtered by the colour the recipe started in, so a painted port only feeds the
+     * group it belongs to. A machine with nothing painted gets the whole list back
+     * without a copy, which matters because this runs every tick.
+     */
+    private List<IModularPort> activeInputPorts() {
+        return PortColorGrouping.select(getContextualInputPorts(), activeRecipeColor);
+    }
+
+    /** The output ports the running recipe is allowed to put results into. */
+    private List<IModularPort> activeOutputPorts() {
+        return PortColorGrouping.select(getContextualOutputPorts(), activeRecipeColor);
     }
 
     // ========== IModularPort Implementation ==========
