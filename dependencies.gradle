@@ -69,6 +69,19 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor('org.projectlombok:lombok:1.18.46')
 
+    // Classes the tests need to load, whose absence shows up as
+    // NoClassDefFoundError rather than a compile error. Neither is used directly
+    // by this mod; both are pulled in transitively for compilation and then not
+    // for the test runtime.
+    //
+    // joml: NBTClassType registers a handler for org.joml.Vector3i in its static
+    // initializer, so the class cannot load at all without it - which makes every
+    // @NBTPersist field unreachable from a test.
+    // ModularUI 1: something in the tile entity hierarchy resolves through it, so
+    // the port tile entity classes cannot be loaded without it.
+    testRuntimeOnly 'org.joml:joml:1.10.8'
+    testRuntimeOnly("com.github.GTNewHorizons:ModularUI:1.3.4:dev")
+
     // Versions kept in sync with OmoshiroiKamo's dependencies.gradle.
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'

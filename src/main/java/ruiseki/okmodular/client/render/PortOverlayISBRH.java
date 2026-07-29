@@ -83,9 +83,8 @@ public class PortOverlayISBRH implements ISimpleBlockRenderingHandler {
             return renderMachineCasing(world, x, y, z, casing, renderer);
         }
 
-        // Get tint color from cache or config
-        Integer structureColor = StructureTintCache.get(world, x, y, z);
-        int tintColor = structureColor != null ? structureColor : MachineryConfig.getDefaultTintColorInt();
+        // A colour the player painted on wins over the structure tint; see tintAt.
+        int tintColor = AbstractPortBlock.tintAt(world, x, y, z);
 
         // Calculate tint components
         float r = ((tintColor >> 16) & 0xFF) / 255.0f;

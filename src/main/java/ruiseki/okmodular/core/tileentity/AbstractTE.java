@@ -20,6 +20,7 @@ import mcp.mobius.waila.api.IWailaDataAccessor;
 import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okmodular.OKModular;
+import ruiseki.okmodular.api.modular.PortColor;
 import ruiseki.okmodular.common.network.PacketProgress;
 import ruiseki.okmodular.core.helper.BlockStateHelpers;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
@@ -69,6 +70,55 @@ public abstract class AbstractTE extends AbstractTickingTE
     /** Assigned index during structure formation (for ports). */
     @NBTPersist
     protected int assignedIndex = -1;
+
+    /**
+     * Satisfies {@code IModularPort.getAssignedIndex} for every port tile entity.
+     *
+     * Kept here rather than in each port family: the field has always lived in this
+     * class, and the seven families were each carrying an identical pair of
+     * accessors over it.
+     */
+    public int getAssignedIndex() {
+        return assignedIndex;
+    }
+
+    public void setAssignedIndex(int index) {
+        this.assignedIndex = index;
+    }
+
+    /**
+     * Colour a player has painted this port, if it is a port.
+     *
+     * <p>
+     * Deliberately holds {@link PortColor#NONE} rather than null when unpainted,
+     * even though writing nothing would save the bytes. Description packets are not
+     * diffs, and a reader leaves a field alone when the key is absent - so dropping
+     * the key on unpaint would leave every client still showing the old colour.
+     */
+    @NBTPersist
+    protected PortColor portColor = PortColor.NONE;
+
+    /** Satisfies {@code IModularPort.getPortColor} for every port tile entity. */
+    public PortColor getPortColor() {
+        return portColor == null ? PortColor.NONE : portColor;
+    }
+
+    public void setPortColor(PortColor color) {
+        this.portColor = color == null ? PortColor.NONE : color;
+    }
+
+    /**
+     * The colour stored in an item's NBT, for reading one back off a port that was
+     * broken and put down again.
+     *
+     * Deliberately narrower than reading the whole tag. A port's dropped item carries
+     * its entire tile entity NBT, and restoring all of it would undo the side-IO reset
+     * that placing a port is meant to do and bring tank contents back that were already
+     * dropped separately.
+     */
+    public static PortColor readPortColor(NBTTagCompound tag) {
+        return tag == null ? PortColor.NONE : PortColor.fromName(tag.getString("portColor"));
+    }
 
     /** Cached redstone result */
     protected boolean redstoneCheckPassed = true;

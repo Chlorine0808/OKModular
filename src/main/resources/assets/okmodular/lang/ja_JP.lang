@@ -289,3 +289,24 @@ okmodular.condition.weather.THUNDER=雷雨が必要です
 # --- en_US only until now ---
 tooltip.machinery.deprecated=§e[非推奨]
 tooltip.machinery.deprecated.hint=§7このブロックは旧システムを使用しています。
+# --- ポートの色（機械のポートを独立して動く群に分ける） ---
+chat.okmodular.port_color_set=ポートを %s に塗りました
+chat.okmodular.port_color_cleared=ポートの色を落としました
+gui.port_color.NONE=無色
+gui.port_color.WHITE=白
+gui.port_color.ORANGE=橙
+gui.port_color.MAGENTA=赤紫
+gui.port_color.LIGHT_BLUE=空色
+gui.port_color.YELLOW=黄
+gui.port_color.LIME=黄緑
+gui.port_color.PINK=桃
+gui.port_color.GRAY=灰
+gui.port_color.LIGHT_GRAY=薄灰
+gui.port_color.CYAN=青緑
+gui.port_color.PURPLE=紫
+gui.port_color.BLUE=青
+gui.port_color.BROWN=茶
+gui.port_color.GREEN=緑
+gui.port_color.RED=赤
+gui.port_color.BLACK=黒
+tooltip.okmodular.port_color=塗装: %s

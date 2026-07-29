@@ -267,14 +267,4 @@ public abstract class AbstractVisPortTE extends AbstractTE implements IVisitable
             worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
         }
     }
-
-    @Override
-    public int getAssignedIndex() {
-        return assignedIndex;
-    }
-
-    @Override
-    public void setAssignedIndex(int index) {
-        this.assignedIndex = index;
-    }
 }

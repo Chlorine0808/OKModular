@@ -218,14 +218,4 @@ public abstract class AbstractManaPortTE extends AbstractTE implements IVisitabl
 
     @Override
     public abstract Direction getPortDirection();
-
-    @Override
-    public int getAssignedIndex() {
-        return assignedIndex;
-    }
-
-    @Override
-    public void setAssignedIndex(int index) {
-        this.assignedIndex = index;
-    }
 }

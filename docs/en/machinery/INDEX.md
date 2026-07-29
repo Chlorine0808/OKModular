@@ -21,6 +21,18 @@ Design documentation for the proxy system that integrates external blocks (chest
 
 ---
 
+#### [Port Colours](./PORT_COLORS.md)
+Painting a machine's ports so that only ports of the same colour are considered
+together.
+
+**Contents**:
+- Painting (dyes, AE2's Color Applicator)
+- Which ports belong to which group (five rules)
+- Why unpainted ports are shared by every colour, and what that costs
+- How a recipe is chosen (a group with blocked output is skipped)
+
+**Target Audience**: Players, Modpack Authors
+
 ---
 
 ## 💡 New Features Guide
