@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import ruiseki.okmodular.api.modular.IPortType.Direction;
+import ruiseki.okmodular.api.modular.IPortType.Type;
+import ruiseki.okmodular.api.recipe.expression.ResourceFunctionExpression.Mode;
+
 /**
  * Registry for variables and functions used in ExpressionParser.
  */
@@ -45,97 +49,18 @@ public class ExpressionRegistry {
         registerWorldProperty("progress_tick");
         registerWorldProperty("redstone");
         registerWorldProperty("seed");
+        registerWorldProperty("world_seed");
+        registerWorldProperty("random_seed");
 
         // --- Machine Properties ---
-        registerMachineProperty("energy");
-        registerMachineProperty("energy_stored");
-        registerMachineProperty("energy_total");
-        registerMachineProperty("total_energy");
-        registerMachineProperty("energy_max");
-        registerMachineProperty("energy_capacity");
-        registerMachineProperty("total_energy_max");
-        registerMachineProperty("total_energy_capacity");
-        registerMachineProperty("energy_f");
-        registerMachineProperty("energy_free");
-        registerMachineProperty("energy_p");
-        registerMachineProperty("energy_percent");
-        registerMachineProperty("energy_per_tick");
-        registerMachineProperty("progress");
-        registerMachineProperty("progress_percent");
-        registerMachineProperty("is_running");
-        registerMachineProperty("is_waiting");
-        registerMachineProperty("tier");
-        registerMachineProperty("timeplaced");
-        registerMachineProperty("timecontinue");
-        registerMachineProperty("recipeprocessed");
-        registerMachineProperty("recipe_count");
-        registerMachineProperty("count_recipe");
-        registerMachineProperty("recipeprocessedtype");
-        registerMachineProperty("recipe_types_count");
-        registerMachineProperty("count_recipe_type");
-        registerMachineProperty("count_recipe_types");
-        registerMachineProperty("mana");
-        registerMachineProperty("mana_stored");
-        registerMachineProperty("mana_total");
-        registerMachineProperty("total_mana");
-        registerMachineProperty("mana_max");
-        registerMachineProperty("mana_capacity");
-        registerMachineProperty("total_mana_max");
-        registerMachineProperty("total_mana_capacity");
-        registerMachineProperty("mana_f");
-        registerMachineProperty("mana_free");
-        registerMachineProperty("mana_p");
-        registerMachineProperty("mana_percent");
-        registerMachineProperty("fluid");
-        registerMachineProperty("fluid_stored");
-        registerMachineProperty("fluid_total");
-        registerMachineProperty("total_fluid");
-        registerMachineProperty("fluid_max");
-        registerMachineProperty("fluid_capacity");
-        registerMachineProperty("total_fluid_max");
-        registerMachineProperty("total_fluid_capacity");
-        registerMachineProperty("fluid_f");
-        registerMachineProperty("fluid_free");
-        registerMachineProperty("fluid_p");
-        registerMachineProperty("fluid_percent");
-        registerMachineProperty("fluid_in");
-        registerMachineProperty("fluid_out");
-        registerMachineProperty("fluid_f_in");
-        registerMachineProperty("fluid_f_out");
-        registerMachineProperty("gas");
-        registerMachineProperty("gas_total");
-        registerMachineProperty("total_gas");
-        registerMachineProperty("gas_max");
-        registerMachineProperty("gas_capacity");
-        registerMachineProperty("gas_f");
-        registerMachineProperty("gas_free");
-        registerMachineProperty("gas_p");
-        registerMachineProperty("gas_percent");
-        registerMachineProperty("gas_in");
-        registerMachineProperty("gas_out");
-        registerMachineProperty("gas_f_in");
-        registerMachineProperty("gas_f_out");
-        registerMachineProperty("essentia");
-        registerMachineProperty("essentia_p");
-        registerMachineProperty("essentia_f");
-        registerMachineProperty("essentia_max");
-        registerMachineProperty("essentia_capacity");
-        registerMachineProperty("vis");
-        registerMachineProperty("vis_p");
-        registerMachineProperty("vis_f");
-        registerMachineProperty("vis_max");
-        registerMachineProperty("vis_capacity");
-
-        // --- Structural Properties ---
-        registerMachineProperty("batch");
-        registerMachineProperty("batch_size");
-        registerMachineProperty("current_batch");
-        registerMachineProperty("speed_multi");
-        registerMachineProperty("speed_multiplier");
-        registerMachineProperty("multiplier_speed");
-        registerMachineProperty("energy_multi");
-        registerMachineProperty("energy_multiplier");
-        registerMachineProperty("multiplier_energy");
+        // Driven from the definition table rather than repeated here. A name needs
+        // both a definition and a registration to work, and keeping two hand-written
+        // lists in step failed in both directions: names that parsed and then
+        // silently evaluated to 0, and names that evaluated fine but were rejected
+        // by the parser. Reading one from the other removes the failure mode.
+        for (String property : MachinePropertyExpression.propertyNames()) {
+            registerMachineProperty(property);
+        }
 
         // --- Constants ---
         registerVariable("pi", name -> ConstantExpression.PI);
@@ -159,56 +84,31 @@ public class ExpressionRegistry {
             "has_nbt",
             (args, parser) -> new NbtPresenceExpression(readNbtAccess(args, parser, "has_nbt")));
 
-        registerFunction("essentia", (args, parser) -> {
-            if (args.isEmpty()) throw parser.error("essentia() requires 1 argument (aspect name)");
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.ESSENTIA, args.get(0));
-        });
+        // Named resource reads. Each row is (function name, kind, direction, amount
+        // or space); the expression itself no longer needs a constant per
+        // combination. Kinds that had no directional or space variants before
+        // (essentia, vis) can gain rows here without touching any other file.
+        registerResourceFunction("essentia", Type.ESSENTIA, Direction.BOTH, Mode.AMOUNT);
+        registerResourceFunction("vis", Type.VIS, Direction.BOTH, Mode.AMOUNT);
 
-        registerFunction("vis", (args, parser) -> {
-            if (args.isEmpty()) throw parser.error("vis() requires 1 argument (aspect name)");
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.VIS, args.get(0));
-        });
+        registerResourceFunction("fluid", Type.FLUID, Direction.BOTH, Mode.AMOUNT);
+        registerResourceFunction("fluid_in", Type.FLUID, Direction.INPUT, Mode.AMOUNT);
+        registerResourceFunction("fluid_out", Type.FLUID, Direction.OUTPUT, Mode.AMOUNT);
+        registerResourceFunction("fluid_f_in", Type.FLUID, Direction.INPUT, Mode.SPACE);
+        registerResourceFunction("fluid_f_out", Type.FLUID, Direction.OUTPUT, Mode.SPACE);
 
-        registerFunction("gas", (args, parser) -> {
-            if (args.isEmpty() || args.size() > 1) {
-                throw parser.error("gas() function requires 1 argument (gas name)");
-            }
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.GAS, args.get(0));
-        });
+        registerResourceFunction("gas", Type.GAS, Direction.BOTH, Mode.AMOUNT);
+        registerResourceFunction("gas_in", Type.GAS, Direction.INPUT, Mode.AMOUNT);
+        registerResourceFunction("gas_out", Type.GAS, Direction.OUTPUT, Mode.AMOUNT);
+        registerResourceFunction("gas_f_in", Type.GAS, Direction.INPUT, Mode.SPACE);
+        registerResourceFunction("gas_f_out", Type.GAS, Direction.OUTPUT, Mode.SPACE);
 
-        registerFunction("fluid", (args, parser) -> {
-            if (args.isEmpty() || args.size() > 1) {
-                throw parser.error("fluid() function requires 1 argument (fluid name)");
-            }
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.FLUID, args.get(0));
-        });
-        registerResourceFunction("fluid_in", ResourceFunctionExpression.Type.FLUID_IN);
-        registerResourceFunction("fluid_out", ResourceFunctionExpression.Type.FLUID_OUT);
-        registerResourceFunction("fluid_f_in", ResourceFunctionExpression.Type.FLUID_F_IN);
-        registerResourceFunction("fluid_f_out", ResourceFunctionExpression.Type.FLUID_F_OUT);
-
-        registerFunction("gas_in", (args, parser) -> {
-            if (args.isEmpty() || args.size() > 1) {
-                throw parser.error("gas_in() function requires 1 argument (gas name)");
-            }
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.GAS_IN, args.get(0));
-        });
-        registerFunction("gas_out", (args, parser) -> {
-            if (args.isEmpty() || args.size() > 1) {
-                throw parser.error("gas_out() function requires 1 argument (gas name)");
-            }
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.GAS_OUT, args.get(0));
-        });
-        registerResourceFunction("gas_f_in", ResourceFunctionExpression.Type.GAS_F_IN);
-        registerResourceFunction("gas_f_out", ResourceFunctionExpression.Type.GAS_F_OUT);
-
-        // Unified Item Functions
-        registerResourceFunction("item", ResourceFunctionExpression.Type.ITEM);
-        registerResourceFunction("item_in", ResourceFunctionExpression.Type.ITEM_IN);
-        registerResourceFunction("item_out", ResourceFunctionExpression.Type.ITEM_OUT);
-        registerResourceFunction("item_f", ResourceFunctionExpression.Type.ITEM_F);
-        registerResourceFunction("item_f_in", ResourceFunctionExpression.Type.ITEM_F_IN);
-        registerResourceFunction("item_f_out", ResourceFunctionExpression.Type.ITEM_F_OUT);
+        registerResourceFunction("item", Type.ITEM, Direction.BOTH, Mode.AMOUNT);
+        registerResourceFunction("item_in", Type.ITEM, Direction.INPUT, Mode.AMOUNT);
+        registerResourceFunction("item_out", Type.ITEM, Direction.OUTPUT, Mode.AMOUNT);
+        registerResourceFunction("item_f", Type.ITEM, Direction.BOTH, Mode.SPACE);
+        registerResourceFunction("item_f_in", Type.ITEM, Direction.INPUT, Mode.SPACE);
+        registerResourceFunction("item_f_out", Type.ITEM, Direction.OUTPUT, Mode.SPACE);
 
         // Math Functions
         for (String mathFunc : MathFunctionExpression.SUPPORTED_FUNCTIONS) {
@@ -249,13 +149,30 @@ public class ExpressionRegistry {
         registerFunction("count_blocks", (args, parser) -> new CountBlocksFunctionExpression(args));
     }
 
-    private static void registerResourceFunction(String name, ResourceFunctionExpression.Type type) {
+    private static void registerResourceFunction(String name, Type kind, Direction direction, Mode mode) {
         registerFunction(name, (args, parser) -> {
-            if (args.isEmpty() || args.size() > 1) {
-                throw parser.error(name + "() function requires 1 argument (item ID or OreDict)");
+            if (args.size() != 1) {
+                throw parser.error(name + "() requires 1 argument (" + argumentHint(kind) + ")");
             }
-            return new ResourceFunctionExpression(type, args.get(0));
+            return new ResourceFunctionExpression(name, kind, direction, mode, args.get(0));
         });
+    }
+
+    /** What the single argument of a resource function names, for error messages. */
+    private static String argumentHint(Type kind) {
+        switch (kind) {
+            case ITEM:
+                return "item ID or OreDict";
+            case FLUID:
+                return "fluid name";
+            case GAS:
+                return "gas name";
+            case ESSENTIA:
+            case VIS:
+                return "aspect name";
+            default:
+                return "resource name";
+        }
     }
 
     public static IExpression getVariable(String name) {

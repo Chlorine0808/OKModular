@@ -6,43 +6,50 @@ import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IMachineState;
 
 /**
- * Expression that evaluates to a resource value by name (e.g.,
- * essentia("ignis"), gas("hydrogen")).
+ * Reads one named resource off the machine, as in {@code essentia("ignis")} or
+ * {@code fluid_f_in("water")}.
+ *
+ * <p>
+ * The question is three independent choices - which resource kind, which
+ * direction, and amount or remaining space - so this holds those three rather
+ * than one enum constant per combination. The cross product used to be spelled
+ * out as 18 constants with a switch over them, which left holes: essentia and vis
+ * had no directional or space variants while fluid and gas did. Adding a resource
+ * kind now adds no code here, only a row in the registration table.
+ *
+ * <p>
+ * The registered function name is kept alongside them because {@link #toString()}
+ * has to reproduce it exactly. Expression trees are serialised through
+ * {@code toString} and parsed back, so a name that cannot round-trip corrupts the
+ * expression on reload.
  */
 public class ResourceFunctionExpression implements IExpression {
 
-    public enum Type {
-        ESSENTIA,
-        VIS,
-        GAS,
-        GAS_IN,
-        GAS_OUT,
-        GAS_F_IN,
-        GAS_F_OUT,
-        FLUID,
-        FLUID_IN,
-        FLUID_OUT,
-        FLUID_F_IN,
-        FLUID_F_OUT,
-        ITEM,
-        ITEM_IN,
-        ITEM_OUT,
-        ITEM_F,
-        ITEM_F_IN,
-        ITEM_F_OUT
+    /** Whether the function asks how much is held or how much more fits. */
+    public enum Mode {
+        AMOUNT,
+        SPACE
     }
 
-    private final Type type;
+    private final String functionName;
+    private final IPortType.Type kind;
+    private final IPortType.Direction direction;
+    private final Mode mode;
     private final IExpression argument;
 
-    public ResourceFunctionExpression(Type type, IExpression argument) {
-        this.type = type;
+    public ResourceFunctionExpression(String functionName, IPortType.Type kind, IPortType.Direction direction,
+        Mode mode, IExpression argument) {
+        this.functionName = functionName;
+        this.kind = kind;
+        this.direction = direction;
+        this.mode = mode;
         this.argument = argument;
     }
 
     @Override
     public EvaluationValue evaluate(ConditionContext context) {
         if (context == null) return EvaluationValue.ZERO;
+
         IRecipeContext recipeContext = context.getRecipeContext();
         if (recipeContext == null) return EvaluationValue.ZERO;
 
@@ -52,53 +59,13 @@ public class ResourceFunctionExpression implements IExpression {
         String key = argument != null ? argument.evaluate(context)
             .asString() : "";
 
-        switch (type) {
-            case ESSENTIA:
-                return new EvaluationValue(state.getStoredEssentia(key));
-            case VIS:
-                return new EvaluationValue(state.getStoredVis(key));
-            case GAS:
-                return new EvaluationValue(state.getStoredGas(key));
-            case GAS_IN:
-                return new EvaluationValue(state.getGasInput(key));
-            case GAS_OUT:
-                return new EvaluationValue(state.getGasOutput(key));
-            case GAS_F_IN:
-                return new EvaluationValue(state.getGasInputSpace(key));
-            case GAS_F_OUT:
-                return new EvaluationValue(state.getGasOutputSpace(key));
-            case FLUID:
-                return new EvaluationValue(state.getStoredFluid(key));
-            case FLUID_IN:
-                return new EvaluationValue(state.getFluidInput(key));
-            case FLUID_OUT:
-                return new EvaluationValue(state.getFluidOutput(key));
-            case FLUID_F_IN:
-                return new EvaluationValue(state.getFluidInputSpace(key));
-            case FLUID_F_OUT:
-                return new EvaluationValue(state.getFluidOutputSpace(key));
-            case ITEM:
-                return new EvaluationValue(state.getItemCount(IPortType.Direction.BOTH, key));
-            case ITEM_IN:
-                return new EvaluationValue(state.getItemCount(IPortType.Direction.INPUT, key));
-            case ITEM_OUT:
-                return new EvaluationValue(state.getItemCount(IPortType.Direction.OUTPUT, key));
-            case ITEM_F:
-                return new EvaluationValue(state.getItemSpace(IPortType.Direction.BOTH, key));
-            case ITEM_F_IN:
-                return new EvaluationValue(state.getItemSpace(IPortType.Direction.INPUT, key));
-            case ITEM_F_OUT:
-                return new EvaluationValue(state.getItemSpace(IPortType.Direction.OUTPUT, key));
-        }
+        long value = mode == Mode.SPACE ? state.getSpace(kind, direction, key) : state.getAmount(kind, direction, key);
 
-        return EvaluationValue.ZERO;
+        return new EvaluationValue(value);
     }
 
     @Override
     public String toString() {
-        return type.name()
-            .toLowerCase() + "("
-            + argument
-            + ")";
+        return functionName + "(" + argument + ")";
     }
 }

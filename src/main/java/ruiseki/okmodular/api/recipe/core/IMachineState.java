@@ -6,8 +6,198 @@ import ruiseki.okmodular.api.modular.IPortType;
  * Interface for accessing machine state in expressions.
  * Allows the API layer to access energy, progress, etc., without depending on
  * the implementation.
+ *
+ * <h2>Two layers, and which one to call</h2>
+ *
+ * Resources are readable two ways here, and they are not equal in standing.
+ *
+ * <ul>
+ * <li>{@link #getAmount}, {@link #getSpace} and {@link #getCapacity} take the
+ * resource kind as an argument. <b>New code should use these.</b> Everything
+ * outside this interface does - the expression layer reads every resource
+ * property and every named-resource function through them, and no caller of the
+ * per-kind getters remains.</li>
+ * <li>The per-kind getters ({@code getStoredFluid}, {@code getTotalGasInput},
+ * {@code getStoredEssentia}, and so on) are the primitives those three dispatch
+ * to. They are <b>implementation detail that has to be public because a default
+ * method cannot call anything else.</b> Reading one directly works but ties the
+ * call site to a single resource kind, which is the shape this interface is
+ * moving away from.</li>
+ * </ul>
+ *
+ * The primitives cannot be folded away, because how you read a kind genuinely
+ * differs per kind - fluids come from {@code IFluidHandler} tanks, items from
+ * inventories, essentia from its own handler. What was folded is the choosing
+ * between them, which used to be repeated in the expression registry, the
+ * property table and the function table.
+ *
+ * <h2>Adding a resource kind</h2>
+ *
+ * <ol>
+ * <li>Append a constant to {@link IPortType.Type} - append, never insert, since
+ * the ordinal is written to world NBT.</li>
+ * <li>Add its primitives here and implement them.</li>
+ * <li>Add a branch for it in all three accessors.</li>
+ * </ol>
+ *
+ * Step 3 is the one that gets forgotten, and forgetting it is silent: the switch
+ * falls through to {@code default} and the kind reads as zero. A test walks
+ * {@code Type.values()} and fails on any kind that answers zero, so the omission
+ * surfaces as a failure rather than as a machine that never runs.
+ *
+ * Nothing in the expression layer needs touching - property names, aliases and
+ * resource functions are generated from the kind.
  */
 public interface IMachineState {
+
+    /**
+     * Number of items a full slot holds. Used to express an item capacity as an
+     * amount rather than a slot count, so that items answer getCapacity in the
+     * same unit as every other resource.
+     */
+    int ITEMS_PER_SLOT = 64;
+
+    /**
+     * Get the capacity for a resource kind.
+     *
+     * This is the kind-parameterized form of the per-kind capacity getters below.
+     * New resource kinds should only need a branch here rather than a new pair of
+     * interface methods.
+     *
+     * @param kind the resource kind. Kinds that hold no amount ({@code BLOCK},
+     *             {@code NONE}) answer 0.
+     */
+    default long getCapacity(IPortType.Type kind) {
+        switch (kind) {
+            case ENERGY:
+                return getEnergyCapacity();
+            case MANA:
+                return getManaCapacity();
+            case FLUID:
+                return getFluidCapacity();
+            case GAS:
+                return getGasCapacity();
+            case ESSENTIA:
+                return getEssentiaCapacity();
+            case VIS:
+                return getVisCapacity();
+            case ITEM:
+                return (long) getItemSlotCount(IPortType.Direction.BOTH, false) * ITEMS_PER_SLOT;
+            default:
+                return 0L;
+        }
+    }
+
+    /**
+     * Get the amount held for a resource kind.
+     *
+     * This is the kind-parameterized form of the per-kind amount getters below.
+     * {@code getItemCount} already has this shape; the other kinds spell the same
+     * three questions out as separate methods.
+     *
+     * @param kind the resource kind. Kinds that hold no amount answer 0.
+     * @param dir  {@code BOTH} asks about the machine as a whole. Kinds that keep
+     *             no per-direction figures (energy, mana, essentia, vis) answer
+     *             the total for any direction - having no directional split is not
+     *             the same as holding nothing.
+     * @param name a specific fluid / gas / aspect / item, or null or empty to ask
+     *             about the kind as a whole.
+     */
+    default long getAmount(IPortType.Type kind, IPortType.Direction dir, String name) {
+        boolean byName = name != null && !name.isEmpty();
+
+        switch (kind) {
+            case ENERGY:
+                return getStoredEnergy();
+            case MANA:
+                return getStoredMana();
+            case FLUID:
+                switch (dir) {
+                    case INPUT:
+                        return byName ? getFluidInput(name) : getTotalFluidInput();
+                    case OUTPUT:
+                        return byName ? getFluidOutput(name) : getTotalFluidOutput();
+                    default:
+                        return byName ? getStoredFluid(name) : getStoredFluid();
+                }
+            case GAS:
+                switch (dir) {
+                    case INPUT:
+                        return byName ? getGasInput(name) : getTotalGasInput();
+                    case OUTPUT:
+                        return byName ? getGasOutput(name) : getTotalGasOutput();
+                    default:
+                        return byName ? getStoredGas(name) : getTotalStoredGas();
+                }
+            case ESSENTIA:
+                return byName ? getStoredEssentia(name) : getTotalStoredEssentia();
+            case VIS:
+                return byName ? getStoredVis(name) : getTotalStoredVis();
+            case ITEM:
+                return getItemCount(dir, byName ? name : null);
+            default:
+                return 0L;
+        }
+    }
+
+    /**
+     * Get the remaining room for a resource kind.
+     *
+     * Space is not one formula for every kind, and the difference is deliberate:
+     *
+     * <ul>
+     * <li>Items ask the machine directly. Stack limits differ per item, so
+     * "slots * 64 minus count" is not the number that actually fits.</li>
+     * <li>Fluids and gases keep separate input and output tanks, so a direction
+     * has its own figure and must not be derived from the shared capacity.</li>
+     * <li>Everything else is capacity minus what is held.</li>
+     * </ul>
+     *
+     * {@code BOTH} with a name is a combination the per-kind getters never
+     * offered. Input and output are separate storage, so it is their sum.
+     * {@code BOTH} without a name keeps the capacity-minus-held form that the
+     * existing {@code *_f} properties compute, so their values do not move.
+     *
+     * @param kind the resource kind. Kinds that hold no amount answer 0.
+     * @param dir  {@code BOTH} asks about the machine as a whole.
+     * @param name a specific fluid / gas / aspect / item, or null or empty to ask
+     *             about the kind as a whole.
+     */
+    default long getSpace(IPortType.Type kind, IPortType.Direction dir, String name) {
+        boolean byName = name != null && !name.isEmpty();
+
+        switch (kind) {
+            case ITEM:
+                return getItemSpace(dir, byName ? name : null);
+            case FLUID:
+                switch (dir) {
+                    case INPUT:
+                        return byName ? getFluidInputSpace(name) : getTotalFluidInputSpace();
+                    case OUTPUT:
+                        return byName ? getFluidOutputSpace(name) : getTotalFluidOutputSpace();
+                    default:
+                        return byName ? getFluidInputSpace(name) + getFluidOutputSpace(name)
+                            : getFluidCapacity() - getStoredFluid();
+                }
+            case GAS:
+                switch (dir) {
+                    case INPUT:
+                        return byName ? getGasInputSpace(name) : getTotalGasInputSpace();
+                    case OUTPUT:
+                        return byName ? getGasOutputSpace(name) : getTotalGasOutputSpace();
+                    default:
+                        return byName ? getGasInputSpace(name) + getGasOutputSpace(name)
+                            : getGasCapacity() - getTotalStoredGas();
+                }
+            case ENERGY:
+            case MANA:
+            case ESSENTIA:
+            case VIS:
+                return getCapacity(kind) - getAmount(kind, dir, name);
+            default:
+                return 0L;
+        }
+    }
 
     /**
      * Get the current energy stored.

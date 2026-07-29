@@ -71,44 +71,72 @@ Retrieve information about the world where the machine is located.
 
 Retrieve the current state of the machine.
 
-### Item
-- **Variables (Global)**
-    - `item` / `item_total`: Total number of items stored.
-    - `item_in` / `item_out`: Total items in input / output ports.
-    - `item_max` / `item_capacity`: Maximum item slot capacity.
-    - `item_f` / `item_free` / `item_space`: Total free capacity for items.
-    - `item_p` / `item_percent`: Item fill percentage (0.0 ~ 1.0).
-- **Functions (Filtering)**
-    - `item("id")`: Current amount of a specific item ID or OreDict entry.
-    - `item_in("id")` / `item_out("id")`: Amount in input / output ports.
-    - `item_f("id")` / `item_f_in("id")` / `item_f_out("id")`: Acceptable amount for a specific item.
-- **Slot Info (Functions)**
-    - `item_slot()`: Total slot count.
-    - `item_slot_in()` / `item_slot_out()`: Slot count for input / output.
-    - `item_slot_empty()`: Number of empty slots.
+### Every resource kind reads the same way
 
-### Energy
-- `energy` / `energy_stored` / `energy_total`: Currently stored energy.
-- `energy_max` / `energy_capacity`: Maximum energy capacity.
-- `energy_f` / `energy_free`: Available energy space (`max - stored`).
-- `energy_p` / `energy_percent`: Energy fill percentage (0.0 ~ 1.0).
-- `energy_per_tick`: Energy drawn per tick — the total of the running recipe's `perTick` inputs.
+**All seven resource kinds share the same suffixes.** Read `K` below as the name
+of a kind.
 
-### Fluid
-- **Variables (Global)**
-    - `fluid` / `fluid_stored` / `fluid_total`: Total amount of fluids stored.
-    - `fluid_in` / `fluid_out`: Total fluid in input / output ports.
-    - `fluid_max` / `fluid_capacity`: Maximum fluid tank capacity.
-    - `fluid_p` / `fluid_percent`: Fluid fill percentage (0.0 ~ 1.0).
-- **Functions (Filtering)**
-    - `fluid("name")`: Amount of a specific fluid.
-    - `fluid_in("name")` / `fluid_out("name")`: Amount in input / output ports.
+`K` = `item` / `fluid` / `gas` / `energy` / `mana` / `essentia` / `vis`
 
-### Other Resources
-- **Mana**: `mana`, `mana_max`, `mana_p`
-- **Gas**: `gas`, `gas_max`, `gas_p`
-- **Essentia**: `essentia("aspectName")`
-- **Vis**: `vis("aspectName")`
+| Written as | Meaning |
+|---|---|
+| `K` / `K_stored` / `K_total` / `total_K` | How much is held |
+| `K_max` / `K_capacity` / `total_K_max` / `total_K_capacity` | Capacity |
+| `K_f` / `K_free` / `K_space` | Room left |
+| `K_p` / `K_percent` | Fill ratio (0.0 - 1.0) |
+
+`gas_stored`, `total_vis` and `essentia_percent` are all just this table applied.
+
+Kinds whose input and output are **separate storage** (`item`, `fluid`, `gas`) also
+have directional names.
+
+| Written as | Meaning |
+|---|---|
+| `K_in` / `K_out` | Amount on the input / output side |
+| `K_f_in` / `K_f_out` | Room left on the input / output side |
+
+`energy`, `mana`, `essentia` and `vis` are single pools, so they have no
+directional names - a direction would have nothing to select and the answer would
+be the total.
+
+### Asking about one specific resource
+
+To ask about a particular fluid, gas, aspect or item rather than the kind as a
+whole, pass one argument to the same name. Exactly one argument is required;
+more or fewer is an error.
+
+```
+fluid("water")        item("minecraft:stone")     essentia("ignis")
+fluid_in("water")     item_out("minecraft:iron_ingot")
+fluid_f_out("lava")   item_f_in("minecraft:coal")
+```
+
+Which forms accept an argument depends on the kind, because naming a resource only
+means something where the kind holds more than one:
+
+| Kind | Argument forms available |
+|---|---|
+| `item` | `item`, `item_in`, `item_out`, `item_f`, `item_f_in`, `item_f_out` |
+| `fluid` / `gas` | `K`, `K_in`, `K_out`, `K_f_in`, `K_f_out` |
+| `essentia` / `vis` | `K` only |
+| `energy` / `mana` | none - a single pool of one thing has nothing to name |
+
+### Notes per kind
+
+- **Energy**: `power` and `power_p` are aliases of `energy` and `energy_p`.
+  `energy_per_tick` is the energy drawn per tick (the total of the running
+  recipe's `perTick` inputs), which is not an amount held and so is not in the
+  table above.
+- **Items**: capacity is expressed as slots * 64. `item_f` is not that capacity
+  minus the count, though - it is **how many actually fit**, since stack limits
+  differ per item and the subtraction would not match reality.
+- **Item slots**: `item_slot()` total slots, `item_slot_in()` / `item_slot_out()`
+  per direction, `item_slot_empty()` empty slots.
+
+> [!NOTE]
+> **Directional room is not the shared capacity minus what is held.**
+> Fluids and gases keep separate input and output tanks, so `fluid_f_in` answers
+> for the input tanks only. `fluid_f`, with no direction, is capacity minus held.
 
 ### Statistics & State
 - `recipe_count`: Cumulative number of recipes processed by the machine.
