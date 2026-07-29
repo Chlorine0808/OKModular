@@ -107,7 +107,7 @@ public class ItemOutput extends AbstractModularRecipeOutput {
             for (int i = startSlot; i <= endSlot && remaining > 0; i++) {
                 if (itemPort.getStackInSlot(i) == null) {
                     int insert = Math.min(remaining, output.getMaxStackSize());
-                    ItemStack newStack = createOutputStack(insert);
+                    ItemStack newStack = createOutputStack(insert, context);
                     itemPort.setInventorySlotContents(i, newStack);
                     remaining -= insert;
                 }
@@ -119,8 +119,12 @@ public class ItemOutput extends AbstractModularRecipeOutput {
 
     /**
      * Create an output ItemStack with NBT data applied.
+     * <p>
+     * The context must be the one the recipe is running in: an NBT expression can
+     * read machine state — <code>nbt('tier') = tier</code> — and a context without a
+     * machine attached has nothing to answer with.
      */
-    private ItemStack createOutputStack(int stackSize) {
+    private ItemStack createOutputStack(int stackSize, ConditionContext context) {
         if (output == null) return null;
 
         ItemStack newStack = output.copy();
@@ -134,8 +138,6 @@ public class ItemOutput extends AbstractModularRecipeOutput {
             if (nbt == null) {
                 nbt = new NBTTagCompound();
             }
-
-            ConditionContext context = new ConditionContext(null, 0, 0, 0);
 
             // Apply expression-based NBT writes
             if (nbtExpressions != null) {
