@@ -30,7 +30,8 @@ For running several lines through one machine, assembly-line style.
 |---|---|
 | **Right-click a port with a dye** | Paints it that colour (consumes one dye) |
 | **Right-click with a bucket of water** | Washes the colour off (**the water is not used up**) |
-| AE2's **Color Applicator** | Paints, or strips |
+| **Shift + Right-click with AE2's Color Applicator** | Paints |
+| **Right-click with IC2's Painter** | Paints |
 
 Holding neither a dye nor a water bucket, right-clicking opens the GUI as before.
 Painting a port the colour it already is consumes no dye.
@@ -39,10 +40,8 @@ The colour also shows in the WAILA tooltip, which is how to check one: a machine
 its own colour scheme can make a painted port hard to read at a glance.
 
 > [!NOTE]
-> **IC2's painter is untested.** Whether it reaches this has not been checked.
-
-**External blocks used as ports - a vanilla chest, say - cannot be painted yet.** They
-count as unpainted, so by the rules below every colour shares them.
+> **External blocks used as ports - a vanilla chest, say - cannot be painted yet.** They
+> count as unpainted, so by the rules below every colour shares them.
 
 ## 3. Which ports belong to which group
 
