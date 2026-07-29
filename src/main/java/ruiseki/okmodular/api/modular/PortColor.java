@@ -125,6 +125,25 @@ public enum PortColor {
         return VALUES[index];
     }
 
+    /**
+     * The colour a stored name refers to, or {@link #NONE} for a name that matches
+     * nothing.
+     *
+     * Names are what NBT holds, and NBT crosses builds and gets hand-edited. Falling
+     * back beats {@code valueOf}, which throws - and something reading a port's colour
+     * is usually deep inside loading a chunk.
+     */
+    public static PortColor fromName(String name) {
+        if (name == null || name.isEmpty()) return NONE;
+        for (PortColor color : VALUES) {
+            if (color.name()
+                .equals(name)) {
+                return color;
+            }
+        }
+        return NONE;
+    }
+
     /** The dye that produces this colour, or null for {@link #NONE}. */
     public EnumDye toDye() {
         return dye;

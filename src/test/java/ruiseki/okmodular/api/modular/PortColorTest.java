@@ -162,6 +162,34 @@ public class PortColorTest {
         }
     }
 
+    // ========== 名前から戻す（NBT に入っている表現） ==========
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(PortColor.class)
+    @DisplayName("名前から往復できる")
+    public void test名前から往復できる(PortColor color) {
+        assertSame(color, PortColor.fromName(color.name()));
+    }
+
+    /**
+     * 読めない名前で throw しないこと。
+     *
+     * 名前は NBT に入っている表現で、NBT はビルドを跨ぎ、手で編集もされる。
+     * これを読むのはチャンク読み込みの最中なので、**例外はチャンクごと失う**。
+     */
+    @ParameterizedTest(name = "\"{0}\"")
+    @ValueSource(strings = { "TRANSPARENT", "red", "", "  ", "RED " })
+    @DisplayName("読めない名前は NONE になる")
+    public void test読めない名前はNone(String stored) {
+        assertSame(PortColor.NONE, PortColor.fromName(stored), () -> "'" + stored + "' は NONE に倒れるべき");
+    }
+
+    @Test
+    @DisplayName("null の名前は NONE になる")
+    public void testNullの名前はNone() {
+        assertSame(PortColor.NONE, PortColor.fromName(null), "キーが無いのは「塗っていない」と同じ");
+    }
+
     // ========== EnumDye との対応（逆順） ==========
 
     /**
