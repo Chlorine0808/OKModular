@@ -3,6 +3,8 @@ package ruiseki.okmodular.api.recipe.error;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
@@ -111,6 +113,25 @@ public class ErrorReasonDisplayTest {
     public void test漏れていたものが出る() {
         for (ErrorReason reason : PREVIOUSLY_SWALLOWED) {
             assertTrue(reason.showsWhenIdle(), reason + " がまだ出ない。これがこの修正の本体");
+        }
+    }
+
+    @Test
+    @DisplayName("定数が可変な状態を持たない")
+    public void test定数が状態を持たない() {
+        // **enum 定数はプロセス全体で 1 個しかない。** そこに書き換え可能なフィールドを持つと、
+        // ある機械の状態が別の機械の表示に混ざる。
+        //
+        // 実際にその形の罠があった。`withDetail(String)` が `this.detail = detail` を
+        // 定数に対してやっていた。呼び出し元が 0 件だったので実害は出ていなかったが、
+        // 詳細を付けたい場所（`GuiManager`）の真横にあり、いつ使われてもおかしくなかった。
+        // コントローラ側の `lastProcessErrorDetail` が正しい置き場所。
+        for (Field field : ErrorReason.class.getDeclaredFields()) {
+            if (field.isSynthetic()) continue;
+            if (Modifier.isStatic(field.getModifiers())) continue; // 定数自身と $VALUES
+            assertTrue(
+                Modifier.isFinal(field.getModifiers()),
+                "ErrorReason." + field.getName() + " が final でない。enum 定数は共有されるので、" + "機械ごとの値はコントローラ側に置くこと");
         }
     }
 

@@ -25,8 +25,14 @@ public enum ErrorReason {
     BLOCK_OUTPUT_FULL("block_output_full", "No space for Block");
 
     private final String id;
+
+    /**
+     * English wording, kept as the record of what each status means.
+     * <p>
+     * Not what a player reads - that comes from {@link #getUnlocalizedName()} and the lang
+     * files - but it is where those translations were taken from, so the two should agree.
+     */
     private final String defaultMessage;
-    private String detail = "";
 
     ErrorReason(String id, String defaultMessage) {
         this.id = id;
@@ -68,15 +74,4 @@ public enum ErrorReason {
         return this != NONE && this != RUNNING;
     }
 
-    public ErrorReason withDetail(String detail) {
-        this.detail = detail;
-        return this;
-    }
-
-    public String getMessage() {
-        if (detail != null && !detail.isEmpty()) {
-            return defaultMessage + ": " + detail;
-        }
-        return defaultMessage;
-    }
 }
