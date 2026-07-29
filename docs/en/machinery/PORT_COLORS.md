@@ -29,11 +29,14 @@ For running several lines through one machine, assembly-line style.
 | Action | Result |
 |---|---|
 | **Right-click a port with a dye** | Paints it that colour (consumes one dye) |
-| **Sneak + right-click with a dye** | Strips the colour (consumes nothing) |
+| **Right-click with a bucket of water** | Washes the colour off (**the water is not used up**) |
 | AE2's **Color Applicator** | Paints, or strips |
 
-Right-clicking without a dye opens the GUI as before. Painting a port the colour it
-already is consumes no dye.
+Holding neither a dye nor a water bucket, right-clicking opens the GUI as before.
+Painting a port the colour it already is consumes no dye.
+
+The colour also shows in the WAILA tooltip, which is how to check one: a machine with
+its own colour scheme can make a painted port hard to read at a glance.
 
 > [!NOTE]
 > **IC2's painter is untested.** Whether it reaches this has not been checked.
@@ -96,6 +99,14 @@ structure sets**. An unpainted port looks exactly as it did.
 ## 6. Saving
 
 Colours are stored in the world and survive a reload.
+
+**Breaking a port does not lose its colour.** The dropped item carries it, putting the
+port back down restores it, and the item's tooltip says which colour it is.
+
+> [!NOTE]
+> **Per-side IO settings do reset when a port is placed again.** That is separate from
+> colour and has always been the case - they are set from the direction it is placed
+> facing.
 
 Colour is a **separate axis** from ordered port positions (`portIndex` in structure
 JSON): the index is read within a colour's group, so both work at once.
