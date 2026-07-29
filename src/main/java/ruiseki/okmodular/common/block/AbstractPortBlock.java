@@ -354,6 +354,19 @@ public abstract class AbstractPortBlock<T extends AbstractTE> extends AbstractTi
     public void getWailaInfo(List<String> tooltip, ItemStack itemStack, IWailaDataAccessor accessor,
         IWailaConfigHandler config) {
         TileEntity te = accessor.getTileEntity();
+
+        // Which group this port belongs to is not obvious from the tint alone once a
+        // machine has its own colour scheme, and it decides what the port can be used
+        // for. Silent when unpainted, which is the ordinary case.
+        if (te instanceof IModularPort port) {
+            PortColor color = port.getPortColor();
+            if (color.isColored()) {
+                tooltip.add(
+                    LangHelpers
+                        .localize("tooltip.okmodular.port_color", LangHelpers.localize(color.getUnlocalizedName())));
+            }
+        }
+
         if (te instanceof ISidedIO io) {
             Vec3 hit = WailaUtils.getLocalHit(accessor);
             if (hit == null) return;
