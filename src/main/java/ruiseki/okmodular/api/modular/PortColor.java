@@ -89,6 +89,22 @@ public enum PortColor {
     }
 
     /**
+     * What a painted port should render as, given what it would have rendered as
+     * otherwise.
+     *
+     * A port's own colour wins over the machine's structure tint. That is the whole
+     * point of painting one: the groups have to be tellable apart at a glance, which
+     * they would not be if the machine's own colour scheme stayed on top. An unpainted
+     * port is unchanged.
+     *
+     * @param fallback the tint with no colour on the port - structure tint, or the
+     *                 configured default
+     */
+    public int tintOr(int fallback) {
+        return isColored() ? rgb : fallback;
+    }
+
+    /**
      * The number vanilla wool metadata, {@code AEColor.ordinal()} and
      * {@code recolourBlock}'s colour argument all use for this colour.
      */

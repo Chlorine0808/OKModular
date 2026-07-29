@@ -242,6 +242,24 @@ public class PortColorTest {
         assertEquals(0xFFFFFF, PortColor.NONE.getRgb(), "塗っていないポートは色を掛けない = 白");
     }
 
+    /**
+     * 塗った色が構造の色より優先されること。
+     *
+     * 塗る目的は**群が一目で見分けられること**なので、機械の配色が上に残ると意味がない。
+     */
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = PortColor.class, names = "NONE", mode = EnumSource.Mode.EXCLUDE)
+    @DisplayName("塗った色は構造の色に勝つ")
+    public void testTintOrは塗った色を優先する(PortColor color) {
+        assertEquals(color.getRgb(), color.tintOr(0x123456), () -> color + " が構造の色に負けている");
+    }
+
+    @Test
+    @DisplayName("塗っていなければ渡された色をそのまま返す")
+    public void testTintOrは無色なら素通し() {
+        assertEquals(0x123456, PortColor.NONE.tintOr(0x123456), "塗っていないポートの見た目は変わらないべき");
+    }
+
     @ParameterizedTest(name = "{0}")
     @EnumSource(PortColor.class)
     @DisplayName("lang キーが名前から導かれる")
