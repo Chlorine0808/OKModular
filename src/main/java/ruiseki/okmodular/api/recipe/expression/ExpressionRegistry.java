@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import ruiseki.okmodular.api.modular.IPortType.Direction;
+import ruiseki.okmodular.api.modular.IPortType.Type;
+import ruiseki.okmodular.api.recipe.expression.ResourceFunctionExpression.Mode;
+
 /**
  * Registry for variables and functions used in ExpressionParser.
  */
@@ -174,56 +178,31 @@ public class ExpressionRegistry {
             "has_nbt",
             (args, parser) -> new NbtPresenceExpression(readNbtAccess(args, parser, "has_nbt")));
 
-        registerFunction("essentia", (args, parser) -> {
-            if (args.isEmpty()) throw parser.error("essentia() requires 1 argument (aspect name)");
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.ESSENTIA, args.get(0));
-        });
+        // Named resource reads. Each row is (function name, kind, direction, amount
+        // or space); the expression itself no longer needs a constant per
+        // combination. Kinds that had no directional or space variants before
+        // (essentia, vis) can gain rows here without touching any other file.
+        registerResourceFunction("essentia", Type.ESSENTIA, Direction.BOTH, Mode.AMOUNT);
+        registerResourceFunction("vis", Type.VIS, Direction.BOTH, Mode.AMOUNT);
 
-        registerFunction("vis", (args, parser) -> {
-            if (args.isEmpty()) throw parser.error("vis() requires 1 argument (aspect name)");
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.VIS, args.get(0));
-        });
+        registerResourceFunction("fluid", Type.FLUID, Direction.BOTH, Mode.AMOUNT);
+        registerResourceFunction("fluid_in", Type.FLUID, Direction.INPUT, Mode.AMOUNT);
+        registerResourceFunction("fluid_out", Type.FLUID, Direction.OUTPUT, Mode.AMOUNT);
+        registerResourceFunction("fluid_f_in", Type.FLUID, Direction.INPUT, Mode.SPACE);
+        registerResourceFunction("fluid_f_out", Type.FLUID, Direction.OUTPUT, Mode.SPACE);
 
-        registerFunction("gas", (args, parser) -> {
-            if (args.isEmpty() || args.size() > 1) {
-                throw parser.error("gas() function requires 1 argument (gas name)");
-            }
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.GAS, args.get(0));
-        });
+        registerResourceFunction("gas", Type.GAS, Direction.BOTH, Mode.AMOUNT);
+        registerResourceFunction("gas_in", Type.GAS, Direction.INPUT, Mode.AMOUNT);
+        registerResourceFunction("gas_out", Type.GAS, Direction.OUTPUT, Mode.AMOUNT);
+        registerResourceFunction("gas_f_in", Type.GAS, Direction.INPUT, Mode.SPACE);
+        registerResourceFunction("gas_f_out", Type.GAS, Direction.OUTPUT, Mode.SPACE);
 
-        registerFunction("fluid", (args, parser) -> {
-            if (args.isEmpty() || args.size() > 1) {
-                throw parser.error("fluid() function requires 1 argument (fluid name)");
-            }
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.FLUID, args.get(0));
-        });
-        registerResourceFunction("fluid_in", ResourceFunctionExpression.Type.FLUID_IN);
-        registerResourceFunction("fluid_out", ResourceFunctionExpression.Type.FLUID_OUT);
-        registerResourceFunction("fluid_f_in", ResourceFunctionExpression.Type.FLUID_F_IN);
-        registerResourceFunction("fluid_f_out", ResourceFunctionExpression.Type.FLUID_F_OUT);
-
-        registerFunction("gas_in", (args, parser) -> {
-            if (args.isEmpty() || args.size() > 1) {
-                throw parser.error("gas_in() function requires 1 argument (gas name)");
-            }
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.GAS_IN, args.get(0));
-        });
-        registerFunction("gas_out", (args, parser) -> {
-            if (args.isEmpty() || args.size() > 1) {
-                throw parser.error("gas_out() function requires 1 argument (gas name)");
-            }
-            return new ResourceFunctionExpression(ResourceFunctionExpression.Type.GAS_OUT, args.get(0));
-        });
-        registerResourceFunction("gas_f_in", ResourceFunctionExpression.Type.GAS_F_IN);
-        registerResourceFunction("gas_f_out", ResourceFunctionExpression.Type.GAS_F_OUT);
-
-        // Unified Item Functions
-        registerResourceFunction("item", ResourceFunctionExpression.Type.ITEM);
-        registerResourceFunction("item_in", ResourceFunctionExpression.Type.ITEM_IN);
-        registerResourceFunction("item_out", ResourceFunctionExpression.Type.ITEM_OUT);
-        registerResourceFunction("item_f", ResourceFunctionExpression.Type.ITEM_F);
-        registerResourceFunction("item_f_in", ResourceFunctionExpression.Type.ITEM_F_IN);
-        registerResourceFunction("item_f_out", ResourceFunctionExpression.Type.ITEM_F_OUT);
+        registerResourceFunction("item", Type.ITEM, Direction.BOTH, Mode.AMOUNT);
+        registerResourceFunction("item_in", Type.ITEM, Direction.INPUT, Mode.AMOUNT);
+        registerResourceFunction("item_out", Type.ITEM, Direction.OUTPUT, Mode.AMOUNT);
+        registerResourceFunction("item_f", Type.ITEM, Direction.BOTH, Mode.SPACE);
+        registerResourceFunction("item_f_in", Type.ITEM, Direction.INPUT, Mode.SPACE);
+        registerResourceFunction("item_f_out", Type.ITEM, Direction.OUTPUT, Mode.SPACE);
 
         // Math Functions
         for (String mathFunc : MathFunctionExpression.SUPPORTED_FUNCTIONS) {
@@ -264,13 +243,30 @@ public class ExpressionRegistry {
         registerFunction("count_blocks", (args, parser) -> new CountBlocksFunctionExpression(args));
     }
 
-    private static void registerResourceFunction(String name, ResourceFunctionExpression.Type type) {
+    private static void registerResourceFunction(String name, Type kind, Direction direction, Mode mode) {
         registerFunction(name, (args, parser) -> {
-            if (args.isEmpty() || args.size() > 1) {
-                throw parser.error(name + "() function requires 1 argument (item ID or OreDict)");
+            if (args.size() != 1) {
+                throw parser.error(name + "() requires 1 argument (" + argumentHint(kind) + ")");
             }
-            return new ResourceFunctionExpression(type, args.get(0));
+            return new ResourceFunctionExpression(name, kind, direction, mode, args.get(0));
         });
+    }
+
+    /** What the single argument of a resource function names, for error messages. */
+    private static String argumentHint(Type kind) {
+        switch (kind) {
+            case ITEM:
+                return "item ID or OreDict";
+            case FLUID:
+                return "fluid name";
+            case GAS:
+                return "gas name";
+            case ESSENTIA:
+            case VIS:
+                return "aspect name";
+            default:
+                return "resource name";
+        }
     }
 
     public static IExpression getVariable(String name) {
