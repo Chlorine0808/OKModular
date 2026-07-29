@@ -13,6 +13,7 @@ import ruiseki.okcore.proxy.CommonProxyComponent;
 import ruiseki.okmodular.common.handler.FluidPhysicsHandler;
 import ruiseki.okmodular.common.network.PacketReloadNEI;
 import ruiseki.okmodular.common.network.PacketStructureTint;
+import ruiseki.okmodular.common.network.PacketToggleSide;
 
 /**
  * Modular Machinery Backport module entry point.
@@ -35,8 +36,15 @@ public class MachineryCommon extends CommonProxyComponent {
      * discriminators, so reordering is harmless. Append at the end anyway - it keeps
      * the existing numbers still and makes a diff say only what was added.
      */
-    public static final List<Class<? extends PacketBase>> PACKETS = Collections
-        .unmodifiableList(Arrays.asList(PacketStructureTint.class, PacketReloadNEI.class));
+    public static final List<Class<? extends PacketBase>> PACKETS = Collections.unmodifiableList(
+        Arrays.asList(
+            PacketStructureTint.class,
+            PacketReloadNEI.class,
+            // The wrench's per-side IO toggle. It was missing, so ItemWrench sent this
+            // to a channel that had no discriminator for it and the toggle never
+            // reached the server. The split brought the sender over from the parent
+            // mod's CoreCommon without bringing the registration.
+            PacketToggleSide.class));
 
     @Override
     public ModBase getMod() {
