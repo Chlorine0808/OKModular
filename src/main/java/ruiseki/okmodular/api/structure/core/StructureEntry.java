@@ -261,7 +261,10 @@ public class StructureEntry implements IStructureEntry {
         serializeExpr(json, "speedMultiplier", speedMultiplier, speedMultiplierExpr, 1.0);
         serializeExpr(json, "energyMultiplier", energyMultiplier, energyMultiplierExpr, 1.0);
         serializeExpr(json, "batchMin", batchMin, batchMinExpr, 1.0);
-        serializeExpr(json, "batchMax", batchMin, batchMaxExpr, 1.0);
+        // Was passing batchMin here. Four calls of the same shape, one of them wrong, and
+        // only visible when batchMax is a constant and batchMin is not the default - so an
+        // exported structure came back with the wrong batch ceiling.
+        serializeExpr(json, "batchMax", batchMax, batchMaxExpr, 1.0);
 
         if (tier != 0) {
             json.addProperty("tier", tier);
