@@ -121,7 +121,7 @@ public final class StubMachineContext {
     public static final long ITEM_IN_SPACE_NAMED = 713L;
     public static final long ITEM_OUT_SPACE = 714L;
     public static final long ITEM_OUT_SPACE_NAMED = 715L;
-    public static final int ITEM_SLOTS = 9;
+    public static final int ITEM_SLOTS = 20;
 
     /** アイテムの容量は「スロット数 × 64」で表される（式レイヤの既存の扱い）。 */
     public static final double ITEM_CAPACITY = ITEM_SLOTS * (double) IMachineState.ITEMS_PER_SLOT;
