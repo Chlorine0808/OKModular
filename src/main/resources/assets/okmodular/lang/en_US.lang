@@ -308,3 +308,7 @@ gui.port_color.GREEN=Green
 gui.port_color.RED=Red
 gui.port_color.BLACK=Black
 tooltip.okmodular.port_color=Painted: %s
+
+# --- Wrench tooltip (the selected type and the link were invisible outside chat) ---
+tooltip.okmodular.wrench_unlinked=Not linked - sneak + right-click a controller
+tooltip.okmodular.wrench_linked=Linked controller: (%d, %d, %d) in dim %d

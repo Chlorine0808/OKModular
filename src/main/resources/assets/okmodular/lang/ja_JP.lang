@@ -310,3 +310,7 @@ gui.port_color.GREEN=緑
 gui.port_color.RED=赤
 gui.port_color.BLACK=黒
 tooltip.okmodular.port_color=塗装: %s
+
+# --- レンチのツールチップ（選択中の種別とリンク先はチャット以外に出ていなかった） ---
+tooltip.okmodular.wrench_unlinked=リンクされていません - スニーク + 右クリックでコントローラにリンク
+tooltip.okmodular.wrench_linked=リンク先コントローラ: (%d, %d, %d) ディメンション %d

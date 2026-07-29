@@ -73,6 +73,7 @@ public class BlockItemOutputPortME extends AbstractPortBlock<TEItemOutputPortME>
     @Override
     public void getWailaInfo(List<String> tooltip, ItemStack itemStack, IWailaDataAccessor accessor,
         IWailaConfigHandler config) {
+        super.getWailaInfo(tooltip, itemStack, accessor, config);
         TileEntity te = accessor.getTileEntity();
         if (te instanceof TEItemOutputPortME meTile) {
             if (meTile.isActive()) {

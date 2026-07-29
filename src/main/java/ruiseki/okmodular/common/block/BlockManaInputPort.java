@@ -104,6 +104,7 @@ public class BlockManaInputPort extends AbstractPortBlock<TEManaInputPort> imple
     @Override
     public void getWailaInfo(List<String> tooltip, ItemStack itemStack, IWailaDataAccessor accessor,
         IWailaConfigHandler config) {
+        super.getWailaInfo(tooltip, itemStack, accessor, config);
         TileEntity tileEntity = accessor.getTileEntity();
         if (tileEntity instanceof IManaBlock handler) {
             tooltip.add(WailaUtils.getManaToolTip(handler));

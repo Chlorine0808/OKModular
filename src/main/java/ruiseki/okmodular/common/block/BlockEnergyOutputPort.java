@@ -9,9 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
@@ -23,12 +21,10 @@ import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
-import ruiseki.okmodular.common.item.ItemWrench;
 import ruiseki.okmodular.common.tier.TierManager;
 import ruiseki.okmodular.common.tile.energy.output.TEEnergyOutputPort;
 import ruiseki.okmodular.config.MachineryConfig;
 import ruiseki.okmodular.core.tileentity.AbstractEnergyTE;
-import ruiseki.okmodular.core.tileentity.ISidedIO;
 import ruiseki.okmodular.integration.waila.WailaUtils;
 
 /**
@@ -105,16 +101,14 @@ public class BlockEnergyOutputPort extends AbstractPortBlock<TEEnergyOutputPort>
     @Override
     public void getWailaInfo(List<String> tooltip, ItemStack itemStack, IWailaDataAccessor accessor,
         IWailaConfigHandler config) {
+        // The shared lines - painted colour, per-side IO - live in the base class. The
+        // side IO block used to be copied out here, which is why the colour line added
+        // to the base for port colours never showed on energy ports.
+        super.getWailaInfo(tooltip, itemStack, accessor, config);
+
         TileEntity te = accessor.getTileEntity();
         if (te instanceof AbstractEnergyTE energyTE) {
             tooltip.add(WailaUtils.getEnergyTransfer(energyTE));
-        }
-        if (te instanceof ISidedIO io) {
-            Vec3 hit = WailaUtils.getLocalHit(accessor);
-            if (hit == null) return;
-            ForgeDirection side = ItemWrench
-                .getClickedSide(accessor.getSide(), (float) hit.xCoord, (float) hit.yCoord, (float) hit.zCoord);
-            tooltip.add(WailaUtils.getSideIOTooltip(io, side));
         }
     }
 

@@ -16,10 +16,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.opengl.GL11;
 
-import com.gtnewhorizon.gtnhlib.eventbus.EventBusSubscriber;
-
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
@@ -27,16 +24,19 @@ import ruiseki.okmodular.common.item.ItemWrench;
 import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.okmodular.core.tileentity.ISidedIO;
 
-@EventBusSubscriber(side = Side.CLIENT)
+/**
+ * Draws the wrench's overlay: linked external ports, and the controller they belong to.
+ * <p>
+ * Registered by hand from {@code MachineryClient.registerEventHooks}, the same way
+ * {@link StructureWandRenderer} is. It used to carry GTNHLib's
+ * {@code @EventBusSubscriber} instead, which never fired: <b>nothing in the mod
+ * references this class</b>, so it was never loaded, and a class that is never loaded is
+ * never wired up. The overlay simply did not exist, with no error to say so.
+ */
 public class WrenchOverlayRenderer {
 
-    @EventBusSubscriber.Condition
-    public static boolean shouldSubscribe() {
-        return true;
-    }
-
     @SubscribeEvent
-    public static void onRenderWorldLast(RenderWorldLastEvent event) {
+    public void onRenderWorldLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
         EntityPlayer player = mc.thePlayer;
 

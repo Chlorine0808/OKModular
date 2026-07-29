@@ -1,5 +1,7 @@
 package ruiseki.okmodular.common.item;
 
+import java.util.List;
+
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,7 +26,6 @@ import ruiseki.okmodular.core.tileentity.ISidedIO;
 /**
  * Item Wrench - config ISidedIO.
  * TODO: Add Wrench texture
- * TODO: Add tooltip
  * TODO: Add announcement when change io
  */
 public class ItemWrench extends ItemOK implements IToolHammer {
@@ -249,6 +250,41 @@ public class ItemWrench extends ItemOK implements IToolHammer {
         IPortType.Type nextType = IPortType.SUPPORTED_TYPES[currentIndex];
         String typeName = LangHelpers.localize("gui.port_type." + nextType.name());
         player.addChatMessage(new ChatComponentTranslation("gui.port_type", typeName));
+    }
+
+    /**
+     * Whether the wrench is linked to a controller, which nothing else showed.
+     * <p>
+     * Registering an external port needs a link, and without one that operation does
+     * nothing at all. Yet the link only announced itself in chat at the moment it was
+     * made, and afterwards only through the overlay - which was not drawn at all until it
+     * got registered on the event bus. A wrench in the inventory looked identical linked
+     * or not.
+     * <p>
+     * The selected port type is <b>not</b> repeated here: {@link #getItemStackDisplayName}
+     * already puts it in the name, which is the tooltip's first line.
+     * <p>
+     * The unlinked case says so rather than staying silent, because "no line" and "not
+     * linked" would be indistinguishable - and it is the one place to mention how linking
+     * works.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean advanced) {
+        super.addInformation(stack, player, list, advanced);
+
+        NBTTagCompound nbt = stack.getTagCompound();
+        if (nbt != null && nbt.hasKey("LinkedX")) {
+            list.add(
+                LangHelpers.localize(
+                    "tooltip.okmodular.wrench_linked",
+                    nbt.getInteger("LinkedX"),
+                    nbt.getInteger("LinkedY"),
+                    nbt.getInteger("LinkedZ"),
+                    nbt.getInteger("LinkedDim")));
+        } else {
+            list.add(LangHelpers.localize("tooltip.okmodular.wrench_unlinked"));
+        }
     }
 
     public static IPortType.Type getSelectedPortType(ItemStack stack) {
