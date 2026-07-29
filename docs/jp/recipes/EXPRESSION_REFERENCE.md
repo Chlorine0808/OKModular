@@ -152,6 +152,7 @@ OmoshiroiKamo の式パーサー (`ExpressionParser`) で使用できる変数�
     - 例: `count_blocks(1, "minecraft:iron_block")`
 - `nbt('key')`: マシン本体の NBT を取得。
 - `nbt('symbol', 'key')`: 構造体の特定シンボル位置の NBT を取得。
+- `has_nbt('key')` / `has_nbt('symbol', 'key')`: NBT キーが**存在するか**を判定（値ではなく有無）。
 
 ### NBT へのアクセスは `nbt(...)` に統一されています
 

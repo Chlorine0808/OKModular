@@ -49,10 +49,16 @@ public class Conditions {
                     .getAsString()),
             json -> json.has("expression"));
 
-        ConditionParserRegistry.register(
-            "tile_nbt",
-            TileNbtCondition::fromJson,
-            json -> json.has("tile_nbt") || (json.has("key") && json.has("op") && json.has("value")));
+        // tile_nbt is gone. It read one flat key off the machine's own TileEntity with
+        // its own comparison parser, and could not do nested paths, other blocks, or
+        // !=. Write it as an expression instead:
+        //
+        // { "expression": "nbt('energy') >= 1000" }
+        // { "expression": "has_nbt('heat') && nbt('heat') <= 100" }
+        //
+        // The second form is the one that needs care: tile_nbt treated an absent key
+        // as failing the condition, whereas nbt() answers 0, which passes a <=
+        // comparison. has_nbt() restores that distinction.
 
         // Logical Operators
         ConditionParserRegistry.register("and", OpAnd::fromJson, json -> json.has("conditions") || json.has("and"));
