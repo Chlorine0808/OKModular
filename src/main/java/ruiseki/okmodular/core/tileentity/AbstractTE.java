@@ -70,6 +70,21 @@ public abstract class AbstractTE extends AbstractTickingTE
     @NBTPersist
     protected int assignedIndex = -1;
 
+    /**
+     * Satisfies {@code IModularPort.getAssignedIndex} for every port tile entity.
+     *
+     * Kept here rather than in each port family: the field has always lived in this
+     * class, and the seven families were each carrying an identical pair of
+     * accessors over it.
+     */
+    public int getAssignedIndex() {
+        return assignedIndex;
+    }
+
+    public void setAssignedIndex(int index) {
+        this.assignedIndex = index;
+    }
+
     /** Cached redstone result */
     protected boolean redstoneCheckPassed = true;
 
