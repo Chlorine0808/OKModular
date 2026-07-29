@@ -478,6 +478,8 @@ public class MachinePropertyExpression implements IExpression {
         alias("item_total", "item");
         alias("item_capacity", "item_max");
         alias("item_space", "item_f");
+        alias("item_free", "item_f");
+        alias("item_percent", "item_p");
 
         alias("progress_percent", "progress");
         alias("batch_size", "batch");

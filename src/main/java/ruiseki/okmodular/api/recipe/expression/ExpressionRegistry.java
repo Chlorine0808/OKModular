@@ -45,6 +45,8 @@ public class ExpressionRegistry {
         registerWorldProperty("progress_tick");
         registerWorldProperty("redstone");
         registerWorldProperty("seed");
+        registerWorldProperty("world_seed");
+        registerWorldProperty("random_seed");
 
         // --- Machine Properties ---
         registerMachineProperty("energy");
@@ -125,6 +127,19 @@ public class ExpressionRegistry {
         registerMachineProperty("vis_f");
         registerMachineProperty("vis_max");
         registerMachineProperty("vis_capacity");
+
+        // Item totals. The function forms (item("id")) are registered further down;
+        // these are the bare variables that read the machine as a whole.
+        registerMachineProperty("item");
+        registerMachineProperty("item_total");
+        registerMachineProperty("item_max");
+        registerMachineProperty("item_capacity");
+        registerMachineProperty("item_f");
+        registerMachineProperty("item_free");
+        registerMachineProperty("item_space");
+        registerMachineProperty("item_p");
+        registerMachineProperty("item_percent");
+        registerMachineProperty("facing");
 
         // --- Structural Properties ---
         registerMachineProperty("batch");
