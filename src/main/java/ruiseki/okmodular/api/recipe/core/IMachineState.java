@@ -48,6 +48,58 @@ public interface IMachineState {
     }
 
     /**
+     * Get the amount held for a resource kind.
+     *
+     * This is the kind-parameterized form of the per-kind amount getters below.
+     * {@code getItemCount} already has this shape; the other kinds spell the same
+     * three questions out as separate methods.
+     *
+     * @param kind the resource kind. Kinds that hold no amount answer 0.
+     * @param dir  {@code BOTH} asks about the machine as a whole. Kinds that keep
+     *             no per-direction figures (energy, mana, essentia, vis) answer
+     *             the total for any direction - having no directional split is not
+     *             the same as holding nothing.
+     * @param name a specific fluid / gas / aspect / item, or null or empty to ask
+     *             about the kind as a whole.
+     */
+    default long getAmount(IPortType.Type kind, IPortType.Direction dir, String name) {
+        boolean byName = name != null && !name.isEmpty();
+
+        switch (kind) {
+            case ENERGY:
+                return getStoredEnergy();
+            case MANA:
+                return getStoredMana();
+            case FLUID:
+                switch (dir) {
+                    case INPUT:
+                        return byName ? getFluidInput(name) : getTotalFluidInput();
+                    case OUTPUT:
+                        return byName ? getFluidOutput(name) : getTotalFluidOutput();
+                    default:
+                        return byName ? getStoredFluid(name) : getStoredFluid();
+                }
+            case GAS:
+                switch (dir) {
+                    case INPUT:
+                        return byName ? getGasInput(name) : getTotalGasInput();
+                    case OUTPUT:
+                        return byName ? getGasOutput(name) : getTotalGasOutput();
+                    default:
+                        return byName ? getStoredGas(name) : getTotalStoredGas();
+                }
+            case ESSENTIA:
+                return byName ? getStoredEssentia(name) : getTotalStoredEssentia();
+            case VIS:
+                return byName ? getStoredVis(name) : getTotalStoredVis();
+            case ITEM:
+                return getItemCount(dir, byName ? name : null);
+            default:
+                return 0L;
+        }
+    }
+
+    /**
      * Get the current energy stored.
      */
     long getStoredEnergy();

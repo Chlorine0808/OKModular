@@ -17,25 +17,39 @@ import ruiseki.okmodular.api.structure.core.IStructureEntry;
  * 機械プロパティの式を評価するための最小コンテキスト。
  *
  * ============================================
- * なぜ「全部の値が非ゼロで、しかも互いに違う」のか
+ * なぜ値が「すべて非ゼロで、すべて相異なる」のか
  * ============================================
  *
- * 理由が 2 つある。
+ * 理由が 3 つあり、どれも「間違った繋ぎ方をしたときに失敗すること」を狙っている。
  *
  * **1. 定義の欠落を検出するため。**
  * MachinePropertyExpression は定義が見つからないとき **黙って ZERO を返す**。
- * つまり「登録されているのに定義が無い」欠落は、値が 0 になることでしか
- * 観測できない。機械側の値をすべて非ゼロにしておけば、
- * **0 が返ってきたこと自体が「定義が無い」の証拠**になる。
+ * 機械側の値をすべて非ゼロにしておけば、**0 が返ったこと自体が「定義が無い」の証拠**になる。
  *
- * **2. 資源種の対応付けを検証するため。**
- * 全資源種が同じ値を返すスタブだと、fluid を読むつもりのコードが
- * 誤って gas を読んでいても値が一致してテストが通ってしまう。
- * **資源種ごとに違う値**を返せば、繋ぎ間違いがそのまま失敗として出る。
- * Kind でまとめた汎用アクセサ（B9）が正しい資源種に届いているかは、
- * これが無いと確かめられない。
+ * **2. 資源種の取り違えを検出するため。**
+ * 全資源種が同じ値だと、fluid を読むつもりで gas を読んでいても通ってしまう。
  *
- * 残量と容量も違う値にする（`*_f` = 容量 - 残量 が偶然 0 にならないように）。
+ * **3. 方向と名前指定の取り違えを検出するため。**
+ * 資源種を引数で受ける汎用アクセサ（B9）は
+ * (資源種 × 方向 × 名前あり/なし) を switch で振り分ける。
+ * 「合計を返すメソッド」と「名前で引くメソッド」が同じ値だと、
+ * どちらを呼んでいても一致してしまう。
+ *
+ * ============================================
+ * 値の付け方
+ * ============================================
+ *
+ * 資源種ごとに基数を決め（energy 100 / mana 200 / fluid 300 / gas 400 /
+ * essentia 500 / vis 600 / item 700）、その中で下 1 桁を用途に割り当てる:
+ *
+ * <pre>
+ * +0 合計          +1 名前で引いた量
+ * +2 入力側の合計   +3 入力側を名前で引いた量
+ * +4 出力側の合計   +5 出力側を名前で引いた量
+ * </pre>
+ *
+ * 空き容量は基数 +10 から同じ並びで置く。容量は基数 × 10。
+ * どの値が返ったかで「どのメソッドが呼ばれたか」が一意に分かる。
  *
  * ============================================
  * B9 との関係
@@ -49,42 +63,68 @@ import ruiseki.okmodular.api.structure.core.IStructureEntry;
  */
 public final class StubMachineContext {
 
-    // 資源種ごとに桁で見分けられる値を置く。
-    // 残量 = N00、容量 = N000、方向別 = 残量に近い別値、空き = 容量 - 残量 とは別値。
-
+    // --- energy: 方向も名前指定も持たない ---
     public static final long ENERGY_STORED = 100L;
     public static final long ENERGY_CAPACITY = 1000L;
     public static final int ENERGY_PER_TICK = 7;
 
+    // --- mana: 方向も名前指定も持たない ---
     public static final long MANA_STORED = 200L;
     public static final long MANA_CAPACITY = 2000L;
 
+    // --- fluid: 方向も名前指定も持つ ---
     public static final long FLUID_STORED = 300L;
+    public static final long FLUID_STORED_NAMED = 301L;
+    public static final long FLUID_IN = 302L;
+    public static final long FLUID_IN_NAMED = 303L;
+    public static final long FLUID_OUT = 304L;
+    public static final long FLUID_OUT_NAMED = 305L;
+    public static final long FLUID_IN_SPACE = 310L;
+    public static final long FLUID_IN_SPACE_NAMED = 311L;
+    public static final long FLUID_OUT_SPACE = 312L;
+    public static final long FLUID_OUT_SPACE_NAMED = 313L;
     public static final long FLUID_CAPACITY = 3000L;
-    public static final long FLUID_INPUT = 310L;
-    public static final long FLUID_OUTPUT = 320L;
-    public static final long FLUID_INPUT_SPACE = 330L;
-    public static final long FLUID_OUTPUT_SPACE = 340L;
 
+    // --- gas: 方向も名前指定も持つ ---
     public static final long GAS_STORED = 400L;
+    public static final long GAS_STORED_NAMED = 401L;
+    public static final long GAS_IN = 402L;
+    public static final long GAS_IN_NAMED = 403L;
+    public static final long GAS_OUT = 404L;
+    public static final long GAS_OUT_NAMED = 405L;
+    public static final long GAS_IN_SPACE = 410L;
+    public static final long GAS_IN_SPACE_NAMED = 411L;
+    public static final long GAS_OUT_SPACE = 412L;
+    public static final long GAS_OUT_SPACE_NAMED = 413L;
     public static final long GAS_CAPACITY = 4000L;
-    public static final long GAS_INPUT = 410L;
-    public static final long GAS_OUTPUT = 420L;
-    public static final long GAS_INPUT_SPACE = 430L;
-    public static final long GAS_OUTPUT_SPACE = 440L;
 
+    // --- essentia: 名前指定は持つが方向は持たない ---
     public static final long ESSENTIA_STORED = 500L;
+    public static final long ESSENTIA_STORED_NAMED = 501L;
     public static final long ESSENTIA_CAPACITY = 5000L;
 
+    // --- vis: 名前指定は持つが方向は持たない ---
     public static final long VIS_STORED = 600L;
+    public static final long VIS_STORED_NAMED = 601L;
     public static final long VIS_CAPACITY = 6000L;
 
+    // --- item: 方向も名前指定も持つ。容量はスロット数から導かれる ---
     public static final long ITEM_COUNT = 700L;
-    public static final long ITEM_SPACE = 750L;
+    public static final long ITEM_COUNT_NAMED = 701L;
+    public static final long ITEM_IN = 702L;
+    public static final long ITEM_IN_NAMED = 703L;
+    public static final long ITEM_OUT = 704L;
+    public static final long ITEM_OUT_NAMED = 705L;
+    public static final long ITEM_SPACE = 710L;
+    public static final long ITEM_SPACE_NAMED = 711L;
+    public static final long ITEM_IN_SPACE = 712L;
+    public static final long ITEM_IN_SPACE_NAMED = 713L;
+    public static final long ITEM_OUT_SPACE = 714L;
+    public static final long ITEM_OUT_SPACE_NAMED = 715L;
     public static final int ITEM_SLOTS = 9;
 
     /** アイテムの容量は「スロット数 × 64」で表される（式レイヤの既存の扱い）。 */
-    public static final double ITEM_CAPACITY = ITEM_SLOTS * 64.0;
+    public static final double ITEM_CAPACITY = ITEM_SLOTS * (double) IMachineState.ITEMS_PER_SLOT;
 
     private StubMachineContext() {}
 
@@ -101,6 +141,10 @@ public final class StubMachineContext {
     /** 機械状態そのもの。汎用アクセサを直接叩くテスト用。 */
     public static IMachineState machineState() {
         return new StubMachineState();
+    }
+
+    private static boolean named(String name) {
+        return name != null && !name.isEmpty();
     }
 
     /** 式の評価だけに使う最小の IRecipeContext。機械状態以外は使われない。 */
@@ -149,8 +193,8 @@ public final class StubMachineContext {
     }
 
     /**
-     * 全メソッドが非ゼロを返し、資源種ごとに値が違う IMachineState。
-     * 値の意味は問わない。「0 でないこと」と「種を混同すれば違う値になること」が契約。
+     * どのメソッドが呼ばれたかが返り値で一意に分かる IMachineState。
+     * 値の意味は問わない。区別できることだけが契約。
      */
     private static final class StubMachineState implements IMachineState {
 
@@ -228,53 +272,53 @@ public final class StubMachineContext {
         }
 
         @Override
+        public long getStoredFluid(String name) {
+            return FLUID_STORED_NAMED;
+        }
+
+        @Override
         public long getFluidCapacity() {
             return FLUID_CAPACITY;
         }
 
         @Override
-        public long getStoredFluid(String name) {
-            return FLUID_STORED;
-        }
-
-        @Override
         public long getTotalFluidInput() {
-            return FLUID_INPUT;
+            return FLUID_IN;
         }
 
         @Override
         public long getTotalFluidOutput() {
-            return FLUID_OUTPUT;
+            return FLUID_OUT;
         }
 
         @Override
         public long getFluidInput(String name) {
-            return FLUID_INPUT;
+            return FLUID_IN_NAMED;
         }
 
         @Override
         public long getFluidOutput(String name) {
-            return FLUID_OUTPUT;
-        }
-
-        @Override
-        public long getFluidInputSpace(String name) {
-            return FLUID_INPUT_SPACE;
-        }
-
-        @Override
-        public long getFluidOutputSpace(String name) {
-            return FLUID_OUTPUT_SPACE;
+            return FLUID_OUT_NAMED;
         }
 
         @Override
         public long getTotalFluidInputSpace() {
-            return FLUID_INPUT_SPACE;
+            return FLUID_IN_SPACE;
         }
 
         @Override
         public long getTotalFluidOutputSpace() {
-            return FLUID_OUTPUT_SPACE;
+            return FLUID_OUT_SPACE;
+        }
+
+        @Override
+        public long getFluidInputSpace(String name) {
+            return FLUID_IN_SPACE_NAMED;
+        }
+
+        @Override
+        public long getFluidOutputSpace(String name) {
+            return FLUID_OUT_SPACE_NAMED;
         }
 
         // --- mana ---
@@ -290,13 +334,13 @@ public final class StubMachineContext {
 
         // --- gas ---
         @Override
-        public long getStoredGas(String name) {
+        public long getTotalStoredGas() {
             return GAS_STORED;
         }
 
         @Override
-        public long getTotalStoredGas() {
-            return GAS_STORED;
+        public long getStoredGas(String name) {
+            return GAS_STORED_NAMED;
         }
 
         @Override
@@ -306,53 +350,53 @@ public final class StubMachineContext {
 
         @Override
         public long getTotalGasInput() {
-            return GAS_INPUT;
+            return GAS_IN;
         }
 
         @Override
         public long getTotalGasOutput() {
-            return GAS_OUTPUT;
+            return GAS_OUT;
         }
 
         @Override
         public long getGasInput(String name) {
-            return GAS_INPUT;
+            return GAS_IN_NAMED;
         }
 
         @Override
         public long getGasOutput(String name) {
-            return GAS_OUTPUT;
-        }
-
-        @Override
-        public long getGasInputSpace(String name) {
-            return GAS_INPUT_SPACE;
-        }
-
-        @Override
-        public long getGasOutputSpace(String name) {
-            return GAS_OUTPUT_SPACE;
+            return GAS_OUT_NAMED;
         }
 
         @Override
         public long getTotalGasInputSpace() {
-            return GAS_INPUT_SPACE;
+            return GAS_IN_SPACE;
         }
 
         @Override
         public long getTotalGasOutputSpace() {
-            return GAS_OUTPUT_SPACE;
+            return GAS_OUT_SPACE;
+        }
+
+        @Override
+        public long getGasInputSpace(String name) {
+            return GAS_IN_SPACE_NAMED;
+        }
+
+        @Override
+        public long getGasOutputSpace(String name) {
+            return GAS_OUT_SPACE_NAMED;
         }
 
         // --- essentia / vis ---
         @Override
-        public long getStoredEssentia(String aspect) {
+        public long getTotalStoredEssentia() {
             return ESSENTIA_STORED;
         }
 
         @Override
-        public long getTotalStoredEssentia() {
-            return ESSENTIA_STORED;
+        public long getStoredEssentia(String aspect) {
+            return ESSENTIA_STORED_NAMED;
         }
 
         @Override
@@ -361,13 +405,13 @@ public final class StubMachineContext {
         }
 
         @Override
-        public long getStoredVis(String aspect) {
+        public long getTotalStoredVis() {
             return VIS_STORED;
         }
 
         @Override
-        public long getTotalStoredVis() {
-            return VIS_STORED;
+        public long getStoredVis(String aspect) {
+            return VIS_STORED_NAMED;
         }
 
         @Override
@@ -378,12 +422,28 @@ public final class StubMachineContext {
         // --- item ---
         @Override
         public long getItemCount(IPortType.Direction direction, String itemName) {
-            return ITEM_COUNT;
+            boolean byName = named(itemName);
+            switch (direction) {
+                case INPUT:
+                    return byName ? ITEM_IN_NAMED : ITEM_IN;
+                case OUTPUT:
+                    return byName ? ITEM_OUT_NAMED : ITEM_OUT;
+                default:
+                    return byName ? ITEM_COUNT_NAMED : ITEM_COUNT;
+            }
         }
 
         @Override
         public long getItemSpace(IPortType.Direction direction, String itemName) {
-            return ITEM_SPACE;
+            boolean byName = named(itemName);
+            switch (direction) {
+                case INPUT:
+                    return byName ? ITEM_IN_SPACE_NAMED : ITEM_IN_SPACE;
+                case OUTPUT:
+                    return byName ? ITEM_OUT_SPACE_NAMED : ITEM_OUT_SPACE;
+                default:
+                    return byName ? ITEM_SPACE_NAMED : ITEM_SPACE;
+            }
         }
 
         @Override

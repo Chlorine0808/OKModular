@@ -82,8 +82,11 @@ public class DocumentedVariableTest {
     @Test
     @DisplayName("裸の item と関数形の item('id') が併存する")
     public void test変数形と関数形が併存する() {
-        assertEquals(StubMachineContext.ITEM_COUNT, evaluate("item"), "変数形");
-        assertEquals(StubMachineContext.ITEM_COUNT, evaluate("item('minecraft:stone')"), "関数形");
+        assertEquals(StubMachineContext.ITEM_COUNT, evaluate("item"), "変数形は機械全体の総数");
+        assertEquals(
+            StubMachineContext.ITEM_COUNT_NAMED,
+            evaluate("item('minecraft:stone')"),
+            "関数形は名前を渡した先の値。変数形と同じ値になるなら引数が捨てられている");
     }
 
     @Test
