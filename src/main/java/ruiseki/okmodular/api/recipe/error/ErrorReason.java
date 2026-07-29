@@ -45,6 +45,29 @@ public enum ErrorReason {
         return "gui.status." + id;
     }
 
+    /**
+     * Whether an idle machine should say this rather than just "Idle".
+     * <p>
+     * <b>The default is yes, and that is the point.</b> The GUI used to pick from a
+     * hand-written list of five, so the other thirteen were set, synced, and then dropped
+     * on the floor - {@code PAUSED}, {@code NO_MANA}, {@code BLOCK_MISSING},
+     * {@code MISSING_BLUEPRINT}, {@code BLOCK_OUTPUT_FULL} and {@code WAITING_OUTPUT} all
+     * reached the client and none of them was ever displayed. A list cannot notice a
+     * constant that was added after it was written.
+     * <p>
+     * Answering yes by default turns that failure inside out: a new constant shows up
+     * immediately, and if nobody wrote it a translation then
+     * {@code ErrorReasonLangCoverageTest} fails rather than a player seeing "Idle" for a
+     * machine that is actually stuck.
+     * <p>
+     * Only two say no. {@link #NONE} means there is no error at all, and {@link #RUNNING}
+     * would claim the machine is working while this very method is being asked what to
+     * show an idle one.
+     */
+    public boolean showsWhenIdle() {
+        return this != NONE && this != RUNNING;
+    }
+
     public ErrorReason withDetail(String detail) {
         this.detail = detail;
         return this;

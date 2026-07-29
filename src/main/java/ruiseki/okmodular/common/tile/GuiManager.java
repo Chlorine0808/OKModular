@@ -268,19 +268,15 @@ public class GuiManager {
 
         ErrorReason lastError = controller.getLastProcessErrorReason();
 
-        // Check specific error reasons
-        if (lastError == ErrorReason.NO_MATCHING_RECIPE || lastError == ErrorReason.NO_ENERGY
-            || lastError == ErrorReason.INPUT_MISSING
-            || lastError == ErrorReason.OUTPUT_CAPACITY_INSUFFICIENT
-            || lastError == ErrorReason.OUTPUT_FULL) {
-
-            if (lastError == ErrorReason.OUTPUT_CAPACITY_INSUFFICIENT) {
-                String detail = controller.getLastProcessErrorDetail();
-                if (detail != null && !detail.isEmpty()) {
-                    return LangHelpers.localize(lastError.getUnlocalizedName(), detail);
-                }
-            }
-            return LangHelpers.localize(lastError.getUnlocalizedName());
+        // The reason decides whether it is worth saying; this used to be a hand-written
+        // list of five, which silently swallowed the other thirteen.
+        if (lastError.showsWhenIdle()) {
+            // The detail goes in unconditionally. Some of these texts carry a %s and some
+            // do not, and a text that wants one but is localized without it comes out as
+            // "Format error: ..." - which is what an idle OUTPUT_FULL used to render as.
+            // An extra argument is ignored, a missing one is not.
+            String detail = controller.getLastProcessErrorDetail();
+            return LangHelpers.localize(lastError.getUnlocalizedName(), detail == null ? "" : detail);
         }
 
         // Default idle state
