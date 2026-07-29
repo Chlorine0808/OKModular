@@ -50,7 +50,10 @@ public class PortLangCoverageTest {
     }
 
     private static Stream<Arguments> 塗ったときのメッセージ() {
-        return keys("", new String[] { "chat.okmodular.port_color_set", "chat.okmodular.port_color_cleared" });
+        return keys(
+            "",
+            new String[] { "chat.okmodular.port_color_set", "chat.okmodular.port_color_cleared",
+                "tooltip.okmodular.port_color" });
     }
 
     @ParameterizedTest(name = "{0} / {1}")

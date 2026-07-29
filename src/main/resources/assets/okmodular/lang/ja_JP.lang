@@ -309,3 +309,4 @@ gui.port_color.BROWN=茶
 gui.port_color.GREEN=緑
 gui.port_color.RED=赤
 gui.port_color.BLACK=黒
+tooltip.okmodular.port_color=塗装: %s

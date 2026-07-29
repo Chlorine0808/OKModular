@@ -307,3 +307,4 @@ gui.port_color.BROWN=Brown
 gui.port_color.GREEN=Green
 gui.port_color.RED=Red
 gui.port_color.BLACK=Black
+tooltip.okmodular.port_color=Painted: %s
