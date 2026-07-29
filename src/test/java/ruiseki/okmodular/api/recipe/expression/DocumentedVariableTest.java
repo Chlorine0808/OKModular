@@ -42,8 +42,8 @@ import org.junit.jupiter.api.Test;
 @DisplayName("docs が約束している変数")
 public class DocumentedVariableTest {
 
-    /** item_max はスロット数 × 64。スタブのスロット数は 9。 */
-    private static final double ITEM_MAX = 9 * 64.0;
+    /** item_max はスロット数 × 64。 */
+    private static final double ITEM_MAX = StubMachineContext.ITEM_CAPACITY;
 
     private static double evaluate(String expression) {
         return ExpressionParser.parseExpression(expression)
@@ -53,8 +53,8 @@ public class DocumentedVariableTest {
     @Test
     @DisplayName("item / item_total はアイテム総数")
     public void testアイテム総数() {
-        assertEquals(StubMachineContext.STORED, evaluate("item"));
-        assertEquals(StubMachineContext.STORED, evaluate("item_total"));
+        assertEquals(StubMachineContext.ITEM_COUNT, evaluate("item"));
+        assertEquals(StubMachineContext.ITEM_COUNT, evaluate("item_total"));
     }
 
     @Test
@@ -67,23 +67,23 @@ public class DocumentedVariableTest {
     @Test
     @DisplayName("item_f / item_free / item_space は空き容量")
     public void test空き容量() {
-        assertEquals(StubMachineContext.SPACE, evaluate("item_f"));
-        assertEquals(StubMachineContext.SPACE, evaluate("item_free"));
-        assertEquals(StubMachineContext.SPACE, evaluate("item_space"));
+        assertEquals(StubMachineContext.ITEM_SPACE, evaluate("item_f"));
+        assertEquals(StubMachineContext.ITEM_SPACE, evaluate("item_free"));
+        assertEquals(StubMachineContext.ITEM_SPACE, evaluate("item_space"));
     }
 
     @Test
     @DisplayName("item_p / item_percent は充填率")
     public void test充填率() {
-        assertEquals(StubMachineContext.STORED / ITEM_MAX, evaluate("item_p"));
-        assertEquals(StubMachineContext.STORED / ITEM_MAX, evaluate("item_percent"));
+        assertEquals(StubMachineContext.ITEM_COUNT / ITEM_MAX, evaluate("item_p"));
+        assertEquals(StubMachineContext.ITEM_COUNT / ITEM_MAX, evaluate("item_percent"));
     }
 
     @Test
     @DisplayName("裸の item と関数形の item('id') が併存する")
     public void test変数形と関数形が併存する() {
-        assertEquals(StubMachineContext.STORED, evaluate("item"), "変数形");
-        assertEquals(StubMachineContext.STORED, evaluate("item('minecraft:stone')"), "関数形");
+        assertEquals(StubMachineContext.ITEM_COUNT, evaluate("item"), "変数形");
+        assertEquals(StubMachineContext.ITEM_COUNT, evaluate("item('minecraft:stone')"), "関数形");
     }
 
     @Test

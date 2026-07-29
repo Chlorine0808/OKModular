@@ -20,15 +20,22 @@ import ruiseki.okmodular.api.structure.core.IStructureEntry;
  * なぜ「全部の値が非ゼロで、しかも互いに違う」のか
  * ============================================
  *
- * MachinePropertyExpression は定義が見つからないとき **黙って ZERO を返す**
- * （evaluate の末尾）。つまり「登録されているのに定義が無い」欠落は、
- * 値が 0 になることでしか観測できない。
+ * 理由が 2 つある。
  *
- * そこで機械側の値をすべて非ゼロにしておく。そうすれば
+ * **1. 定義の欠落を検出するため。**
+ * MachinePropertyExpression は定義が見つからないとき **黙って ZERO を返す**。
+ * つまり「登録されているのに定義が無い」欠落は、値が 0 になることでしか
+ * 観測できない。機械側の値をすべて非ゼロにしておけば、
  * **0 が返ってきたこと自体が「定義が無い」の証拠**になる。
  *
- * 差分から導出されるプロパティ（`*_f` = 容量 - 残量）が偶然 0 に
- * ならないよう、残量と容量には違う値を入れる。
+ * **2. 資源種の対応付けを検証するため。**
+ * 全資源種が同じ値を返すスタブだと、fluid を読むつもりのコードが
+ * 誤って gas を読んでいても値が一致してテストが通ってしまう。
+ * **資源種ごとに違う値**を返せば、繋ぎ間違いがそのまま失敗として出る。
+ * Kind でまとめた汎用アクセサ（B9）が正しい資源種に届いているかは、
+ * これが無いと確かめられない。
+ *
+ * 残量と容量も違う値にする（`*_f` = 容量 - 残量 が偶然 0 にならないように）。
  *
  * ============================================
  * B9 との関係
@@ -42,14 +49,42 @@ import ruiseki.okmodular.api.structure.core.IStructureEntry;
  */
 public final class StubMachineContext {
 
-    /** 残量。容量と違う値にする（差分が 0 にならないように）。 */
-    public static final long STORED = 100L;
-    /** 容量。 */
-    public static final long CAPACITY = 500L;
-    /** 空き。容量 - 残量 と一致させる必要は無い（別経路であることを見たいので）。 */
-    public static final long SPACE = 400L;
-    /** 毎 tick のエネルギー。 */
+    // 資源種ごとに桁で見分けられる値を置く。
+    // 残量 = N00、容量 = N000、方向別 = 残量に近い別値、空き = 容量 - 残量 とは別値。
+
+    public static final long ENERGY_STORED = 100L;
+    public static final long ENERGY_CAPACITY = 1000L;
     public static final int ENERGY_PER_TICK = 7;
+
+    public static final long MANA_STORED = 200L;
+    public static final long MANA_CAPACITY = 2000L;
+
+    public static final long FLUID_STORED = 300L;
+    public static final long FLUID_CAPACITY = 3000L;
+    public static final long FLUID_INPUT = 310L;
+    public static final long FLUID_OUTPUT = 320L;
+    public static final long FLUID_INPUT_SPACE = 330L;
+    public static final long FLUID_OUTPUT_SPACE = 340L;
+
+    public static final long GAS_STORED = 400L;
+    public static final long GAS_CAPACITY = 4000L;
+    public static final long GAS_INPUT = 410L;
+    public static final long GAS_OUTPUT = 420L;
+    public static final long GAS_INPUT_SPACE = 430L;
+    public static final long GAS_OUTPUT_SPACE = 440L;
+
+    public static final long ESSENTIA_STORED = 500L;
+    public static final long ESSENTIA_CAPACITY = 5000L;
+
+    public static final long VIS_STORED = 600L;
+    public static final long VIS_CAPACITY = 6000L;
+
+    public static final long ITEM_COUNT = 700L;
+    public static final long ITEM_SPACE = 750L;
+    public static final int ITEM_SLOTS = 9;
+
+    /** アイテムの容量は「スロット数 × 64」で表される（式レイヤの既存の扱い）。 */
+    public static final double ITEM_CAPACITY = ITEM_SLOTS * 64.0;
 
     private StubMachineContext() {}
 
@@ -61,6 +96,11 @@ public final class StubMachineContext {
     /** 機械が繋がっていないコンテキスト（NEI のレシピ描画と同じ状況）。 */
     public static ConditionContext withoutMachine() {
         return new ConditionContext(null, 0, 0, 0);
+    }
+
+    /** 機械状態そのもの。汎用アクセサを直接叩くテスト用。 */
+    public static IMachineState machineState() {
+        return new StubMachineState();
     }
 
     /** 式の評価だけに使う最小の IRecipeContext。機械状態以外は使われない。 */
@@ -109,20 +149,20 @@ public final class StubMachineContext {
     }
 
     /**
-     * 全メソッドが非ゼロを返す IMachineState。
-     * 値の意味は問わない。「0 でないこと」だけが契約。
+     * 全メソッドが非ゼロを返し、資源種ごとに値が違う IMachineState。
+     * 値の意味は問わない。「0 でないこと」と「種を混同すれば違う値になること」が契約。
      */
     private static final class StubMachineState implements IMachineState {
 
         // --- energy ---
         @Override
         public long getStoredEnergy() {
-            return STORED;
+            return ENERGY_STORED;
         }
 
         @Override
         public long getEnergyCapacity() {
-            return CAPACITY;
+            return ENERGY_CAPACITY;
         }
 
         @Override
@@ -184,171 +224,171 @@ public final class StubMachineContext {
         // --- fluid ---
         @Override
         public long getStoredFluid() {
-            return STORED;
+            return FLUID_STORED;
         }
 
         @Override
         public long getFluidCapacity() {
-            return CAPACITY;
+            return FLUID_CAPACITY;
         }
 
         @Override
         public long getStoredFluid(String name) {
-            return STORED;
+            return FLUID_STORED;
         }
 
         @Override
         public long getTotalFluidInput() {
-            return STORED;
+            return FLUID_INPUT;
         }
 
         @Override
         public long getTotalFluidOutput() {
-            return STORED;
+            return FLUID_OUTPUT;
         }
 
         @Override
         public long getFluidInput(String name) {
-            return STORED;
+            return FLUID_INPUT;
         }
 
         @Override
         public long getFluidOutput(String name) {
-            return STORED;
+            return FLUID_OUTPUT;
         }
 
         @Override
         public long getFluidInputSpace(String name) {
-            return SPACE;
+            return FLUID_INPUT_SPACE;
         }
 
         @Override
         public long getFluidOutputSpace(String name) {
-            return SPACE;
+            return FLUID_OUTPUT_SPACE;
         }
 
         @Override
         public long getTotalFluidInputSpace() {
-            return SPACE;
+            return FLUID_INPUT_SPACE;
         }
 
         @Override
         public long getTotalFluidOutputSpace() {
-            return SPACE;
+            return FLUID_OUTPUT_SPACE;
         }
 
         // --- mana ---
         @Override
         public long getStoredMana() {
-            return STORED;
+            return MANA_STORED;
         }
 
         @Override
         public long getManaCapacity() {
-            return CAPACITY;
+            return MANA_CAPACITY;
         }
 
         // --- gas ---
         @Override
         public long getStoredGas(String name) {
-            return STORED;
+            return GAS_STORED;
         }
 
         @Override
         public long getTotalStoredGas() {
-            return STORED;
+            return GAS_STORED;
         }
 
         @Override
         public long getGasCapacity() {
-            return CAPACITY;
+            return GAS_CAPACITY;
         }
 
         @Override
         public long getTotalGasInput() {
-            return STORED;
+            return GAS_INPUT;
         }
 
         @Override
         public long getTotalGasOutput() {
-            return STORED;
+            return GAS_OUTPUT;
         }
 
         @Override
         public long getGasInput(String name) {
-            return STORED;
+            return GAS_INPUT;
         }
 
         @Override
         public long getGasOutput(String name) {
-            return STORED;
+            return GAS_OUTPUT;
         }
 
         @Override
         public long getGasInputSpace(String name) {
-            return SPACE;
+            return GAS_INPUT_SPACE;
         }
 
         @Override
         public long getGasOutputSpace(String name) {
-            return SPACE;
+            return GAS_OUTPUT_SPACE;
         }
 
         @Override
         public long getTotalGasInputSpace() {
-            return SPACE;
+            return GAS_INPUT_SPACE;
         }
 
         @Override
         public long getTotalGasOutputSpace() {
-            return SPACE;
+            return GAS_OUTPUT_SPACE;
         }
 
         // --- essentia / vis ---
         @Override
         public long getStoredEssentia(String aspect) {
-            return STORED;
+            return ESSENTIA_STORED;
         }
 
         @Override
         public long getTotalStoredEssentia() {
-            return STORED;
+            return ESSENTIA_STORED;
         }
 
         @Override
         public long getEssentiaCapacity() {
-            return CAPACITY;
+            return ESSENTIA_CAPACITY;
         }
 
         @Override
         public long getStoredVis(String aspect) {
-            return STORED;
+            return VIS_STORED;
         }
 
         @Override
         public long getTotalStoredVis() {
-            return STORED;
+            return VIS_STORED;
         }
 
         @Override
         public long getVisCapacity() {
-            return CAPACITY;
+            return VIS_CAPACITY;
         }
 
         // --- item ---
         @Override
         public long getItemCount(IPortType.Direction direction, String itemName) {
-            return STORED;
+            return ITEM_COUNT;
         }
 
         @Override
         public long getItemSpace(IPortType.Direction direction, String itemName) {
-            return SPACE;
+            return ITEM_SPACE;
         }
 
         @Override
         public int getItemSlotCount(IPortType.Direction direction, boolean emptyOnly) {
-            return 9;
+            return ITEM_SLOTS;
         }
 
         // --- recipe modifiers ---
