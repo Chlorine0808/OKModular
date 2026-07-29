@@ -10,6 +10,44 @@ import ruiseki.okmodular.api.modular.IPortType;
 public interface IMachineState {
 
     /**
+     * Number of items a full slot holds. Used to express an item capacity as an
+     * amount rather than a slot count, so that items answer getCapacity in the
+     * same unit as every other resource.
+     */
+    int ITEMS_PER_SLOT = 64;
+
+    /**
+     * Get the capacity for a resource kind.
+     *
+     * This is the kind-parameterized form of the per-kind capacity getters below.
+     * New resource kinds should only need a branch here rather than a new pair of
+     * interface methods.
+     *
+     * @param kind the resource kind. Kinds that hold no amount ({@code BLOCK},
+     *             {@code NONE}) answer 0.
+     */
+    default long getCapacity(IPortType.Type kind) {
+        switch (kind) {
+            case ENERGY:
+                return getEnergyCapacity();
+            case MANA:
+                return getManaCapacity();
+            case FLUID:
+                return getFluidCapacity();
+            case GAS:
+                return getGasCapacity();
+            case ESSENTIA:
+                return getEssentiaCapacity();
+            case VIS:
+                return getVisCapacity();
+            case ITEM:
+                return (long) getItemSlotCount(IPortType.Direction.BOTH, false) * ITEMS_PER_SLOT;
+            default:
+                return 0L;
+        }
+    }
+
+    /**
      * Get the current energy stored.
      */
     long getStoredEnergy();
