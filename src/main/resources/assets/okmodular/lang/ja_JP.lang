@@ -335,3 +335,8 @@ gui.status.output_capacity_insufficient=出力容量が足りません: %s
 gui.status.no_mana=マナが足りません
 gui.status.block_missing=ブロックがありません
 gui.status.block_output_full=ブロックを置く空きがありません
+
+# --- ME ポートの状態（WAILA に出る。色コードはブロック側が付ける） ---
+waila.me.online=ME ネットワークに接続中
+waila.me.no_channel=ME チャンネルがありません
+waila.me.offline=ME ネットワークに接続していません
