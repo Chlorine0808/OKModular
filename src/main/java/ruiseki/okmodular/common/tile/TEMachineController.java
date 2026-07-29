@@ -953,40 +953,7 @@ public class TEMachineController extends AbstractMBModifierTE
         }
 
         // Load External Port Configs
-        externalPortConfigs.clear();
-        if (nbt.hasKey("externalPortConfigs", 9)) {
-            NBTTagList portList = nbt.getTagList("externalPortConfigs", 10);
-            for (int i = 0; i < portList.tagCount(); i++) {
-                NBTTagCompound portTag = portList.getCompoundTagAt(i);
-                ChunkCoordinates coords = new ChunkCoordinates(
-                    portTag.getInteger("x"),
-                    portTag.getInteger("y"),
-                    portTag.getInteger("z"));
-
-                Map<IPortType.Type, EnumIO> typeMap = new HashMap<>();
-                if (portTag.hasKey("types", 9)) {
-                    NBTTagList typeList = portTag.getTagList("types", 10);
-                    for (int j = 0; j < typeList.tagCount(); j++) {
-                        NBTTagCompound typeTag = typeList.getCompoundTagAt(j);
-                        int typeOrdinal = typeTag.getByte("type") & 0xFF;
-                        int ioOrdinal = typeTag.getByte("io") & 0xFF;
-                        if (typeOrdinal < IPortType.Type.values().length && ioOrdinal < EnumIO.values().length) {
-                            typeMap.put(IPortType.Type.values()[typeOrdinal], EnumIO.values()[ioOrdinal]);
-                        }
-                    }
-                } else if (portTag.hasKey("io")) {
-                    // Legacy support
-                    int ordinal = portTag.getByte("io") & 0xFF;
-                    if (ordinal < EnumIO.values().length) {
-                        typeMap.put(IPortType.Type.ITEM, EnumIO.values()[ordinal]);
-                    }
-                }
-
-                if (!typeMap.isEmpty()) {
-                    externalPortConfigs.put(coords, typeMap);
-                }
-            }
-        }
+        ExternalPortConfigCodec.read(nbt, externalPortConfigs);
 
         if (worldObj != null && worldObj.isRemote && !Objects.equals(previousFacing, extendedFacing)) {
             worldObj.markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
