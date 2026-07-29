@@ -53,8 +53,34 @@ public interface IModularPort extends IPortType {
 
     /**
      * Set the index assigned to this port during structure formation.
-     * 
+     *
      * @param index The index to assign.
      */
     default void setAssignedIndex(int index) {}
+
+    /**
+     * The colour a player has painted this port, dividing a machine's ports into
+     * groups that run recipes independently.
+     *
+     * <p>
+     * Never null. An unpainted port answers {@link PortColor#NONE}, and an
+     * unpainted port takes part in <em>every</em> colour group - so a single
+     * unpainted energy hatch can feed all of them.
+     *
+     * @return the colour, or {@link PortColor#NONE} if unpainted
+     */
+    default PortColor getPortColor() {
+        return PortColor.NONE;
+    }
+
+    /**
+     * Paint this port.
+     *
+     * Implementations with nowhere to store a colour ignore the call rather than
+     * refusing it: this arrives from other mods' painting tools, which have no way
+     * to ask first.
+     *
+     * @param color the colour to apply, or {@link PortColor#NONE} to strip it
+     */
+    default void setPortColor(PortColor color) {}
 }

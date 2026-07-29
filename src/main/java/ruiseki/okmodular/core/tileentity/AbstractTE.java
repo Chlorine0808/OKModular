@@ -20,6 +20,7 @@ import mcp.mobius.waila.api.IWailaDataAccessor;
 import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okmodular.OKModular;
+import ruiseki.okmodular.api.modular.PortColor;
 import ruiseki.okmodular.common.network.PacketProgress;
 import ruiseki.okmodular.core.helper.BlockStateHelpers;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
@@ -83,6 +84,27 @@ public abstract class AbstractTE extends AbstractTickingTE
 
     public void setAssignedIndex(int index) {
         this.assignedIndex = index;
+    }
+
+    /**
+     * Colour a player has painted this port, if it is a port.
+     *
+     * <p>
+     * Deliberately holds {@link PortColor#NONE} rather than null when unpainted,
+     * even though writing nothing would save the bytes. Description packets are not
+     * diffs, and a reader leaves a field alone when the key is absent - so dropping
+     * the key on unpaint would leave every client still showing the old colour.
+     */
+    @NBTPersist
+    protected PortColor portColor = PortColor.NONE;
+
+    /** Satisfies {@code IModularPort.getPortColor} for every port tile entity. */
+    public PortColor getPortColor() {
+        return portColor == null ? PortColor.NONE : portColor;
+    }
+
+    public void setPortColor(PortColor color) {
+        this.portColor = color == null ? PortColor.NONE : color;
     }
 
     /** Cached redstone result */
