@@ -5,9 +5,11 @@ import java.util.List;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
@@ -19,6 +21,8 @@ import com.gtnewhorizon.gtnhlib.client.model.color.BlockColor;
 
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
+import ruiseki.okcore.enums.EnumDye;
+import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.modular.IModularBlock;
@@ -136,6 +140,50 @@ public abstract class AbstractPortBlock<T extends AbstractTE> extends AbstractTi
         port.markDirty();
         world.markBlockForUpdate(x, y, z);
         return true;
+    }
+
+    /**
+     * A dye in hand paints the port; sneaking with one strips the colour.
+     *
+     * This is the route that does not need another mod installed. The gesture
+     * matches AE2's Color Applicator, where sneaking is also what clears a colour.
+     *
+     * <p>
+     * Any other item falls through to the normal click, so opening a port's GUI is
+     * unaffected. A dye always consumes the click even when the colour did not change
+     * - a player holding a dye is trying to paint, not to open a screen.
+     */
+    @Override
+    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX,
+        float hitY, float hitZ) {
+        ItemStack held = player.getHeldItem();
+        EnumDye dye = held == null ? null : EnumDye.getColorFromDye(held);
+        if (dye == null) {
+            return super.onBlockActivated(world, x, y, z, player, side, hitX, hitY, hitZ);
+        }
+
+        PortColor wanted = player.isSneaking() ? PortColor.NONE : PortColor.fromDye(dye);
+        boolean changed = recolourBlock(world, x, y, z, ForgeDirection.getOrientation(side), wanted.toColorIndex());
+
+        if (changed && !world.isRemote) {
+            if (!player.capabilities.isCreativeMode) {
+                consumeOne(player, held);
+            }
+            player.addChatMessage(
+                wanted.isColored()
+                    ? new ChatComponentTranslation(
+                        "chat.okmodular.port_color_set",
+                        LangHelpers.localize(wanted.getUnlocalizedName()))
+                    : new ChatComponentTranslation("chat.okmodular.port_color_cleared"));
+        }
+        return true;
+    }
+
+    private static void consumeOne(EntityPlayer player, ItemStack held) {
+        held.stackSize--;
+        if (held.stackSize <= 0) {
+            player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
+        }
     }
 
     @Override
