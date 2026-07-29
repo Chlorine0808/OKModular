@@ -69,6 +69,12 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor('org.projectlombok:lombok:1.18.46')
 
+    // NBTClassType registers a handler for org.joml.Vector3i in its static
+    // initializer, so the class cannot even load without joml on the classpath -
+    // which makes every @NBTPersist field untestable. GTNHLib brings joml in
+    // transitively for compilation but not for the test runtime, hence this.
+    testRuntimeOnly 'org.joml:joml:1.10.8'
+
     // Versions kept in sync with OmoshiroiKamo's dependencies.gradle.
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'
