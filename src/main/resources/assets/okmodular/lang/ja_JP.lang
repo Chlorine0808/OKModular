@@ -314,3 +314,24 @@ tooltip.okmodular.port_color=塗装: %s
 # --- レンチのツールチップ（選択中の種別とリンク先はチャット以外に出ていなかった） ---
 tooltip.okmodular.wrench_unlinked=リンクされていません - スニーク + 右クリックでコントローラにリンク
 tooltip.okmodular.wrench_linked=リンク先コントローラ: (%d, %d, %d) ディメンション %d
+
+# --- 機械の状態 (ErrorReason) ---
+# キーは "gui.status." + id で組み立てられるので、無いと機械の GUI に生のキーが出る
+# （例外は出ない）。以前は idle と output_full だけがここにあり、残りは親 mod の lang に
+# しか無かった。OKModular は親 mod に依存していないので、単体導入では
+# gui.status.no_energy のような文字列が画面に出ていた。
+gui.status.running=処理中
+gui.status.no_recipes=レシピが登録されていません
+gui.status.no_input_ports=入力ポートが接続されていません
+gui.status.no_output_ports=出力ポートが接続されていません
+gui.status.no_energy=エネルギーが足りません
+gui.status.input_missing=入力が足りません
+gui.status.no_matching_recipe=一致するレシピがありません
+gui.status.waiting_output=出力先の空きを待っています
+gui.status.no_input=入力資源がありません
+gui.status.paused=レッドストーン信号で停止中
+gui.status.missing_blueprint=ブループリントがありません
+gui.status.output_capacity_insufficient=出力容量が足りません: %s
+gui.status.no_mana=マナが足りません
+gui.status.block_missing=ブロックがありません
+gui.status.block_output_full=ブロックを置く空きがありません

@@ -312,3 +312,25 @@ tooltip.okmodular.port_color=Painted: %s
 # --- Wrench tooltip (the selected type and the link were invisible outside chat) ---
 tooltip.okmodular.wrench_unlinked=Not linked - sneak + right-click a controller
 tooltip.okmodular.wrench_linked=Linked controller: (%d, %d, %d) in dim %d
+
+# --- Machine status (ErrorReason) ---
+# These keys are built as "gui.status." + id, so a missing one shows the raw key in the
+# machine GUI with no error anywhere. Only idle and output_full used to be here; the rest
+# lived in the parent mod's lang, which OKModular does not depend on, so a standalone
+# install showed strings like gui.status.no_energy. Wording follows the parent where it
+# has an entry, so loading both mods cannot change what a player reads.
+gui.status.running=Processing
+gui.status.no_recipes=No recipes registered
+gui.status.no_input_ports=No input ports connected
+gui.status.no_output_ports=No output ports connected
+gui.status.no_energy=Insufficient energy
+gui.status.input_missing=Input missing
+gui.status.no_matching_recipe=No matching recipe
+gui.status.waiting_output=Waiting for output space
+gui.status.no_input=No input resources
+gui.status.paused=Paused by Redstone
+gui.status.missing_blueprint=No Blueprint
+gui.status.output_capacity_insufficient=Output Capacity Insufficient: %s
+gui.status.no_mana=Insufficient Mana
+gui.status.block_missing=Block missing
+gui.status.block_output_full=No space for Block
