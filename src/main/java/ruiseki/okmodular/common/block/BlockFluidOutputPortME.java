@@ -74,7 +74,12 @@ public class BlockFluidOutputPortME extends AbstractPortBlock<TEFluidOutputPortM
     @Override
     public void getWailaInfo(List<String> tooltip, ItemStack itemStack, IWailaDataAccessor accessor,
         IWailaConfigHandler config) {
+        // The clear drops what other providers contributed, so the base class runs after
+        // it rather than before - otherwise the shared lines (painted colour, per-side
+        // IO) would be wiped along with them.
         tooltip.clear();
+        super.getWailaInfo(tooltip, itemStack, accessor, config);
+
         TileEntity te = accessor.getTileEntity();
         if (te instanceof TEFluidOutputPortME meTile) {
             if (meTile.isActive()) {
