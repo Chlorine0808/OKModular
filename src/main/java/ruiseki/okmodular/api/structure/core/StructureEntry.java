@@ -14,6 +14,7 @@ import com.google.gson.JsonPrimitive;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.structure.io.IStructureRequirement;
@@ -41,6 +42,7 @@ public class StructureEntry implements IStructureEntry {
     private final double batchMax;
     private final IExpression batchMaxExpr;
     private final boolean dynamic;
+    private final DurationPolicy durationPolicy;
     private final int tier;
     private final String defaultFacing;
     private final Set<Character> externalPorts;
@@ -51,8 +53,8 @@ public class StructureEntry implements IStructureEntry {
         Map<Character, ISymbolMapping> mappings, List<IStructureRequirement> requirements, List<String> recipeGroup,
         int[] controllerOffset, String tintColor, double speedMultiplier, IExpression speedMultiplierExpr,
         double energyMultiplier, IExpression energyMultiplierExpr, double batchMin, IExpression batchMinExpr,
-        double batchMax, IExpression batchMaxExpr, boolean dynamic, int tier, String defaultFacing,
-        Set<Character> externalPorts, Map<Character, EnumIO> fixedExternalPorts,
+        double batchMax, IExpression batchMaxExpr, boolean dynamic, DurationPolicy durationPolicy, int tier,
+        String defaultFacing, Set<Character> externalPorts, Map<Character, EnumIO> fixedExternalPorts,
         List<TierStructureRef> tierStructures) {
         this.name = name;
         this.displayName = displayName;
@@ -74,6 +76,7 @@ public class StructureEntry implements IStructureEntry {
         this.batchMax = batchMax;
         this.batchMaxExpr = batchMaxExpr != null ? batchMaxExpr : new ConstantExpression(batchMax);
         this.dynamic = dynamic;
+        this.durationPolicy = durationPolicy != null ? durationPolicy : DurationPolicy.ON_START;
         this.tier = tier;
         this.defaultFacing = defaultFacing;
         this.externalPorts = externalPorts != null ? Collections.unmodifiableSet(new LinkedHashSet<>(externalPorts))
@@ -141,6 +144,11 @@ public class StructureEntry implements IStructureEntry {
     @Override
     public boolean isDynamic() {
         return dynamic;
+    }
+
+    @Override
+    public DurationPolicy getDurationPolicy() {
+        return durationPolicy;
     }
 
     @Override
@@ -244,6 +252,12 @@ public class StructureEntry implements IStructureEntry {
             json.addProperty("tintColor", tintColor);
         }
         if (dynamic) json.addProperty("dynamic", true);
+        if (durationPolicy != DurationPolicy.ON_START) {
+            json.addProperty(
+                "durationPolicy",
+                durationPolicy.name()
+                    .toLowerCase());
+        }
         serializeExpr(json, "speedMultiplier", speedMultiplier, speedMultiplierExpr, 1.0);
         serializeExpr(json, "energyMultiplier", energyMultiplier, energyMultiplierExpr, 1.0);
         serializeExpr(json, "batchMin", batchMin, batchMinExpr, 1.0);

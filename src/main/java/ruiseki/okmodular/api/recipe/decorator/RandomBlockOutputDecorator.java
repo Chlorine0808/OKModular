@@ -113,7 +113,7 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
      *
      * Expected format:
      * {
-     * "type": "randomBlockOutput",
+     * "type": "random_block_output",
      * "count": { "type": "constant", "value": 2 },
      * "selections": [
      * {

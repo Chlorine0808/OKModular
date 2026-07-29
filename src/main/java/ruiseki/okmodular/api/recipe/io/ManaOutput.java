@@ -10,6 +10,7 @@ import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
+import ruiseki.okmodular.api.recipe.expression.ArithmeticExpression;
 import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
 import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
@@ -144,7 +145,7 @@ public class ManaOutput extends AbstractModularRecipeOutput {
         ManaOutput result = new ManaOutput(amount * multiplier, isPerTick());
         result.interval = this.interval;
         result.index = this.index;
-        result.amountExpr = this.amountExpr;
+        result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         return result;
     }
 

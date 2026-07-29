@@ -20,6 +20,7 @@ import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.modular.port.IItemPort;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
+import ruiseki.okmodular.api.recipe.expression.ArithmeticExpression;
 import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.INBTWriteExpression;
@@ -511,7 +512,7 @@ public class ItemInput extends AbstractModularRecipeInput {
         ItemInput result = required != null ? new ItemInput(required) : new ItemInput(oreDict, count);
         result.count *= multiplier;
         if (result.required != null) result.required.stackSize *= multiplier;
-        result.countExpr = this.countExpr;
+        result.countExpr = ArithmeticExpression.scaled(this.countExpr, multiplier);
         result.metaExpr = this.metaExpr;
         result.consume = this.consume;
         result.interval = this.interval;

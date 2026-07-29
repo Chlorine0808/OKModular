@@ -256,14 +256,48 @@ You can use the operator name directly as the key.
 - **`not`**: `{ "not": { condition } }`
 - `xor`, `nand`, `nor` are also supported.
 
-## 5. Decorators
-Decorators provide additional behavior during or after recipe execution.
-(Note: If the `type` property is omitted, the type is inferred from the keys used.)
+### The three ways to write a condition
 
-- `chance`: Controls the success probability of the recipe.
-- `bonus`: Gives a chance to produce extra outputs.
-- `requirement`: Checks additional structural requirements during execution.
-- `weighted_random`: Selects an output from a weighted pool.
+Every condition accepts all three, and the parser tries them in this order.
+
+| # | Form | Example |
+|---|------|---------|
+| 1 | Explicit `type` | `{ "type": "comparison", "left": 10, "operator": ">", "right": 5 }` |
+| 2 | **Type named by the key** (value is one object) | `{ "comparison": { "left": 10, "operator": ">", "right": 5 } }` |
+| 3 | Inferred from properties | `{ "biome": "Plains" }` |
+
+Form 2 only counts as a type declaration when the inner object holds up as that
+type on its own. So `{ "chance": { "type": "map_range", … } }`, where the value is
+an expression object, is read as form 3 and the expression is not lost.
+
+`tile_nbt` accepts two spellings:
+
+```json
+{ "tile_nbt": "energy >= 1000" }
+{ "key": "energy", "op": "greater_or_equal", "value": 1000 }
+```
+
+## 5. Decorators
+Decorators provide additional behavior during or after recipe execution. They
+accept the same three forms as conditions: explicit `type`, type named by the key,
+or inferred from the properties present.
+
+| type | Behaviour | Properties used for inference |
+|------|-----------|-------------------------------|
+| `chance` | Controls the success probability of the recipe | `chance` |
+| `bonus` | Gives a chance to produce extra outputs | `chance` + `outputs` |
+| `weighted_random` | Selects an output from a weighted pool | `outputs` (entries carrying `weight`), `pool`, `rolls` |
+| `requirement` | Checks an additional condition or catalyst during execution | `condition` / `requirements` |
+| `harvest_block` | Changes how broken blocks are harvested | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
+| `per_position_probability` | Swaps a block output per position, by chance | `chance` + `symbol` + `output` |
+| `bonus_block_output` | Gives a chance to produce extra block outputs | `chance` + `outputs` (first is `type: "block"`) |
+| `random_block_output` | Draws block outputs from a set of candidates | `count` / `selections` |
+
+> [!NOTE]
+> `harvest_block`, `per_position_probability`, `bonus_block_output` and
+> `random_block_output` were previously registered in camelCase (`harvest`,
+> `perPositionProbability`, `bonusBlockOutput`, `randomBlockOutput`). Those names
+> remain as aliases, so existing recipe packs keep working.
 
 ```json
 "decorators": [
@@ -275,9 +309,53 @@ Decorators provide additional behavior during or after recipe execution.
       "chance": 0.1,
       "outputs": [{ "item": "minecraft:diamond", "amount": 1 }]
     }
+  },
+  {
+    "type": "weighted_random",
+    "outputs": [
+      { "weight": 70, "item": "minecraft:flint",  "amount": 1 },
+      { "weight": 30, "item": "minecraft:gravel", "amount": 1 }
+    ]
   }
 ]
 ```
+
+Omitting `rolls` draws once; omitting a `weight` treats it as 1.
+
+### The requirement decorator
+
+Takes a `condition`, a list of `requirements`, or both.
+
+```json
+"decorators": [
+  {
+    "type": "requirement",
+    "condition": "tier.glass >= 2",
+    "requirements": [
+      { "item": "minecraft:redstone", "amount": 10 },
+      { "energy": 10000 }
+    ]
+  }
+]
+```
+
+Each entry in `requirements` is written **like an input** and is **not consumed** — it
+is a catalyst. It is checked when the recipe starts and again every tick, so the
+recipe stops if it goes missing. Writing `consume: true` there is ignored: if you
+want an extra input that is consumed, put it in `inputs`, where it reads as one.
+
+> [!NOTE]
+> **The same thing can be written as a non-consuming input.** This is equivalent to
+> the `requirements` entry above:
+> ```json
+> "inputs": [ { "item": "minecraft:redstone", "amount": 10, "consume": false } ]
+> ```
+> Declaring it on the decorator is useful with recipe inheritance, where a `parent`
+> can hand a catalyst requirement to everything inheriting from it without touching
+> their inputs.
+>
+> Structure definitions also have a `requirements` field, but it is **unrelated**:
+> that one declares **how many ports** a machine needs, e.g. at least one item input.
 
 ## 6. Expressions (IExpression)
 Some parameters (like decorator chances) can use `IExpression` to calculate values dynamically. Instead of a direct numeric constant, you can use the following object format:

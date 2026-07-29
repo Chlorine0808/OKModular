@@ -17,6 +17,7 @@ tooltip.machineBlueprint.build=コントローラーにシフト右クリック�
 message.machineBlueprint.empty=この設計図は白紙です
 okmodular.nei.required_tiers=要求されるTier:
 okmodular.nei.tier_format=Tier %d
+okmodular.nei.duration_expression=作業量: %s （マシンによって変わります）
 tile.modular_machine_controller.name=モジュラーマシンコントローラー
 tile.vis_bridge.name=ビスブリッジ
 machinery.casing.format=%s%s

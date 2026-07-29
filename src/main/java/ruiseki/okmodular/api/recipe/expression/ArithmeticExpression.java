@@ -47,6 +47,43 @@ public class ArithmeticExpression implements IExpression {
         return EvaluationValue.ZERO;
     }
 
+    /**
+     * Multiplies an expression by a constant.
+     * <p>
+     * Used when a recipe input or output is copied for a batch. The static amount is
+     * scaled by the copy itself, so an expression has to be scaled here too, or the
+     * batch size silently stops applying to whichever amounts were written as
+     * expressions.
+     * <p>
+     * A constant stays a constant rather than becoming a multiplication, because
+     * callers branch on {@link ConstantExpression} to decide whether an amount can be
+     * persisted as a plain number.
+     *
+     * @param expr   The expression to scale; null is returned unchanged
+     * @param factor The constant to multiply by; 1 returns the expression unchanged
+     */
+    public static IExpression scaled(IExpression expr, int factor) {
+        if (expr == null || factor == 1) return expr;
+
+        if (expr instanceof ConstantExpression) {
+            return new ConstantExpression(expr.evaluateDouble(null) * factor);
+        }
+        return new ArithmeticExpression(expr, new ConstantExpression(factor), "*");
+    }
+
+    /**
+     * Reproduces the expression as a recipe script.
+     * <p>
+     * Callers persist expressions by writing this string to NBT or JSON and parsing
+     * it back later, so the result has to be readable by
+     * {@link ExpressionParser#parseExpression}. The parentheses are what keep
+     * <code>(1 + 2) * 3</code> from coming back as <code>1 + 2 * 3</code>.
+     */
+    @Override
+    public String toString() {
+        return "(" + left + " " + operation + " " + right + ")";
+    }
+
     public static IExpression fromJson(JsonObject json) {
         IExpression left = ExpressionsParser.parse(json.get("left"));
         IExpression right = ExpressionsParser.parse(json.get("right"));

@@ -24,6 +24,7 @@ import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
+import ruiseki.okmodular.api.recipe.expression.ArithmeticExpression;
 import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
 import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
@@ -233,6 +234,12 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
         result.nbtExpressions = this.nbtExpressions;
         result.nbtListOp = this.nbtListOp;
         result.nbtMatchMode = this.nbtMatchMode;
+        // These were being dropped: a copy lost its amount expression, its per-tick
+        // interval and its port index, so a batched or per-tick block output silently
+        // reverted to a plain one-shot at the base amount.
+        result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
+        result.interval = this.interval;
+        result.index = this.index;
         return result;
     }
 

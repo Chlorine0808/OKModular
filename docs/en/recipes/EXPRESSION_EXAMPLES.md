@@ -364,16 +364,30 @@ Probabilistic output using `chance()` function.
 
 ---
 
-### 3.3 Dynamic Processing Time
+### 3.3 Dynamic Work Amount
 
-Example when `duration` field can use expressions.
+The `duration` field accepts expressions.
 
 ```json
 {
   "duration": "max(20, floor(200 / (1.0 + tier * 0.2)))"
 }
 ```
-- Higher tier = shorter processing time (minimum 20 ticks)
+- Higher tier = less work to do (minimum 20 ticks)
+
+The expression is evaluated **once, when the recipe starts**, and stays fixed for
+that run. To have it re-evaluated every tick, set `"durationPolicy": "perTick"` on
+the structure — note that this moves the denominator of the progress bar, so a
+duration that drops below the work already done completes the recipe on that tick.
+
+> [!IMPORTANT]
+> Do not multiply or divide a duration by `speed_multi`. The engine already applies
+> the speed multiplier every tick, so writing it here applies it twice. Use `tier`
+> directly as above, or something external like weather or moon phase.
+
+NEI has no machine to evaluate against, so a machine-dependent duration cannot be
+resolved there. NEI shows **the expression itself** instead of a time. Expressions
+that fold to a constant still show as seconds.
 
 ---
 

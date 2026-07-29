@@ -9,6 +9,7 @@ import mekanism.api.gas.GasStack;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.recipe.expression.ArithmeticExpression;
 import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
 import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
@@ -130,7 +131,7 @@ public class GasInput extends AbstractModularRecipeInput {
         result.consume = this.consume;
         result.interval = this.interval;
         result.index = this.index;
-        result.amountExpr = this.amountExpr; // Reuse same expression
+        result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         return result;
     }
 

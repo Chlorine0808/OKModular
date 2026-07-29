@@ -20,6 +20,7 @@ import com.google.gson.JsonParser;
 import ruiseki.okcore.json.AbstractJsonReader;
 import ruiseki.okcore.json.ParsingContext;
 import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.structure.core.BlockMapping;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
@@ -342,6 +343,20 @@ public class StructureJsonReader extends AbstractJsonReader<StructureJsonReader.
             builder.setDynamic(
                 json.get("dynamic")
                     .getAsBoolean());
+        }
+
+        if (json.has("durationPolicy")) {
+            String policyName = json.get("durationPolicy")
+                .getAsString();
+            DurationPolicy policy = DurationPolicy.fromString(policyName, null);
+            if (policy != null) {
+                builder.setDurationPolicy(policy);
+            } else {
+                Logger.warn(
+                    "Unknown durationPolicy '{}' in {}. Keeping onStart.",
+                    policyName,
+                    ParsingContext.getCurrentFileName());
+            }
         }
 
         // 6. tier

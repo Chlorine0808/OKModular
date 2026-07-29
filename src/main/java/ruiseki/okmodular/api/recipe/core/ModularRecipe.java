@@ -10,6 +10,7 @@ import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
@@ -22,6 +23,7 @@ public class ModularRecipe implements IModularRecipe {
     private final String recipeGroup;
     private final String name;
     private final int duration;
+    private final IExpression durationExpr;
     private final int priority;
     private final List<IRecipeInput> inputs;
     private final List<IRecipeOutput> outputs;
@@ -32,6 +34,7 @@ public class ModularRecipe implements IModularRecipe {
         this.registryName = builder.registryName;
         this.recipeGroup = builder.recipeGroup;
         this.duration = builder.duration;
+        this.durationExpr = builder.durationExpr;
         this.priority = builder.priority;
         this.name = builder.name;
         this.inputs = Collections.unmodifiableList(new ArrayList<>(builder.inputs));
@@ -54,6 +57,20 @@ public class ModularRecipe implements IModularRecipe {
 
     public int getDuration() {
         return duration;
+    }
+
+    @Override
+    public int getDuration(ConditionContext context) {
+        if (durationExpr != null && context != null) {
+            // A duration of zero would complete the recipe on its first tick
+            return (int) Math.max(1, durationExpr.evaluateDouble(context));
+        }
+        return duration;
+    }
+
+    @Override
+    public IExpression getDurationExpression() {
+        return durationExpr;
     }
 
     public int getPriority() {
@@ -229,6 +246,7 @@ public class ModularRecipe implements IModularRecipe {
         private String recipeGroup;
         private String name;
         private int duration = 100;
+        private IExpression durationExpr;
         private int priority = 0;
         private List<IRecipeInput> inputs = new ArrayList<>();
         private List<IRecipeOutput> outputs = new ArrayList<>();
@@ -251,6 +269,17 @@ public class ModularRecipe implements IModularRecipe {
 
         public Builder duration(int duration) {
             this.duration = duration;
+            return this;
+        }
+
+        /**
+         * Sets a duration that is evaluated per machine.
+         * <p>
+         * Pair this with {@link #duration(int)} to leave a static stand-in for
+         * callers that have no context to evaluate against.
+         */
+        public Builder durationExpr(IExpression durationExpr) {
+            this.durationExpr = durationExpr;
             return this;
         }
 

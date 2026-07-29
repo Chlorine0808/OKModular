@@ -101,14 +101,23 @@ Modular モジュールの機能を段階的に紹介する 5 つのサンプル
 **Expression 引数（`duration`・`energy`・`amount` すべてに式が使える）**
 
 ```json
-"duration": "floor(200 / speed_multi)"
+"duration": 200
 "energy":   "floor(500 * energy_multi)"
 "amount":   "3 + tier"
 ```
 
-- `speed_multi`: 将来的に構造体側で設定できる速度倍率（デフォルト 1.0）
-- `energy_multi`: 同じくエネルギー倍率（デフォルト 1.0）
+- `energy_multi`: 構造体側で設定するエネルギー倍率（デフォルト 1.0）
 - `tier`: マシンの現在の Tier（`tierMap` で決まる）
+
+> [!IMPORTANT]
+> **`duration` に `speed_multi` を書かないでください。**
+> `duration` は「作業量」であって時間ではありません。エンジンは 1 tick ごとに
+> 速度倍率のぶんだけ作業を進めるので、実際の所要時間は `duration ÷ speed_multi` に既になっています。
+> ここに `floor(200 / speed_multi)` と書くと倍率が **2 回** 掛かります（実効 `200 / speed_multi²`）。
+>
+> `duration` に式を書くのは、**マシンの性能とは無関係な外的要因**で作業量を変えたいときです
+> （天候・月齢・TileEntity の NBT など）。エネルギー倍率は逆で、エンジン側で適用されないため
+> `energy` に `energy_multi` を書くのが正しい書き方です。
 
 **requiredTier によるレシピ解禁**
 

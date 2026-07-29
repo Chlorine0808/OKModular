@@ -4,6 +4,7 @@ import java.util.List;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.condition.ICondition;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
@@ -24,6 +25,36 @@ public interface IRecipe extends Comparable<IRecipe> {
     String getName();
 
     int getDuration();
+
+    /**
+     * The duration to use for a machine in the given context.
+     * <p>
+     * Note that duration is a work amount, not a wall-clock time: the engine
+     * advances a recipe by the machine's speed multiplier each tick, so the actual
+     * time taken is this divided by that multiplier. Writing the speed multiplier
+     * into the duration would apply it twice.
+     *
+     * @param context The context to evaluate against, or null when there is no
+     *                machine — NEI, validation, tooling
+     * @return The evaluated duration, or the static one when there is no expression
+     *         or no context
+     */
+    default int getDuration(ConditionContext context) {
+        return getDuration();
+    }
+
+    /**
+     * The expression behind the duration, if it was written as one.
+     * <p>
+     * NEI needs this because it renders recipes with no machine to evaluate
+     * against, so for a machine-dependent duration there is no number it can
+     * honestly show.
+     *
+     * @return The expression, or null if the duration is a plain number
+     */
+    default IExpression getDurationExpression() {
+        return null;
+    }
 
     int getPriority();
 

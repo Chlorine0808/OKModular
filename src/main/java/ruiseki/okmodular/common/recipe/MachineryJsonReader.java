@@ -17,6 +17,9 @@ import ruiseki.okmodular.util.Logger;
  */
 public class MachineryJsonReader extends AbstractJsonReader<List<JsonObject>> {
 
+    /** Key under which each recipe carries the name of the file it came from. */
+    public static final String SOURCE_FILE_KEY = "_sourceFile";
+
     public MachineryJsonReader(File path) {
         super(path);
     }
@@ -99,8 +102,10 @@ public class MachineryJsonReader extends AbstractJsonReader<List<JsonObject>> {
     private JsonObject parseEntry(JsonElement e, File source) {
         if (!e.isJsonObject()) return null;
         JsonObject m = e.getAsJsonObject();
-        // We can add metadata like source file if needed, but for now just returning
-        // the JSON
+        // MachineryRecipeLoader receives every file's recipes flattened into one
+        // list, so the origin has to travel with the recipe or its parse errors
+        // cannot name a file.
+        m.addProperty(SOURCE_FILE_KEY, source.getName());
         return m;
     }
 }

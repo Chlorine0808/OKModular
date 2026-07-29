@@ -6,6 +6,7 @@ import java.util.Set;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.structure.io.IStructureRequirement;
 import ruiseki.okmodular.api.structure.io.IStructureSerializable;
 import ruiseki.okmodular.api.structure.visitor.IStructureVisitor;
@@ -63,6 +64,20 @@ public interface IStructureEntry extends IStructureSerializable {
      * @return true if dynamic evaluation is needed
      */
     boolean isDynamic();
+
+    /**
+     * When a machine built from this structure re-resolves a recipe duration that
+     * was written as an expression.
+     * <p>
+     * Independent of {@link #isDynamic()}: that one governs the performance
+     * multipliers, this one the recipe's work amount. Defaults to evaluating once at
+     * recipe start.
+     *
+     * @return the policy, never null
+     */
+    default DurationPolicy getDurationPolicy() {
+        return DurationPolicy.ON_START;
+    }
 
     /**
      * Returns the static base speed multiplier for this structure.

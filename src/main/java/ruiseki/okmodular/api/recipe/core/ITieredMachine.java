@@ -39,4 +39,15 @@ public interface ITieredMachine {
      * Get the current structure entry being used.
      */
     IStructureEntry getStructureEntry();
+
+    /**
+     * When this machine re-resolves a recipe duration that was written as an
+     * expression.
+     * <p>
+     * Defaults to evaluating once at recipe start, which keeps the progress display
+     * monotonic. Override to let a duration follow state that changes mid-run.
+     */
+    default DurationPolicy getDurationPolicy() {
+        return DurationPolicy.ON_START;
+    }
 }

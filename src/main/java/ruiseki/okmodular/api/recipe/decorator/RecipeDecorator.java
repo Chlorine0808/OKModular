@@ -8,6 +8,7 @@ import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
@@ -42,6 +43,16 @@ public abstract class RecipeDecorator implements IModularRecipe {
     @Override
     public int getDuration() {
         return internal.getDuration();
+    }
+
+    @Override
+    public int getDuration(ConditionContext context) {
+        return internal.getDuration(context);
+    }
+
+    @Override
+    public IExpression getDurationExpression() {
+        return internal.getDurationExpression();
     }
 
     @Override
@@ -114,8 +125,17 @@ public abstract class RecipeDecorator implements IModularRecipe {
         return internal.getTotalItemInputCount();
     }
 
+    /**
+     * Presents this decorator to the visitor, not the recipe underneath it.
+     * <p>
+     * {@link IRecipeVisitor#visit(ruiseki.okmodular.api.recipe.core.IRecipe)} walks
+     * whatever {@link #getInputs()} and {@link #getOutputs()} return, so handing over
+     * the wrapped recipe would hide anything a decorator contributes — which is how
+     * the engine sees a recipe's inputs at all. Decorators that leave both lists alone
+     * are unaffected, since those calls delegate.
+     */
     @Override
     public void accept(IRecipeVisitor visitor) {
-        internal.accept(visitor);
+        visitor.visit(this);
     }
 }
