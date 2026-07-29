@@ -60,7 +60,7 @@ public class ExpressionNameFreezeTest {
      * ExpressionRegistry の registerMachineProperty 87 件を書き写したもの。
      */
     // spotless:off
-    private static final String[] MACHINE_PROPERTIES = {
+    static final String[] MACHINE_PROPERTIES = {
         "batch", "batch_size", "count_recipe", "count_recipe_type", "count_recipe_types",
         "current_batch",
         "energy", "energy_capacity", "energy_f", "energy_free", "energy_max",
