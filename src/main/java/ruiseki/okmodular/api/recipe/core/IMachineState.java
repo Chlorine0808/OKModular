@@ -6,6 +6,47 @@ import ruiseki.okmodular.api.modular.IPortType;
  * Interface for accessing machine state in expressions.
  * Allows the API layer to access energy, progress, etc., without depending on
  * the implementation.
+ *
+ * <h2>Two layers, and which one to call</h2>
+ *
+ * Resources are readable two ways here, and they are not equal in standing.
+ *
+ * <ul>
+ * <li>{@link #getAmount}, {@link #getSpace} and {@link #getCapacity} take the
+ * resource kind as an argument. <b>New code should use these.</b> Everything
+ * outside this interface does - the expression layer reads every resource
+ * property and every named-resource function through them, and no caller of the
+ * per-kind getters remains.</li>
+ * <li>The per-kind getters ({@code getStoredFluid}, {@code getTotalGasInput},
+ * {@code getStoredEssentia}, and so on) are the primitives those three dispatch
+ * to. They are <b>implementation detail that has to be public because a default
+ * method cannot call anything else.</b> Reading one directly works but ties the
+ * call site to a single resource kind, which is the shape this interface is
+ * moving away from.</li>
+ * </ul>
+ *
+ * The primitives cannot be folded away, because how you read a kind genuinely
+ * differs per kind - fluids come from {@code IFluidHandler} tanks, items from
+ * inventories, essentia from its own handler. What was folded is the choosing
+ * between them, which used to be repeated in the expression registry, the
+ * property table and the function table.
+ *
+ * <h2>Adding a resource kind</h2>
+ *
+ * <ol>
+ * <li>Append a constant to {@link IPortType.Type} - append, never insert, since
+ * the ordinal is written to world NBT.</li>
+ * <li>Add its primitives here and implement them.</li>
+ * <li>Add a branch for it in all three accessors.</li>
+ * </ol>
+ *
+ * Step 3 is the one that gets forgotten, and forgetting it is silent: the switch
+ * falls through to {@code default} and the kind reads as zero. A test walks
+ * {@code Type.values()} and fails on any kind that answers zero, so the omission
+ * surfaces as a failure rather than as a machine that never runs.
+ *
+ * Nothing in the expression layer needs touching - property names, aliases and
+ * resource functions are generated from the kind.
  */
 public interface IMachineState {
 
