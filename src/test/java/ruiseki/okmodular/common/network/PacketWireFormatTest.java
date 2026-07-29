@@ -218,8 +218,6 @@ public class PacketWireFormatTest {
         trace = new String(captured.toByteArray(), StandardCharsets.UTF_8);
 
         assertTrue(trace.contains("IndexOutOfBoundsException"), "例外が出ていない: " + trace);
-        assertTrue(
-            trace.contains("readerIndex(9)") && trace.contains("writerIndex(12)"),
-            "観測された例外文と一致しない: " + trace);
+        assertTrue(trace.contains("readerIndex(9)") && trace.contains("writerIndex(12)"), "観測された例外文と一致しない: " + trace);
     }
 }
