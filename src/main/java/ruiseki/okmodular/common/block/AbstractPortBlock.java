@@ -314,6 +314,13 @@ public abstract class AbstractPortBlock<T extends AbstractTE> extends AbstractTi
 
         TileEntity te = world.getTileEntity(x, y, z);
 
+        // Bring back the colour the port was painted, and only the colour. Breaking a
+        // port attaches its whole tile entity NBT to the dropped item, but nothing ever
+        // read that back and restoring all of it would undo the side-IO reset above.
+        if (te instanceof AbstractTE port && stack.hasTagCompound()) {
+            port.setPortColor(AbstractTE.readPortColor(stack.getTagCompound()));
+        }
+
         if (te instanceof IVisitablePort port) {
             // Set tier on TileEntity
             port.setTier(tier);

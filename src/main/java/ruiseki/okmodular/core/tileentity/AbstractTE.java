@@ -107,6 +107,19 @@ public abstract class AbstractTE extends AbstractTickingTE
         this.portColor = color == null ? PortColor.NONE : color;
     }
 
+    /**
+     * The colour stored in an item's NBT, for reading one back off a port that was
+     * broken and put down again.
+     *
+     * Deliberately narrower than reading the whole tag. A port's dropped item carries
+     * its entire tile entity NBT, and restoring all of it would undo the side-IO reset
+     * that placing a port is meant to do and bring tank contents back that were already
+     * dropped separately.
+     */
+    public static PortColor readPortColor(NBTTagCompound tag) {
+        return tag == null ? PortColor.NONE : PortColor.fromName(tag.getString("portColor"));
+    }
+
     /** Cached redstone result */
     protected boolean redstoneCheckPassed = true;
 
