@@ -1,6 +1,10 @@
 package ruiseki.okmodular.common.tile;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.minecraft.nbt.NBTTagCompound;
@@ -88,6 +92,63 @@ public final class ExternalPortConfigCodec {
     // spotless:on
 
     private ExternalPortConfigCodec() {}
+
+    /**
+     * Replaces {@link #KEY} in {@code nbt} with what {@code from} holds, and
+     * removes the key entirely when there is nothing to store.
+     *
+     * <p>
+     * Output is ordered by position and then by {@code Type.values()} so that the
+     * same configuration always produces the same tag. Left to a HashMap's
+     * iteration order the bytes would move around between saves for no reason,
+     * which is a needless chunk write every time.
+     *
+     * <p>
+     * A port whose type map is empty is not written. Reading drops such an entry
+     * anyway, so writing one only costs bytes.
+     */
+    public static void write(NBTTagCompound nbt, Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> from) {
+        if (nbt == null) return;
+
+        NBTTagList portList = new NBTTagList();
+        for (ChunkCoordinates pos : sorted(from.keySet())) {
+            Map<IPortType.Type, EnumIO> typeMap = from.get(pos);
+            if (typeMap == null || typeMap.isEmpty()) continue;
+
+            NBTTagList typeList = new NBTTagList();
+            for (IPortType.Type type : IPortType.Type.values()) {
+                EnumIO io = typeMap.get(type);
+                if (io == null) continue;
+
+                NBTTagCompound typeTag = new NBTTagCompound();
+                typeTag.setString(KEY_TYPE, type.name());
+                typeTag.setString(KEY_IO, io.name());
+                typeList.appendTag(typeTag);
+            }
+            if (typeList.tagCount() == 0) continue;
+
+            NBTTagCompound portTag = new NBTTagCompound();
+            portTag.setInteger("x", pos.posX);
+            portTag.setInteger("y", pos.posY);
+            portTag.setInteger("z", pos.posZ);
+            portTag.setTag(KEY_TYPES, typeList);
+            portList.appendTag(portTag);
+        }
+
+        if (portList.tagCount() == 0) {
+            // The key has to go, not just be left stale: an emptied configuration
+            // must survive a save, or a port can never be unset.
+            nbt.removeTag(KEY);
+            return;
+        }
+        nbt.setTag(KEY, portList);
+    }
+
+    private static List<ChunkCoordinates> sorted(Collection<ChunkCoordinates> positions) {
+        List<ChunkCoordinates> ordered = new ArrayList<>(positions);
+        Collections.sort(ordered);
+        return ordered;
+    }
 
     /**
      * Replaces the contents of {@code into} with what {@code nbt} holds.

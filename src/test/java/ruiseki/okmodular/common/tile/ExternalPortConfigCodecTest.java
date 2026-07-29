@@ -4,8 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -14,25 +18,27 @@ import net.minecraft.util.ChunkCoordinates;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.modular.IPortType;
 
 /**
- * 外部ポート設定の NBT 読み込みの検証。
+ * 外部ポート設定の NBT 読み書きの検証。
  *
  * ============================================
  * なぜこのテストがあるか
  * ============================================
  *
- * `TEMachineController` の `externalPortConfigs` には **読み手しか無い**。
+ * `TEMachineController` の `externalPortConfigs` には **読み手しか無かった**。
  * 書き手が一度も存在しなかったので、レンチでプレイヤーが設定した外部ポート設定は
  * セーブに残らない（構造 JSON の `fixedExternalPorts` から毎回再構築されるものだけが
- * 動いて見えている）。
+ * 動いて見えていた）。
  *
- * 書き手を足すのがこの作業の本体だが、**読み手を先に切り出す**。理由が 2 つある。
+ * 書き手を足すのがこの作業の本体だが、**読み手を先に切り出した**。理由が 2 つある。
  *
  * 1. `TEMachineController` は `MockWorld` がコンストラクタで NPE するのでユニットテストで
  * 組めない（`MachineTierRecognitionTest` が `@Disabled` なのはこれ）。
@@ -41,14 +47,16 @@ import ruiseki.okmodular.api.modular.IPortType;
  * 「旧セーブが読めなくなった」を検出できない
  *
  * ============================================
- * ディスク上の書式が 2 つある
+ * ディスク上の書式が 3 つある
  * ============================================
  *
  * <pre>
- * 改修前: {"type": 1b, "io": 2b} enum の **ordinal を byte で** 書いていた
- * 改修後: {"type": "FLUID", "io": "OUTPUT"} name() で書く
- * legacy: {"io": 1b} types リストが無く、Type.ITEM 固定だった更に古い形
+ * 現行:   {"types": [{"type": "FLUID", "io": "OUTPUT"}]}  name() で書く
+ * 改修前: {"types": [{"type": 1b,      "io": 2b}]}        enum の **ordinal を byte で** 書いていた
+ * 最古:   {"io": 1b}                                      types リストが無く、Type.ITEM 固定
  * </pre>
+ *
+ * 書けるのは現行だけで、読めるのは 3 つすべて。
  *
  * ordinal がディスク上の表現だったことが「`IPortType.Type` に要素を挿入できない」
  * 制約の正体だった。**この制約を消すのが目的**なので、ordinal → enum の対応は
@@ -61,7 +69,7 @@ import ruiseki.okmodular.api.modular.IPortType;
  *
  * ============================================
  */
-@DisplayName("外部ポート設定の NBT 読み込み")
+@DisplayName("外部ポート設定の NBT 読み書き")
 public class ExternalPortConfigCodecTest {
 
     // ========== 旧書式の凍結 ==========
@@ -258,7 +266,223 @@ public class ExternalPortConfigCodecTest {
         assertFalse(types.isEmpty());
     }
 
+    // ========== 書き出し ==========
+
+    /**
+     * 全組み合わせの往復。
+     *
+     * 生きた列挙（`Type.values()` × `EnumIO.values()`）を回している。凍結リストではない
+     * のは意図的で、**新しい Type を足したときに自動的に検査対象に入る**のが狙い。
+     * 「消えたこと」を検出したい旧書式の凍結（上の `@CsvSource`）とは役割が逆。
+     */
+    @ParameterizedTest(name = "{0} / {1}")
+    @MethodSource("すべてのTypeとIoの組")
+    @DisplayName("すべての Type × EnumIO が往復する")
+    public void test全組み合わせが往復する(IPortType.Type type, EnumIO io) {
+        Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> result = roundTrip(
+            new Configs().at(1, 2, 3, type, io)
+                .build());
+
+        assertEquals(1, result.size(), () -> type + "/" + io + " の座標が失われた");
+        assertEquals(
+            io,
+            result.get(new ChunkCoordinates(1, 2, 3))
+                .get(type),
+            () -> type + " / " + io + " が往復しない");
+    }
+
+    private static Stream<Arguments> すべてのTypeとIoの組() {
+        return Stream.of(IPortType.Type.values())
+            .flatMap(
+                type -> Stream.of(EnumIO.values())
+                    .map(io -> Arguments.of(type, io)));
+    }
+
+    /**
+     * 名前で書くこと。
+     *
+     * ここが B6 の本題。ordinal で書くのをやめたので、`IPortType.Type` に要素を
+     * **挿入**できるようになる。数値で書いていたら要素の挿入が既存セーブを化かす。
+     */
+    @Test
+    @DisplayName("type と io は名前で書かれる")
+    public void test名前で書かれる() {
+        NBTTagCompound nbt = write(
+            new Configs().at(1, 2, 3, IPortType.Type.FLUID, EnumIO.OUTPUT)
+                .build());
+
+        NBTTagCompound typeTag = firstTypeTag(nbt);
+        assertEquals("FLUID", typeTag.getString("type"), "type は name() で書かれるべき");
+        assertEquals("OUTPUT", typeTag.getString("io"), "io は name() で書かれるべき");
+    }
+
+    @Test
+    @DisplayName("数値としては書かれない")
+    public void test数値では書かれない() {
+        NBTTagCompound nbt = write(
+            new Configs().at(1, 2, 3, IPortType.Type.FLUID, EnumIO.OUTPUT)
+                .build());
+
+        NBTTagCompound typeTag = firstTypeTag(nbt);
+        assertFalse(typeTag.hasKey("type", 99), "type が数値タグとして残っていると ordinal 依存が消えていない");
+        assertFalse(typeTag.hasKey("io", 99), "io が数値タグとして残っていると ordinal 依存が消えていない");
+    }
+
+    @Test
+    @DisplayName("空の設定はキーを作らない")
+    public void test空の設定はキーを作らない() {
+        NBTTagCompound nbt = write(new HashMap<>());
+
+        assertFalse(nbt.hasKey(ExternalPortConfigCodec.KEY), "設定が無いのにキーを作ると、無意味なチャンク保存が増える");
+    }
+
+    @Test
+    @DisplayName("type マップが空の座標は書かない")
+    public void test空の座標は書かない() {
+        Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> configs = new HashMap<>();
+        configs.put(new ChunkCoordinates(1, 2, 3), new HashMap<>());
+
+        NBTTagCompound nbt = write(configs);
+
+        assertFalse(nbt.hasKey(ExternalPortConfigCodec.KEY), "読めば消える座標を書く意味は無い");
+    }
+
+    @Test
+    @DisplayName("負の座標も往復する")
+    public void test負の座標も往復する() {
+        Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> result = roundTrip(
+            new Configs().at(-1000, 5, -2000, IPortType.Type.ITEM, EnumIO.INPUT)
+                .build());
+
+        assertEquals(
+            EnumIO.INPUT,
+            result.get(new ChunkCoordinates(-1000, 5, -2000))
+                .get(IPortType.Type.ITEM));
+    }
+
+    @Test
+    @DisplayName("1 座標に複数 Type がある設定も往復する")
+    public void test複数Typeが往復する() {
+        Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> result = roundTrip(
+            new Configs().at(1, 2, 3, IPortType.Type.ITEM, EnumIO.INPUT)
+                .at(1, 2, 3, IPortType.Type.FLUID, EnumIO.OUTPUT)
+                .at(1, 2, 3, IPortType.Type.ENERGY, EnumIO.BOTH)
+                .at(9, 8, 7, IPortType.Type.GAS, EnumIO.INPUT)
+                .build());
+
+        assertEquals(2, result.size());
+        assertEquals(
+            3,
+            result.get(new ChunkCoordinates(1, 2, 3))
+                .size());
+        assertEquals(
+            EnumIO.INPUT,
+            result.get(new ChunkCoordinates(9, 8, 7))
+                .get(IPortType.Type.GAS));
+    }
+
+    /**
+     * 同じ内容なら同じ NBT になること。
+     *
+     * `HashMap` の反復順に任せると、内容が変わっていないのに NBT が変わり、
+     * チャンクが無用に dirty になる。書き出しは座標順・`Type.values()` 順に固定する。
+     */
+    @Test
+    @DisplayName("投入順が違っても同じ NBT になる")
+    public void test書き出しは決定的() {
+        Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> forward = new Configs()
+            .at(1, 2, 3, IPortType.Type.ITEM, EnumIO.INPUT)
+            .at(1, 2, 3, IPortType.Type.VIS, EnumIO.OUTPUT)
+            .at(0, 0, 0, IPortType.Type.GAS, EnumIO.BOTH)
+            .build();
+
+        Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> backward = new Configs()
+            .at(0, 0, 0, IPortType.Type.GAS, EnumIO.BOTH)
+            .at(1, 2, 3, IPortType.Type.VIS, EnumIO.OUTPUT)
+            .at(1, 2, 3, IPortType.Type.ITEM, EnumIO.INPUT)
+            .build();
+
+        assertEquals(written(forward), written(backward), "投入順で NBT が変わると、内容が同じでもチャンクが dirty になる");
+    }
+
+    @Test
+    @DisplayName("書き出しは既存のキーを置き換える")
+    public void test書き出しは既存キーを置き換える() {
+        NBTTagCompound nbt = root(port(9, 9, 9, namedType("ITEM", "BOTH")));
+
+        ExternalPortConfigCodec.write(
+            nbt,
+            new Configs().at(1, 2, 3, IPortType.Type.FLUID, EnumIO.INPUT)
+                .build());
+
+        Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> result = read(nbt);
+        assertEquals(1, result.size(), "古い座標が残ると、ポートを外しても設定が消えない");
+        assertTrue(result.containsKey(new ChunkCoordinates(1, 2, 3)));
+    }
+
+    @Test
+    @DisplayName("設定が空になったらキーを消す")
+    public void test空になったらキーを消す() {
+        NBTTagCompound nbt = root(port(9, 9, 9, namedType("ITEM", "BOTH")));
+
+        ExternalPortConfigCodec.write(nbt, new HashMap<>());
+
+        assertFalse(nbt.hasKey(ExternalPortConfigCodec.KEY), "全部外したのに残ると、設定が消せなくなる");
+    }
+
     // ========== 補助 ==========
+
+    /** 座標と Type を足していく設定ビルダ。投入順を保つので決定性のテストに使える。 */
+    private static final class Configs {
+
+        private final Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> map = new LinkedHashMap<>();
+
+        Configs at(int x, int y, int z, IPortType.Type type, EnumIO io) {
+            map.computeIfAbsent(new ChunkCoordinates(x, y, z), k -> new LinkedHashMap<>())
+                .put(type, io);
+            return this;
+        }
+
+        Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> build() {
+            return map;
+        }
+    }
+
+    private static NBTTagCompound write(Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> configs) {
+        NBTTagCompound nbt = new NBTTagCompound();
+        ExternalPortConfigCodec.write(nbt, configs);
+        return nbt;
+    }
+
+    private static Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> roundTrip(
+        Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> configs) {
+        return read(write(configs));
+    }
+
+    /** 書き出した内容を読める文字列の列にする。順序も含めて比べられる。 */
+    private static List<String> written(Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> configs) {
+        List<String> lines = new ArrayList<>();
+        NBTTagList ports = write(configs).getTagList(ExternalPortConfigCodec.KEY, 10);
+        for (int i = 0; i < ports.tagCount(); i++) {
+            NBTTagCompound port = ports.getCompoundTagAt(i);
+            String pos = port.getInteger("x") + "," + port.getInteger("y") + "," + port.getInteger("z");
+            NBTTagList types = port.getTagList("types", 10);
+            for (int j = 0; j < types.tagCount(); j++) {
+                NBTTagCompound type = types.getCompoundTagAt(j);
+                lines.add(pos + " " + type.getString("type") + "=" + type.getString("io"));
+            }
+        }
+        return lines;
+    }
+
+    private static NBTTagCompound firstTypeTag(NBTTagCompound nbt) {
+        NBTTagList ports = nbt.getTagList(ExternalPortConfigCodec.KEY, 10);
+        assertEquals(1, ports.tagCount(), "座標が 1 件だけ書かれているべき");
+        NBTTagList types = ports.getCompoundTagAt(0)
+            .getTagList("types", 10);
+        assertEquals(1, types.tagCount(), "type が 1 件だけ書かれているべき");
+        return types.getCompoundTagAt(0);
+    }
 
     private static Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> read(NBTTagCompound nbt) {
         Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> result = new HashMap<>();
