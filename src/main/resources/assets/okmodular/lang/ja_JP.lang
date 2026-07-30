@@ -187,7 +187,7 @@ material.chlonox=クロノックス
 material.leviathan=リヴァイアサン
 material.perfect=パーフェクト
 
-# --- Wrench / Structure Wand (moved from the parent mod) ---
+# --- Wrench / Structure Wand ---
 item.wrench.name=レンチ
 item.structure_wand.name=ストラクチャーワンド
 chat.okmodular.wand.pos1_set=[OKModular] 位置1を設定: (%d, %d, %d)
@@ -209,11 +209,11 @@ tooltip.okmodular.wand.size=サイズ: %dx%dx%d
 chat.okmodular.wrench_linked=レンチをコントローラにリンクしました: (%d, %d, %d)
 chat.okmodular.wrench_type_selected=ポートタイプを選択しました: %s
 chat.okmodular.wrench_unlinked=リンクを解除しました。
-# --- Fluid Canister (moved from the parent mod) ---
+# --- Fluid Canister ---
 tooltip.holdshift=§7- §r§oSHIFT§r§7キーで詳細を表示§r
 item.fluid_canister.name=流体キャニスター
 
-# --- World generation config (moved from the parent mod) ---
+# --- World generation config ---
 config.worldGenConfig=ワールド生成の設定
 config.heliumGasGen=ヘリウム
 config.chlorineGasGen=塩素
@@ -229,7 +229,7 @@ command.okmodular.scan_success=%s
 command.okmodular.scan_file=保存しました: %s
 command.okmodular.scan_failed=スキャン失敗: %s
 
-# --- Machine GUI status and controls (moved from the parent mod) ---
+# --- Machine GUI status and controls ---
 gui.status.idle=待機中
 gui.status.processing=レシピ処理中: %d%%
 gui.status.output_full=出力が満杯です: %s
@@ -251,7 +251,7 @@ gui.redstone_mode.high_off=レッドストーン信号でオフ
 gui.search_bar.tool_tip=右クリックで検索バーをクリア
 gui.not_in_effect=無効
 
-# --- Port types (never had entries; the wrench and GUI showed raw keys) ---
+# --- Port types ---
 gui.port_type=ポート種別を %s に設定しました
 gui.port_type.format=%s (%s)
 gui.port_type.ITEM=アイテム
@@ -264,7 +264,7 @@ gui.port_type.VIS=ヴィス
 gui.port_type.BLOCK=ブロック
 gui.port_type.NONE=なし
 
-# --- GUI / NEI text that never had entries in either mod ---
+# --- GUI / NEI text ---
 chat.okmodular.port_io_fixed=このポートのIOモードは構造体で固定されており変更できません。
 gui.modular.inputs=入力
 gui.modular.no_input=入力なし
@@ -277,7 +277,7 @@ gui.craftingState.idle=待機中
 gui.craftingState.running=稼働中
 gui.craftingState.error=エラー
 
-# --- Recipe conditions (were keyed under okcore, which never defined them) ---
+# --- Recipe conditions ---
 okmodular.condition.biome.base=バイオーム条件
 okmodular.condition.block=必要なブロック: %s
 okmodular.condition.block_below=直下に必要なブロック: %s
@@ -289,7 +289,7 @@ okmodular.condition.weather.THUNDER=雷雨が必要です
 # --- en_US only until now ---
 tooltip.machinery.deprecated=§e[非推奨]
 tooltip.machinery.deprecated.hint=§7このブロックは旧システムを使用しています。
-# --- ポートの色（機械のポートを独立して動く群に分ける） ---
+# --- ポートの色---
 chat.okmodular.port_color_set=ポートを %s に塗りました
 chat.okmodular.port_color_cleared=ポートの色を落としました
 gui.port_color.NONE=無色
@@ -311,15 +311,11 @@ gui.port_color.RED=赤
 gui.port_color.BLACK=黒
 tooltip.okmodular.port_color=塗装: %s
 
-# --- レンチのツールチップ（選択中の種別とリンク先はチャット以外に出ていなかった） ---
+# --- レンチのツールチップ ---
 tooltip.okmodular.wrench_unlinked=リンクされていません - スニーク + 右クリックでコントローラにリンク
 tooltip.okmodular.wrench_linked=リンク先コントローラ: (%d, %d, %d) ディメンション %d
 
 # --- 機械の状態 (ErrorReason) ---
-# キーは "gui.status." + id で組み立てられるので、無いと機械の GUI に生のキーが出る
-# （例外は出ない）。以前は idle と output_full だけがここにあり、残りは親 mod の lang に
-# しか無かった。OKModular は親 mod に依存していないので、単体導入では
-# gui.status.no_energy のような文字列が画面に出ていた。
 gui.status.running=処理中
 gui.status.no_recipes=レシピが登録されていません
 gui.status.no_input_ports=入力ポートが接続されていません
@@ -337,7 +333,7 @@ gui.status.block_missing=ブロックがありません
 gui.status.block_output_full=ブロックを置く空きがありません
 gui.status.condition_not_met=稼働条件を満たしていません: %s
 
-# --- ME ポートの状態（WAILA に出る。色コードはブロック側が付ける） ---
+# --- ME ポートの状態（WAILA） ---
 waila.me.online=ME ネットワークに接続中
 waila.me.no_channel=ME チャンネルがありません
 waila.me.offline=ME ネットワークに接続していません
