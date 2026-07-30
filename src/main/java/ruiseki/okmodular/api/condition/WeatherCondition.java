@@ -41,9 +41,11 @@ public class WeatherCondition implements ICondition {
 
     @Override
     public String getDescription() {
-        return StatCollector.translateToLocal(
-            "okmodular.condition.weather." + weather.name()
-                .toLowerCase());
+        // Upper case, matching the enum constant and the lang entries. It used to lower
+        // case the name, so it asked for a key nobody had written and the GUI showed
+        // "okmodular.condition.weather.rain" verbatim. The rest of this mod keys enums by
+        // their constant name too - gui.port_type.ITEM, gui.port_color.RED.
+        return StatCollector.translateToLocal("okmodular.condition.weather." + weather.name());
     }
 
     @Override
