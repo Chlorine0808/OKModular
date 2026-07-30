@@ -19,10 +19,12 @@ import com.google.gson.JsonParser;
 
 import ruiseki.okcore.json.AbstractJsonReader;
 import ruiseki.okcore.json.ParsingContext;
+import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.structure.core.BlockMapping;
+import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.api.structure.core.IStructureLayer;
 import ruiseki.okmodular.api.structure.core.ISymbolMapping;
@@ -343,6 +345,18 @@ public class StructureJsonReader extends AbstractJsonReader<StructureJsonReader.
             builder.setDynamic(
                 json.get("dynamic")
                     .getAsBoolean());
+        }
+
+        // The machine's own conditions and what happens to a running recipe when they stop
+        // holding. Both optional, so a definition that says nothing keeps its old meaning.
+        if (json.has("conditions")) {
+            for (ICondition condition : MachineConditionsParser.parse(json.get("conditions"))) {
+                builder.addCondition(condition);
+            }
+        }
+        if (json.has("conditionPolicy")) {
+            builder.setConditionPolicy(
+                MachineConditionsParser.parsePolicy(json.get("conditionPolicy"), ConditionPolicy.PAUSE));
         }
 
         if (json.has("durationPolicy")) {
