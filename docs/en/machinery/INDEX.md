@@ -21,6 +21,19 @@ Design documentation for the proxy system that integrates external blocks (chest
 
 ---
 
+#### [Machine Conditions](./MACHINE_CONDITIONS.md)
+Conditions in a structure definition that stop the machine itself, whatever recipe it was going to run.
+
+**Contents**:
+- How they differ from a recipe's conditions (they work independently)
+- Writing them (array or single, asking about machine state with an expression)
+- What happens when they break mid-recipe (`pause` / `abort`), and that `abort` gives nothing back
+- A misspelled condition loosens the gate rather than closing it
+
+**Audience**: anyone writing structure definitions
+
+---
+
 #### [Port Colours](./PORT_COLORS.md)
 Painting a machine's ports so that only ports of the same colour are considered
 together.

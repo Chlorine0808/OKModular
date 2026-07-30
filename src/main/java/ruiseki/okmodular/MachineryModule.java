@@ -19,6 +19,7 @@ import ruiseki.okcore.helper.MinecraftHelpers;
 import ruiseki.okcore.init.ModModuleBase;
 import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okcore.proxy.ICommonProxy;
+import ruiseki.okmodular.api.condition.Conditions;
 import ruiseki.okmodular.common.fluid.EnumFluidMaterial;
 import ruiseki.okmodular.common.fluid.ModFluidGases;
 import ruiseki.okmodular.common.init.MachineryBlocks;
@@ -103,6 +104,17 @@ public class MachineryModule extends ModModuleBase {
     public void preInit(FMLPreInitializationEvent event) {
         // Resolve this mod's config root exactly once. Everything downstream appends leaf names to it.
         configDir = new File(event.getModConfigurationDirectory(), Reference.CONFIG_DIR);
+
+        // Condition parsers, before anything reads JSON. Without this the registry is empty
+        // and every condition in every recipe and structure is dropped with "Unknown or
+        // non-inferable condition type" - which is exactly what was happening. Nothing
+        // called this, so weather, biome, time and expression conditions had never once
+        // taken effect.
+        //
+        // It has to be an explicit call. RecipeParserRegistry gets away with a static
+        // initialiser because parsing references that class, but nothing references
+        // Conditions, so its class would never load and its static block would never run.
+        Conditions.registerDefaults();
 
         // Structure engine wiring (formerly done by the parent mod's CoreModule).
         // The config root is this mod's ID, matching RecipeLoader and TierConfigLoader.

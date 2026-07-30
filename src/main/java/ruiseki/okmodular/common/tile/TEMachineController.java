@@ -55,6 +55,7 @@ import ruiseki.okmodular.api.recipe.core.ITieredMachine;
 import ruiseki.okmodular.api.recipe.error.ErrorReason;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
 import ruiseki.okmodular.common.block.BlockMachineController;
@@ -546,6 +547,10 @@ public class TEMachineController extends AbstractMBModifierTE
             return;
         }
 
+        if (!machineConditionsMet()) {
+            return;
+        }
+
         // Process recipes when formed
         if (isFormed) {
             if (!worldObj.isRemote) {
@@ -556,6 +561,46 @@ public class TEMachineController extends AbstractMBModifierTE
             }
             processRecipe();
         }
+    }
+
+    /**
+     * Whether the machine's own conditions, declared in its structure definition, hold.
+     * <p>
+     * Checked in the same place as the redstone signal and for the same reason: this gates
+     * the machine as a whole, so it comes before any recipe work and before the running
+     * counters move. A machine that is not formed is not gated - there is nothing to gate.
+     * <p>
+     * <b>A structure that declares no conditions pays nothing.</b> The context is passed as
+     * a supplier and never built when the list is empty, which matters on a path that runs
+     * every tick.
+     * <p>
+     * The context comes from {@link #getConditionContext()} rather than a bare one, so a
+     * condition can ask about the machine - {@code energy > 1000} and the like. A context
+     * without this controller answers zero for every machine property, which would make
+     * such a condition quietly always false. It is a fresh instance each tick, so its result
+     * cache is never shared with the recipe's own condition checks.
+     *
+     * @return true when the machine may run
+     */
+    private boolean machineConditionsMet() {
+        IStructureEntry entry = getStructureEntry();
+        if (entry == null) return true;
+
+        MachineConditionGate.Verdict verdict = MachineConditionGate
+            .evaluate(entry.getConditions(), this::getConditionContext);
+        if (verdict.isMet()) return true;
+
+        setProcessError(ErrorReason.CONDITION_NOT_MET, verdict.getFailedDescription());
+
+        // The one place this mod aborts a recipe that may already have eaten its inputs.
+        // abort() resets the process without giving anything back, and that is what the
+        // policy means - the alternative, PAUSE, is the default precisely because it does
+        // not. Elsewhere abort() is only reached once it is known that nothing was consumed
+        // (see the isOnlyNonConsumingRecipe checks in processRecipe).
+        if (entry.getConditionPolicy() == ConditionPolicy.ABORT) {
+            processAgent.abort();
+        }
+        return false;
     }
 
     /**

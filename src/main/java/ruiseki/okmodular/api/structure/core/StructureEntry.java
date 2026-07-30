@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
@@ -48,6 +49,8 @@ public class StructureEntry implements IStructureEntry {
     private final Set<Character> externalPorts;
     private final Map<Character, EnumIO> fixedExternalPorts;
     private final List<TierStructureRef> tierStructures;
+    private final List<ICondition> conditions;
+    private final ConditionPolicy conditionPolicy;
 
     public StructureEntry(String name, String displayName, List<IStructureLayer> layers,
         Map<Character, ISymbolMapping> mappings, List<IStructureRequirement> requirements, List<String> recipeGroup,
@@ -55,7 +58,7 @@ public class StructureEntry implements IStructureEntry {
         double energyMultiplier, IExpression energyMultiplierExpr, double batchMin, IExpression batchMinExpr,
         double batchMax, IExpression batchMaxExpr, boolean dynamic, DurationPolicy durationPolicy, int tier,
         String defaultFacing, Set<Character> externalPorts, Map<Character, EnumIO> fixedExternalPorts,
-        List<TierStructureRef> tierStructures) {
+        List<TierStructureRef> tierStructures, List<ICondition> conditions, ConditionPolicy conditionPolicy) {
         this.name = name;
         this.displayName = displayName;
         this.layers = Collections.unmodifiableList(new ArrayList<>(layers));
@@ -86,6 +89,9 @@ public class StructureEntry implements IStructureEntry {
             : Collections.emptyMap();
         this.tierStructures = tierStructures != null ? Collections.unmodifiableList(new ArrayList<>(tierStructures))
             : Collections.emptyList();
+        this.conditions = conditions != null ? Collections.unmodifiableList(new ArrayList<>(conditions))
+            : Collections.emptyList();
+        this.conditionPolicy = conditionPolicy != null ? conditionPolicy : ConditionPolicy.PAUSE;
     }
 
     @Override
@@ -218,6 +224,16 @@ public class StructureEntry implements IStructureEntry {
     }
 
     @Override
+    public List<ICondition> getConditions() {
+        return conditions;
+    }
+
+    @Override
+    public ConditionPolicy getConditionPolicy() {
+        return conditionPolicy;
+    }
+
+    @Override
     public void accept(IStructureVisitor visitor) {
         visitor.visit(this);
         for (IStructureRequirement req : requirements) {
@@ -258,10 +274,21 @@ public class StructureEntry implements IStructureEntry {
                 durationPolicy.name()
                     .toLowerCase());
         }
+        // Only when it differs from the default, like durationPolicy above - an exported
+        // structure should not gain keys its author never wrote.
+        if (conditionPolicy != ConditionPolicy.PAUSE) {
+            json.addProperty(
+                "conditionPolicy",
+                conditionPolicy.name()
+                    .toLowerCase());
+        }
         serializeExpr(json, "speedMultiplier", speedMultiplier, speedMultiplierExpr, 1.0);
         serializeExpr(json, "energyMultiplier", energyMultiplier, energyMultiplierExpr, 1.0);
         serializeExpr(json, "batchMin", batchMin, batchMinExpr, 1.0);
-        serializeExpr(json, "batchMax", batchMin, batchMaxExpr, 1.0);
+        // Was passing batchMin here. Four calls of the same shape, one of them wrong, and
+        // only visible when batchMax is a constant and batchMin is not the default - so an
+        // exported structure came back with the wrong batch ceiling.
+        serializeExpr(json, "batchMax", batchMax, batchMaxExpr, 1.0);
 
         if (tier != 0) {
             json.addProperty("tier", tier);
@@ -281,6 +308,17 @@ public class StructureEntry implements IStructureEntry {
                     .serialize());
         }
         json.add("mappings", mappingsObj);
+
+        if (!conditions.isEmpty()) {
+            // ICondition fills an object rather than returning one, so each gets its own.
+            JsonArray conditionsArray = new JsonArray();
+            for (ICondition condition : conditions) {
+                JsonObject written = new JsonObject();
+                condition.write(written);
+                conditionsArray.add(written);
+            }
+            json.add("conditions", conditionsArray);
+        }
 
         if (!requirements.isEmpty()) {
             JsonArray reqsArray = new JsonArray();

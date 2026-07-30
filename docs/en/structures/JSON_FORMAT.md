@@ -27,6 +27,8 @@ A file can contain a single object or an array of objects. A special object name
 | `tierMap` | Object | Definition of Tiers provided by each part of the structure. |
 | `defaultFacing` | String | Default facing is horizontal. You can modify it to vertical (`UP`, `DOWN`). |
 | `durationPolicy` | String | When an expression-valued recipe `duration` is evaluated (`onStart` / `perTick`, default: `onStart`). |
+| `conditions` | Array/Object | Conditions **the machine itself** must meet; while they fail no recipe runs (optional). See [Machine Conditions](../machinery/MACHINE_CONDITIONS.md) |
+| `conditionPolicy` | String | What happens to a running recipe when `conditions` stop holding (`pause` / `abort`, default: `pause`). |
 
 ### durationPolicy
 

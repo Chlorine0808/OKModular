@@ -189,7 +189,7 @@ material.chlonox=Chlonox
 material.leviathan=Leviathan
 material.perfect=Perfect
 
-# --- Wrench / Structure Wand (moved from the parent mod) ---
+# --- Wrench / Structure Wand ---
 item.wrench.name=Wrench
 item.structure_wand.name=Structure Wand
 chat.okmodular.wand.pos1_set=[OKModular] Position 1 set: (%d, %d, %d)
@@ -211,11 +211,11 @@ tooltip.okmodular.wand.size=Size: %dx%dx%d
 chat.okmodular.wrench_linked=Wrench linked to Controller at (%d, %d, %d)
 chat.okmodular.wrench_type_selected=Selected port type: %s
 chat.okmodular.wrench_unlinked=Unlinked.
-# --- Fluid Canister (moved from the parent mod) ---
+# --- Fluid Canister ---
 tooltip.holdshift=§7- hold §r§oSHIFT§r§7 for more info§r
 item.fluid_canister.name=Fluid Canister
 
-# --- World generation config (moved from the parent mod) ---
+# --- World generation config ---
 config.worldGenConfig=World Generation Settings
 config.heliumGasGen=Helium
 config.chlorineGasGen=Chlorine
@@ -231,7 +231,7 @@ command.okmodular.scan_success=%s
 command.okmodular.scan_file=Saved as: %s
 command.okmodular.scan_failed=Scan failed: %s
 
-# --- Machine GUI status and controls (moved from the parent mod) ---
+# --- Machine GUI status and controls ---
 gui.status.idle=Idle
 gui.status.processing=Processing: %d%%
 gui.status.output_full=Output Full: %s
@@ -253,7 +253,7 @@ gui.redstone_mode.high_off=Off with redstone signal
 gui.search_bar.tool_tip=Right click to clear the search bar
 gui.not_in_effect=Not in effect
 
-# --- Port types (never had entries; the wrench and GUI showed raw keys) ---
+# --- Port types ---
 gui.port_type=Port type set to: %s
 gui.port_type.format=%s (%s)
 gui.port_type.ITEM=Item
@@ -266,7 +266,7 @@ gui.port_type.VIS=Vis
 gui.port_type.BLOCK=Block
 gui.port_type.NONE=None
 
-# --- GUI / NEI text that never had entries in either mod ---
+# --- GUI / NEI text ---
 chat.okmodular.port_io_fixed=This port's IO mode is fixed by the structure and cannot be changed.
 gui.modular.inputs=Inputs
 gui.modular.no_input=No inputs
@@ -279,7 +279,7 @@ gui.craftingState.idle=Idle
 gui.craftingState.running=Running
 gui.craftingState.error=Error
 
-# --- Recipe conditions (were keyed under okcore, which never defined them) ---
+# --- Recipe conditions ---
 okmodular.condition.biome.base=Biome condition
 okmodular.condition.block=Requires block: %s
 okmodular.condition.block_below=Requires block below: %s
@@ -287,7 +287,7 @@ okmodular.condition.dimension=Allowed dimensions: %s
 okmodular.condition.weather.CLEAR=Requires clear weather
 okmodular.condition.weather.RAIN=Requires rain
 okmodular.condition.weather.THUNDER=Requires a thunderstorm
-# --- Port colours (divide a machine's ports into groups that run independently) ---
+# --- Port colours ---
 chat.okmodular.port_color_set=Port painted %s
 chat.okmodular.port_color_cleared=Port colour removed
 gui.port_color.NONE=Unpainted
@@ -309,6 +309,29 @@ gui.port_color.RED=Red
 gui.port_color.BLACK=Black
 tooltip.okmodular.port_color=Painted: %s
 
-# --- Wrench tooltip (the selected type and the link were invisible outside chat) ---
+# --- Wrench tooltip --
 tooltip.okmodular.wrench_unlinked=Not linked - sneak + right-click a controller
 tooltip.okmodular.wrench_linked=Linked controller: (%d, %d, %d) in dim %d
+
+# --- Machine status (ErrorReason) ---
+gui.status.running=Processing
+gui.status.no_recipes=No recipes registered
+gui.status.no_input_ports=No input ports connected
+gui.status.no_output_ports=No output ports connected
+gui.status.no_energy=Insufficient energy
+gui.status.input_missing=Input missing
+gui.status.no_matching_recipe=No matching recipe
+gui.status.waiting_output=Waiting for output space
+gui.status.no_input=No input resources
+gui.status.paused=Paused by Redstone
+gui.status.missing_blueprint=No Blueprint
+gui.status.output_capacity_insufficient=Output Capacity Insufficient: %s
+gui.status.no_mana=Insufficient Mana
+gui.status.block_missing=Block missing
+gui.status.block_output_full=No space for Block
+gui.status.condition_not_met=Conditions not met: %s
+
+# --- ME port status (shown in WAILA) ---
+waila.me.online=ME network online
+waila.me.no_channel=No ME channel
+waila.me.offline=ME network offline

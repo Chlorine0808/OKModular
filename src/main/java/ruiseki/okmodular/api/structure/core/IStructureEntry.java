@@ -1,10 +1,12 @@
 package ruiseki.okmodular.api.structure.core;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.structure.io.IStructureRequirement;
@@ -77,6 +79,29 @@ public interface IStructureEntry extends IStructureSerializable {
      */
     default DurationPolicy getDurationPolicy() {
         return DurationPolicy.ON_START;
+    }
+
+    /**
+     * Conditions the machine itself must satisfy to run at all.
+     * <p>
+     * Separate from a recipe's conditions: these gate the machine, the way a redstone
+     * signal does, and are checked whatever recipe is up next. Declared at the top level of
+     * a structure definition under <code>conditions</code>.
+     * <p>
+     * Empty, never null - this is read every tick, so the caller should not have to spread
+     * null checks around to use it.
+     */
+    default List<ICondition> getConditions() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * What happens to a running recipe when {@link #getConditions()} stops being met.
+     * <p>
+     * {@link ConditionPolicy#PAUSE} by default, which keeps the run and loses nothing.
+     */
+    default ConditionPolicy getConditionPolicy() {
+        return ConditionPolicy.PAUSE;
     }
 
     /**

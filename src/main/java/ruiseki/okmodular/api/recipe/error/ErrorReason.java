@@ -22,11 +22,28 @@ public enum ErrorReason {
     OUTPUT_CAPACITY_INSUFFICIENT("output_capacity_insufficient", "Output Capacity Insufficient"),
     NO_MANA("no_mana", "Insufficient Mana"),
     BLOCK_MISSING("block_missing", "Block missing"),
-    BLOCK_OUTPUT_FULL("block_output_full", "No space for Block");
+    BLOCK_OUTPUT_FULL("block_output_full", "No space for Block"),
+    /**
+     * The machine's own conditions are not satisfied.
+     * <p>
+     * Not a recipe's conditions - these gate the machine as a whole, the way a redstone
+     * signal does. The detail carries the description of the first condition that failed,
+     * which is the only handle a player has on why the machine is sitting still.
+     * <p>
+     * <b>Appended at the end deliberately.</b> The GUI syncs this enum by ordinal, so
+     * inserting anywhere else would shift the meaning of every constant after it.
+     */
+    CONDITION_NOT_MET("condition_not_met", "Machine conditions not met");
 
     private final String id;
+
+    /**
+     * English wording, kept as the record of what each status means.
+     * <p>
+     * Not what a player reads - that comes from {@link #getUnlocalizedName()} and the lang
+     * files - but it is where those translations were taken from, so the two should agree.
+     */
     private final String defaultMessage;
-    private String detail = "";
 
     ErrorReason(String id, String defaultMessage) {
         this.id = id;
@@ -45,15 +62,27 @@ public enum ErrorReason {
         return "gui.status." + id;
     }
 
-    public ErrorReason withDetail(String detail) {
-        this.detail = detail;
-        return this;
+    /**
+     * Whether an idle machine should say this rather than just "Idle".
+     * <p>
+     * <b>The default is yes, and that is the point.</b> The GUI used to pick from a
+     * hand-written list of five, so the other thirteen were set, synced, and then dropped
+     * on the floor - {@code PAUSED}, {@code NO_MANA}, {@code BLOCK_MISSING},
+     * {@code MISSING_BLUEPRINT}, {@code BLOCK_OUTPUT_FULL} and {@code WAITING_OUTPUT} all
+     * reached the client and none of them was ever displayed. A list cannot notice a
+     * constant that was added after it was written.
+     * <p>
+     * Answering yes by default turns that failure inside out: a new constant shows up
+     * immediately, and if nobody wrote it a translation then
+     * {@code ErrorReasonLangCoverageTest} fails rather than a player seeing "Idle" for a
+     * machine that is actually stuck.
+     * <p>
+     * Only two say no. {@link #NONE} means there is no error at all, and {@link #RUNNING}
+     * would claim the machine is working while this very method is being asked what to
+     * show an idle one.
+     */
+    public boolean showsWhenIdle() {
+        return this != NONE && this != RUNNING;
     }
 
-    public String getMessage() {
-        if (detail != null && !detail.isEmpty()) {
-            return defaultMessage + ": " + detail;
-        }
-        return defaultMessage;
-    }
 }
