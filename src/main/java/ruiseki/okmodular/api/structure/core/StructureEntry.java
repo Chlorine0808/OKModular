@@ -274,6 +274,14 @@ public class StructureEntry implements IStructureEntry {
                 durationPolicy.name()
                     .toLowerCase());
         }
+        // Only when it differs from the default, like durationPolicy above - an exported
+        // structure should not gain keys its author never wrote.
+        if (conditionPolicy != ConditionPolicy.PAUSE) {
+            json.addProperty(
+                "conditionPolicy",
+                conditionPolicy.name()
+                    .toLowerCase());
+        }
         serializeExpr(json, "speedMultiplier", speedMultiplier, speedMultiplierExpr, 1.0);
         serializeExpr(json, "energyMultiplier", energyMultiplier, energyMultiplierExpr, 1.0);
         serializeExpr(json, "batchMin", batchMin, batchMinExpr, 1.0);
@@ -300,6 +308,17 @@ public class StructureEntry implements IStructureEntry {
                     .serialize());
         }
         json.add("mappings", mappingsObj);
+
+        if (!conditions.isEmpty()) {
+            // ICondition fills an object rather than returning one, so each gets its own.
+            JsonArray conditionsArray = new JsonArray();
+            for (ICondition condition : conditions) {
+                JsonObject written = new JsonObject();
+                condition.write(written);
+                conditionsArray.add(written);
+            }
+            json.add("conditions", conditionsArray);
+        }
 
         if (!requirements.isEmpty()) {
             JsonArray reqsArray = new JsonArray();

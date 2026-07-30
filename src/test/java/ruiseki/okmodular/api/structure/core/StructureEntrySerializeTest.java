@@ -7,7 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.condition.ICondition;
 
 /**
  * `StructureEntry.serialize()` が書き出す値の検証。
@@ -127,5 +131,92 @@ public class StructureEntrySerializeTest {
             json.get("batchMin")
                 .getAsInt());
         assertFalse(json.has("batchMax"), "batchMax は既定値なので出てはいけない（batchMin の値が漏れていた）");
+    }
+
+    // ========== 機械の稼働条件（B8） ==========
+
+    /** `write` に自分の印を残す条件。書き出しの中身を追えるようにする。 */
+    private static final class MarkedCondition implements ICondition {
+
+        private final String mark;
+
+        MarkedCondition(String mark) {
+            this.mark = mark;
+        }
+
+        @Override
+        public boolean isMet(ConditionContext context) {
+            return true;
+        }
+
+        @Override
+        public String getDescription() {
+            return mark;
+        }
+
+        @Override
+        public void write(JsonObject json) {
+            json.addProperty("mark", mark);
+        }
+    }
+
+    @Test
+    @DisplayName("条件が配列として、順番どおりに書き出される")
+    public void test条件が書き出される() {
+        // ワンドでエクスポートした JSON はそのまま読み戻される。ここで落とすと
+        // 「エクスポートしたら条件が消えた機械」になる。
+        JsonObject json = new StructureEntryBuilder().setName("test")
+            .addCondition(new MarkedCondition("1 つ目"))
+            .addCondition(new MarkedCondition("2 つ目"))
+            .build()
+            .serialize();
+
+        JsonArray conditions = json.getAsJsonArray("conditions");
+        assertEquals(2, conditions.size());
+        assertEquals(
+            "1 つ目",
+            conditions.get(0)
+                .getAsJsonObject()
+                .get("mark")
+                .getAsString());
+        assertEquals(
+            "2 つ目",
+            conditions.get(1)
+                .getAsJsonObject()
+                .get("mark")
+                .getAsString());
+    }
+
+    @Test
+    @DisplayName("条件が無ければキーを出さない")
+    public void test条件が無ければ出さない() {
+        // 既定値を書かないのが元の設計。エクスポートで勝手にキーが増えない。
+        assertFalse(
+            new StructureEntryBuilder().setName("test")
+                .build()
+                .serialize()
+                .has("conditions"));
+    }
+
+    @Test
+    @DisplayName("方針は既定（PAUSE）なら出さず、abort なら出す")
+    public void test方針の書き出し() {
+        assertFalse(
+            new StructureEntryBuilder().setName("test")
+                .setConditionPolicy(ConditionPolicy.PAUSE)
+                .build()
+                .serialize()
+                .has("conditionPolicy"),
+            "既定値なのに出ている");
+
+        assertEquals(
+            "abort",
+            new StructureEntryBuilder().setName("test")
+                .setConditionPolicy(ConditionPolicy.ABORT)
+                .build()
+                .serialize()
+                .get("conditionPolicy")
+                .getAsString(),
+            "durationPolicy と同じく小文字で書く");
     }
 }
