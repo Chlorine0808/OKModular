@@ -334,6 +334,7 @@ gui.status.output_capacity_insufficient=Output Capacity Insufficient: %s
 gui.status.no_mana=Insufficient Mana
 gui.status.block_missing=Block missing
 gui.status.block_output_full=No space for Block
+gui.status.condition_not_met=Conditions not met: %s
 
 # --- ME port status (shown in WAILA; the colour code is added by the block) ---
 waila.me.online=ME network online

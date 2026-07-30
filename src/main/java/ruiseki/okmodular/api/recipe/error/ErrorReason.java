@@ -22,7 +22,18 @@ public enum ErrorReason {
     OUTPUT_CAPACITY_INSUFFICIENT("output_capacity_insufficient", "Output Capacity Insufficient"),
     NO_MANA("no_mana", "Insufficient Mana"),
     BLOCK_MISSING("block_missing", "Block missing"),
-    BLOCK_OUTPUT_FULL("block_output_full", "No space for Block");
+    BLOCK_OUTPUT_FULL("block_output_full", "No space for Block"),
+    /**
+     * The machine's own conditions are not satisfied.
+     * <p>
+     * Not a recipe's conditions - these gate the machine as a whole, the way a redstone
+     * signal does. The detail carries the description of the first condition that failed,
+     * which is the only handle a player has on why the machine is sitting still.
+     * <p>
+     * <b>Appended at the end deliberately.</b> The GUI syncs this enum by ordinal, so
+     * inserting anywhere else would shift the meaning of every constant after it.
+     */
+    CONDITION_NOT_MET("condition_not_met", "Machine conditions not met");
 
     private final String id;
 

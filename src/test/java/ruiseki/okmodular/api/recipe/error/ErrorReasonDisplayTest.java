@@ -73,6 +73,22 @@ public class ErrorReasonDisplayTest {
         ErrorReason.WAITING_OUTPUT, ErrorReason.NO_INPUT, ErrorReason.NO_RECIPES, ErrorReason.NO_INPUT_PORTS,
         ErrorReason.NO_OUTPUT_PORTS, ErrorReason.IDLE };
 
+    /**
+     * ホワイトリストが無くなった後に足された定数。
+     * <p>
+     * **この一覧が空でないこと自体が、述語に変えた効果の証拠。** 足しただけで表示され、
+     * `GuiManager` に 1 行も書かなくてよかったもの。
+     */
+    private static final ErrorReason[] ADDED_AFTER_THE_WHITELIST = { ErrorReason.CONDITION_NOT_MET };
+
+    @Test
+    @DisplayName("ホワイトリスト撤去後に足した定数も、何もせずに表示される")
+    public void test後から足した定数も出る() {
+        for (ErrorReason reason : ADDED_AFTER_THE_WHITELIST) {
+            assertTrue(reason.showsWhenIdle(), reason + " が出ない。既定は「出す」のはず");
+        }
+    }
+
     @Test
     @DisplayName("出さないのは NONE と RUNNING だけ")
     public void test出さないものが二つだけ() {
@@ -144,10 +160,12 @@ public class ErrorReasonDisplayTest {
             boolean classified = HIDDEN.contains(reason) || Arrays.asList(PREVIOUSLY_SHOWN)
                 .contains(reason)
                 || Arrays.asList(PREVIOUSLY_SWALLOWED)
+                    .contains(reason)
+                || Arrays.asList(ADDED_AFTER_THE_WHITELIST)
                     .contains(reason);
             assertTrue(
                 classified,
-                reason + " がどの一覧にも無い。既定では出るので動作は正しいが、" + "出してよいか判断して HIDDEN か PREVIOUSLY_SWALLOWED に分類すること");
+                reason + " がどの一覧にも無い。既定では出るので動作は正しいが、" + "出してよいか判断して HIDDEN か ADDED_AFTER_THE_WHITELIST に分類すること");
         }
     }
 }
