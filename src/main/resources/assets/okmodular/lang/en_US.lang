@@ -310,6 +310,7 @@ gui.port_color.GREEN=§2Green§r
 gui.port_color.RED=§cRed§r
 gui.port_color.BLACK=§8Black§r
 tooltip.okmodular.port_color=§7Painted: %s
+tooltip.okmodular.side_io=§7This side: §b%s
 
 # --- Wrench tooltip --
 tooltip.okmodular.wrench_unlinked=§eNot linked §8- sneak + right-click a controller

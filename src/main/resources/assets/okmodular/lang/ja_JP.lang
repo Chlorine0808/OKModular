@@ -312,6 +312,7 @@ gui.port_color.GREEN=§2緑§r
 gui.port_color.RED=§c赤§r
 gui.port_color.BLACK=§8黒§r
 tooltip.okmodular.port_color=§7塗装: %s
+tooltip.okmodular.side_io=§7この面: §b%s
 
 # --- レンチのツールチップ ---
 tooltip.okmodular.wrench_unlinked=§e未リンク §8- スニーク + 右クリックでコントローラにリンク
