@@ -27,6 +27,8 @@
 | `tierMap` | オブジェクト | 構造体の各パーツが提供する Tier の定義。 |
 | `defaultFacing` | 文字列 | 構造体のデフォルトの向き（`UP`, `DOWN`）。指定がない場合は横向きになります。 |
 | `durationPolicy` | 文字列 | 式で書かれたレシピの `duration` をいつ評価するか（`onStart` / `perTick`、デフォルト: `onStart`）。 |
+| `conditions` | 配列/オブジェクト | **機械そのもの**の稼働条件。満たさない間、どのレシピも動かない（任意）。→ [機械の稼働条件](../machinery/MACHINE_CONDITIONS.md) |
+| `conditionPolicy` | 文字列 | 稼働中に `conditions` が崩れたときの挙動（`pause` / `abort`、デフォルト: `pause`）。 |
 
 ### durationPolicy
 
