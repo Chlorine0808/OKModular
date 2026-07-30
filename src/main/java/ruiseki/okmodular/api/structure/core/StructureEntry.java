@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
@@ -48,6 +49,8 @@ public class StructureEntry implements IStructureEntry {
     private final Set<Character> externalPorts;
     private final Map<Character, EnumIO> fixedExternalPorts;
     private final List<TierStructureRef> tierStructures;
+    private final List<ICondition> conditions;
+    private final ConditionPolicy conditionPolicy;
 
     public StructureEntry(String name, String displayName, List<IStructureLayer> layers,
         Map<Character, ISymbolMapping> mappings, List<IStructureRequirement> requirements, List<String> recipeGroup,
@@ -55,7 +58,7 @@ public class StructureEntry implements IStructureEntry {
         double energyMultiplier, IExpression energyMultiplierExpr, double batchMin, IExpression batchMinExpr,
         double batchMax, IExpression batchMaxExpr, boolean dynamic, DurationPolicy durationPolicy, int tier,
         String defaultFacing, Set<Character> externalPorts, Map<Character, EnumIO> fixedExternalPorts,
-        List<TierStructureRef> tierStructures) {
+        List<TierStructureRef> tierStructures, List<ICondition> conditions, ConditionPolicy conditionPolicy) {
         this.name = name;
         this.displayName = displayName;
         this.layers = Collections.unmodifiableList(new ArrayList<>(layers));
@@ -86,6 +89,9 @@ public class StructureEntry implements IStructureEntry {
             : Collections.emptyMap();
         this.tierStructures = tierStructures != null ? Collections.unmodifiableList(new ArrayList<>(tierStructures))
             : Collections.emptyList();
+        this.conditions = conditions != null ? Collections.unmodifiableList(new ArrayList<>(conditions))
+            : Collections.emptyList();
+        this.conditionPolicy = conditionPolicy != null ? conditionPolicy : ConditionPolicy.PAUSE;
     }
 
     @Override
@@ -215,6 +221,16 @@ public class StructureEntry implements IStructureEntry {
     @Override
     public List<TierStructureRef> getTierStructures() {
         return tierStructures;
+    }
+
+    @Override
+    public List<ICondition> getConditions() {
+        return conditions;
+    }
+
+    @Override
+    public ConditionPolicy getConditionPolicy() {
+        return conditionPolicy;
     }
 
     @Override

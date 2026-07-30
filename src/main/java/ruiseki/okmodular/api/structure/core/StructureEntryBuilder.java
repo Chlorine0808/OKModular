@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
@@ -41,6 +42,8 @@ public class StructureEntryBuilder {
     private int tier = 0;
     private String defaultFacing;
     private final List<TierStructureRef> tierStructures = new ArrayList<>();
+    private final List<ICondition> conditions = new ArrayList<>();
+    private ConditionPolicy conditionPolicy = ConditionPolicy.PAUSE;
 
     public StructureEntryBuilder setName(String name) {
         this.name = name;
@@ -183,6 +186,18 @@ public class StructureEntryBuilder {
         return this;
     }
 
+    /** A condition the machine itself must satisfy to run. Order matters: the first that fails is the one reported. */
+    public StructureEntryBuilder addCondition(ICondition condition) {
+        if (condition != null) this.conditions.add(condition);
+        return this;
+    }
+
+    /** What happens to a running recipe when the conditions stop being met. */
+    public StructureEntryBuilder setConditionPolicy(ConditionPolicy policy) {
+        if (policy != null) this.conditionPolicy = policy;
+        return this;
+    }
+
     public IStructureEntry build() {
         if (name == null) {
             throw new IllegalStateException("Structure name must be set");
@@ -210,6 +225,8 @@ public class StructureEntryBuilder {
             defaultFacing,
             externalPorts,
             fixedExternalPorts,
-            tierStructures);
+            tierStructures,
+            conditions,
+            conditionPolicy);
     }
 }
