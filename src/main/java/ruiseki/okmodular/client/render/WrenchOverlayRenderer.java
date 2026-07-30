@@ -392,14 +392,17 @@ public class WrenchOverlayRenderer {
                 // The kind and the direction both have translations already - the same
                 // ones the wrench's own name and every port GUI use - so the label read
                 // "[ ITEM : INPUT ]" for no reason other than never asking for them.
-                String text = LangHelpers.localize(
-                    fixed ? "overlay.okmodular.wrench_port_fixed" : "overlay.okmodular.wrench_port",
-                    LangHelpers.localize(
-                        "gui.port_type." + typeEntry.getKey()
-                            .name()),
-                    LangHelpers.localize(
-                        typeEntry.getValue()
-                            .getName()));
+                String kind = LangHelpers.localize(
+                    "gui.port_type." + typeEntry.getKey()
+                        .name());
+                String io = LangHelpers.localize(
+                    typeEntry.getValue()
+                        .getName());
+
+                // Written as two calls rather than one with a ternary key, so that both
+                // keys sit as literals where LangKeyCoverageTest can see them.
+                String text = fixed ? LangHelpers.localize("overlay.okmodular.wrench_port_fixed", kind, io)
+                    : LangHelpers.localize("overlay.okmodular.wrench_port", kind, io);
 
                 double d0 = port.posX + 0.5 - px;
                 // Move downward natively (y moves pos when scaled, note normal rendering)
