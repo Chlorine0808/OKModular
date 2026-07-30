@@ -48,6 +48,19 @@ together.
 
 ---
 
+#### [The Wrench](./WRENCH.md)
+The tool that sets a port's per-side IO and registers external blocks as ports.
+
+**Contents**:
+- Every control (side IO, port kind, linking, registering an external port)
+- The 3 × 3 sections and which side each one selects
+- What is highlighted while it is held (green and amber controllers, lines to ports)
+- Reading the tooltip, and what is saved where
+
+**Target Audience**: Players, Modpack Authors
+
+---
+
 ## 💡 New Features Guide
 
 ### Dynamic Amount System (Expression System)
