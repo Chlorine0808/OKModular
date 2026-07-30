@@ -211,6 +211,8 @@ tooltip.okmodular.wand.size=Size: %dx%dx%d
 chat.okmodular.wrench_linked=Wrench linked to Controller at (%d, %d, %d)
 chat.okmodular.wrench_type_selected=Selected port type: %s
 chat.okmodular.wrench_unlinked=Unlinked.
+overlay.okmodular.wrench_port=[ %s : %s ]
+overlay.okmodular.wrench_port_fixed=[ %s : %s - fixed ]
 # --- Fluid Canister ---
 tooltip.holdshift=§7- hold §r§oSHIFT§r§7 for more info§r
 item.fluid_canister.name=Fluid Canister

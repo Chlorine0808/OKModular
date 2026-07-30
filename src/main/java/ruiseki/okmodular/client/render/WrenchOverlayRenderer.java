@@ -18,6 +18,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.modular.IMachineController;
 import ruiseki.okmodular.api.modular.IPortType;
@@ -375,28 +376,30 @@ public class WrenchOverlayRenderer {
             for (Map.Entry<IPortType.Type, EnumIO> typeEntry : entry.getValue()
                 .entrySet()) {
 
-                String fixedSuffix = "";
+                boolean fixed = false;
                 if (fixedPorts != null) {
                     // Find which symbol corresponds to this ChunkCoordinates
                     for (Map.Entry<Character, List<ChunkCoordinates>> symEntry : controller.getSymbolPositionsMap()
                         .entrySet()) {
                         if (symEntry.getValue()
                             .contains(port)) {
-                            if (fixedPorts.containsKey(symEntry.getKey())) {
-                                fixedSuffix = " (Fixed)";
-                            }
+                            fixed = fixedPorts.containsKey(symEntry.getKey());
                             break;
                         }
                     }
                 }
 
-                String text = "[ " + typeEntry.getKey()
-                    .name()
-                    + " : "
-                    + typeEntry.getValue()
-                        .name()
-                    + fixedSuffix
-                    + " ]";
+                // The kind and the direction both have translations already - the same
+                // ones the wrench's own name and every port GUI use - so the label read
+                // "[ ITEM : INPUT ]" for no reason other than never asking for them.
+                String text = LangHelpers.localize(
+                    fixed ? "overlay.okmodular.wrench_port_fixed" : "overlay.okmodular.wrench_port",
+                    LangHelpers.localize(
+                        "gui.port_type." + typeEntry.getKey()
+                            .name()),
+                    LangHelpers.localize(
+                        typeEntry.getValue()
+                            .getName()));
 
                 double d0 = port.posX + 0.5 - px;
                 // Move downward natively (y moves pos when scaled, note normal rendering)

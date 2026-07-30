@@ -209,6 +209,8 @@ tooltip.okmodular.wand.size=サイズ: %dx%dx%d
 chat.okmodular.wrench_linked=レンチをコントローラにリンクしました: (%d, %d, %d)
 chat.okmodular.wrench_type_selected=ポートタイプを選択しました: %s
 chat.okmodular.wrench_unlinked=リンクを解除しました。
+overlay.okmodular.wrench_port=[ %s : %s ]
+overlay.okmodular.wrench_port_fixed=[ %s : %s - 固定 ]
 # --- Fluid Canister ---
 tooltip.holdshift=§7- §r§oSHIFT§r§7キーで詳細を表示§r
 item.fluid_canister.name=流体キャニスター
