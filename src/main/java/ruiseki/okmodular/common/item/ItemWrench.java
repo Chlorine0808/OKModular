@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -285,6 +286,29 @@ public class ItemWrench extends ItemOK implements IToolHammer {
         } else {
             list.add(LangHelpers.localize("tooltip.okmodular.wrench_unlinked"));
         }
+    }
+
+    /**
+     * Where this wrench's linked controller stands, or null when there is nothing
+     * usable to point at.
+     *
+     * <p>
+     * A link in another dimension answers null just as an absent link does. Both mean
+     * "this wrench cannot register a port here", which is the only question a caller
+     * ever has - and the coordinates of a link a dimension away would otherwise name
+     * some unrelated block in this one.
+     *
+     * @param world the world the wrench is being used in, or null to skip the dimension
+     *              check and read the stored position as-is
+     */
+    public static ChunkCoordinates getLinkedController(ItemStack stack, World world) {
+        if (stack == null || !stack.hasTagCompound()) return null;
+
+        NBTTagCompound nbt = stack.getTagCompound();
+        if (!nbt.hasKey("LinkedX")) return null;
+        if (world != null && world.provider.dimensionId != nbt.getInteger("LinkedDim")) return null;
+
+        return new ChunkCoordinates(nbt.getInteger("LinkedX"), nbt.getInteger("LinkedY"), nbt.getInteger("LinkedZ"));
     }
 
     public static IPortType.Type getSelectedPortType(ItemStack stack) {

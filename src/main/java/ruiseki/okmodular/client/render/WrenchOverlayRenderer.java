@@ -8,6 +8,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MovingObjectPosition;
@@ -18,6 +19,7 @@ import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import ruiseki.okmodular.api.enums.EnumIO;
+import ruiseki.okmodular.api.modular.IMachineController;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.common.item.ItemWrench;
@@ -35,51 +37,68 @@ import ruiseki.okmodular.core.tileentity.ISidedIO;
  */
 public class WrenchOverlayRenderer {
 
+    /** The controller this wrench is already linked to. */
+    private static final float LINKED_R = 0.2f, LINKED_G = 1.0f, LINKED_B = 0.45f;
+
+    /** A controller the wrench could link to, being looked at right now. */
+    private static final float TARGET_R = 1.0f, TARGET_G = 0.75f, TARGET_B = 0.1f;
+
+    private static final float BOX_FACE_ALPHA = 0.16f;
+    private static final float BOX_EDGE_ALPHA = 0.9f;
+
     @SubscribeEvent
     public void onRenderWorldLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
         EntityPlayer player = mc.thePlayer;
 
-        if (player == null || mc.objectMouseOver == null) return;
-        if (!(player.getHeldItem() != null && player.getHeldItem()
-            .getItem() instanceof ItemWrench)) return;
+        if (player == null) return;
 
-        // Link external ports rendering
-        if (player.getHeldItem()
-            .hasTagCompound()
-            && player.getHeldItem()
-                .getTagCompound()
-                .hasKey("LinkedX")) {
-            int cx = player.getHeldItem()
-                .getTagCompound()
-                .getInteger("LinkedX");
-            int cy = player.getHeldItem()
-                .getTagCompound()
-                .getInteger("LinkedY");
-            int cz = player.getHeldItem()
-                .getTagCompound()
-                .getInteger("LinkedZ");
-            int cDim = player.getHeldItem()
-                .getTagCompound()
-                .getInteger("LinkedDim");
+        ItemStack held = player.getHeldItem();
+        if (held == null || !(held.getItem() instanceof ItemWrench)) return;
 
-            if (player.worldObj.provider.dimensionId == cDim) {
-                TileEntity cte = player.worldObj.getTileEntity(cx, cy, cz);
-                if (cte instanceof TEMachineController) {
-                    TEMachineController controller = (TEMachineController) cte;
-                    drawLinkedPorts(controller, event.partialTicks, player);
-                }
+        // The linked controller and its ports draw wherever the player is looking, so
+        // this comes before the cursor is consulted at all - the whole point of the
+        // link overlay is to find a machine that is not in front of you.
+        ChunkCoordinates linked = ItemWrench.getLinkedController(held, player.worldObj);
+        if (linked != null) {
+            TileEntity cte = player.worldObj.getTileEntity(linked.posX, linked.posY, linked.posZ);
+            if (cte instanceof TEMachineController controller) {
+                drawBlockHighlight(
+                    linked.posX,
+                    linked.posY,
+                    linked.posZ,
+                    event.partialTicks,
+                    player,
+                    LINKED_R,
+                    LINKED_G,
+                    LINKED_B);
+                drawLinkedPorts(controller, event.partialTicks, player);
             }
         }
 
-        if (mc.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) return;
+        if (mc.objectMouseOver == null || mc.objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK)
+            return;
 
         int x = mc.objectMouseOver.blockX;
         int y = mc.objectMouseOver.blockY;
         int z = mc.objectMouseOver.blockZ;
 
         TileEntity te = player.worldObj.getTileEntity(x, y, z);
-        if (!(te instanceof ISidedIO) || te instanceof TEMachineController) return;
+
+        // A controller is a wrench target too, but not a per-face one: the wrench links
+        // to it rather than toggling its sides, so the nine-section grid below would
+        // promise an interaction that does not exist. It gets the whole block outlined
+        // instead. This used to be an outright exclusion, which is why holding a wrench
+        // showed nothing at all on the one block the wrench needs you to find first.
+        if (te instanceof IMachineController) {
+            boolean isLinkedOne = linked != null && linked.posX == x && linked.posY == y && linked.posZ == z;
+            if (!isLinkedOne) {
+                drawBlockHighlight(x, y, z, event.partialTicks, player, TARGET_R, TARGET_G, TARGET_B);
+            }
+            return;
+        }
+
+        if (!(te instanceof ISidedIO)) return;
 
         ForgeDirection side = ForgeDirection.getOrientation(mc.objectMouseOver.sideHit);
 
@@ -114,6 +133,43 @@ public class WrenchOverlayRenderer {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         GL11.glPopMatrix();
+    }
+
+    /**
+     * Outlines a whole block, drawn through terrain.
+     *
+     * <p>
+     * The depth test is off on purpose. The linked controller can be behind the wall
+     * the player is standing at when they register a port on the far side of a machine,
+     * and an outline that only shows when the block is already visible would be exactly
+     * as useful as no outline at that moment.
+     */
+    private static void drawBlockHighlight(int x, int y, int z, float partialTicks, EntityPlayer player, float r,
+        float g, float b) {
+        double px = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
+        double py = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
+        double pz = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
+
+        // Outset so the outline sits clear of the block's own faces rather than fighting
+        // them, the same reason the face outlines above carry one.
+        double o = 0.01;
+        double minX = x - o - px;
+        double minY = y - o - py;
+        double minZ = z - o - pz;
+        double maxX = x + 1 + o - px;
+        double maxY = y + 1 + o - py;
+        double maxZ = z + 1 + o - pz;
+
+        OverlayShapes.beginOverlay(false);
+
+        GL11.glColor4f(r, g, b, BOX_FACE_ALPHA);
+        OverlayShapes.drawBoxFaces(minX, minY, minZ, maxX, maxY, maxZ);
+
+        GL11.glLineWidth(3.0f);
+        GL11.glColor4f(r, g, b, BOX_EDGE_ALPHA);
+        OverlayShapes.drawBoxEdges(minX, minY, minZ, maxX, maxY, maxZ);
+
+        OverlayShapes.endOverlay();
     }
 
     private static void drawFaceOutline(int x, int y, int z, ForgeDirection side) {
