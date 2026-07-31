@@ -173,6 +173,11 @@ Performance multipliers provided by the structure definition.
 ### Advanced Functions
 - `can_see_sky(filter...)`: Check sky visibility. Specify IDs to treat blocks like glass as transparent
 - `can_see_void(filter...)`: Check if there is void directly below
+
+> [!NOTE]
+> **Both also work without the brackets**, as the world properties listed above -
+> `can_see_sky == 1`. The bare form is the plain test; reach for the function form only when
+> you need to name blocks to see through.
 - `count_blocks(distance, filter...)`: Count specific blocks within a range
     - Example: `count_blocks(1, "minecraft:iron_block")`
 - `nbt('key')`: Retrieve NBT from the machine itself
