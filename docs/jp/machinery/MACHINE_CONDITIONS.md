@@ -71,7 +71,7 @@
 
 ## 3. Tips
 
-エラーがある場合は `/ok multiblock reload` の際にログがでます。
+エラーがある場合は `/okmodular reload` の際にログがでます。
 
 ### 条件文の言語はサーバ側で決まる
 

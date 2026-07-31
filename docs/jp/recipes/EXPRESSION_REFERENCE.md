@@ -34,7 +34,7 @@ OmoshiroiKamo の式パーサー (`ExpressionParser`) で使用できる変数�
 - `day` / `total_days`: 累積経過日数
 - `time`: 現在の時刻 (0 - 23999)
 - `tick`: ワールドの総経過時間 (Total World Time の生の tick 値)
-- `moon` / `moon_phase`: 現在の月齢 (0 - 7、0 = 満月、7 = 新月)
+- `moon` / `moon_phase`: 現在の月齢 (0 - 7、0 = 満月、4 = 新月)
 
 #### 座標・ディメンション
 - `x` / `y` / `z`: コントローラーの座標
