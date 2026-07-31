@@ -6,31 +6,15 @@ Modular Machineryモジュールの技術ドキュメント一覧です。
 
 ### システム設計
 
-#### [External Port Proxy システム](./EXTERNAL_PROXY.md)
-外部ブロック（チェスト、タンク、エネルギーストレージ等）を機械の一部として統合するためのプロキシシステムの設計ドキュメント。
-
-**内容**:
-- Adapter + Proxy パターンの融合設計
-- 6タイプのプロキシ実装（Item, Fluid, Energy, Gas, Essentia, Mana）
-- AbstractExternalProxy 基底クラスの詳細
-- Self-Validation Pattern との統合
-- プロキシファクトリの登録方法
-- コード例と使用例
-
-**対象読者**: 開発者、デザインパターン学習者
-
----
-
 #### [機械の稼働条件](./MACHINE_CONDITIONS.md)
 構造定義に条件を書いて、レシピに関係なく機械そのものを止める仕組み。
 
 **内容**:
-- レシピの条件との違い（別々に効く）
+- レシピ条件との違い
 - 書き方（配列 / 単体、式で機械の状態を見る）
 - 稼働中に条件が崩れたとき（`pause` / `abort`）と、`abort` が材料を返さないこと
-- 綴りを間違えた条件は門を「緩める」
 
-**対象読者**: 構造定義を書く人
+**対象者**: オリジナルマシンを作りたい人
 
 ---
 
@@ -38,32 +22,17 @@ Modular Machineryモジュールの技術ドキュメント一覧です。
 機械のポートを色で塗り分け、同じ色のポートだけを 1 つのまとまりとして扱う仕組み。
 
 **内容**:
-- 塗り方（染料 / AE2 の Color Applicator）
-- どのポートがどのまとまりに入るか（5 つの規則）
-- 塗っていないポートが全色から共有される理由と、その代償
-- レシピの選ばれ方（出力が塞がったまとまりは飛ばす）
+- 塗り方
+- レシピの選ばれ方・実行順
 
-**対象読者**: プレイヤー、Modpack 製作者
+**対象者**: Player、Modpacker
 
 ---
 
-#### [レンチ](./WRENCH.md)
-ポートの面ごとの IO と、外部ブロックのポート登録を設定する道具。
-
-**内容**:
-- 操作の一覧（面の IO / ポート種別の切り替え / リンク / 外部ポートの登録）
-- 3 × 3 の区画とどの面が選ばれるかの対応
-- 持っている間のハイライト（コントローラの緑と橙、外部ポートへの線）
-- ツールチップの読み方と、何がどこに保存されるか
-
-**対象読者**: プレイヤー、Modpack 製作者
-
----
-
-## 💡 新機能ガイド
+## 機能ガイド
 
 ### 動的数量システム (Expression System)
-レシピの入出力量を動的に変化させるための式システム。マシンの状態やワールド環境に応じて、柔軟なレシピ設計が可能になります。
+レシピの入出力量を動的に変化させるための式システム。マシンの状態やワールド環境に応じた、柔軟なレシピ設計を可能にする。
 
 **主な機能**:
 - **マシン状態の参照**: エネルギー、流体、マナ、ガス、Tier、進捗など
@@ -75,7 +44,7 @@ Modular Machineryモジュールの技術ドキュメント一覧です。
 ```json
 {
   "inputs": [
-    { "item": "minecraft:iron_ingot", "amount": "tier * 10 + 5" }
+    { "item": "minecraft:coal", "amount": "tier * 10 + 5" }
   ],
   "outputs": [
     { "fluid": "steam", "amount": "energy_p * 1000" }
@@ -84,25 +53,25 @@ Modular Machineryモジュールの技術ドキュメント一覧です。
 ```
 
 **関連ドキュメント**:
-- [JSON フォーマット: 動的数量](../recipes/JSON_FORMAT.md#31-動的数量-dynamic-amount) - 基本的な使い方
-- [実用例集](../recipes/EXPRESSION_EXAMPLES.md) - パターン別の詳細な使用例
+- [JSON フォーマット: 動的数量](../recipes/JSON_FORMAT.md#31-動的数量) - 基本的な使い方
+- [式パーサー リファレンス](../recipes/EXPRESSION_REFERENCE.md) - 変数・関数のリスト
+- [実用例集](../recipes/EXPRESSION_EXAMPLES.md) - パターン別の使用例
 
-**対象読者**: レシピ作成者、Modpack 製作者
+**対象者**: オリジナルマシンを作りたい人
 
 ---
 
 ## 🔗 関連ドキュメント
 
 ### Recipe System
-- [概要](../recipes/OVERVIEW.md)
 - [JSON フォーマット](../recipes/JSON_FORMAT.md)
-- [実用例集](../recipes/EXPRESSION_EXAMPLES.md) 🆕
-- [開発者ガイド](../recipes/DEVELOPER_GUIDE.md)
+- [条件 (Conditions)](../recipes/CONDITIONS.md)
+- [デコレータ (Decorators)](../recipes/DECORATORS.md)
+- [式パーサー リファレンス](../recipes/EXPRESSION_REFERENCE.md)
+- [実用例集](../recipes/EXPRESSION_EXAMPLES.md)
 
 ### Structure System
-- [概要](../structures/OVERVIEW.md)
 - [JSON フォーマット](../structures/JSON_FORMAT.md)
-- [開発者ガイド](../structures/DEVELOPER_GUIDE.md)
 
 ---
 
