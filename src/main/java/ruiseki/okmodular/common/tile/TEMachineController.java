@@ -67,6 +67,7 @@ import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 import ruiseki.okmodular.core.tileentity.AbstractMBModifierTE;
 import ruiseki.okmodular.structure.StructureManager;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Corresponds to the 'Q' symbol in structure definitions.
@@ -150,6 +151,10 @@ public class TEMachineController extends AbstractMBModifierTE
     private PortColor activeRecipeColor = PortColor.NONE;
 
     private final MachineStateAgent machineStateAgent = new MachineStateAgent(this);
+
+    // Performance modifiers from the structure definition, and the guard that keeps a
+    // self-referencing expression from recursing back into the getters below.
+    private final MachineModifiers modifiers = new MachineModifiers(this::reportModifierCycle);
 
     // External Port Configurations
     private final Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> externalPortConfigs = new HashMap<>();
@@ -427,48 +432,42 @@ public class TEMachineController extends AbstractMBModifierTE
         return 1200;
     }
 
+    /**
+     * The performance modifiers the structure definition gives this machine.
+     * <p>
+     * Each of these used to build its own bare {@link ConditionContext}, which answers zero
+     * for every machine property - {@code "speedMultiplier": "tier"} evaluated to zero with
+     * no exception and no log. They take {@link #getConditionContext()} instead, and go
+     * through {@link MachineModifiers} so that a definition reading the value it defines
+     * ({@code "speedMultiplier": "speed_multi * 2"}) stops rather than recursing forever.
+     * The context is passed as a supplier and never built when the machine has no structure;
+     * {@code speedMultiplier} is read every tick.
+     */
     @Override
     public double getSpeedMultiplier() {
-        if (worldObj == null || !isFormed) return 1.0;
-        String name = getCustomStructureName();
-        if (name == null) return 1.0;
-        IStructureEntry entry = StructureManager.getInstance()
-            .getCustomStructure(name);
-        if (entry == null) return 1.0;
-        return entry.evaluateSpeedMultiplier(new ConditionContext(worldObj, xCoord, yCoord, zCoord));
+        return modifiers.speedMultiplier(getStructureEntry(), this::getConditionContext);
     }
 
     @Override
     public double getEnergyMultiplier() {
-        if (worldObj == null || !isFormed) return 1.0;
-        String name = getCustomStructureName();
-        if (name == null) return 1.0;
-        IStructureEntry entry = StructureManager.getInstance()
-            .getCustomStructure(name);
-        if (entry == null) return 1.0;
-        return entry.evaluateEnergyMultiplier(new ConditionContext(worldObj, xCoord, yCoord, zCoord));
+        return modifiers.energyMultiplier(getStructureEntry(), this::getConditionContext);
     }
 
     @Override
     public int getBatchMin() {
-        if (worldObj == null || !isFormed) return 1;
-        String name = getCustomStructureName();
-        if (name == null) return 1;
-        IStructureEntry entry = StructureManager.getInstance()
-            .getCustomStructure(name);
-        if (entry == null) return 1;
-        return entry.evaluateBatchMin(new ConditionContext(worldObj, xCoord, yCoord, zCoord));
+        return modifiers.batchMin(getStructureEntry(), this::getConditionContext);
     }
 
     @Override
     public int getBatchMax() {
-        if (worldObj == null || !isFormed) return 1;
-        String name = getCustomStructureName();
-        if (name == null) return 1;
-        IStructureEntry entry = StructureManager.getInstance()
-            .getCustomStructure(name);
-        if (entry == null) return 1;
-        return entry.evaluateBatchMax(new ConditionContext(worldObj, xCoord, yCoord, zCoord));
+        return modifiers.batchMax(getStructureEntry(), this::getConditionContext);
+    }
+
+    private void reportModifierCycle(MachineModifiers.Modifier modifier) {
+        Logger.error(
+            "Structure '{}' defines a cyclic {}: the expression reads the value it defines. Using the neutral value.",
+            getCustomStructureName(),
+            modifier.getJsonKey());
     }
 
     @Override
@@ -520,6 +519,8 @@ public class TEMachineController extends AbstractMBModifierTE
             setFormed(false);
             clearStructureParts();
             processAgent.abort();
+            // A cycle already reported belonged to the previous definition.
+            modifiers.reset();
             markDirty();
 
             if (blueprintName != null && !blueprintName.isEmpty()) {
