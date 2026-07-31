@@ -261,8 +261,8 @@ gui.port_type.FLUID=液体
 gui.port_type.ENERGY=エネルギー
 gui.port_type.MANA=マナ
 gui.port_type.GAS=ガス
-gui.port_type.ESSENTIA=エッセンチア
-gui.port_type.VIS=ヴィス
+gui.port_type.ESSENTIA=エッセンシア
+gui.port_type.VIS=ビス
 gui.port_type.BLOCK=ブロック
 gui.port_type.NONE=なし
 
@@ -282,7 +282,7 @@ gui.craftingState.error=エラー
 # --- Recipe conditions ---
 okmodular.condition.biome.base=バイオーム条件
 okmodular.condition.block=必要なブロック: %s
-okmodular.condition.block_below=直下に必要なブロック: %s
+okmodular.condition.block_below=真下に必要なブロック: %s
 okmodular.condition.dimension=許可されるディメンション: %s
 okmodular.condition.weather.CLEAR=晴天が必要です
 okmodular.condition.weather.RAIN=降雨が必要です
@@ -291,6 +291,7 @@ okmodular.condition.weather.THUNDER=雷雨が必要です
 # --- en_US only until now ---
 tooltip.machinery.deprecated=§e[非推奨]
 tooltip.machinery.deprecated.hint=§7このブロックは旧システムを使用しています。
+
 # --- ポートの色---
 chat.okmodular.port_color_set=ポートを %s に塗りました
 chat.okmodular.port_color_cleared=ポートの色を落としました
@@ -327,7 +328,7 @@ gui.status.no_energy=エネルギーが足りません
 gui.status.input_missing=入力が足りません
 gui.status.no_matching_recipe=一致するレシピがありません
 gui.status.waiting_output=出力先の空きを待っています
-gui.status.no_input=入力資源がありません
+gui.status.no_input=入力がありません
 gui.status.paused=レッドストーン信号で停止中
 gui.status.missing_blueprint=ブループリントがありません
 gui.status.output_capacity_insufficient=出力容量が足りません: %s
