@@ -19,6 +19,13 @@ public class OffsetCondition implements ICondition {
         this.dz = dz;
     }
 
+    /**
+     * Evaluates the inner condition with the position moved and <b>nothing else changed</b>.
+     * <p>
+     * The evaluation seed has to be carried across or it defaults to zero, and
+     * {@code random()} and {@code chance()} seed off it: {@code chance(0.5)} inside an offset
+     * would then be false for every machine on every tick rather than half the time.
+     */
     @Override
     public boolean isMet(ConditionContext context) {
         ConditionContext offsetContext = new ConditionContext(
@@ -26,7 +33,8 @@ public class OffsetCondition implements ICondition {
             context.getX() + dx,
             context.getY() + dy,
             context.getZ() + dz,
-            context.getRecipeContext());
+            context.getRecipeContext(),
+            context.getEvaluationSeed());
         return condition.isMet(offsetContext);
     }
 
