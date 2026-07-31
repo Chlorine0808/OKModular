@@ -608,11 +608,19 @@ public class TEMachineController extends AbstractMBModifierTE
      * Process recipe using ProcessAgent.
      * Searches for the next recipe during current recipe processing,
      * enabling zero-tick delay between recipe completions.
+     * <p>
+     * Both paths below build their context with {@link #getConditionContext()}, the same way
+     * {@link #startNextRecipe()} always has. A bare context answers zero for every machine
+     * property and carries no evaluation seed, so with one of those an {@code "amount"} of
+     * {@code "1 + tier"} produced 1 and {@code chance()} returned the same answer on every
+     * machine forever. One instance per path, reused for the whole of it: its result cache
+     * is what makes the machine's state a single snapshot rather than something that shifts
+     * between the per-tick inputs and the outputs that follow them.
      */
     private void processRecipe() {
         // Try to output if waiting
         if (processAgent.isWaitingForOutput()) {
-            ConditionContext context = new ConditionContext(worldObj, xCoord, yCoord, zCoord);
+            ConditionContext context = getConditionContext();
             // Same colour the recipe started in. This path passes getOutputPorts()
             // rather than the contextual list, as it always has.
             List<IModularPort> waitingOutputs = PortColorGrouping.select(getOutputPorts(), activeRecipeColor);
@@ -634,7 +642,7 @@ public class TEMachineController extends AbstractMBModifierTE
 
         // If running, tick and look-ahead search for next recipe
         if (processAgent.isRunning()) {
-            ConditionContext context = new ConditionContext(worldObj, xCoord, yCoord, zCoord);
+            ConditionContext context = getConditionContext();
             ProcessAgent.TickResult result = processAgent.tick(activeInputPorts(), activeOutputPorts(), context);
 
             if (result == ProcessAgent.TickResult.NO_ENERGY) {
