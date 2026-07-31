@@ -6,6 +6,8 @@ These can be used in the `amount` field of JSON recipes, the `expression` key in
 ## 📚 Related Documentation
 
 - [JSON Format](./JSON_FORMAT.md) - Basic JSON syntax
+- [Conditions](./CONDITIONS.md) - writing an `expression` condition
+- [Decorators](./DECORATORS.md) - passing an expression to `chance` and the like
 - [Practical Examples](./EXPRESSION_EXAMPLES.md) - Real-world recipe patterns
 
 ---
@@ -60,7 +62,7 @@ Retrieve information about the world where the machine is located.
 #### Miscellaneous
 - `redstone`: Redstone signal strength received by the controller (0 - 15)
 - `random_seed`: Seed value for the recipe evaluation session (used for reproducible `random()` / `chance()`)
-- `world_seed`: Seed of the world generation
+- `world_seed`: Seed of the world
 - `facing`: Direction the machine is facing (0:Down, 1:Up, 2:North, 3:South, 4:West, 5:East)
 
 ### Constants
@@ -85,7 +87,7 @@ of a kind.
 | `K_f` / `K_free` / `K_space` | Room left |
 | `K_p` / `K_percent` | Fill ratio (0.0 - 1.0) |
 
-`gas_stored`, `total_vis` and `essentia_percent` are all just this table applied.
+That gives names like `gas_stored`, `total_vis` and `essentia_percent`.
 
 Kinds whose input and output are **separate storage** (`item`, `fluid`, `gas`) also
 have directional names.
@@ -101,9 +103,8 @@ be the total.
 
 ### Asking about one specific resource
 
-To ask about a particular fluid, gas, aspect or item rather than the kind as a
-whole, pass one argument to the same name. Exactly one argument is required;
-more or fewer is an error.
+To ask about a particular fluid, gas, aspect or item rather than the kind as a whole, pass one argument to the same name.
+Exactly one argument is required; more or fewer is an error.
 
 ```
 fluid("water")        item("minecraft:stone")     essentia("ignis")
@@ -121,17 +122,14 @@ means something where the kind holds more than one:
 | `essentia` / `vis` | `K` only |
 | `energy` / `mana` | none - a single pool of one thing has nothing to name |
 
-### Notes per kind
+### Notes
 
 - **Energy**: `power` and `power_p` are aliases of `energy` and `energy_p`.
-  `energy_per_tick` is the energy drawn per tick (the total of the running
-  recipe's `perTick` inputs), which is not an amount held and so is not in the
-  table above.
+  `energy_per_tick` is the energy drawn per tick (the total of the running recipe's `perTick` inputs), which is not an amount held and so is not in the table above.
 - **Items**: capacity is expressed as slots * 64. `item_f` is not that capacity
   minus the count, though - it is **how many actually fit**, since stack limits
   differ per item and the subtraction would not match reality.
-- **Item slots**: `item_slot()` total slots, `item_slot_in()` / `item_slot_out()`
-  per direction, `item_slot_empty()` empty slots.
+- **Item slots**: `item_slot()` total slots, `item_slot_in()` / `item_slot_out()` per direction, `item_slot_empty()` empty slots.
 
 > [!NOTE]
 > **Directional room is not the shared capacity minus what is held.**
@@ -139,25 +137,23 @@ means something where the kind holds more than one:
 > for the input tanks only. `fluid_f`, with no direction, is capacity minus held.
 
 ### Statistics & State
-- `recipe_count`: Cumulative number of recipes processed by the machine.
-- `progress` / `progress_percent`: Current recipe progress (0.0 ~ 1.0).
-- `tier`: Current machine Tier.
-- `is_running`: Whether the machine is running (1 or 0).
-- `timeplaced`: Cumulative time since the machine was placed (ticks).
-- `timecontinue`: Continuous uptime of the machine (ticks).
+- `recipe_count`: Cumulative number of recipes processed by the machine
+- `progress` / `progress_percent`: Current recipe progress (0.0 ~ 1.0)
+- `tier`: Current machine Tier
+- `is_running`: Whether the machine is running (1 or 0)
+- `timeplaced`: Cumulative time since the machine was placed (ticks)
+- `timecontinue`: Continuous uptime of the machine (ticks)
 
 ### Structural Properties
 Performance multipliers provided by the structure definition.
 
-- `batch`: Current batch size.
-- `speed_multi`: Speed multiplier.
-- `energy_multi`: Energy multiplier.
+- `batch`: Current batch size
+- `speed_multi`: Speed multiplier
+- `energy_multi`: Energy multiplier
 
 > [!NOTE]
-> **The batch size is applied to amounts for you.** An amount written as an expression,
-> such as `"amount": "2 + tier"`, is tripled when the machine runs a batch of three.
-> Do not multiply by `batch` inside the expression — that applies it twice. The `batch`
-> variable is for when the batch size itself is what you want to reason about.
+> **The batch size is applied to amounts for you.** An amount written as an expression, such as `"amount": "2 + tier"`, is tripled when the machine runs a batch of three. Do not multiply by `batch` inside the expression — that applies it twice.
+> The `batch` variable is for when the batch size itself is what you want to reason about.
 
 ---
 
@@ -174,14 +170,14 @@ Performance multipliers provided by the structure definition.
 - `random()`: Random number between 0 and 1
 - `chance(x)`: Returns 1 or 0 based on probability `x` (0.0 - 1.0)
 
-### Advanced Queries
-- `can_see_sky(filter...)`: Check sky visibility. Specify IDs to treat blocks like glass as transparent.
-- `can_see_void(filter...)`: Check if there is void directly below.
-- `count_blocks(distance, filter...)`: Count specific blocks within a range.
+### Advanced Functions
+- `can_see_sky(filter...)`: Check sky visibility. Specify IDs to treat blocks like glass as transparent
+- `can_see_void(filter...)`: Check if there is void directly below
+- `count_blocks(distance, filter...)`: Count specific blocks within a range
     - Example: `count_blocks(1, "minecraft:iron_block")`
-- `nbt('key')`: Retrieve NBT from the machine itself.
-- `nbt('symbol', 'key')`: Retrieve NBT from a block at a specific symbol position.
-- `has_nbt('key')` / `has_nbt('symbol', 'key')`: Whether the key **exists**, rather than what it holds.
+- `nbt('key')`: Retrieve NBT from the machine itself
+- `nbt('symbol', 'key')`: Retrieve NBT from a block at a specific symbol position
+- `has_nbt('key')` / `has_nbt('symbol', 'key')`: Whether the NBT key exists
 
 ### All NBT access goes through `nbt(...)`
 
@@ -194,15 +190,6 @@ nbt('display.Name')          a nested path on the machine itself
 nbt('S', 'stored_energy')    the TileEntity at structure symbol S
 nbt('S', 'a.b.c')            a nested path on that TileEntity
 ```
-
-> [!WARNING]
-> **Bare dot notation — writing `display.Name` as an expression on its own — has
-> been removed.** It could not express any target other than the machine itself,
-> and worse, `S.energy` was indistinguishable from "the `energy` inside my own `S`
-> tag". Writing one now raises an error naming the `nbt('...')` replacement.
->
-> **`tier.glass` and other `tier.` names still work** — those are component tiers,
-> not NBT.
 
 #### Writing (assignment)
 
@@ -244,7 +231,7 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 
 | Field | Evaluated |
 |-------|-----------|
-| `duration` | **Once, when the recipe starts** (every tick if the structure sets `"durationPolicy": "perTick"`) |
+| `duration` | When the recipe starts (every tick while running if the structure sets `"durationPolicy": "perTick"`) |
 | `amount` on inputs and outputs | Each time it is consumed or produced |
 | Resource amounts such as `energy` and `mana` | As above |
 | A decorator's `chance` | When it is rolled |
@@ -254,9 +241,13 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 - **Quotes in JSON**: Expressions themselves must be strings in JSON, e.g., `"amount": "tier * 2"`.
 - **Case Sensitivity**: Variable names are all **lowercase** (e.g., `tier`, not `Tier`).
 - **Characters**: Do not use full-width or non-standard characters for operators or variable names.
+- **Division by zero**: an expression dividing by a fill ratio or a stored amount divides by zero when empty.
+  Check the denominator first, as in `energy_p > 0 ? floor(1000 / energy_p) : 0`.
 - **Putting `speed_multi` in `duration`**: the engine applies the speed multiplier every
   tick, so writing it here applies it **twice**. A duration is a work amount, not a time.
   Energy is the reverse: writing `energy_multi` into `energy` is the correct route.
+
+Errors from a failed expression parse appear in `logs/latest.log`.
 
 ### How this looks in NEI
 

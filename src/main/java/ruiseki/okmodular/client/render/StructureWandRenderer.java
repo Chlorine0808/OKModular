@@ -1,7 +1,6 @@
 package ruiseki.okmodular.client.render;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChunkCoordinates;
@@ -109,11 +108,11 @@ public class StructureWandRenderer {
         double maxY = pos.posY + 1 - py;
         double maxZ = pos.posZ + 1 - pz;
 
-        beginOverlay();
+        OverlayShapes.beginOverlay(false);
         GL11.glLineWidth(3.0f);
         GL11.glColor4f(r, g, b, COLOR_A_EDGE);
-        drawBoxEdges(minX, minY, minZ, maxX, maxY, maxZ);
-        endOverlay();
+        OverlayShapes.drawBoxEdges(minX, minY, minZ, maxX, maxY, maxZ);
+        OverlayShapes.endOverlay();
     }
 
     private static void renderBox(ChunkCoordinates pos1, ChunkCoordinates pos2, float partialTicks, EntityPlayer player,
@@ -130,129 +129,16 @@ public class StructureWandRenderer {
         double maxY = Math.max(pos1.posY, pos2.posY) + 1 - py;
         double maxZ = Math.max(pos1.posZ, pos2.posZ) + 1 - pz;
 
-        beginOverlay();
+        OverlayShapes.beginOverlay(false);
 
         GL11.glColor4f(r, g, b, faceAlpha);
-        drawBoxFaces(minX, minY, minZ, maxX, maxY, maxZ);
+        OverlayShapes.drawBoxFaces(minX, minY, minZ, maxX, maxY, maxZ);
 
         GL11.glLineWidth(2.0f);
         GL11.glColor4f(r, g, b, edgeAlpha);
-        drawBoxEdges(minX, minY, minZ, maxX, maxY, maxZ);
+        OverlayShapes.drawBoxEdges(minX, minY, minZ, maxX, maxY, maxZ);
 
-        endOverlay();
+        OverlayShapes.endOverlay();
     }
 
-    private static void beginOverlay() {
-        GL11.glPushMatrix();
-        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL11.GL_LIGHTING);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
-    }
-
-    private static void endOverlay() {
-        GL11.glPopAttrib();
-        GL11.glPopMatrix();
-    }
-
-    private static void drawBoxFaces(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-        Tessellator tessellator = Tessellator.instance;
-
-        // Bottom
-        tessellator.startDrawingQuads();
-        tessellator.addVertex(minX, minY, minZ);
-        tessellator.addVertex(maxX, minY, minZ);
-        tessellator.addVertex(maxX, minY, maxZ);
-        tessellator.addVertex(minX, minY, maxZ);
-        tessellator.draw();
-
-        // Top
-        tessellator.startDrawingQuads();
-        tessellator.addVertex(minX, maxY, minZ);
-        tessellator.addVertex(minX, maxY, maxZ);
-        tessellator.addVertex(maxX, maxY, maxZ);
-        tessellator.addVertex(maxX, maxY, minZ);
-        tessellator.draw();
-
-        // North (-Z)
-        tessellator.startDrawingQuads();
-        tessellator.addVertex(minX, minY, minZ);
-        tessellator.addVertex(minX, maxY, minZ);
-        tessellator.addVertex(maxX, maxY, minZ);
-        tessellator.addVertex(maxX, minY, minZ);
-        tessellator.draw();
-
-        // South (+Z)
-        tessellator.startDrawingQuads();
-        tessellator.addVertex(minX, minY, maxZ);
-        tessellator.addVertex(maxX, minY, maxZ);
-        tessellator.addVertex(maxX, maxY, maxZ);
-        tessellator.addVertex(minX, maxY, maxZ);
-        tessellator.draw();
-
-        // West (-X)
-        tessellator.startDrawingQuads();
-        tessellator.addVertex(minX, minY, minZ);
-        tessellator.addVertex(minX, minY, maxZ);
-        tessellator.addVertex(minX, maxY, maxZ);
-        tessellator.addVertex(minX, maxY, minZ);
-        tessellator.draw();
-
-        // East (+X)
-        tessellator.startDrawingQuads();
-        tessellator.addVertex(maxX, minY, minZ);
-        tessellator.addVertex(maxX, maxY, minZ);
-        tessellator.addVertex(maxX, maxY, maxZ);
-        tessellator.addVertex(maxX, minY, maxZ);
-        tessellator.draw();
-    }
-
-    private static void drawBoxEdges(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawing(GL11.GL_LINES);
-
-        // Bottom edges
-        tessellator.addVertex(minX, minY, minZ);
-        tessellator.addVertex(maxX, minY, minZ);
-
-        tessellator.addVertex(maxX, minY, minZ);
-        tessellator.addVertex(maxX, minY, maxZ);
-
-        tessellator.addVertex(maxX, minY, maxZ);
-        tessellator.addVertex(minX, minY, maxZ);
-
-        tessellator.addVertex(minX, minY, maxZ);
-        tessellator.addVertex(minX, minY, minZ);
-
-        // Top edges
-        tessellator.addVertex(minX, maxY, minZ);
-        tessellator.addVertex(maxX, maxY, minZ);
-
-        tessellator.addVertex(maxX, maxY, minZ);
-        tessellator.addVertex(maxX, maxY, maxZ);
-
-        tessellator.addVertex(maxX, maxY, maxZ);
-        tessellator.addVertex(minX, maxY, maxZ);
-
-        tessellator.addVertex(minX, maxY, maxZ);
-        tessellator.addVertex(minX, maxY, minZ);
-
-        // Vertical edges
-        tessellator.addVertex(minX, minY, minZ);
-        tessellator.addVertex(minX, maxY, minZ);
-
-        tessellator.addVertex(maxX, minY, minZ);
-        tessellator.addVertex(maxX, maxY, minZ);
-
-        tessellator.addVertex(maxX, minY, maxZ);
-        tessellator.addVertex(maxX, maxY, maxZ);
-
-        tessellator.addVertex(minX, minY, maxZ);
-        tessellator.addVertex(minX, maxY, maxZ);
-
-        tessellator.draw();
-    }
 }

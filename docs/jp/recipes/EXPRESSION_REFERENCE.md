@@ -6,6 +6,8 @@ OmoshiroiKamo の式パーサー (`ExpressionParser`) で使用できる変数�
 ## 📚 関連ドキュメント
 
 - [JSON フォーマット](./JSON_FORMAT.md) - 基本的な JSON 構文
+- [条件 (Conditions)](./CONDITIONS.md) - `expression` 条件の書き方
+- [デコレータ (Decorators)](./DECORATORS.md) - `chance` などに式を渡す
 - [実用例集](./EXPRESSION_EXAMPLES.md) - 実践的なレシピ例
 
 ---
@@ -60,7 +62,7 @@ OmoshiroiKamo の式パーサー (`ExpressionParser`) で使用できる変数�
 #### その他
 - `redstone`: コントローラーが受けているレッドストーン信号強度 (0 - 15)
 - `random_seed`: レシピ評価セッションのシード値（`random()` / `chance()` の再現性に使用）
-- `world_seed`: ワールド生成時のシード値
+- `world_seed`: ワールドのシード値
 - `facing`: マシンの向き (0:下, 1:上, 2:北, 3:南, 4:西, 5:東)
 
 ### 定数
@@ -84,7 +86,7 @@ OmoshiroiKamo の式パーサー (`ExpressionParser`) で使用できる変数�
 | `K_f` / `K_free` / `K_space` | 空き |
 | `K_p` / `K_percent` | 充填率 (0.0 〜 1.0) |
 
-たとえば `gas_stored` `total_vis` `essentia_percent` はすべてこの表から導かれる名前です。
+たとえば `gas_stored` `total_vis` `essentia_percent` のような形になります。
 
 **搬入側と搬出側が別の格納になる資源種**（`item` / `fluid` / `gas`）は、さらに方向つきの名前を持ちます。
 
@@ -98,8 +100,8 @@ OmoshiroiKamo の式パーサー (`ExpressionParser`) で使用できる変数�
 
 ### 種類を指定する関数
 
-量を「その資源種の合計」ではなく「特定の流体・ガス・アスペクト・アイテム」で知りたい場合は、
-同じ名前に引数を 1 つ渡します。引数は必ず 1 つで、多くても少なくてもエラーになります。
+量を「その資源種の合計」ではなく「特定の流体・ガス・アスペクト・アイテム」で知りたい場合は、同じ名前に引数を 1 つ渡します。
+引数は必ず 1 つで、多くても少なくてもエラーになります。
 
 ```
 fluid("water")        item("minecraft:stone")     essentia("ignis")
@@ -117,41 +119,38 @@ fluid_f_out("lava")   item_f_in("minecraft:coal")
 | `essentia` / `vis` | `K` のみ |
 | `energy` / `mana` | なし（単一の種類の単一プールなので名指しする対象が無い） |
 
-### 資源種ごとの補足
+### 補足
 
 - **エネルギー**: `power` / `power_p` は `energy` / `energy_p` の別名です。
-  `energy_per_tick` は 1 ティックあたりのエネルギー消費量（稼働中の `perTick` 入力の合計）で、
-  保持量ではないので上の表には含まれません。
+  `energy_per_tick` は 1 ティックあたりのエネルギー消費量（稼働中の `perTick` 入力の合計）で、保持量ではないので上の表には含まれません。
 - **アイテム**: 容量は「スロット数 × 64」で表されます。
   ただし `item_f` は容量から引いた値ではなく**実際に入る個数**です
   （スタック上限が種類ごとに違うため、引き算では実態と合いません）。
-- **アイテムのスロット情報**: `item_slot()` 合計スロット数 /
-  `item_slot_in()` `item_slot_out()` 方向ごとのスロット数 / `item_slot_empty()` 空きスロット数。
+- **アイテムのスロット情報**: `item_slot()` 合計スロット数 / `item_slot_in()` `item_slot_out()` 方向ごとのスロット数 / `item_slot_empty()` 空きスロット数。
 
 > [!NOTE]
 > **方向を指定した空きは、共有容量からの引き算ではありません。**
-> 流体とガスは搬入タンクと搬出タンクが別物なので、`fluid_f_in` は搬入タンクの空きだけを答えます。
+> 液体とガスは搬入タンクと搬出タンクが別物なので、`fluid_f_in` は搬入タンクの空きだけを答えます。
 > 一方 `fluid_f`（方向なし）は「容量 - 保持量」です。
 
 ### 統計・状態
-- `recipe_count`: マシンが処理したレシピの累計回数。
-- `progress` / `progress_percent`: 現在のレシピの進行度 (0.0 ~ 1.0)。
-- `tier`: マシンの現在の Tier。
-- `is_running`: マシンが動作中であるか (1 or 0)。
-- `timeplaced`: マシンが設置されてからの累積時間 (ticks)。
-- `timecontinue`: マシンが連続稼働している時間 (ticks)。
+- `recipe_count`: マシンが処理したレシピの累計回数
+- `progress` / `progress_percent`: 現在のレシピの進行度 (0.0 ~ 1.0)
+- `tier`: マシンの現在の Tier
+- `is_running`: マシンが動作中であるか (1 or 0)
+- `timeplaced`: マシンが設置されてからの累積時間 (ticks)
+- `timecontinue`: マシンが連続稼働している時間 (ticks)
 
 ### 構造プロパティ
 構造体定義から提供される性能係数。
 
-- `batch`: 現在のバッチサイズ。
-- `speed_multi`: 速度倍率。
-- `energy_multi`: エネルギー倍率。
+- `batch`: 現在のバッチサイズ
+- `speed_multi`: 速度倍率
+- `energy_multi`: エネルギー倍率
 
 > [!NOTE]
-> **バッチサイズは量に自動で掛かります。** `"amount": "2 + tier"` のように式で書いた量も、
-> バッチ 3 で稼働すれば 3 倍になります。式の中で `batch` を掛ける必要はありません
-> （掛けると二重になります）。`batch` 変数は「バッチサイズそのものを条件に使いたい」場合のものです。
+> **バッチサイズは量に自動で掛かります。** `"amount": "2 + tier"` のように式で書いた量も、バッチ 3 で稼働すれば 3 倍になります。式の中で `batch` を掛ける必要はありません（掛けると二重になります）。
+> `batch` 変数は「バッチサイズそのものを条件に使いたい」場合のものです。
 
 ---
 
@@ -168,14 +167,14 @@ fluid_f_out("lava")   item_f_in("minecraft:coal")
 - `random()`: 0 以上 1 未満の乱数
 - `chance(x)`: 確率 `x` (0.0 - 1.0) に基づいて 1 または 0 を返す
 
-### 高度なクエリ
-- `can_see_sky(filter...)`: 上空視界判定。ガラス等を透過させるには ID を指定。
-- `can_see_void(filter...)`: 真下が奈落か判定。
-- `count_blocks(distance, filter...)`: 周囲の特定ブロックをカウント。
+### 高度な関数
+- `can_see_sky(filter...)`: 上空視界判定。ガラス等を透過させるには ID を指定
+- `can_see_void(filter...)`: 真下が奈落か判定
+- `count_blocks(distance, filter...)`: 周囲の特定ブロックをカウント
     - 例: `count_blocks(1, "minecraft:iron_block")`
-- `nbt('key')`: マシン本体の NBT を取得。
-- `nbt('symbol', 'key')`: 構造体の特定シンボル位置の NBT を取得。
-- `has_nbt('key')` / `has_nbt('symbol', 'key')`: NBT キーが**存在するか**を判定（値ではなく有無）。
+- `nbt('key')`: マシン本体の NBT を取得
+- `nbt('symbol', 'key')`: 構造体の特定シンボル位置の NBT を取得
+- `has_nbt('key')` / `has_nbt('symbol', 'key')`: NBT キーが存在するか
 
 ### NBT へのアクセスは `nbt(...)` に統一されています
 
@@ -187,14 +186,6 @@ nbt('display.Name')          マシン自身の階層パス
 nbt('S', 'stored_energy')    シンボル S の位置の TileEntity
 nbt('S', 'a.b.c')            シンボル S の階層パス
 ```
-
-> [!WARNING]
-> **裸のドット記法（`display.Name` を式として直接書く形）は廃止されました。**
-> 対象を表現できないうえ、`S.energy` が「シンボル S の energy」とも
-> 「自分の NBT の `S` の中の `energy`」とも読めて区別できなかったためです。
-> 書いた場合はエラーになり、`nbt('...')` への書き換えを案内します。
->
-> **`tier.glass` などの `tier.` は NBT ではないので今も有効です。**
 
 #### 書き込み（代入）
 
@@ -234,7 +225,7 @@ long は**大文字のみ**です（小文字の `l` は `1` と紛らわしい�
 
 | フィールド | 評価タイミング |
 |-----------|--------------|
-| `duration` | **レシピ開始時に 1 回**（構造体で `"durationPolicy": "perTick"` を指定すると毎 tick） |
+| `duration` | レシピ開始時（ただし構造体で `"durationPolicy": "perTick"` を指定すると実行中毎 tick） |
 | 入力・出力の `amount` | 毎回の消費・生産時 |
 | `energy` / `mana` などのリソース量 | 同上 |
 | デコレータの `chance` | 判定時 |
@@ -244,8 +235,12 @@ long は**大文字のみ**です（小文字の `l` は `1` と紛らわしい�
 - **文字列の引用符**: 式自体は JSON 内で文字列として `"amount": "tier * 2"` のように記述します。
 - **大文字・小文字**: 変数名はすべて**小文字**です（`Tier` ではなく `tier`）。
 - **全角文字**: 演算子や変数名に全角文字を使用しないでください。
+- **ゼロ除算**: 充填率や残量で割る式は、空のときに 0 除算になります。
+  `energy_p > 0 ? floor(1000 / energy_p) : 0` のように分母を先に確認してください。
 - **`duration` に `speed_multi` を書く**: 速度倍率はエンジンが毎 tick 適用しているので **2 回掛かります**。
   `duration` は時間ではなく作業量です。エネルギーは逆で、`energy` に `energy_multi` を書くのが正しい経路です。
+
+式のパースに失敗したときのエラーは `logs/latest.log` に出ます。
 
 ### NEI での見え方
 

@@ -47,9 +47,9 @@ tooltip.me_output.desc=アイテムを直接MEネットワークに出力する
 tooltip.me_fluid_output.desc=液体を直接MEネットワークに出力する
 tooltip.me_output.wip=開発中
 tooltip.me_output.lag_warning=警告: MEネットワーク接続時にラグが発生する可能性があります
-tooltip.machinery.capacity=容量: %s
-tooltip.machinery.slots=スロット数: %s
-tooltip.machinery.mana_transfer=転送量: %s /t
+tooltip.machinery.capacity=§7容量: §b%s
+tooltip.machinery.slots=§7スロット数: §b%s
+tooltip.machinery.mana_transfer=§7転送量: §b%s §7/t
 tile.gas.helium.name=ヘリウム
 fluid.helium=ヘリウム
 tile.gas.neon.name=ネオン
@@ -209,6 +209,8 @@ tooltip.okmodular.wand.size=サイズ: %dx%dx%d
 chat.okmodular.wrench_linked=レンチをコントローラにリンクしました: (%d, %d, %d)
 chat.okmodular.wrench_type_selected=ポートタイプを選択しました: %s
 chat.okmodular.wrench_unlinked=リンクを解除しました。
+overlay.okmodular.wrench_port=[ %s : %s ]
+overlay.okmodular.wrench_port_fixed=[ %s : %s - 固定 ]
 # --- Fluid Canister ---
 tooltip.holdshift=§7- §r§oSHIFT§r§7キーで詳細を表示§r
 item.fluid_canister.name=流体キャニスター
@@ -242,7 +244,7 @@ gui.status.invalid_definition=無効な構造定義です
 gui.status.requirements_not_met=構造体の要件を満たしていません
 gui.status.unknown=不明なエラー
 gui.progress=進捗: %.1f%%
-gui.energy_transfer=転送量: %s RF/t
+gui.energy_transfer=§7転送量: §b%s §7RF/t
 gui.mana_info=%d マナ
 gui.redstone_mode.always_on=常にオン
 gui.redstone_mode.always_off=常にオフ
@@ -253,14 +255,14 @@ gui.not_in_effect=無効
 
 # --- Port types ---
 gui.port_type=ポート種別を %s に設定しました
-gui.port_type.format=%s (%s)
+gui.port_type.format=%s §7(§b%s§7)
 gui.port_type.ITEM=アイテム
 gui.port_type.FLUID=液体
 gui.port_type.ENERGY=エネルギー
 gui.port_type.MANA=マナ
 gui.port_type.GAS=ガス
-gui.port_type.ESSENTIA=エッセンチア
-gui.port_type.VIS=ヴィス
+gui.port_type.ESSENTIA=エッセンシア
+gui.port_type.VIS=ビス
 gui.port_type.BLOCK=ブロック
 gui.port_type.NONE=なし
 
@@ -280,7 +282,7 @@ gui.craftingState.error=エラー
 # --- Recipe conditions ---
 okmodular.condition.biome.base=バイオーム条件
 okmodular.condition.block=必要なブロック: %s
-okmodular.condition.block_below=直下に必要なブロック: %s
+okmodular.condition.block_below=真下に必要なブロック: %s
 okmodular.condition.dimension=許可されるディメンション: %s
 okmodular.condition.weather.CLEAR=晴天が必要です
 okmodular.condition.weather.RAIN=降雨が必要です
@@ -289,31 +291,33 @@ okmodular.condition.weather.THUNDER=雷雨が必要です
 # --- en_US only until now ---
 tooltip.machinery.deprecated=§e[非推奨]
 tooltip.machinery.deprecated.hint=§7このブロックは旧システムを使用しています。
+
 # --- ポートの色---
 chat.okmodular.port_color_set=ポートを %s に塗りました
 chat.okmodular.port_color_cleared=ポートの色を落としました
-gui.port_color.NONE=無色
-gui.port_color.WHITE=白
-gui.port_color.ORANGE=橙
-gui.port_color.MAGENTA=赤紫
-gui.port_color.LIGHT_BLUE=空色
-gui.port_color.YELLOW=黄
-gui.port_color.LIME=黄緑
-gui.port_color.PINK=桃
-gui.port_color.GRAY=灰
-gui.port_color.LIGHT_GRAY=薄灰
-gui.port_color.CYAN=青緑
-gui.port_color.PURPLE=紫
-gui.port_color.BLUE=青
-gui.port_color.BROWN=茶
-gui.port_color.GREEN=緑
-gui.port_color.RED=赤
-gui.port_color.BLACK=黒
-tooltip.okmodular.port_color=塗装: %s
+gui.port_color.NONE=§7無色§r
+gui.port_color.WHITE=§f白§r
+gui.port_color.ORANGE=§6橙§r
+gui.port_color.MAGENTA=§d赤紫§r
+gui.port_color.LIGHT_BLUE=§b空色§r
+gui.port_color.YELLOW=§e黄§r
+gui.port_color.LIME=§a黄緑§r
+gui.port_color.PINK=§d桃§r
+gui.port_color.GRAY=§8灰§r
+gui.port_color.LIGHT_GRAY=§7薄灰§r
+gui.port_color.CYAN=§3青緑§r
+gui.port_color.PURPLE=§5紫§r
+gui.port_color.BLUE=§9青§r
+gui.port_color.BROWN=§6茶§r
+gui.port_color.GREEN=§2緑§r
+gui.port_color.RED=§c赤§r
+gui.port_color.BLACK=§8黒§r
+tooltip.okmodular.port_color=§7塗装: %s
+tooltip.okmodular.side_io=§7この面: §b%s
 
 # --- レンチのツールチップ ---
-tooltip.okmodular.wrench_unlinked=リンクされていません - スニーク + 右クリックでコントローラにリンク
-tooltip.okmodular.wrench_linked=リンク先コントローラ: (%d, %d, %d) ディメンション %d
+tooltip.okmodular.wrench_unlinked=§e未リンク §8- スニーク + 右クリックでコントローラにリンク
+tooltip.okmodular.wrench_linked=§7リンク先コントローラ: §a%d, %d, %d §8(ディメンション %d)
 
 # --- 機械の状態 (ErrorReason) ---
 gui.status.running=処理中
@@ -324,7 +328,7 @@ gui.status.no_energy=エネルギーが足りません
 gui.status.input_missing=入力が足りません
 gui.status.no_matching_recipe=一致するレシピがありません
 gui.status.waiting_output=出力先の空きを待っています
-gui.status.no_input=入力資源がありません
+gui.status.no_input=入力がありません
 gui.status.paused=レッドストーン信号で停止中
 gui.status.missing_blueprint=ブループリントがありません
 gui.status.output_capacity_insufficient=出力容量が足りません: %s

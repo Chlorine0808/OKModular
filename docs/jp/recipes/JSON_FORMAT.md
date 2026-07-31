@@ -1,11 +1,18 @@
 # レシピシステム: JSON フォーマットリファレンス
 
-レシピは `config/omoshiroikamo/modular/recipes/*.json` で定義されます。
+レシピは `config/okmodular/recipes/*.json` で定義されます。
 
-## 1. ファイル構成
-単一のレシピオブジェクトを記述するか、または複数のレシピをまとめて記述することができます。
+## 📚 関連ドキュメント
 
-### 複数レシピの構成 (推奨)
+- [条件 (Conditions)](./CONDITIONS.md) - レシピが動く / 止まる判定
+- [デコレータ (Decorators)](./DECORATORS.md) - 確率・ボーナス出力・触媒
+- [式パーサー 変数・関数リファレンス](./EXPRESSION_REFERENCE.md) - 変数・関数のリスト
+- [式の実用例集](./EXPRESSION_EXAMPLES.md)
+
+---
+
+## 1. 基本の構成
+
 ```json
 {
   "group": "マシン名",
@@ -18,167 +25,124 @@
 
 ## 2. レシピのプロパティ
 
-| `decorators` | 配列 | レシピの挙動を拡張するデコレータ |
-| `requiredTier` | オブジェクト | 要求されるコンポーネントの Tier (例: `{"glass": 1, "casing": 3}`) |
+| キー | 型 | 意味 |
+|---|---|---|
+| `group` / `machine` | 文字列 | レシピグループ（どのマシンのレシピか） |
+| `duration` / `time` | 数値または式 | 作業量。**時間ではない**（速度倍率で割られる） |
+| `inputs` / `input` | 配列 | 入力 |
+| `outputs` / `output` | 配列 | 出力 |
+| `conditions` / `condition` | 配列またはオブジェクト | 条件 → [CONDITIONS.md](./CONDITIONS.md) |
+| `decorators` | 配列 | 挙動の拡張 → [DECORATORS.md](./DECORATORS.md) |
+| `tier` / `tiers` | オブジェクト | 要求されるコンポーネントの Tier（例: `{"glass": 1, "casing": 3}`） |
+| `priority` | 数値 | 優先度 |
+| `name` / `localizedName` | 文字列 | 表示名 |
+| `registryName` | 文字列 | 継承で参照される名前 → §6 |
+| `parent` | 文字列 | 継承元の `registryName` → §6 |
+| `abstract` | 真偽値 | 継承専用のレシピにする → §6 |
 
-## 2.1 レシピの優先順位とソート
-レシピは以下の順序で評価・表示されます（上位の項目が優先）：
-1. **要求される最大 Tier**: 最も高い Tier 要求を持つレシピが優先されます（上位 Tier レシピがリストの先頭にきます）。
-2. **優先度 (`priority`)**: `requiredTier` が同じ場合、この数値が大きいほど優先されます。
-3. **入力の種類数**: より多くの種類のリソースを要求するレシピが優先されます。
-4. **アイテム入力の総数**: 合計アイテム要求数が多いレシピが優先されます。
+> [!NOTE]
+> `speedMultiplier` / `energyMultiplier` / `batchMin` / `batchMax` / `durationPolicy` / `conditionPolicy` は構造 JSON 側のキーです。
+> マシン単位の設定なので、レシピに書いても読まれません。
 
-## 3. 入力と出力 (Inputs and Outputs)
+## 2.1 レシピの優先順位
 
-入出力は、オブジェクト内に特定のキーが存在するかどうかで型が判定されます。
+レシピは以下の順序で検索・実行します。
 
-### アイテム
-- `item`: ブロック/アイテムID。
-- `amount`: 数量。
-- `meta`: メタデータ（任意）。
-- `ore`: 鉱石辞書名（inputのみ、`item`の代わりに使用）。
+1. **要求される最大 Tier**: 最も高い Tier 要求を持つレシピ
+2. **優先度 (`priority`)**: Tier 要求が同じ場合、この数値の大きさ
+3. **入力の種類数**: より多くの種類の入力を持つレシピ
+4. **アイテム入力の総数**: 合計アイテム要求数が多いレシピ
 
-```json
-{ 
-  "item": "minecraft:coal", 
-  "amount": 64 
-}
-```
+## 3. 入出力の指定
 
-### 液体
-- `fluid`: 液体ID。
-- `amount`: ミリバケツ量。
+入出力は、オブジェクト内にどのキーが存在するかで型が判定されます。
+`type` を明示することもできます。
 
-```json
-{ 
-  "fluid": "water", 
-  "amount": 1000 
-}
-```
-
-### エネルギー・マナ
-- `energy` / `mana`: 量。
-- `perTick` / `pertick`: trueの場合、合計ではなく毎tick消費/生産します。
-
-```json
-{ 
-  "energy": 100, 
-  "perTick": true 
-}
-```
-
-### その他のリソース
-- `gas`: ガスID。
-- `essentia`: 相（Aspect）名。
-- `vis`: 相（Aspect）名。
+| キー | 型 | 補足 |
+|---|---|---|
+| `item` | アイテム | `meta` でメタデータ指定 |
+| `ore` | アイテム | 鉱石辞書名。input のみ |
+| `fluid` | 液体 | `amount` は mB |
+| `gas` | ガス | `amount` は mB |
+| `energy` / `mana` | エネルギー / マナ | `perTick` が true なら毎 tick |
+| `essentia` / `vis` | アスペクト | 値はアスペクト名 |
+| `symbol` | ブロック | 構造体のシンボル位置を操作 → §3.2 |
 
 ```json
-{ 
-  "essentia": "ignis", 
-  "amount": 10 
-}
+{ "item": "minecraft:coal", "amount": 64 }
+{ "fluid": "water", "amount": 1000 }
+{ "energy": 100, "perTick": true }
+{ "essentia": "ignis", "amount": 10 }
 ```
 
-## 3.1 動的数量 (Dynamic Amount)
+`consume: false` を書くと消費しません（触媒）。
 
-入出力の `amount` フィールドには、固定値の代わりに**式（Expression）**を指定できます。
-式を使用することで、マシンの状態やワールド環境に応じて数量を動的に変化させることができます。
+## 3.1 動的数量
 
-### 基本的な使い方
+`amount` には固定値の代わりに式を書けます。
 
 ```json
 {
-  "inputs": [
-    {
-      "item": "minecraft:iron_ingot",
-      "amount": "tier * 10 + 5"
-    }
-  ],
-  "outputs": [
-    {
-      "fluid": "water",
-      "amount": "energy_p * 1000"
-    }
-  ]
+  "inputs":  [ { "item": "minecraft:iron_ingot", "amount": "tier * 10 + 5" } ],
+  "outputs": [ { "fluid": "water", "amount": "energy_p * 1000" } ]
 }
 ```
 
-上記の例では：
-- **入力**: マシンの Tier が 1 なら 15 個、Tier 5 なら 55 個のアイテムが必要
-- **出力**: エネルギー充填率に応じて出力量が変化（満タンなら 1000mB、50% なら 500mB）
+- 入力: Tier 1 なら 15 個、Tier 5 なら 55 個
+- 出力: エネルギー充填率に応じて変化（満タンで 1000 mB、50% で 500 mB）
 
-### 使用可能な変数と関数
+主なプロパティ:
 
-詳細なリストについては、[式パーサー 変数・関数リファレンス](./EXPRESSION_REFERENCE.md)を参照してください。
+| 変数 | 意味 |
+|---|---|
+| `tier` | マシンの現在の Tier |
+| `energy_p` / `fluid_p` / `mana_p` | 各リソースの充填率 (0.0 - 1.0) |
+| `progress` | レシピ進行度 (0.0 - 1.0) |
+| `recipe_count` | 処理済みレシピ数 |
+| `time` / `day` | ワールド時間と経過日数 |
 
-**主なプロパティ**:
-- `tier` - マシンの現在の Tier (1-16)
-- `energy_p` / `fluid_p` / `mana_p` - 各種リソースの充填率 (0.0-1.0)
-- `progress` - レシピ進行度 (0.0-1.0)
-- `recipe_count` - 処理済みレシピ数
-- `time` / `day` - ワールド時間と経過日数
-
-実践的な例は [式の実用例集](./EXPRESSION_EXAMPLES.md) を参照してください。
+完全なリストは [式パーサー リファレンス](./EXPRESSION_REFERENCE.md)、
+書き方の例は [実用例集](./EXPRESSION_EXAMPLES.md) を参照。
 
 ### 注意事項
 
 - 式の結果は整数に丸められます（小数点以下は切り捨て）
 - 負の値は 0 として扱われます
-- 式が無効な場合、デフォルトで `amount` の固定値が使用されます
-- 三項演算子 `? :` を使用した条件分岐が可能です
-- 論理演算子 `&&`（AND）、`||`（OR）が使用できます
+- 三項演算子 `? :` と論理演算子 `&&` / `||` が使えます
+- バッチサイズは量に自動で掛かります。式の中で `batch` を掛けると二重になります
 
----
+## 3.2 ブロック（`symbol`）
 
-### 外部ブロック NBT チェック/消費 (Block Nbt Input)
-レシピ開始時に構造体内のブロックの NBT をチェック・消費します。
+構造体内のシンボル位置にあるブロックを検知・操作します。`replace`（操作前）と
+`block`（操作後）という命名で統一されています。
 
-- `type`: `"block_nbt"`
-- `symbol`: 対象の記号。
-- `key`: チェック対象の NBT キー名。
-- `operation`: (`"sub"` | `"set"` | `"add"`)。`"sub"` は不足時にレシピ開始を阻止します。
-- `value`: 数値または式。
-- `consume`: true（デフォルト）の場合、レシピ開始時に実際に値を書き換えます。
-- `optional`: true の場合、対象ブロックや NBT キーが見つからない場合でもレシピを開始できます。false（デフォルト）の場合、対象が見つからなければレシピ開始を阻止します。
-
-```json
-"inputs": [{
-  "type": "block_nbt",
-  "symbol": "S",
-  "key": "stored_energy",
-  "operation": "sub",
-  "value": 100
-}]
-```
-
-### ブロック (Block)
-構造体内の特定のシンボル位置にあるブロックを検知・操作します。本 mod では、**`replace`（操作前）** と **`block`（操作後）** という統一された命名規則を採用しています。
-(注)いくつかのTileEntityは設置時にクラッシュの原因になります。(Angelica+ET Futurm導入時のBeaconで確認済)
-もしバグを発見したらissueの作成をお願いします。
-
-- `symbol`: 構造体定義で使用されている記号（1文字）。
-- `replace`: (**条件/旧ブロック**) 操作対象のブロックID。
-- `block`: (**結果/新ブロック**) 最終的にその位置にあるべきブロックID。
-- `consume`: (**Inputのみ**) trueの場合、`block` を指定しなくても自動的に空気に置き換えます（消去）。
-- `optional`: trueの場合、対象ブロックが見つからなくてもレシピを開始できます（あれば実行する）。
-- `amount`: 操作する最大個数。
-- `nbt`: (**Outputのみ**) 設置するブロックのTileEntityに適用するNBTデータ。値に **Expression** を使用可能です。
-
-#### 7つの主要ユースケース
+| キー | 意味 |
+|---|---|
+| `symbol` | 対象の記号（構造体定義のマッピング） |
+| `replace` | 条件 / 旧ブロックの ID |
+| `block` | 結果 / 新ブロックの ID |
+| `consume` | true でブロックを消費（input のみ） |
+| `optional` | true なら対象が見つからなくてもレシピを開始・完了できる |
+| `amount` | 操作する最大個数 |
+| `nbt` | 設置するブロックの TileEntity に書き込む NBT（output のみ）。式が使える |
 
 | # | ケース | 入出力 | 設定例 | 挙動 |
 | :--- | :--- | :--- | :--- | :--- |
-| 1 | **存在確認** | `inputs` | `"block": "stone"` | 石があるか確認（消えなない） |
-| 2 | **必須消費** | `inputs` | `"block": "stone", "consume": true` | 石を消去（開始時） |
-| 3 | **任意消費** | `inputs` | `"consume": true, "optional": true` | あれば消去（開始時） |
-| 4 | **入力置換** | `inputs` | `"replace": "A", "block": "B"` | AをBに変換（開始時） |
-| 5 | **新規設置** | `outputs`| `"block": "gold"` | 空きに金を設置（終了時） |
-| 6 | **必須置換** | `outputs`| `"replace": "stone", "block": "gold"` | 石を金に置換（終了時） |
-| 7 | **任意置換** | `outputs`| `"replace": "stone", "block": "gold", "optional": true` | 石あれば金に置換（終了時） |
+| 1 | 存在確認 | `inputs` | `"block": "stone"` | 石があるか確認 |
+| 2 | 必須消費 | `inputs` | `"block": "stone", "consume": true` | 開始時に石を消去 |
+| 3 | 任意消費 | `inputs` | `"consume": true, "optional": true` | 開始時にブロックがあれば消去 |
+| 4 | 入力置換 | `inputs` | `"replace": "A", "block": "B"` | 開始時に A を B に変換 |
+| 5 | 新規設置 | `outputs`| `"block": "gold"` | 終了時に金を設置 |
+| 6 | 必須置換 | `outputs`| `"replace": "stone", "block": "gold"` | 終了時に石を金に置換 |
+| 7 | 任意置換 | `outputs`| `"replace": "stone", "block": "gold", "optional": true` | 終了時に石があれば金に置換 |
 
-#### 動的NBTの例
+> [!NOTE]
+> いくつかの TileEntity は設置時にクラッシュの原因になります（Angelica + ET Futurum 導入時の Beacon で確認）。
+> バグを見つけたら issue の作成をお願いします。
 
-設置するブロックの TileEntity に NBT を書き込みます。値には式が使えます。
+### ブロックの NBT を書き換える
+
+`nbt` に代入式を並べます。左辺が書き込み先（設置するブロックの NBT）、右辺は任意の式です。
 
 ```json
 "outputs": [{
@@ -191,225 +155,56 @@
 }]
 ```
 
-左辺が書き込み先（設置するブロックの NBT）、右辺は任意の式です。
-右辺の `nbt('C', ...)` のようにシンボルを使えば、**別のブロックから読んで書き込む**ことができます。
-
-> [!NOTE]
-> `"nbt"` をオブジェクトで書く旧形式（`{"energy": {"type":"nbt","path":"..."}}`）は
-> レガシー扱いです。`path` キーは読まれない（実装は `key` を見る）ため、この形式は**動作しません**。
-> 上の配列形式を使ってください。
-
-### 外部ブロック NBT 操作 (Block Nbt Output)
-構造体内の任意のブロック（TileEntity）の NBT を直接操作します。これは `block` による置換とは異なり、ブロックそのものを変えずに内部データのみを数値的に変更します。
-
-- `type`: `"block_nbt"` を指定します。
-- `symbol`: 操作対象の記号。
-- `key`: 操作対象の NBT キー名。
-- `operation`: 演算方法 (`"set"`, `"add"`, `"sub"`)。
-- `optional`: true の場合、出力先のブロックや NBT キーがなくてもレシピの完了を許可します。false（デフォルト）の場合、出力先がなければレシピの実行が止まります（容量不足として扱われます）。
-- `value`: 数値または代入する Expression。
+右辺で `nbt('C', ...)` のようにシンボルを使えば、別のブロックから読んで書き込めます。
+加算・減算は右辺に自分を書くか、`+=` を使います。
 
 ```json
-"outputs": [{
-  "type": "block_nbt",
-  "symbol": "S",
-  "key": "stored_energy",
-  "operation": "add",
-  "value": 1000
-}]
+"nbt": [ "nbt('stored_energy') += 1000" ]
 ```
 
-## 4. 条件 (Conditions)
-条件は毎 tick、または処理の開始時にチェックされます。論理演算（CoRパターン）を使用して複雑な条件を構成可能です。
+## 4. 条件とデコレータ
 
-利用可能なタイプ:
-(※ `type` プロパティを省略した場合、使用されているキーの内容から自動的に型が推論されます)
+表現力が高すぎるので、別ファイルを参照。
 
-- **`block` (推奨)**: マシンの設置座標にあるブロックを判定します。(`block`: 文字列ID または オブジェクト)
-- `dimension`: 特定の次元にいるか。
-    - **ショートハンド**: `{ "dimension": 0 }`
-    - `ids`: 数値の配列（従来形式）。
-- `biome`: バイオーム名、タグ、条件を判定します。
-    - **ショートハンド**: `{ "biome": "Plains" }` / `{ "tag": "FOREST" }`
-    - `biomes`: バイオーム名の配列。
-    - `tags`: Forge BiomeDictionary タグの配列。
-    - `minTemp` / `maxTemp`: 気温の範囲判定（任意）。
-    - `minHumid` / `maxHumid`: 湿度の範囲判定（任意）。
-- `offset`: 任意の条件を指定した相対座標 `(dx, dy, dz)` で判定します。
-    - `dx`, `dy`, `dz`: 相対座標。
-    - `condition`: 実行する条件オブジェクト。
-- `pattern`: クラフトレシピのような形式で、周囲のバイオーム配置を判定します。
-    - `pattern`: 文字列の配列。
-    - `keys`: パターン文字と条件オブジェクトのマッピング。
-- `block_below`: マシンの「下（Y-1）」にあるブロックを判定します。現在は `offset` + `block` の組み合わせが推奨されます。
-- ~~`tile_nbt`~~: **廃止**。`{ "expression": "nbt('energy') >= 1000" }` と書いてください（下記）。
-- `weather`: 現在の天候を判定。(`rain`, `thunder`, `clear`)
-- `comparison`: 二つの式を比較します（`left`, `right`, `operator`）。
-- `expression`: 数学的な文字列式を直接記述します。
+- [条件 (Conditions)](./CONDITIONS.md) — ブロック・バイオーム・天候・座標・NBT・式による判定
+- [デコレータ (Decorators)](./DECORATORS.md) — 確率、ボーナス出力、重み付き抽選、触媒
 
-```json
-"conditions": [
-  { 
-    "pattern": [ "FFF", "F#F", "FFF" ],
-    "keys": {
-      "#": { "biome": "Plains" },
-      "F": { "tag": "FOREST" }
-    }
-  },
-  { "weather": "rain" },
-  { "expression": "day % 28 == 0" }
-]
-```
+## 5. 式を JSON オブジェクトで書く
 
-### サポートされている論理演算 (Shortcuts)
-演算子名をそのままキーとして使用できます。
-- **`and`**: `{ "and": [ { condition1 }, { condition2 } ] }`
-- **`or`**: `{ "or": [ ... ] }`
-- **`not`**: `{ "not": { condition } }`
-- `xor`, `nand`, `nor` も同様に対応しています。
+一部のパラメータは、数値の代わりに式オブジェクトを取れます。
 
-### 条件の 3 つの書き方
+| `type` | 動作 |
+|---|---|
+| `constant` | 固定の数値を返す |
+| `nbt` | マシンの TileEntity から NBT パスの数値を読む |
+| `map_range` | ある範囲の数値を別の範囲へ線形補間でマッピング |
+| `arithmetic` | 二つの式の間で演算（`left`, `right`, `operation`: `+` `-` `*` `/` `%`） |
+| `world_property` | ワールドの情報（`time`, `day`, `moon_phase`）を取得 |
 
-どの条件も次の 3 通りで書けます。パーサはこの順に解釈します。
+### 文字列による簡易記述
 
-| # | 書き方 | 例 |
-|---|--------|-----|
-| 1 | `type` を明示 | `{ "type": "comparison", "left": 10, "operator": ">", "right": 5 }` |
-| 2 | **キーで型を名指し**（値は 1 つのオブジェクト） | `{ "comparison": { "left": 10, "operator": ">", "right": 5 } }` |
-| 3 | プロパティから推論 | `{ "biome": "Plains" }` |
-
-形式 2 は「内側のオブジェクトがその型として成立する」ときだけ型宣言として扱われます。
-`{ "chance": { "type": "map_range", … } }` のように**値が式オブジェクトである場合は形式 3** として解釈されるので、
-式が失われることはありません。
-
-### NBT を条件にする
-
-`expression` の中で `nbt(...)` を使います。**`tile_nbt` は廃止されました。**
-
-```json
-{ "expression": "nbt('energy') >= 1000" }
-{ "expression": "nbt('customData.heat') < 500" }
-{ "expression": "nbt('S', 'stored_power') > 0" }
-{ "expression": "nbt('mode') != 3" }
-```
-
-`tile_nbt` は独自の比較パーサを持ち、**階層パス・別ブロック・`!=` のいずれも書けませんでした**。
-`nbt()` はすべて書けるため置き換えました。
-
-> [!IMPORTANT]
-> **キーが存在しない場合の扱いが違います。**
-> `tile_nbt` は「キーが無ければ条件不成立」でしたが、`nbt()` は **0 を返します**。
-> `>=` の比較では同じ結果になりますが、`<=` や `< ` では**逆になります**（0 は条件を満たしてしまう）。
->
-> キーの存在自体を条件にしたい場合は `has_nbt(...)` を併用してください。
-> ```json
-> { "expression": "has_nbt('heat') && nbt('heat') <= 100" }
-> ```
-> 引数の形は `nbt()` と同じです（`has_nbt('key')` / `has_nbt('S', 'key')`）。
-
-## 5. デコレータ (Decorators)
-デコレータはレシピの実行中や終了時に追加の挙動を与えます。
-条件と同じ 3 つの書き方（`type` 明示 / キーで型を名指し / プロパティから推論）が使えます。
-
-| type 名 | 動作 | 推論に使われるプロパティ |
-|---------|------|------------------------|
-| `chance` | レシピの成功確率を制御 | `chance` |
-| `bonus` | 確率で追加の出力を生成 | `chance` + `outputs` |
-| `weighted_random` | 重み付きリストから出力を選択 | `outputs`（各要素に `weight`）／ `pool` ／ `rolls` |
-| `requirement` | 実行中に追加の条件・触媒をチェック | `condition` / `requirements` |
-| `harvest_block` | ブロック破壊時の採掘特性を変える | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
-| `per_position_probability` | 座標ごとに確率でブロック出力を差し替える | `chance` + `symbol` + `output` |
-| `bonus_block_output` | 確率で追加のブロック出力を生成 | `chance` + `outputs`（先頭が `type: "block"`） |
-| `random_block_output` | 候補からブロック出力を抽選 | `count` / `selections` |
-
-> [!NOTE]
-> `harvest_block` / `per_position_probability` / `bonus_block_output` / `random_block_output` は
-> 以前 camelCase（`harvest` / `perPositionProbability` / `bonusBlockOutput` / `randomBlockOutput`）で
-> 登録されていました。旧名もエイリアスとして残っているので既存のレシピパックはそのまま動きます。
-
-```json
-"decorators": [
-  {
-    "chance": 0.5
-  },
-  {
-    "bonus": {
-      "chance": 0.1,
-      "outputs": [{ "item": "minecraft:diamond", "amount": 1 }]
-    }
-  },
-  {
-    "type": "weighted_random",
-    "outputs": [
-      { "weight": 70, "item": "minecraft:flint",  "amount": 1 },
-      { "weight": 30, "item": "minecraft:gravel", "amount": 1 }
-    ]
-  }
-]
-```
-
-`weighted_random` の `rolls` を省略すると 1 回抽選、`weight` を省略すると 1 として扱われます。
-
-### requirement decorator
-
-`condition`（追加の条件）と `requirements`（触媒）のどちらか、または両方を取ります。
-
-```json
-"decorators": [
-  {
-    "type": "requirement",
-    "condition": "tier.glass >= 2",
-    "requirements": [
-      { "item": "minecraft:redstone", "amount": 10 },
-      { "energy": 10000 }
-    ]
-  }
-]
-```
-
-`requirements` の各要素は**入力と同じ書式**で、**消費されません**（触媒）。稼働開始時と毎 tick チェックされ、
-足りなくなるとレシピが止まります。`consume: true` を書いても無視されます — 消費する追加入力が欲しい場合は
-`inputs` に書いてください。そちらなら読んだときに消費されると分かります。
-
-> [!NOTE]
-> **同じことは非消費入力で直接書けます。** 下は上の `requirements` と等価です。
-> ```json
-> "inputs": [ { "item": "minecraft:redstone", "amount": 10, "consume": false } ]
-> ```
-> decorator 側で書く利点は、`parent` を使ったレシピ継承で**親が触媒要件を配れる**点です
-> （子の `inputs` に手を入れずに済む）。
->
-> なお構造 JSON 側にも `requirements` がありますが**別物**で、あちらは
-> 「アイテム入力ポートが最低 1 個必要」のような**ポート数の指定**です。
-
-## 6. エクスプレッション (Expression)
-一部のパラメータ（デコレータの確率など）には、数値を動的に算出する `Expression` を使用できます。数値定数を直接記述する代わりに、以下のオブジェクト形式を使用できます。
-
-- `constant`: 固定の数値を返します。
-- `nbt`: マシンの TileEntity から指定した NBT パス（`energyStored` 等）の数値を読み取ります。
-- `map_range`: ある範囲の数値を別の範囲に線形補完でマッピングします。
-- `arithmetic`: 二つの式の間で演算を行います（`left`, `right`, `operation`: `+`, `-`, `*`, `/`, `%`）。
-- `world_property`: ワールドの情報（`time`, `day`, `moon_phase`）を取得します。
-
-### 文字列による簡易記述 (Expression String / Recipe Script)
-JSON のオブジェクト階層を避け、文字列として直接式を記述できます。これは単一の数値だけでなく、複雑な条件判定（論理演算）もサポートしており、本システムでは **「レシピスクリプト」** と呼称されます。
+JSON の階層を避けて、文字列で直接書けます。単一の数値だけでなく論理演算も書けるため、
+本システムでは**レシピスクリプト**と呼んでいます。
 
 ```json
 "condition": "nbt('S', 'energy') > 5000",
 "chance": "{ nbt('energy') / 100000.0 } * 0.8"
 ```
 
-利用可能な変数・関数・演算子の完全なリストは [式パーサー 変数・関数リファレンス](./EXPRESSION_REFERENCE.md) を参照してください。
+## 6. レシピの継承
 
-## 7. 継承
-`abstract`（抽象）レシピを使用して、共通のプロパティを共有できます。
+`abstract` なレシピに共通のプロパティを置き、他のレシピから `parent` で参照します。
 
 ```json
 {
   "registryName": "base_miner",
-  "isAbstract": true,
-  "time": 200,
-  "inputs": [...]
+  "abstract": true,
+  "duration": 200,
+  "inputs": [ ... ]
 }
 ```
-他のレシピで `"parent": "base_miner"` を指定することで、これらの値を継承できます。
+
+```json
+{ "parent": "base_miner", "outputs": [ ... ] }
+```
+

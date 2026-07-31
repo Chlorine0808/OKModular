@@ -6,64 +6,44 @@ Technical documentation for the Modular Machinery module.
 
 ### System Design
 
-#### [External Port Proxy System](./EXTERNAL_PROXY.md)
-Design documentation for the proxy system that integrates external blocks (chests, tanks, energy storage, etc.) as part of the machine.
-
-**Contents**:
-- Fusion of Adapter + Proxy patterns
-- 6 types of proxy implementations (Item, Fluid, Energy, Gas, Essentia, Mana)
-- AbstractExternalProxy base class details
-- Integration with Self-Validation Pattern
-- Proxy factory registration methods
-- Code examples and usage
-
-**Target Audience**: Developers, Design Pattern Learners
-
----
-
 #### [Machine Conditions](./MACHINE_CONDITIONS.md)
 Conditions in a structure definition that stop the machine itself, whatever recipe it was going to run.
 
 **Contents**:
-- How they differ from a recipe's conditions (they work independently)
 - Writing them (array or single, asking about machine state with an expression)
 - What happens when they break mid-recipe (`pause` / `abort`), and that `abort` gives nothing back
-- A misspelled condition loosens the gate rather than closing it
 
-**Audience**: anyone writing structure definitions
+**Audience**: anyone building their own machine
 
 ---
 
 #### [Port Colours](./PORT_COLORS.md)
-Painting a machine's ports so that only ports of the same colour are considered
-together.
+Painting a machine's ports so that only ports of the same colour are treated as one group.
 
 **Contents**:
-- Painting (dyes, AE2's Color Applicator)
-- Which ports belong to which group (five rules)
-- Why unpainted ports are shared by every colour, and what that costs
-- How a recipe is chosen (a group with blocked output is skipped)
+- Painting
+- How a recipe is chosen, and the order groups run in
 
-**Target Audience**: Players, Modpack Authors
+**Audience**: Players, Modpackers
 
 ---
 
-## 💡 New Features Guide
+## Feature Guide
 
 ### Dynamic Amount System (Expression System)
-An expression system for dynamically changing recipe input/output amounts. Enables flexible recipe design based on machine state and world environment.
+An expression system for varying recipe input and output amounts. It allows flexible recipe design that responds to machine state and world conditions.
 
 **Main Features**:
-- **Machine State Reference**: Energy, fluids, mana, gas, Tier, progress, etc.
-- **World Environment Reference**: Time, weather, moon phase, biome, elapsed days, etc.
-- **Mathematical Functions**: Trigonometric functions, logarithms, exponentiation, random numbers, etc.
-- **Conditional Branching**: Complex control via ternary operators and logical operators
+- **Machine state**: energy, fluid, mana, gas, tier, progress and more
+- **World conditions**: time, weather, moon phase, biome, elapsed days and more
+- **Math functions**: trigonometry, logarithms, powers, random numbers
+- **Branching**: the ternary operator and logical operators for more involved control
 
-**Usage Example**:
+**Example**:
 ```json
 {
   "inputs": [
-    { "item": "minecraft:iron_ingot", "amount": "tier * 10 + 5" }
+    { "item": "minecraft:coal", "amount": "tier * 10 + 5" }
   ],
   "outputs": [
     { "fluid": "steam", "amount": "energy_p * 1000" }
@@ -72,25 +52,25 @@ An expression system for dynamically changing recipe input/output amounts. Enabl
 ```
 
 **Related Documentation**:
-- [JSON Format: Dynamic Amount](../recipes/JSON_FORMAT.md#31-dynamic-amount) - Basic usage
-- [Practical Examples](../recipes/EXPRESSION_EXAMPLES.md) - Detailed usage examples by pattern
+- [JSON Format: Dynamic amounts](../recipes/JSON_FORMAT.md#31-dynamic-amounts) - basic usage
+- [Expression Reference](../recipes/EXPRESSION_REFERENCE.md) - the list of variables and functions
+- [Practical Examples](../recipes/EXPRESSION_EXAMPLES.md) - usage by pattern
 
-**Target Audience**: Recipe creators, Modpack developers
+**Audience**: anyone building their own machine
 
 ---
 
 ## 🔗 Related Documentation
 
 ### Recipe System
-- [Overview](../recipes/OVERVIEW.md)
 - [JSON Format](../recipes/JSON_FORMAT.md)
-- [Practical Examples](../recipes/EXPRESSION_EXAMPLES.md) 🆕
-- [Developer Guide](../recipes/DEVELOPER_GUIDE.md)
+- [Conditions](../recipes/CONDITIONS.md)
+- [Decorators](../recipes/DECORATORS.md)
+- [Expression Reference](../recipes/EXPRESSION_REFERENCE.md)
+- [Practical Examples](../recipes/EXPRESSION_EXAMPLES.md)
 
 ### Structure System
-- [Overview](../structures/OVERVIEW.md)
 - [JSON Format](../structures/JSON_FORMAT.md)
-- [Developer Guide](../structures/DEVELOPER_GUIDE.md)
 
 ---
 

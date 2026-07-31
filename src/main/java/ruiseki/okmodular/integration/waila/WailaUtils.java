@@ -124,10 +124,20 @@ public class WailaUtils {
         return renderStr;
     }
 
+    /**
+     * What the side the cursor is over is set to.
+     *
+     * <p>
+     * Carries a label. The bare word - "Input", or worse "None" - sat in the WAILA box
+     * among the port's other lines with nothing saying what it described, and the
+     * direction it describes is not even the face being pointed at: the wrench maps the
+     * nine sections of a face onto the six sides, so the edge of the top face reports a
+     * horizontal neighbour.
+     */
     public static String getSideIOTooltip(ISidedIO handler, ForgeDirection direction) {
         if (handler == null) return null;
         EnumIO io = handler.getSideIO(direction);
-        return LangHelpers.localize(io.getName());
+        return LangHelpers.localize("tooltip.okmodular.side_io", LangHelpers.localize(io.getName()));
     }
 
     public static Vec3 getLocalHit(IWailaDataAccessor accessor) {
