@@ -32,6 +32,7 @@
 | `inputs` / `input` | 配列 | 入力 |
 | `outputs` / `output` | 配列 | 出力 |
 | `conditions` / `condition` | 配列またはオブジェクト | 条件 → [CONDITIONS.md](./CONDITIONS.md) |
+| `conditionPolicy` | 文字列 | 稼働中に `conditions` が崩れたときの挙動（`pause` / `abort`、デフォルト: `pause`） |
 | `decorators` | 配列 | 挙動の拡張 → [DECORATORS.md](./DECORATORS.md) |
 | `tier` / `tiers` | オブジェクト | 要求されるコンポーネントの Tier（例: `{"glass": 1, "casing": 3}`） |
 | `priority` | 数値 | 優先度 |
@@ -41,8 +42,11 @@
 | `abstract` | 真偽値 | 継承専用のレシピにする → §6 |
 
 > [!NOTE]
-> `speedMultiplier` / `energyMultiplier` / `batchMin` / `batchMax` / `durationPolicy` / `conditionPolicy` は構造 JSON 側のキーです。
+> `speedMultiplier` / `energyMultiplier` / `batchMin` / `batchMax` / `durationPolicy` は構造 JSON 側のキーです。
 > マシン単位の設定なので、レシピに書いても読まれません。
+>
+> `conditionPolicy` は**両方にあります**。構造体側は[機械の稼働条件](../machinery/MACHINE_CONDITIONS.md)が崩れたとき、
+> レシピ側はそのレシピ自身の `conditions` が崩れたときの挙動で、**別々に設定します**。
 
 ## 2.1 レシピの優先順位
 

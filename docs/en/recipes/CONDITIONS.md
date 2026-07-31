@@ -1,6 +1,17 @@
 # Recipe Conditions
 
-What decides whether a recipe runs or stops. **Checked every tick while running.**
+What decides whether a recipe runs or stops. **Checked once when it starts, then every tick
+while it runs.**
+
+| When | If they do not hold |
+|---|---|
+| Starting a recipe | **It does not start.** Nothing is consumed |
+| Every tick while running | Whatever `conditionPolicy` says (default `pause`) |
+
+`conditionPolicy` goes at the recipe's top level. `pause` waits for the conditions to hold
+again and **carries on from where it stopped**; `abort` throws the recipe away and **does not
+give back what it already consumed**. See the key table in
+[JSON Format](./JSON_FORMAT.md).
 
 ## 📚 Related Documentation
 

@@ -12,6 +12,7 @@ import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 
 /**
  * Basic decorator for IModularRecipe.
@@ -78,6 +79,11 @@ public abstract class RecipeDecorator implements IModularRecipe {
     @Override
     public boolean isConditionMet(ConditionContext context) {
         return internal.isConditionMet(context);
+    }
+
+    @Override
+    public ConditionPolicy getConditionPolicy() {
+        return internal.getConditionPolicy();
     }
 
     @Override

@@ -729,9 +729,15 @@ public class TEMachineController extends AbstractMBModifierTE
                 ^ ((long) xCoord << 32 | (zCoord & 0xFFFFFFFFL));
             currentRecipeStartTick = worldObj.getTotalWorldTime();
             ConditionContext context = getConditionContext();
-            if (processAgent.startRecipe(selection.getRecipe(), selection.getInputs(), selection.getOutputs(), context))
+            if (processAgent
+                .startRecipe(selection.getRecipe(), selection.getInputs(), selection.getOutputs(), context)) {
                 lastProcessErrorReason = ErrorReason.NONE;
-            else lastProcessErrorReason = ErrorReason.NO_INPUT;
+            } else if (processAgent.wasStartBlockedByCondition()) {
+                // Not a missing input. Saying so would send the player to the wrong hatch.
+                setProcessError(ErrorReason.CONDITION_NOT_MET);
+            } else {
+                lastProcessErrorReason = ErrorReason.NO_INPUT;
+            }
             return;
         }
 

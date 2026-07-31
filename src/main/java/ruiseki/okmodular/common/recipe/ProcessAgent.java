@@ -25,6 +25,7 @@ import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.parser.InputNBTRegistry;
 import ruiseki.okmodular.api.recipe.parser.OutputNBTRegistry;
 import ruiseki.okmodular.api.recipe.visitor.RecipeExecutionVisitor;
+import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 
 public class ProcessAgent extends AbstractRecipeProcess {
@@ -32,6 +33,9 @@ public class ProcessAgent extends AbstractRecipeProcess {
     private final IRecipeContext context;
     private int currentBatchSize = 1;
     private double workProgress;
+
+    /** Why the last {@link #startRecipe} refused, for the controller to report. */
+    private boolean startBlockedByCondition;
 
     public ProcessAgent(IRecipeContext context) {
         this.context = context;
@@ -51,6 +55,14 @@ public class ProcessAgent extends AbstractRecipeProcess {
     public boolean startRecipe(IModularRecipe recipe, List<IModularPort> inputPorts, List<IModularPort> outputPorts,
         ConditionContext context) {
         if (isRunning()) return false;
+
+        // Nothing checked the recipe's own conditions before it started. The search matches
+        // on inputs and the visitors below walk inputs and outputs, so a recipe whose
+        // conditions did not hold would start, eat its inputs, fail the check on the next
+        // tick and be thrown away - then start again. A machine sat there dissolving its
+        // input stack an item every other tick. Refusing here is before anything is consumed.
+        startBlockedByCondition = !recipe.isConditionMet(context);
+        if (startBlockedByCondition) return false;
 
         // Calculate maximum possible batch size
         int batchMin = 1;
@@ -214,6 +226,17 @@ public class ProcessAgent extends AbstractRecipeProcess {
         if (!isRunning()) return TickResult.IDLE;
         if (isWaitingForOutput()) return TickResult.WAITING_OUTPUT;
 
+        // Before anything is drawn for this tick. A paused recipe must not go on paying for
+        // itself, and an aborted one must not pay for the tick that killed it - which is
+        // what happened while this check sat below the per-tick consumption in executeTick.
+        if (currentRecipe != null && !currentRecipe.isConditionMet(context)) {
+            if (currentRecipe.getConditionPolicy() == ConditionPolicy.ABORT) {
+                abort();
+                return TickResult.IDLE;
+            }
+            return TickResult.PAUSED;
+        }
+
         // Generalized resource check for per-tick inputs/outputs
         for (IModularRecipeInput input : perTickInputs) {
             if (input.getInterval() > 0 && progress % input.getInterval() == 0) {
@@ -303,11 +326,7 @@ public class ProcessAgent extends AbstractRecipeProcess {
             }
         }
 
-        // 2. Continuous condition check
-        if (!checkContinuousConditions(context)) {
-            abort();
-            return;
-        }
+        // The conditions were checked in tick(), before any of the above was paid for.
 
         // 3. Per-tick recipe logic
         currentRecipe.onTick(context);
@@ -386,6 +405,16 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
     public int getBatchSize() {
         return currentBatchSize;
+    }
+
+    /**
+     * Whether the last {@link #startRecipe} refused because the recipe's own conditions did
+     * not hold, rather than because an input was missing. The two look the same to the
+     * caller otherwise, and telling a player their inputs are missing when the machine is
+     * short of energy sends them looking in the wrong place.
+     */
+    public boolean wasStartBlockedByCondition() {
+        return startBlockedByCondition;
     }
 
     public int getEnergyOutputPerTick() {

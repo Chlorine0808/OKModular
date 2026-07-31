@@ -16,6 +16,7 @@ import ruiseki.okmodular.api.recipe.io.IModularRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 
 public class ModularRecipe implements IModularRecipe {
 
@@ -28,6 +29,7 @@ public class ModularRecipe implements IModularRecipe {
     private final List<IRecipeInput> inputs;
     private final List<IRecipeOutput> outputs;
     private final List<ICondition> conditions;
+    private final ConditionPolicy conditionPolicy;
     private final Map<String, Integer> requiredComponentTiers;
 
     private ModularRecipe(Builder builder) {
@@ -40,6 +42,7 @@ public class ModularRecipe implements IModularRecipe {
         this.inputs = Collections.unmodifiableList(new ArrayList<>(builder.inputs));
         this.outputs = Collections.unmodifiableList(new ArrayList<>(builder.outputs));
         this.conditions = Collections.unmodifiableList(new ArrayList<>(builder.conditions));
+        this.conditionPolicy = builder.conditionPolicy;
         this.requiredComponentTiers = Collections.unmodifiableMap(new HashMap<>(builder.requiredComponentTiers));
     }
 
@@ -87,6 +90,11 @@ public class ModularRecipe implements IModularRecipe {
 
     public List<ICondition> getConditions() {
         return conditions;
+    }
+
+    @Override
+    public ConditionPolicy getConditionPolicy() {
+        return conditionPolicy;
     }
 
     public boolean isConditionMet(ConditionContext context) {
@@ -309,9 +317,15 @@ public class ModularRecipe implements IModularRecipe {
         }
 
         private List<ICondition> conditions = new ArrayList<>();
+        private ConditionPolicy conditionPolicy = ConditionPolicy.PAUSE;
 
         public Builder addCondition(ICondition condition) {
             this.conditions.add(condition);
+            return this;
+        }
+
+        public Builder conditionPolicy(ConditionPolicy policy) {
+            this.conditionPolicy = policy != null ? policy : ConditionPolicy.PAUSE;
             return this;
         }
 

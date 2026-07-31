@@ -32,6 +32,7 @@ Recipes are defined in `config/okmodular/recipes/*.json`.
 | `inputs` / `input` | array | Inputs |
 | `outputs` / `output` | array | Outputs |
 | `conditions` / `condition` | array or object | Conditions → [CONDITIONS.md](./CONDITIONS.md) |
+| `conditionPolicy` | string | What happens to this recipe when `conditions` stop holding mid-run (`pause` / `abort`, default: `pause`) |
 | `decorators` | array | Extended behaviour → [DECORATORS.md](./DECORATORS.md) |
 | `tier` / `tiers` | object | Required component tiers (e.g. `{"glass": 1, "casing": 3}`) |
 | `priority` | number | Priority |
@@ -41,8 +42,12 @@ Recipes are defined in `config/okmodular/recipes/*.json`.
 | `abstract` | boolean | Make this an inheritance-only recipe → §6 |
 
 > [!NOTE]
-> `speedMultiplier` / `energyMultiplier` / `batchMin` / `batchMax` / `durationPolicy` / `conditionPolicy` are structure JSON keys.
+> `speedMultiplier` / `energyMultiplier` / `batchMin` / `batchMax` / `durationPolicy` are structure JSON keys.
 > They are per-machine settings, so writing them in a recipe has no effect.
+>
+> `conditionPolicy` exists in **both**. On a structure it governs the
+> [machine's own conditions](../machinery/MACHINE_CONDITIONS.md); on a recipe it governs that
+> recipe's own `conditions`. They are set separately.
 
 ## 2.1 Recipe priority
 

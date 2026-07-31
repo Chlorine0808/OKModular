@@ -11,6 +11,7 @@ import ruiseki.okmodular.api.recipe.parser.impl.ConditionPropertyParser;
 import ruiseki.okmodular.api.recipe.parser.impl.DurationParser;
 import ruiseki.okmodular.api.recipe.parser.impl.InputPropertyParser;
 import ruiseki.okmodular.api.recipe.parser.impl.OutputPropertyParser;
+import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 
 /**
  * Registry for recipe property parsers.
@@ -54,6 +55,13 @@ public class RecipeParserRegistry {
         ConditionPropertyParser conditionParser = new ConditionPropertyParser();
         register("conditions", conditionParser);
         register("condition", conditionParser);
+        // Same key and same meaning as a structure's, and an unreadable name falls back to
+        // the default rather than stopping the recipe from loading.
+        register("conditionPolicy", (builder, element) -> {
+            if (element.isJsonPrimitive()) {
+                builder.conditionPolicy(ConditionPolicy.fromString(element.getAsString(), ConditionPolicy.PAUSE));
+            }
+        });
 
         // Tiers
         register("tiers", (builder, element) -> {

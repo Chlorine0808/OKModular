@@ -10,6 +10,7 @@ import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.ItemInput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 
 /**
  * Base interface for all modular recipes.
@@ -75,6 +76,18 @@ public interface IRecipe extends Comparable<IRecipe> {
     List<ICondition> getConditions();
 
     boolean isConditionMet(ConditionContext context);
+
+    /**
+     * What becomes of this recipe when its own conditions stop holding mid-run.
+     * <p>
+     * Recipe conditions used to be checked only while running, and a failure always threw
+     * the recipe away along with everything it had already eaten. Structures could choose
+     * between pausing and aborting; recipes could not. They can now, and the default is the
+     * same {@link ConditionPolicy#PAUSE} for the same reason.
+     */
+    default ConditionPolicy getConditionPolicy() {
+        return ConditionPolicy.PAUSE;
+    }
 
     @Override
     default int compareTo(IRecipe other) {
