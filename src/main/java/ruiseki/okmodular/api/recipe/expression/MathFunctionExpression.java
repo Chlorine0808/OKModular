@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
@@ -82,7 +81,9 @@ public class MathFunctionExpression implements IExpression {
     @Override
     public EvaluationValue evaluate(ConditionContext context) {
         if (functionName.equals("random")) {
-            return new EvaluationValue(new Random(context.getEvaluationSeed()).nextDouble());
+            // See SeedMixer: new Random(seed).nextDouble() answers almost the same number for
+            // seeds a few apart, and one machine's seeds are always close together.
+            return new EvaluationValue(SeedMixer.toUnitInterval(context.getEvaluationSeed(), SeedMixer.RANDOM));
         }
 
         if (arguments == null || arguments.isEmpty()) return EvaluationValue.ZERO;
@@ -146,7 +147,8 @@ public class MathFunctionExpression implements IExpression {
             case "sign":
                 return new EvaluationValue(Math.signum(val));
             case "chance":
-                return new EvaluationValue(new Random(context.getEvaluationSeed() + 1).nextDouble() < val);
+                return new EvaluationValue(
+                    SeedMixer.toUnitInterval(context.getEvaluationSeed(), SeedMixer.CHANCE) < val);
             case "npr":
             case "perm":
             case "permu":
