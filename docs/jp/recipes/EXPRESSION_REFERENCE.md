@@ -230,6 +230,13 @@ long は**大文字のみ**です（小文字の `l` は `1` と紛らわしい�
 | `energy` / `mana` などのリソース量 | 同上 |
 | デコレータの `chance` | 判定時 |
 | `condition` / `conditions` | 稼働中は毎 tick |
+| 構造体の `speedMultiplier` | 稼働中は毎 tick |
+| 構造体の `batchMin` / `batchMax` | レシピ開始時 |
+| 構造体の `energyMultiplier` | レシピ側が `energy_multi` を読んだとき |
+
+構造体の性能係数からもレシピと同じように機械が見えるので、
+`"speedMultiplier": "1 + tier * 0.25"` と書けます。ただし**その係数自身は読めません** —
+[構造体の JSON フォーマット](../structures/JSON_FORMAT.md) を参照。
 
 ### よくある間違い
 - **文字列の引用符**: 式自体は JSON 内で文字列として `"amount": "tier * 2"` のように記述します。

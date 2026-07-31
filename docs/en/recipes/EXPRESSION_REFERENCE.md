@@ -236,6 +236,13 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 | Resource amounts such as `energy` and `mana` | As above |
 | A decorator's `chance` | When it is rolled |
 | `condition` / `conditions` | Every tick while running |
+| The structure's `speedMultiplier` | Every tick while running |
+| The structure's `batchMin` / `batchMax` | When a recipe starts |
+| The structure's `energyMultiplier` | When a recipe reads `energy_multi` |
+
+A structure's performance modifiers see the machine just as a recipe does, so
+`"speedMultiplier": "1 + tier * 0.25"` works. **A modifier cannot read itself**, though —
+see [the structure JSON format](../structures/JSON_FORMAT.md).
 
 ### Common Pitfalls
 - **Quotes in JSON**: Expressions themselves must be strings in JSON, e.g., `"amount": "tier * 2"`.
