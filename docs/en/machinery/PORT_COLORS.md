@@ -1,7 +1,7 @@
 # Port Colours
 
-Paint a machine's ports and **only ports of the same colour are considered together**.
-One machine can then hold several independent lines that take material separately.
+Paint a machine's ports and **only ports of the same colour are treated as one group**.
+One machine can then hold several lines that take material independently.
 
 ## 📚 Related Documentation
 
@@ -10,54 +10,44 @@ One machine can then hold several independent lines that take material separatel
 
 ---
 
-## 1. What it does
+## 1. Summary
 
-For running several lines through one machine, assembly-line style.
+For managing several kinds of recipe through one machine.
 
 - Material put in a red port comes out of a red port
 - Material put in a blue port comes out of a blue port
 - Red and blue never combine to satisfy one recipe
-
-> [!IMPORTANT]
-> **Only one recipe runs at a time.**
-> Colours decide which material is looked at together, and which colour is looked at
-> first. **They are not parallel processing.** With material in both red and blue, the
-> machine runs the red recipe, finishes it, and then runs the blue one.
+- Only one recipe runs at a time; this is not parallel processing.
 
 ## 2. Painting
 
 | Action | Result |
 |---|---|
-| **Right-click a port with a dye** | Paints it that colour (consumes one dye) |
-| **Right-click with a bucket of water** | Washes the colour off (**the water is not used up**) |
+| **Right-click a port with a dye** | Paints it that colour (consumes the dye) |
+| **Right-click with a bucket of water** | Washes the colour off (the water is not used up) |
 | **Shift + Right-click with AE2's Color Applicator** | Paints |
 | **Right-click with IC2's Painter** | Paints |
 
 Holding neither a dye nor a water bucket, right-clicking opens the GUI as before.
 Painting a port the colour it already is consumes no dye.
 
-The colour also shows in the WAILA tooltip, which is how to check one: a machine with
-its own colour scheme can make a painted port hard to read at a glance.
+The colour also shows in the WAILA tooltip.
 
 > [!NOTE]
-> **External blocks used as ports - a vanilla chest, say - cannot be painted yet.** They
-> count as unpainted, so by the rules below every colour shares them.
+External block ports cannot be painted yet.
+They count as unpainted, so by the rules below every colour shares them.
 
-## 3. Which ports belong to which group
-
-Five rules.
+## 3. The order recipes run in
 
 | # | Rule |
 |---|---|
-| 1 | A painted port belongs **only to its own colour's group** |
-| 2 | **An unpainted port belongs to every group** |
-| 3 | Groups are looked at in the order white, orange, magenta, light blue, yellow, lime, pink, gray, light gray, cyan, purple, blue, brown, green, red, black |
-| 4 | The group of **unpainted ports comes last** |
+| 1 | A painted port belongs to its own colour's group |
+| 2 | An unpainted port belongs to every colour's group |
+| 3 | Groups are looked at in metadata order, that is white → orange → magenta → light blue → yellow → lime → pink → gray → light gray → cyan → purple → blue → brown → green → red → black |
+| 4 | The group of unpainted ports only comes last |
 | 5 | The controller itself belongs to every group, whatever its colour |
 
-### What rule 2 is for
-
-So that an energy hatch does not have to exist once per colour.
+For example, this arrangement gives:
 
 ```
 red ports:  item in, item out
@@ -68,44 +58,23 @@ unpainted:  one energy input
 -> blue group = blue in, blue out, the unpainted energy hatch
 ```
 
-**It has a cost.** Material in an unpainted input port is visible to **every** colour,
-so colours do not isolate completely. For full separation, **paint every port**.
+Material in an unpainted input port is visible to every colour.
 
-### What rule 4 is for
-
-It follows from rule 2. The unpainted group holds every unpainted port, so it matches
-almost anything. Looked at first, it would make painting pointless.
-
-A machine with no unpainted ports at all gets no such group.
 
 ## 4. How a recipe is chosen
 
-Groups are tried in order, and the first one that **both matches a recipe and has room
-for its output** runs.
+Groups are tried in order, and the first recipe that both matches and has room for its
+output runs.
 
 > [!NOTE]
-> **A group whose output is blocked is skipped, not treated as a stop.**
+> A group whose output is blocked is skipped.
 > A full red output tank does not hold blue back.
 
-When no group can run, the GUI shows the failure from the **highest-priority colour**
-that got that far.
+When no group can run, the GUI shows the error from the highest-priority colour.
 
-## 5. Appearance
+## 5. Tips
 
-A painted port renders in its colour, and **that wins over any tint the machine's
-structure sets**. An unpainted port looks exactly as it did.
+Breaking a port does not lose its colour.
 
-## 6. Saving
-
-Colours are stored in the world and survive a reload.
-
-**Breaking a port does not lose its colour.** The dropped item carries it, putting the
-port back down restores it, and the item's tooltip says which colour it is.
-
-> [!NOTE]
-> **Per-side IO settings do reset when a port is placed again.** That is separate from
-> colour and has always been the case - they are set from the direction it is placed
-> facing.
-
-Colour is a **separate axis** from ordered port positions (`portIndex` in structure
-JSON): the index is read within a colour's group, so both work at once.
+Colour is a separate axis from ordered port positions (`portIndex` in structure JSON).
+The index is read within a colour's group, so both work at once.
