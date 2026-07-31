@@ -118,7 +118,7 @@ public class EnergyInput extends AbstractModularRecipeInput {
 
     @Override
     public boolean validate() {
-        return amount > 0;
+        return hasAmount();
     }
 
     public static EnergyInput fromJson(JsonObject json) {

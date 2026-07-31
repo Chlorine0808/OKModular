@@ -82,6 +82,22 @@ public abstract class AbstractModularRecipeInput extends AbstractRecipeInput imp
     }
 
     /**
+     * Whether an amount was given at all, for {@code validate()} to build on.
+     * <p>
+     * Every subclass used to spell this as {@code amount > 0}, which is wrong the moment the
+     * amount is an expression: the readers park the expression in {@code amountExpr} and
+     * leave {@code amount} at zero, so {@code fromJson} returned null and <b>the whole input
+     * disappeared from the recipe</b> with no error and no log. A recipe meant to draw energy
+     * every tick simply ran for free.
+     * <p>
+     * The rule is that validation rejects only what it can prove unusable. An expression
+     * cannot be judged here - it has no value until a machine evaluates it.
+     */
+    protected boolean hasAmount() {
+        return amount > 0 || amountExpr != null;
+    }
+
+    /**
      * Reads common amount fields from JSON.
      * Subclasses should call this before reading their specific fields.
      *

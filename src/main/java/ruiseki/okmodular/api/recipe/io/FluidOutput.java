@@ -164,7 +164,9 @@ public class FluidOutput extends AbstractModularRecipeOutput {
 
     @Override
     public boolean validate() {
-        return fluidName != null && !fluidName.isEmpty() && amount > 0;
+        // No behaviour change: read() parks 1000 in amount when the amount is an expression,
+        // so this one happened to survive. Left spelled by hand it invites the copy back.
+        return fluidName != null && !fluidName.isEmpty() && hasAmount();
     }
 
     public static FluidOutput fromJson(JsonObject json) {

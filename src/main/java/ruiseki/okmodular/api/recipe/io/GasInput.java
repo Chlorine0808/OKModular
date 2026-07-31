@@ -111,7 +111,7 @@ public class GasInput extends AbstractModularRecipeInput {
 
     @Override
     public boolean validate() {
-        return amount > 0;
+        return hasAmount();
     }
 
     public static GasInput fromJson(JsonObject json) {

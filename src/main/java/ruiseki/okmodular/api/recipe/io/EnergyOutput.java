@@ -123,7 +123,7 @@ public class EnergyOutput extends AbstractModularRecipeOutput {
 
     @Override
     public boolean validate() {
-        return amount > 0;
+        return hasAmount();
     }
 
     public static EnergyOutput fromJson(JsonObject json) {

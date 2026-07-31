@@ -75,6 +75,17 @@ public abstract class AbstractModularRecipeOutput extends AbstractRecipeOutput i
     }
 
     /**
+     * Whether an amount was given at all, for {@code validate()} to build on.
+     * <p>
+     * See {@link AbstractModularRecipeInput#hasAmount()} - the same {@code amount > 0} was
+     * written out in every subclass, and it silently dropped any output whose amount was an
+     * expression.
+     */
+    protected boolean hasAmount() {
+        return amount > 0 || amountExpr != null;
+    }
+
+    /**
      * Reads common amount fields from JSON.
      * Subclasses should call this before reading their specific fields.
      *
