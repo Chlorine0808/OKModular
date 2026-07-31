@@ -237,10 +237,21 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 | Field | Evaluated |
 |-------|-----------|
 | `duration` | When the recipe starts (every tick while running if the structure sets `"durationPolicy": "perTick"`) |
-| `amount` on inputs and outputs | Each time it is consumed or produced |
-| Resource amounts such as `energy` and `mana` | As above |
+| `amount` on an input | When it is consumed - every tick for `perTick`, otherwise at the start |
+| **`amount` on an output produced on completion** | **When the recipe starts.** See the note below |
+| `amount` on a `perTick` output | Every tick |
+| Resource amounts such as `energy` and `mana` | As above, by whether they are input or output and `perTick` |
 | A decorator's `chance` | When it is rolled |
-| `condition` / `conditions` | Every tick while running |
+| `condition` / `conditions` | When the recipe starts, and every tick while it runs |
+
+> [!NOTE]
+> **How much a recipe pays out is settled when it starts.** Change the machine's tier
+> mid-run and the recipe still hands back what it was worth when it began. Its inputs were
+> taken at the start, so anything else would let you begin at a low tier and finish at a
+> high one.
+>
+> Only the amount is settled. An output item's `nbt` expressions and the decorators
+> (`chance`, `bonus`) are still evaluated when the output is produced.
 | The structure's `speedMultiplier` | Every tick while running |
 | The structure's `batchMin` / `batchMax` | When a recipe starts |
 | The structure's `energyMultiplier` | When a recipe reads `energy_multi` |

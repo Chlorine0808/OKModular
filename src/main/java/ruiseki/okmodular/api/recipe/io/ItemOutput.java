@@ -233,6 +233,17 @@ public class ItemOutput extends AbstractModularRecipeOutput {
     }
 
     @Override
+    public void resolveAmount(ConditionContext context) {
+        // This one keeps its amount in the stack rather than in the inherited field, so the
+        // base implementation would write somewhere nothing reads.
+        if (amountExpr == null) return;
+        int resolved = (int) getRequiredAmount(context);
+        this.count = resolved;
+        if (output != null) output.stackSize = resolved;
+        this.amountExpr = null;
+    }
+
+    @Override
     public void read(JsonObject json) {
         readPerTick(json, 0);
         if (json.has("index")) this.index = json.get("index")

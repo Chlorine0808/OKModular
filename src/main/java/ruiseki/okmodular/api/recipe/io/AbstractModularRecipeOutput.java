@@ -66,6 +66,13 @@ public abstract class AbstractModularRecipeOutput extends AbstractRecipeOutput i
      * @param context The condition context for evaluation
      * @return The evaluated amount (always >= 0)
      */
+    @Override
+    public void resolveAmount(ConditionContext context) {
+        if (amountExpr == null) return;
+        this.amount = (int) evaluateAmount(context);
+        this.amountExpr = null;
+    }
+
     protected long evaluateAmount(ConditionContext context) {
         if (amountExpr != null && context != null) {
             double evaluated = amountExpr.evaluateDouble(context);

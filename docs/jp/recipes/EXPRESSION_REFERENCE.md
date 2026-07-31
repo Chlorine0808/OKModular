@@ -230,10 +230,20 @@ long は**大文字のみ**です（小文字の `l` は `1` と紛らわしい�
 | フィールド | 評価タイミング |
 |-----------|--------------|
 | `duration` | レシピ開始時（ただし構造体で `"durationPolicy": "perTick"` を指定すると実行中毎 tick） |
-| 入力・出力の `amount` | 毎回の消費・生産時 |
-| `energy` / `mana` などのリソース量 | 同上 |
+| 入力の `amount` | 消費時（`perTick` なら毎 tick、そうでなければレシピ開始時） |
+| **完成時に出す出力の `amount`** | **レシピ開始時**。下の NOTE を参照 |
+| `perTick` 出力の `amount` | 毎 tick |
+| `energy` / `mana` などのリソース量 | 上と同じ（入力か出力か、`perTick` かで決まる） |
 | デコレータの `chance` | 判定時 |
-| `condition` / `conditions` | 稼働中は毎 tick |
+| `condition` / `conditions` | レシピ開始時と、稼働中は毎 tick |
+
+> [!NOTE]
+> **完成時の出力量はレシピが始まった時点で確定します。** 稼働中に Tier を変えても、
+> そのレシピは**始めたときの Tier の分**を出します。入力は開始時に消費されているので、
+> そうしないと「低 Tier で始めて高 Tier で終わらせる」が成立してしまいます。
+>
+> 確定するのは**量だけ**です。出力アイテムの `nbt` 式とデコレータ（`chance` / `bonus`）は
+> 従来どおり出力時に評価されます。
 | 構造体の `speedMultiplier` | 稼働中は毎 tick |
 | 構造体の `batchMin` / `batchMax` | レシピ開始時 |
 | 構造体の `energyMultiplier` | レシピ側が `energy_multi` を読んだとき |

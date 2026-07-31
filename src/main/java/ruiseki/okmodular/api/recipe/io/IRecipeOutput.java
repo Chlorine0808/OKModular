@@ -60,6 +60,17 @@ public interface IRecipeOutput extends IJsonMaterial {
      * @param context The condition context
      * @return The produced amount
      */
+       /**
+        * Fix the amount to what the given context says, so it no longer depends on one.
+        * <p>
+        * Called on the copies a recipe caches when it starts. Those copies already decide
+        * <em>what</em> gets produced; this makes them decide <em>how much</em> as well, so that
+        * changing the machine mid-run cannot change the payout of work that was set up under
+        * the old state. An output with no expression has nothing to do here, which is why the
+        * default does nothing.
+        */
+    default void resolveAmount(ConditionContext context) {}
+
     default long getRequiredAmount(ConditionContext context) {
         return getRequiredAmount();
     }

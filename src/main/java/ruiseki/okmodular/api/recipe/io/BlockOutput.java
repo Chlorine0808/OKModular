@@ -336,6 +336,15 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
     }
 
     @Override
+    public void resolveAmount(ConditionContext context) {
+        // This one always holds an expression - the constructor wraps the plain amount in a
+        // ConstantExpression - so it is rebuilt rather than dropped, which is also what
+        // writeToNBT keys on.
+        this.amount = (int) getRequiredAmount(context);
+        this.amountExpr = new ConstantExpression(amount);
+    }
+
+    @Override
     public void read(JsonObject json) {
         readPerTick(json, 0);
         if (json.has("index")) {
