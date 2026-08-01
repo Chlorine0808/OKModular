@@ -20,10 +20,11 @@ public enum ErrorReason {
     /**
      * A running recipe is waiting for its own conditions to hold again.
      * <p>
-     * The wording used to say redstone, which nothing ever set it for - a redstone-disabled
-     * machine goes idle instead. The only thing that reaches this is a recipe whose
-     * {@code conditionPolicy} is {@code pause}, so the detail carries the condition that
-     * stopped it.
+     * The wording used to say redstone. What reaches the GUI under this name is a recipe
+     * whose {@code conditionPolicy} is {@code pause}, so the detail carries the condition
+     * that stopped it. A redstone-disabled machine has no condition to name and is shown
+     * under {@code gui.status.redstone_off} instead - it used to borrow this text and, once
+     * the detail was added, rendered as "Format error".
      */
     PAUSED("paused", "Paused: %s"),
     MISSING_BLUEPRINT("missing_blueprint", "No Blueprint"),

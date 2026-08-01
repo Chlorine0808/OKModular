@@ -336,6 +336,7 @@ gui.status.no_mana=マナが足りません
 gui.status.block_missing=ブロックがありません
 gui.status.block_output_full=ブロックを置く空きがありません
 gui.status.condition_not_met=稼働条件を満たしていません: %s
+gui.status.redstone_off=レッドストーン信号で停止中
 
 # --- ME ポートの状態（WAILA） ---
 waila.me.online=ME ネットワークに接続中

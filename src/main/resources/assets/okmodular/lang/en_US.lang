@@ -333,6 +333,7 @@ gui.status.no_mana=Insufficient Mana
 gui.status.block_missing=Block missing
 gui.status.block_output_full=No space for Block
 gui.status.condition_not_met=Conditions not met: %s
+gui.status.redstone_off=Paused by redstone
 
 # --- ME port status (shown in WAILA) ---
 waila.me.online=ME network online

@@ -209,7 +209,11 @@ public class GuiManager {
         }
 
         if (!controller.isRedstoneActive()) {
-            return LangHelpers.localize(ErrorReason.PAUSED.getUnlocalizedName());
+            // Its own text rather than PAUSED's. That one gained a "%s" for the condition
+            // that stopped the recipe, and localizing it without one renders as
+            // "Format error: Paused, waiting on: %s" - which is what a redstone-disabled
+            // machine has been showing since the detail was added.
+            return LangHelpers.localize("gui.status.redstone_off");
         }
 
         ProcessAgent agent = controller.getProcessAgent();
