@@ -159,11 +159,9 @@ public abstract class AbstractMBModifierTE extends AbstractMachineTE {
             return;
         }
 
-        boolean valid = structureCheck(
-            getStructurePieceName(),
-            getOffSet()[getTier() - 1][0],
-            getOffSet()[getTier() - 1][1],
-            getOffSet()[getTier() - 1][2]);
+        // See StructureOffsets for why the tier cannot index this table directly.
+        int[] offset = StructureOffsets.forTier(getOffSet(), getTier());
+        boolean valid = structureCheck(getStructurePieceName(), offset[0], offset[1], offset[2]);
 
         if (!valid) return;
     }

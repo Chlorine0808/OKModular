@@ -326,13 +326,14 @@ gui.status.input_missing=Input missing
 gui.status.no_matching_recipe=No matching recipe
 gui.status.waiting_output=Waiting for output space
 gui.status.no_input=No input resources
-gui.status.paused=Paused by Redstone
+gui.status.paused=Paused, waiting on: %s
 gui.status.missing_blueprint=No Blueprint
 gui.status.output_capacity_insufficient=Output Capacity Insufficient: %s
 gui.status.no_mana=Insufficient Mana
 gui.status.block_missing=Block missing
 gui.status.block_output_full=No space for Block
 gui.status.condition_not_met=Conditions not met: %s
+gui.status.redstone_off=Paused by redstone
 
 # --- ME port status (shown in WAILA) ---
 waila.me.online=ME network online

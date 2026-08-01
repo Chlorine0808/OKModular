@@ -15,7 +15,7 @@
 
 | type 名 | 動作 | 推論に使われるプロパティ |
 |---------|------|------------------------|
-| `chance` | レシピの成功確率を制御 | `chance` |
+| `chance` | レシピの成功確率を制御（外れると出力なし） | `chance` |
 | `bonus` | 確率で追加の出力を生成 | `chance` + `outputs` |
 | `weighted_random` | 重み付きリストから出力を選択 | `outputs`（各要素に `weight`）／ `pool` ／ `rolls` |
 | `requirement` | 実行中に追加の条件・触媒をチェック | `condition` / `requirements` |

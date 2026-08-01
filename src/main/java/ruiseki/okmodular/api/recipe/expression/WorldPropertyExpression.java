@@ -106,15 +106,17 @@ public class WorldPropertyExpression implements IExpression {
                             context.getY(),
                             context.getZ()));
                 break;
+            // Both delegate to the function form rather than answering for themselves. They
+            // used to ask the chunk's height map instead: can_see_void as
+            // getHeightValue() < 0, which is never true, and can_see_sky as
+            // canBlockSeeTheSky at the controller's own coordinates. The docs say the two
+            // spellings ask the same question, so only one of them gets to answer it.
+            // See VisionFunctionExpression.SKY for what the height map was actually saying.
             case "can_see_sky":
-                result = new EvaluationValue(
-                    context.getWorld()
-                        .canBlockSeeTheSky(context.getX(), context.getY(), context.getZ()));
+                result = VisionFunctionExpression.SKY.evaluate(context);
                 break;
             case "can_see_void":
-                result = new EvaluationValue(
-                    context.getWorld()
-                        .getHeightValue(context.getX(), context.getZ()) < 0);
+                result = VisionFunctionExpression.VOID.evaluate(context);
                 break;
             case "x":
                 result = new EvaluationValue((double) context.getX());

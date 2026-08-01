@@ -42,12 +42,16 @@ public class BiomePatternCondition implements ICondition {
                 int dx = c - centerCol;
                 int dz = r - centerRow;
 
+                // Position moved, nothing else changed - the evaluation seed included, or
+                // random() and chance() inside a pattern would fall back to seed zero and
+                // answer the same thing forever. See OffsetCondition.isMet.
                 ConditionContext offsetContext = new ConditionContext(
                     context.getWorld(),
                     context.getX() + dx,
                     context.getY(),
                     context.getZ() + dz,
-                    context.getRecipeContext());
+                    context.getRecipeContext(),
+                    context.getEvaluationSeed());
 
                 if (!keys.get(ch)
                     .isMet(offsetContext)) {

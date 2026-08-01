@@ -135,7 +135,7 @@ public class VisOutput extends AbstractModularRecipeOutput {
 
     @Override
     public boolean validate() {
-        return aspectTag != null && !aspectTag.isEmpty() && amount > 0;
+        return aspectTag != null && !aspectTag.isEmpty() && hasAmount();
     }
 
     public static VisOutput fromJson(JsonObject json) {

@@ -8,6 +8,7 @@ import ruiseki.okmodular.api.recipe.core.AbstractRecipeProcess;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeOutput;
+import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 
 /**
  * Visitor that handles the actual execution of a recipe.
@@ -67,13 +68,24 @@ public class RecipeExecutionVisitor implements IRecipeVisitor {
 
     // --- Modular Outputs ---
 
+    /**
+     * The cached copy is the recipe's promise of what it will hand back, so its amount is
+     * settled here rather than left as an expression to be evaluated on completion - a
+     * machine whose tier changes mid-run would otherwise pay out at the new tier for work
+     * set up under the old one. A {@code perTick} output says every tick on its face, so it
+     * keeps its expression.
+     */
     @Override
     public void visit(IModularRecipeOutput output) {
         if (mode == Mode.CACHE) {
             if (output.isPerTick()) {
                 agent.addPerTickOutput((IModularRecipeOutput) output.copy(batchSize));
             } else {
-                agent.addCachedOutput(output.copy(batchSize));
+                // copy(1) rather than copy(batchSize): the batch is applied by resolving the
+                // amount once per run, not by scaling one result.
+                IRecipeOutput cached = output.copy(1);
+                cached.resolveAmount(context, batchSize);
+                agent.addCachedOutput(cached);
             }
         }
     }
@@ -91,7 +103,11 @@ public class RecipeExecutionVisitor implements IRecipeVisitor {
             if (output.isPerTick()) {
                 agent.addPerTickOutput((IModularRecipeOutput) output.copy(batchSize));
             } else {
-                agent.addCachedOutput(output.copy(batchSize));
+                // copy(1) rather than copy(batchSize): the batch is applied by resolving the
+                // amount once per run, not by scaling one result.
+                IRecipeOutput cached = output.copy(1);
+                cached.resolveAmount(context, batchSize);
+                agent.addCachedOutput(cached);
             }
         }
     }

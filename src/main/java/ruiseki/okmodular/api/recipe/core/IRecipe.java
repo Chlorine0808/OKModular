@@ -10,6 +10,7 @@ import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.ItemInput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 
 /**
  * Base interface for all modular recipes.
@@ -75,6 +76,55 @@ public interface IRecipe extends Comparable<IRecipe> {
     List<ICondition> getConditions();
 
     boolean isConditionMet(ConditionContext context);
+
+    /**
+     * Whether the recipe may begin.
+     * <p>
+     * The same conditions as {@link #isConditionMet}, plus anything that is decided once for
+     * a run rather than examined continuously. Nothing uses the extra room today - a success
+     * chance did, and {@link #producesOutput} explains why it no longer can - but the
+     * distinction between "checked every tick" and "settled once" is real and is what keeps
+     * a per-run decision out of the per-tick path.
+     */
+    default boolean canStart(ConditionContext context) {
+        return isConditionMet(context);
+    }
+
+    /**
+     * Whether this run hands back its outputs.
+     * <p>
+     * <b>A success chance has to be paid for, or it is not a chance.</b> The {@code chance}
+     * decorator used to refuse to start, which sounds equivalent and is not: a machine that
+     * is refused simply tries again on the next tick with a fresh draw, so a 0.25 recipe
+     * started within a few ticks and ran to completion every single time. Nothing was
+     * consumed by a losing draw, so there was nothing to distinguish 0.25 from 1.0. The docs
+     * call it a success rate, and a rate you cannot lose is not one.
+     * <p>
+     * Asked once, when the run finishes. The inputs are already gone and the time is already
+     * spent; what a lost draw costs is the payout. The draw itself is still made once per
+     * run - the machine's evaluation seed is fixed when a recipe starts and does not move
+     * again until the next one begins, so asking at the end returns the answer that was
+     * already determined at the start.
+     *
+     * @param context the evaluating machine's context; the same one the outputs are produced
+     *                against
+     * @return true when the outputs should be produced
+     */
+    default boolean producesOutput(ConditionContext context) {
+        return true;
+    }
+
+    /**
+     * What becomes of this recipe when its own conditions stop holding mid-run.
+     * <p>
+     * Recipe conditions used to be checked only while running, and a failure always threw
+     * the recipe away along with everything it had already eaten. Structures could choose
+     * between pausing and aborting; recipes could not. They can now, and the default is the
+     * same {@link ConditionPolicy#PAUSE} for the same reason.
+     */
+    default ConditionPolicy getConditionPolicy() {
+        return ConditionPolicy.PAUSE;
+    }
 
     @Override
     default int compareTo(IRecipe other) {

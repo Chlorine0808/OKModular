@@ -38,12 +38,14 @@ public class ExpressionRegistry {
         registerWorldProperty("is_night");
         registerWorldProperty("is_raining");
         registerWorldProperty("is_thundering");
-        registerFunction(
-            "can_see_sky",
-            (args, parser) -> new VisionFunctionExpression(VisionFunctionExpression.Direction.SKY, args));
-        registerFunction(
-            "can_see_void",
-            (args, parser) -> new VisionFunctionExpression(VisionFunctionExpression.Direction.VOID, args));
+        // Both spellings. can_see_sky() takes block ids to see through; the bare name is the
+        // same test with no ids, and WorldPropertyExpression delegates to the function so
+        // that stays true - answering it separately is what made the variable a constant 0.
+        // Only the function was registered, so `can_see_sky == 1` was rejected as an unknown
+        // variable even though the evaluation existed - the same two-hand-written-lists
+        // failure the machine properties were driven off a single table to avoid.
+        registerWorldProperty("can_see_sky");
+        registerWorldProperty("can_see_void");
         registerWorldProperty("tick");
         registerWorldProperty("recipe_tick");
         registerWorldProperty("progress_tick");

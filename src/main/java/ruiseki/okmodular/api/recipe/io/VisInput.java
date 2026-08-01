@@ -106,7 +106,7 @@ public class VisInput extends AbstractModularRecipeInput {
 
     @Override
     public boolean validate() {
-        return aspectTag != null && !aspectTag.isEmpty() && amount > 0;
+        return aspectTag != null && !aspectTag.isEmpty() && hasAmount();
     }
 
     public static VisInput fromJson(JsonObject json) {

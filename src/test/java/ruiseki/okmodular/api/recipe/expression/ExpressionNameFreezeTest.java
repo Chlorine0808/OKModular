@@ -92,9 +92,15 @@ public class ExpressionNameFreezeTest {
 
     /**
      * 変数として使えるワールドプロパティ。
-     * ExpressionRegistry の registerWorldProperty 22 件。
+     * ExpressionRegistry の registerWorldProperty 24 件。
+     *
+     * `can_see_sky` / `can_see_void` は**関数としても変数としても書ける**。
+     * `WorldPropertyExpression:109` に評価はあったのに関数だけ登録されていて、
+     * 変数形式が `Unknown variable` で弾かれていた（shipped の sample_05 が丸ごと死んでいた）。
+     * 関数形式は FUNCTION_CALLS 側にもある。
      */
     private static final String[] WORLD_PROPERTIES = {
+        "can_see_sky", "can_see_void",
         "day", "dimension", "humidity",
         "is_day", "is_night", "is_raining", "is_thundering",
         "light", "light_block", "light_sky",

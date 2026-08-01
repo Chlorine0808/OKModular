@@ -46,6 +46,7 @@ public class BlockMachineController extends AbstractBlock<TEMachineController> i
         setResistance(10.0F);
         // Enable translucent overlay rendering
         isFullSize = isOpaque = false;
+        this.useNeighborBrightness = true;
     }
 
     @Override

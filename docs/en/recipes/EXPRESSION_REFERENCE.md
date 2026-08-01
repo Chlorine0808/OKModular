@@ -154,6 +154,10 @@ Performance multipliers provided by the structure definition.
 > [!NOTE]
 > **The batch size is applied to amounts for you.** An amount written as an expression, such as `"amount": "2 + tier"`, is tripled when the machine runs a batch of three. Do not multiply by `batch` inside the expression — that applies it twice.
 > The `batch` variable is for when the batch size itself is what you want to reason about.
+>
+> **An output produced on completion draws once per item of the batch.** `"1 + floor(random() * 3)"`
+> at a batch of three yields anything from 3 to 9, not only multiples of three: a batch of n
+> is n runs of the recipe.
 
 ---
 
@@ -173,6 +177,14 @@ Performance multipliers provided by the structure definition.
 ### Advanced Functions
 - `can_see_sky(filter...)`: Check sky visibility. Specify IDs to treat blocks like glass as transparent
 - `can_see_void(filter...)`: Check if there is void directly below
+
+> [!NOTE]
+> **Both also work without the brackets**, as the world properties listed above -
+> `can_see_sky == 1`. The bare form is the plain test; reach for the function form only when
+> you need to name blocks to see through.
+> **Either spelling counts from the block above the controller** (below it, for
+> `can_see_void`). The controller itself is a solid cube, so including its own position
+> would make the answer always false.
 - `count_blocks(distance, filter...)`: Count specific blocks within a range
     - Example: `count_blocks(1, "minecraft:iron_block")`
 - `nbt('key')`: Retrieve NBT from the machine itself
@@ -232,10 +244,29 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 | Field | Evaluated |
 |-------|-----------|
 | `duration` | When the recipe starts (every tick while running if the structure sets `"durationPolicy": "perTick"`) |
-| `amount` on inputs and outputs | Each time it is consumed or produced |
-| Resource amounts such as `energy` and `mana` | As above |
-| A decorator's `chance` | When it is rolled |
-| `condition` / `conditions` | Every tick while running |
+| `amount` on an input | When it is consumed - every tick for `perTick`, otherwise at the start |
+| **`amount` on an output produced on completion** | **When the recipe starts.** See the note below |
+| `amount` on a `perTick` output | Every tick |
+| Resource amounts such as `energy` and `mana` | As above, by whether they are input or output and `perTick` |
+| A recipe's `chance` decorator | Once per run (settled on completion) |
+| An output decorator's `chance` | When it is rolled |
+| `condition` / `conditions` | When the recipe starts, and every tick while it runs |
+
+> [!NOTE]
+> **How much a recipe pays out is settled when it starts.** Change the machine's tier
+> mid-run and the recipe still hands back what it was worth when it began. Its inputs were
+> taken at the start, so anything else would let you begin at a low tier and finish at a
+> high one.
+>
+> Only the amount is settled. An output item's `nbt` expressions and the decorators
+> (`chance`, `bonus`) are still evaluated when the output is produced.
+| The structure's `speedMultiplier` | Every tick while running |
+| The structure's `batchMin` / `batchMax` | When a recipe starts |
+| The structure's `energyMultiplier` | When a recipe reads `energy_multi` |
+
+A structure's performance modifiers see the machine just as a recipe does, so
+`"speedMultiplier": "1 + tier * 0.25"` works. **A modifier cannot read itself**, though —
+see [the structure JSON format](../structures/JSON_FORMAT.md).
 
 ### Common Pitfalls
 - **Quotes in JSON**: Expressions themselves must be strings in JSON, e.g., `"amount": "tier * 2"`.

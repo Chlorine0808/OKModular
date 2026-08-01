@@ -126,7 +126,7 @@ public class ManaOutput extends AbstractModularRecipeOutput {
 
     @Override
     public boolean validate() {
-        return amount > 0;
+        return hasAmount();
     }
 
     public static ManaOutput fromJson(JsonObject json) {

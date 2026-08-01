@@ -133,7 +133,7 @@ public class GasOutput extends AbstractModularRecipeOutput {
 
     @Override
     public boolean validate() {
-        return gasName != null && !gasName.isEmpty() && amount > 0;
+        return gasName != null && !gasName.isEmpty() && hasAmount();
     }
 
     public static GasOutput fromJson(JsonObject json) {

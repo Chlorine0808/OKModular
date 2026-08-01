@@ -134,7 +134,7 @@ public class EssentiaOutput extends AbstractModularRecipeOutput {
 
     @Override
     public boolean validate() {
-        return aspectTag != null && !aspectTag.isEmpty() && amount > 0;
+        return aspectTag != null && !aspectTag.isEmpty() && hasAmount();
     }
 
     public static EssentiaOutput fromJson(JsonObject json) {

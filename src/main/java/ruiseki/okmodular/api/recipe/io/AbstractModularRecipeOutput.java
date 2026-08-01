@@ -66,12 +66,37 @@ public abstract class AbstractModularRecipeOutput extends AbstractRecipeOutput i
      * @param context The condition context for evaluation
      * @return The evaluated amount (always >= 0)
      */
+    @Override
+    public void resolveAmount(ConditionContext context, int draws) {
+        if (amountExpr == null) {
+            this.amount *= draws;
+            return;
+        }
+        long total = 0;
+        for (int i = 0; i < draws; i++) {
+            total += evaluateAmount(context.forDraw(i));
+        }
+        this.amount = (int) total;
+        this.amountExpr = null;
+    }
+
     protected long evaluateAmount(ConditionContext context) {
         if (amountExpr != null && context != null) {
             double evaluated = amountExpr.evaluateDouble(context);
             return (long) Math.max(0, evaluated);
         }
         return amount;
+    }
+
+    /**
+     * Whether an amount was given at all, for {@code validate()} to build on.
+     * <p>
+     * See {@link AbstractModularRecipeInput#hasAmount()} - the same {@code amount > 0} was
+     * written out in every subclass, and it silently dropped any output whose amount was an
+     * expression.
+     */
+    protected boolean hasAmount() {
+        return amount > 0 || amountExpr != null;
     }
 
     /**

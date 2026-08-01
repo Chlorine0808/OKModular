@@ -25,6 +25,7 @@ import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.okmodular.common.tile.essentia.AbstractEssentiaPortTE;
 import ruiseki.okmodular.common.tile.vis.AbstractVisPortTE;
+import ruiseki.okmodular.core.energy.IOKEnergySource;
 import ruiseki.okmodular.core.gas.GasTankInfo;
 import ruiseki.okmodular.core.gas.IGasHandler;
 import thaumcraft.api.aspects.Aspect;
@@ -51,14 +52,23 @@ public class MachineStateAgent implements IMachineState {
 
     // --- IMachineState Implementation ---
 
+    /**
+     * The energy the machine can draw on, summed over its energy input ports.
+     * <p>
+     * These two used to read the controller's own buffer, which nothing ever fills - a
+     * multiblock keeps its energy in the ports, and {@code EnergyInput} draws from them. So
+     * the {@code energy} expression answered zero on a machine with a full energy hatch, and
+     * {@code "energy &gt; 1000"} could never hold. Every other storable kind already summed
+     * its ports; energy was the one that did not.
+     */
     @Override
     public long getStoredEnergy() {
-        return controller.getEnergyStored();
+        return sumPortProperty(IPortType.Type.ENERGY, IOKEnergySource.class, IOKEnergySource::getEnergyStored);
     }
 
     @Override
     public long getEnergyCapacity() {
-        return controller.getMaxEnergyStored();
+        return sumPortProperty(IPortType.Type.ENERGY, IOKEnergySource.class, IOKEnergySource::getMaxEnergyStored);
     }
 
     @Override

@@ -109,7 +109,7 @@ public class EssentiaInput extends AbstractModularRecipeInput {
 
     @Override
     public boolean validate() {
-        return aspectTag != null && !aspectTag.isEmpty() && amount > 0;
+        return aspectTag != null && !aspectTag.isEmpty() && hasAmount();
     }
 
     public static EssentiaInput fromJson(JsonObject json) {

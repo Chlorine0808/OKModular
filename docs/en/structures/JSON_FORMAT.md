@@ -17,10 +17,10 @@ A special object named `default` can be used to define shared mappings.
 | `layers` | Array | Vertical slices of the structure (top to bottom) |
 | `requirements` | Array | Structure recognition requirements (ports and the like) |
 | `tintColor` | String | The machine's colour (e.g. `#FF0000`) |
-| `speedMultiplier` | Float | Processing speed (default: 1.0) |
-| `energyMultiplier` | Float | Energy consumption (default: 1.0) |
-| `batchMin` | Integer | Minimum batch size for recipes (default: 1) |
-| `batchMax` | Integer | Maximum batch size for recipes (default: 1) |
+| `speedMultiplier` | Float / expression | Processing speed (default: 1.0) |
+| `energyMultiplier` | Float / expression | Energy consumption (default: 1.0) |
+| `batchMin` | Integer / expression | Minimum batch size for recipes (default: 1) |
+| `batchMax` | Integer / expression | Maximum batch size for recipes (default: 1) |
 | `tier` | Integer | Machine tier (default: 0) |
 | `tierMap` | Object | The tiers each part of the structure provides |
 | `defaultFacing` | String | The structure's default facing (`UP`, `DOWN`). **Specifies the controller's facing.** Horizontal when omitted |
@@ -44,6 +44,31 @@ Decides when a recipe's `duration` is evaluated, for durations written as expres
 This is separate from the `dynamic` flag, which re-evaluates every tick when
 `speedMultiplier` and the like are written as expressions. `dynamic` governs the
 performance multipliers; `durationPolicy` governs the recipe's work amount.
+
+### Performance modifiers as expressions
+
+`speedMultiplier`, `energyMultiplier`, `batchMin` and `batchMax` accept an expression in
+place of a number. Those expressions **can see the machine's own state** (`tier`, `energy`,
+`item("...")` and so on - see the [Expression Reference](../recipes/EXPRESSION_REFERENCE.md)
+for the available names).
+
+```json
+"speedMultiplier": "1 + tier * 0.25",
+"batchMax": "clamp(floor(energy / 10000), 1, 8)"
+```
+
+| Field | Evaluated |
+|---|---|
+| `speedMultiplier` | Every tick while running |
+| `batchMin` / `batchMax` | When a recipe starts, to pick the batch size |
+| `energyMultiplier` | When a recipe reads `energy_multi` |
+
+> [!WARNING]
+> **A modifier cannot read itself.** `speed_multi` *is* the result of evaluating
+> `speedMultiplier`, so `"speedMultiplier": "speed_multi * 2"` is a cycle. A modifier that
+> cycles takes its neutral value (1.0 for a multiplier, 1 for a batch bound) and is reported
+> once in `logs/latest.log`.
+> **Reading a different modifier is fine** - `"speedMultiplier": "energy_multi"` works.
 
 ### 2.2 Tier Map Details
 `tierMap` assigns a specific tier to part of the machine according to the material (block) used.

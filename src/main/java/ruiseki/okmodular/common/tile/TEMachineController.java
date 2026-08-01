@@ -67,6 +67,7 @@ import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 import ruiseki.okmodular.core.tileentity.AbstractMBModifierTE;
 import ruiseki.okmodular.structure.StructureManager;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Corresponds to the 'Q' symbol in structure definitions.
@@ -150,6 +151,10 @@ public class TEMachineController extends AbstractMBModifierTE
     private PortColor activeRecipeColor = PortColor.NONE;
 
     private final MachineStateAgent machineStateAgent = new MachineStateAgent(this);
+
+    // Performance modifiers from the structure definition, and the guard that keeps a
+    // self-referencing expression from recursing back into the getters below.
+    private final MachineModifiers modifiers = new MachineModifiers(this::reportModifierCycle);
 
     // External Port Configurations
     private final Map<ChunkCoordinates, Map<IPortType.Type, EnumIO>> externalPortConfigs = new HashMap<>();
@@ -427,48 +432,64 @@ public class TEMachineController extends AbstractMBModifierTE
         return 1200;
     }
 
+    /**
+     * The performance modifiers the structure definition gives this machine.
+     * <p>
+     * Each of these used to build its own bare {@link ConditionContext}, which answers zero
+     * for every machine property - {@code "speedMultiplier": "tier"} evaluated to zero with
+     * no exception and no log. They take {@link #getConditionContext()} instead, and go
+     * through {@link MachineModifiers} so that a definition reading the value it defines
+     * ({@code "speedMultiplier": "speed_multi * 2"}) stops rather than recursing forever.
+     * The context is passed as a supplier and never built when the machine has no structure;
+     * {@code speedMultiplier} is read every tick.
+     */
     @Override
     public double getSpeedMultiplier() {
-        if (worldObj == null || !isFormed) return 1.0;
-        String name = getCustomStructureName();
-        if (name == null) return 1.0;
-        IStructureEntry entry = StructureManager.getInstance()
-            .getCustomStructure(name);
-        if (entry == null) return 1.0;
-        return entry.evaluateSpeedMultiplier(new ConditionContext(worldObj, xCoord, yCoord, zCoord));
+        return modifiers.speedMultiplier(getStructureEntry(), this::getConditionContext);
     }
 
     @Override
     public double getEnergyMultiplier() {
-        if (worldObj == null || !isFormed) return 1.0;
-        String name = getCustomStructureName();
-        if (name == null) return 1.0;
-        IStructureEntry entry = StructureManager.getInstance()
-            .getCustomStructure(name);
-        if (entry == null) return 1.0;
-        return entry.evaluateEnergyMultiplier(new ConditionContext(worldObj, xCoord, yCoord, zCoord));
+        return modifiers.energyMultiplier(getStructureEntry(), this::getConditionContext);
     }
 
     @Override
     public int getBatchMin() {
-        if (worldObj == null || !isFormed) return 1;
-        String name = getCustomStructureName();
-        if (name == null) return 1;
-        IStructureEntry entry = StructureManager.getInstance()
-            .getCustomStructure(name);
-        if (entry == null) return 1;
-        return entry.evaluateBatchMin(new ConditionContext(worldObj, xCoord, yCoord, zCoord));
+        return modifiers.batchMin(getStructureEntry(), this::getConditionContext);
     }
 
     @Override
     public int getBatchMax() {
-        if (worldObj == null || !isFormed) return 1;
-        String name = getCustomStructureName();
-        if (name == null) return 1;
-        IStructureEntry entry = StructureManager.getInstance()
-            .getCustomStructure(name);
-        if (entry == null) return 1;
-        return entry.evaluateBatchMax(new ConditionContext(worldObj, xCoord, yCoord, zCoord));
+        return modifiers.batchMax(getStructureEntry(), this::getConditionContext);
+    }
+
+    private void reportModifierCycle(MachineModifiers.Modifier modifier) {
+        Logger.error(
+            "Structure '{}' defines a cyclic {}: the expression reads the value it defines. Using the neutral value.",
+            getCustomStructureName(),
+            modifier.getJsonKey());
+    }
+
+    /**
+     * Reads every modifier once, so a cyclic definition is reported when the machine forms.
+     * <p>
+     * A cycle is only noticed while the offending modifier is being evaluated, and the four
+     * of them are read at very different times: {@code speedMultiplier} every tick of a
+     * running recipe, {@code batchMin} / {@code batchMax} when one starts, and
+     * {@code energyMultiplier} only if a recipe happens to mention {@code energy_multi}. A
+     * machine that never manages to start a recipe therefore reported nothing at all, and a
+     * structure with two broken coefficients reported them minutes apart - which reads as
+     * "the report is missing" rather than "the report is waiting".
+     * <p>
+     * The report stays one-shot per modifier, so forming a structure with two cyclic
+     * coefficients still produces exactly two lines, and re-forming produces none.
+     */
+    private void reportModifierCycles() {
+        if (worldObj == null || worldObj.isRemote) return;
+        getSpeedMultiplier();
+        getEnergyMultiplier();
+        getBatchMin();
+        getBatchMax();
     }
 
     @Override
@@ -495,6 +516,7 @@ public class TEMachineController extends AbstractMBModifierTE
         structureAgent.onFormed();
         updateRecipeGroupFromStructure();
         invalidatePortCache();
+        reportModifierCycles();
     }
 
     /**
@@ -520,6 +542,8 @@ public class TEMachineController extends AbstractMBModifierTE
             setFormed(false);
             clearStructureParts();
             processAgent.abort();
+            // A cycle already reported belonged to the previous definition.
+            modifiers.reset();
             markDirty();
 
             if (blueprintName != null && !blueprintName.isEmpty()) {
@@ -607,11 +631,19 @@ public class TEMachineController extends AbstractMBModifierTE
      * Process recipe using ProcessAgent.
      * Searches for the next recipe during current recipe processing,
      * enabling zero-tick delay between recipe completions.
+     * <p>
+     * Both paths below build their context with {@link #getConditionContext()}, the same way
+     * {@link #startNextRecipe()} always has. A bare context answers zero for every machine
+     * property and carries no evaluation seed, so with one of those an {@code "amount"} of
+     * {@code "1 + tier"} produced 1 and {@code chance()} returned the same answer on every
+     * machine forever. One instance per path, reused for the whole of it: its result cache
+     * is what makes the machine's state a single snapshot rather than something that shifts
+     * between the per-tick inputs and the outputs that follow them.
      */
     private void processRecipe() {
         // Try to output if waiting
         if (processAgent.isWaitingForOutput()) {
-            ConditionContext context = new ConditionContext(worldObj, xCoord, yCoord, zCoord);
+            ConditionContext context = getConditionContext();
             // Same colour the recipe started in. This path passes getOutputPorts()
             // rather than the contextual list, as it always has.
             List<IModularPort> waitingOutputs = PortColorGrouping.select(getOutputPorts(), activeRecipeColor);
@@ -633,7 +665,7 @@ public class TEMachineController extends AbstractMBModifierTE
 
         // If running, tick and look-ahead search for next recipe
         if (processAgent.isRunning()) {
-            ConditionContext context = new ConditionContext(worldObj, xCoord, yCoord, zCoord);
+            ConditionContext context = getConditionContext();
             ProcessAgent.TickResult result = processAgent.tick(activeInputPorts(), activeOutputPorts(), context);
 
             if (result == ProcessAgent.TickResult.NO_ENERGY) {
@@ -646,7 +678,8 @@ public class TEMachineController extends AbstractMBModifierTE
                     processAgent.abort();
                 }
             } else if (result == ProcessAgent.TickResult.PAUSED) {
-                lastProcessErrorReason = ErrorReason.PAUSED;
+                // Only a recipe condition reaches this now, so name the one that stopped it.
+                setProcessError(ErrorReason.PAUSED, processAgent.getConditionFailure());
             } else if (result == ProcessAgent.TickResult.OUTPUT_FULL) {
                 lastProcessErrorReason = ErrorReason.OUTPUT_FULL;
             } else if (result == ProcessAgent.TickResult.BLOCK_MISSING) {
@@ -720,9 +753,15 @@ public class TEMachineController extends AbstractMBModifierTE
                 ^ ((long) xCoord << 32 | (zCoord & 0xFFFFFFFFL));
             currentRecipeStartTick = worldObj.getTotalWorldTime();
             ConditionContext context = getConditionContext();
-            if (processAgent.startRecipe(selection.getRecipe(), selection.getInputs(), selection.getOutputs(), context))
+            if (processAgent
+                .startRecipe(selection.getRecipe(), selection.getInputs(), selection.getOutputs(), context)) {
                 lastProcessErrorReason = ErrorReason.NONE;
-            else lastProcessErrorReason = ErrorReason.NO_INPUT;
+            } else if (processAgent.wasBlockedByCondition()) {
+                // Not a missing input. Saying so would send the player to the wrong hatch.
+                setProcessError(ErrorReason.CONDITION_NOT_MET, processAgent.getConditionFailure());
+            } else {
+                lastProcessErrorReason = ErrorReason.NO_INPUT;
+            }
             return;
         }
 

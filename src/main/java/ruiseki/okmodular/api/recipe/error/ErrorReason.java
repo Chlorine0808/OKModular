@@ -17,18 +17,28 @@ public enum ErrorReason {
     NO_MATCHING_RECIPE("no_matching_recipe", "No matching recipe"),
     WAITING_OUTPUT("waiting_output", "Waiting for output space"),
     NO_INPUT("no_input", "No input resources"),
-    PAUSED("paused", "Paused by Redstone"),
+    /**
+     * A running recipe is waiting for its own conditions to hold again.
+     * <p>
+     * The wording used to say redstone. What reaches the GUI under this name is a recipe
+     * whose {@code conditionPolicy} is {@code pause}, so the detail carries the condition
+     * that stopped it. A redstone-disabled machine has no condition to name and is shown
+     * under {@code gui.status.redstone_off} instead - it used to borrow this text and, once
+     * the detail was added, rendered as "Format error".
+     */
+    PAUSED("paused", "Paused: %s"),
     MISSING_BLUEPRINT("missing_blueprint", "No Blueprint"),
     OUTPUT_CAPACITY_INSUFFICIENT("output_capacity_insufficient", "Output Capacity Insufficient"),
     NO_MANA("no_mana", "Insufficient Mana"),
     BLOCK_MISSING("block_missing", "Block missing"),
     BLOCK_OUTPUT_FULL("block_output_full", "No space for Block"),
     /**
-     * The machine's own conditions are not satisfied.
+     * Conditions are not satisfied, so no recipe is being run.
      * <p>
-     * Not a recipe's conditions - these gate the machine as a whole, the way a redstone
-     * signal does. The detail carries the description of the first condition that failed,
-     * which is the only handle a player has on why the machine is sitting still.
+     * Covers both the machine's own conditions - which gate it as a whole, the way a
+     * redstone signal does - and a recipe refusing to start because its own conditions do
+     * not hold. The detail carries the description of the first condition that failed, which
+     * is the only handle a player has on why the machine is sitting still.
      * <p>
      * <b>Appended at the end deliberately.</b> The GUI syncs this enum by ordinal, so
      * inserting anywhere else would shift the meaning of every constant after it.
@@ -83,6 +93,26 @@ public enum ErrorReason {
      */
     public boolean showsWhenIdle() {
         return this != NONE && this != RUNNING;
+    }
+
+    /**
+     * Whether a running machine should say this rather than show its progress.
+     * <p>
+     * <b>The running path had the same hand-written list, and it was worse.</b> It named
+     * three reasons - {@code NO_ENERGY}, {@code OUTPUT_FULL} and
+     * {@code OUTPUT_CAPACITY_INSUFFICIENT} - so a recipe frozen by {@code PAUSED} or
+     * {@code CONDITION_NOT_MET} went on drawing a progress bar as though nothing had
+     * happened. An idle machine at least looks stopped; this one looked like it was working.
+     * That is exactly the case the detail text added for
+     * {@code gui.status.paused} was written to explain, and the player never saw it.
+     * <p>
+     * Same default-yes rule as {@link #showsWhenIdle()}, with one more exclusion:
+     * {@link #IDLE} would claim the machine is doing nothing while this very method is being
+     * asked what a working one should show - the mirror of why {@link #RUNNING} is excluded
+     * above.
+     */
+    public boolean showsWhileRunning() {
+        return showsWhenIdle() && this != IDLE;
     }
 
 }
