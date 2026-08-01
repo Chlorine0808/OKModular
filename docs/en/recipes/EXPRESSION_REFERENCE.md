@@ -60,7 +60,8 @@ Retrieve information about the world where the machine is located.
 - `progress_tick`: Raw tick progress value of the current recipe
 
 #### Miscellaneous
-- `redstone`: Redstone signal strength received by the controller (0 - 15)
+- `redstone_signal`: Redstone signal strength received by the controller (0 - 15)
+  - The bare name `redstone` is reserved for a future redstone port and is not a variable
 - `random_seed`: Seed value for the recipe evaluation session (used for reproducible `random()` / `chance()`)
 - `world_seed`: Seed of the world
 - `facing`: Direction the machine is facing (0:Down, 1:Up, 2:North, 3:South, 4:West, 5:East)

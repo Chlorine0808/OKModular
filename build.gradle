@@ -17,4 +17,11 @@ tasks.withType(JavaCompile) {
 
 test {
     useJUnitPlatform()
+
+    // DocumentedJsonTypeTest reads docs/ to check that every documented JSON type has a
+    // parser. Gradle only knows about the classpath, so editing a doc left :test
+    // UP-TO-DATE and the reconciliation silently reported the previous run's answer.
+    inputs.dir(file('docs'))
+        .withPropertyName('docs')
+        .withPathSensitivity(PathSensitivity.RELATIVE)
 }

@@ -52,7 +52,13 @@ public class StructureEntry implements IStructureEntry {
     private final List<ICondition> conditions;
     private final ConditionPolicy conditionPolicy;
 
-    public StructureEntry(String name, String displayName, List<IStructureLayer> layers,
+    /**
+     * Build instances through {@link StructureEntryBuilder}. This constructor is
+     * package-private on purpose: every remaining structure feature adds another
+     * argument here, and a public 25-argument constructor would turn each of them
+     * into a breaking change.
+     */
+    StructureEntry(String name, String displayName, List<IStructureLayer> layers,
         Map<Character, ISymbolMapping> mappings, List<IStructureRequirement> requirements, List<String> recipeGroup,
         int[] controllerOffset, String tintColor, double speedMultiplier, IExpression speedMultiplierExpr,
         double energyMultiplier, IExpression energyMultiplierExpr, double batchMin, IExpression batchMinExpr,

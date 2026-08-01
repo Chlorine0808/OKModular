@@ -98,13 +98,19 @@ public class ExpressionNameFreezeTest {
      * `WorldPropertyExpression:109` に評価はあったのに関数だけ登録されていて、
      * 変数形式が `Unknown variable` で弾かれていた（shipped の sample_05 が丸ごと死んでいた）。
      * 関数形式は FUNCTION_CALLS 側にもある。
+     *
+     * **`redstone` はこの表から意図的に外した**（release_freeze F-2）。
+     * `Type.REDSTONE` を足すと同名の式が自動生成されて黙って衝突するので、
+     * 世界プロパティ側を `redstone_signal` に退避して `redstone` を空けた。
+     * このテストは「名前が減らないこと」を見る建前なので、**外したこと自体が例外**。
+     * 空けた状態は RedstoneNameReservationTest が別途縛っている。
      */
     private static final String[] WORLD_PROPERTIES = {
         "can_see_sky", "can_see_void",
         "day", "dimension", "humidity",
         "is_day", "is_night", "is_raining", "is_thundering",
         "light", "light_block", "light_sky",
-        "moon_phase", "progress_tick", "random_seed", "recipe_tick", "redstone", "seed",
+        "moon_phase", "progress_tick", "random_seed", "recipe_tick", "redstone_signal", "seed",
         "world_seed",
         "temp", "tick", "time", "total_days",
         "x", "y", "z",
