@@ -178,6 +178,8 @@ fluid_f_out("lava")   item_f_in("minecraft:coal")
 > [!NOTE]
 > **この 2 つは括弧を省いて変数としても書けます** — `can_see_sky == 1` のように。
 > 変数形式は素の判定（透過させるブロックを指定できない）で、透過指定が要るときだけ関数形式にします。
+> **どちらもコントローラの 1 つ上（`can_see_void` は 1 つ下）から数えます。**
+> コントローラ自身は不透過キューブなので、自分の座標を含めると答えが必ず false になります。
 - `count_blocks(distance, filter...)`: 周囲の特定ブロックをカウント
     - 例: `count_blocks(1, "minecraft:iron_block")`
 - `nbt('key')`: マシン本体の NBT を取得

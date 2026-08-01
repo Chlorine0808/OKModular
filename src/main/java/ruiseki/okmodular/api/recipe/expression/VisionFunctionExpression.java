@@ -1,5 +1,6 @@
 package ruiseki.okmodular.api.recipe.expression;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +21,28 @@ public class VisionFunctionExpression implements IExpression {
         SKY,
         VOID
     }
+
+    /**
+     * The argument-less forms, shared.
+     * <p>
+     * These are what the bare {@code can_see_sky} / {@code can_see_void} variables evaluate
+     * to. The docs say the two spellings ask the same question, and they have to actually do
+     * so: {@link WorldPropertyExpression} answered them with
+     * {@code World.canBlockSeeTheSky} and {@code getHeightValue}, both of which include the
+     * controller's own block. A machine controller is a solid cube, so it can never see the
+     * sky at its own position and the world's height map is never below zero - the variable
+     * form was a constant 0 either way, and a recipe gated on {@code can_see_sky == 1} could
+     * not run no matter where it was built.
+     * <p>
+     * Safe to share because the class holds nothing but its direction and its argument list.
+     */
+    public static final VisionFunctionExpression SKY = new VisionFunctionExpression(
+        Direction.SKY,
+        Collections.emptyList());
+
+    public static final VisionFunctionExpression VOID = new VisionFunctionExpression(
+        Direction.VOID,
+        Collections.emptyList());
 
     private final Direction direction;
     private final List<IExpression> arguments;

@@ -39,18 +39,13 @@ public class ExpressionRegistry {
         registerWorldProperty("is_raining");
         registerWorldProperty("is_thundering");
         // Both spellings. can_see_sky() takes block ids to see through; the bare name is the
-        // plain "is the sky visible" test that WorldPropertyExpression has always evaluated.
+        // same test with no ids, and WorldPropertyExpression delegates to the function so
+        // that stays true - answering it separately is what made the variable a constant 0.
         // Only the function was registered, so `can_see_sky == 1` was rejected as an unknown
         // variable even though the evaluation existed - the same two-hand-written-lists
         // failure the machine properties were driven off a single table to avoid.
         registerWorldProperty("can_see_sky");
         registerWorldProperty("can_see_void");
-        registerFunction(
-            "can_see_sky",
-            (args, parser) -> new VisionFunctionExpression(VisionFunctionExpression.Direction.SKY, args));
-        registerFunction(
-            "can_see_void",
-            (args, parser) -> new VisionFunctionExpression(VisionFunctionExpression.Direction.VOID, args));
         registerWorldProperty("tick");
         registerWorldProperty("recipe_tick");
         registerWorldProperty("progress_tick");

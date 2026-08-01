@@ -182,6 +182,9 @@ Performance multipliers provided by the structure definition.
 > **Both also work without the brackets**, as the world properties listed above -
 > `can_see_sky == 1`. The bare form is the plain test; reach for the function form only when
 > you need to name blocks to see through.
+> **Either spelling counts from the block above the controller** (below it, for
+> `can_see_void`). The controller itself is a solid cube, so including its own position
+> would make the answer always false.
 - `count_blocks(distance, filter...)`: Count specific blocks within a range
     - Example: `count_blocks(1, "minecraft:iron_block")`
 - `nbt('key')`: Retrieve NBT from the machine itself

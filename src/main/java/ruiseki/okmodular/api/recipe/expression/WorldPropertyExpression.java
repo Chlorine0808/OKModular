@@ -106,15 +106,18 @@ public class WorldPropertyExpression implements IExpression {
                             context.getY(),
                             context.getZ()));
                 break;
+            // Both delegate to the function form rather than answering for themselves. They
+            // used to ask the world directly - canBlockSeeTheSky and getHeightValue - and
+            // both of those include the controller's own block. A controller is a solid
+            // cube, so canBlockSeeTheSky was false at its own position however open the sky
+            // above it was, and getHeightValue is never negative. The variables were
+            // constant zeroes, which reads in game exactly like a condition that is not
+            // being evaluated at all. See VisionFunctionExpression.SKY.
             case "can_see_sky":
-                result = new EvaluationValue(
-                    context.getWorld()
-                        .canBlockSeeTheSky(context.getX(), context.getY(), context.getZ()));
+                result = VisionFunctionExpression.SKY.evaluate(context);
                 break;
             case "can_see_void":
-                result = new EvaluationValue(
-                    context.getWorld()
-                        .getHeightValue(context.getX(), context.getZ()) < 0);
+                result = VisionFunctionExpression.VOID.evaluate(context);
                 break;
             case "x":
                 result = new EvaluationValue((double) context.getX());
