@@ -2,6 +2,7 @@ package ruiseki.okmodular.common.recipe;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
@@ -170,6 +171,40 @@ public class RecipeConditionPolicyTest {
         agent.tick(NO_PORTS, NO_PORTS, context());
 
         assertFalse(agent.isRunning(), "abort を指定したのに走り続けている");
+    }
+
+    // ========== 落ちた条件を名指しする ==========
+
+    @Test
+    @DisplayName("開始を断ったとき、どの条件で落ちたかが取れる")
+    public void test開始時に落ちた条件が分かる() {
+        // GUI は「稼働条件を満たしていません: %s」と出す作りになっているのに、
+        // レシピ条件では %s が空で、プレイヤーには何も分からなかった。
+        agent.startRecipe(recipe(new Switchable(false), null), NO_PORTS, NO_PORTS, context());
+
+        assertTrue(agent.wasBlockedByCondition());
+        assertEquals("switchable", agent.getConditionFailure());
+    }
+
+    @Test
+    @DisplayName("条件が通れば名指しは消える")
+    public void test通れば説明は無い() {
+        agent.startRecipe(recipe(new Switchable(true), null), NO_PORTS, NO_PORTS, context());
+
+        assertFalse(agent.wasBlockedByCondition());
+        assertNull(agent.getConditionFailure());
+    }
+
+    @Test
+    @DisplayName("pause で止まったときも名指しできる")
+    public void testpauseでも説明が取れる() {
+        Switchable condition = new Switchable(true);
+        agent.startRecipe(recipe(condition, null), NO_PORTS, NO_PORTS, context());
+
+        condition.answer = false;
+        agent.tick(NO_PORTS, NO_PORTS, context());
+
+        assertEquals("switchable", agent.getConditionFailure());
     }
 
     @Test

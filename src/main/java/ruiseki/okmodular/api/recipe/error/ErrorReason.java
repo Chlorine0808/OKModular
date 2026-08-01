@@ -17,18 +17,27 @@ public enum ErrorReason {
     NO_MATCHING_RECIPE("no_matching_recipe", "No matching recipe"),
     WAITING_OUTPUT("waiting_output", "Waiting for output space"),
     NO_INPUT("no_input", "No input resources"),
-    PAUSED("paused", "Paused by Redstone"),
+    /**
+     * A running recipe is waiting for its own conditions to hold again.
+     * <p>
+     * The wording used to say redstone, which nothing ever set it for - a redstone-disabled
+     * machine goes idle instead. The only thing that reaches this is a recipe whose
+     * {@code conditionPolicy} is {@code pause}, so the detail carries the condition that
+     * stopped it.
+     */
+    PAUSED("paused", "Paused: %s"),
     MISSING_BLUEPRINT("missing_blueprint", "No Blueprint"),
     OUTPUT_CAPACITY_INSUFFICIENT("output_capacity_insufficient", "Output Capacity Insufficient"),
     NO_MANA("no_mana", "Insufficient Mana"),
     BLOCK_MISSING("block_missing", "Block missing"),
     BLOCK_OUTPUT_FULL("block_output_full", "No space for Block"),
     /**
-     * The machine's own conditions are not satisfied.
+     * Conditions are not satisfied, so no recipe is being run.
      * <p>
-     * Not a recipe's conditions - these gate the machine as a whole, the way a redstone
-     * signal does. The detail carries the description of the first condition that failed,
-     * which is the only handle a player has on why the machine is sitting still.
+     * Covers both the machine's own conditions - which gate it as a whole, the way a
+     * redstone signal does - and a recipe refusing to start because its own conditions do
+     * not hold. The detail carries the description of the first condition that failed, which
+     * is the only handle a player has on why the machine is sitting still.
      * <p>
      * <b>Appended at the end deliberately.</b> The GUI syncs this enum by ordinal, so
      * inserting anywhere else would shift the meaning of every constant after it.

@@ -27,6 +27,7 @@ import ruiseki.okmodular.api.recipe.parser.OutputNBTRegistry;
 import ruiseki.okmodular.api.recipe.visitor.RecipeExecutionVisitor;
 import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
+import ruiseki.okmodular.common.tile.MachineConditionGate;
 
 public class ProcessAgent extends AbstractRecipeProcess {
 
@@ -34,8 +35,9 @@ public class ProcessAgent extends AbstractRecipeProcess {
     private int currentBatchSize = 1;
     private double workProgress;
 
-    /** Why the last {@link #startRecipe} refused, for the controller to report. */
-    private boolean startBlockedByCondition;
+    /** Whether the last condition check refused, and which condition said so. */
+    private boolean conditionBlocked;
+    private String conditionFailure;
 
     public ProcessAgent(IRecipeContext context) {
         this.context = context;
@@ -61,8 +63,7 @@ public class ProcessAgent extends AbstractRecipeProcess {
         // conditions did not hold would start, eat its inputs, fail the check on the next
         // tick and be thrown away - then start again. A machine sat there dissolving its
         // input stack an item every other tick. Refusing here is before anything is consumed.
-        startBlockedByCondition = !recipe.isConditionMet(context);
-        if (startBlockedByCondition) return false;
+        if (!conditionsHold(recipe, context)) return false;
 
         // Calculate maximum possible batch size
         int batchMin = 1;
@@ -229,7 +230,7 @@ public class ProcessAgent extends AbstractRecipeProcess {
         // Before anything is drawn for this tick. A paused recipe must not go on paying for
         // itself, and an aborted one must not pay for the tick that killed it - which is
         // what happened while this check sat below the per-tick consumption in executeTick.
-        if (currentRecipe != null && !currentRecipe.isConditionMet(context)) {
+        if (currentRecipe != null && !conditionsHold(currentRecipe, context)) {
             if (currentRecipe.getConditionPolicy() == ConditionPolicy.ABORT) {
                 abort();
                 return TickResult.IDLE;
@@ -408,13 +409,51 @@ public class ProcessAgent extends AbstractRecipeProcess {
     }
 
     /**
-     * Whether the last {@link #startRecipe} refused because the recipe's own conditions did
-     * not hold, rather than because an input was missing. The two look the same to the
-     * caller otherwise, and telling a player their inputs are missing when the machine is
-     * short of energy sends them looking in the wrong place.
+     * Whether the last condition check refused.
+     * <p>
+     * A refused start otherwise looks exactly like a missing input to the caller, and
+     * telling a player their inputs are missing when the machine is short of energy sends
+     * them looking in the wrong place.
      */
-    public boolean wasStartBlockedByCondition() {
-        return startBlockedByCondition;
+    public boolean wasBlockedByCondition() {
+        return conditionBlocked;
+    }
+
+    /**
+     * The description of the condition that refused, or null.
+     * <p>
+     * The GUI has always had a slot for this - "conditions not met: %s" - and the machine's
+     * own conditions filled it. A recipe's conditions left it empty, so all a player saw was
+     * that something was wrong.
+     * <p>
+     * Null when a decorator refused rather than a named condition, since a {@code chance}
+     * roll has nothing to name.
+     */
+    public String getConditionFailure() {
+        return conditionFailure;
+    }
+
+    /**
+     * Whether the recipe's conditions hold, remembering which one said no.
+     * <p>
+     * {@link IModularRecipe#isConditionMet} stays the authority: a decorator can refuse on
+     * top of the named conditions - {@code chance} is one - and asking the list directly
+     * would skip that. The list is only walked afterwards, on the path where the machine has
+     * already stopped, to find something to show. That second pass re-evaluates, so a
+     * condition built on {@code chance()} may name itself or not; the message is a hint, not
+     * a record.
+     */
+    private boolean conditionsHold(IModularRecipe recipe, ConditionContext context) {
+        if (recipe.isConditionMet(context)) {
+            conditionBlocked = false;
+            conditionFailure = null;
+            return true;
+        }
+
+        conditionBlocked = true;
+        MachineConditionGate.Verdict verdict = MachineConditionGate.evaluate(recipe.getConditions(), () -> context);
+        conditionFailure = verdict.isMet() ? null : verdict.getFailedDescription();
+        return false;
     }
 
     public int getEnergyOutputPerTick() {

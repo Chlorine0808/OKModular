@@ -655,7 +655,8 @@ public class TEMachineController extends AbstractMBModifierTE
                     processAgent.abort();
                 }
             } else if (result == ProcessAgent.TickResult.PAUSED) {
-                lastProcessErrorReason = ErrorReason.PAUSED;
+                // Only a recipe condition reaches this now, so name the one that stopped it.
+                setProcessError(ErrorReason.PAUSED, processAgent.getConditionFailure());
             } else if (result == ProcessAgent.TickResult.OUTPUT_FULL) {
                 lastProcessErrorReason = ErrorReason.OUTPUT_FULL;
             } else if (result == ProcessAgent.TickResult.BLOCK_MISSING) {
@@ -732,9 +733,9 @@ public class TEMachineController extends AbstractMBModifierTE
             if (processAgent
                 .startRecipe(selection.getRecipe(), selection.getInputs(), selection.getOutputs(), context)) {
                 lastProcessErrorReason = ErrorReason.NONE;
-            } else if (processAgent.wasStartBlockedByCondition()) {
+            } else if (processAgent.wasBlockedByCondition()) {
                 // Not a missing input. Saying so would send the player to the wrong hatch.
-                setProcessError(ErrorReason.CONDITION_NOT_MET);
+                setProcessError(ErrorReason.CONDITION_NOT_MET, processAgent.getConditionFailure());
             } else {
                 lastProcessErrorReason = ErrorReason.NO_INPUT;
             }
