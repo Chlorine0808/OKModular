@@ -470,6 +470,28 @@ public class TEMachineController extends AbstractMBModifierTE
             modifier.getJsonKey());
     }
 
+    /**
+     * Reads every modifier once, so a cyclic definition is reported when the machine forms.
+     * <p>
+     * A cycle is only noticed while the offending modifier is being evaluated, and the four
+     * of them are read at very different times: {@code speedMultiplier} every tick of a
+     * running recipe, {@code batchMin} / {@code batchMax} when one starts, and
+     * {@code energyMultiplier} only if a recipe happens to mention {@code energy_multi}. A
+     * machine that never manages to start a recipe therefore reported nothing at all, and a
+     * structure with two broken coefficients reported them minutes apart - which reads as
+     * "the report is missing" rather than "the report is waiting".
+     * <p>
+     * The report stays one-shot per modifier, so forming a structure with two cyclic
+     * coefficients still produces exactly two lines, and re-forming produces none.
+     */
+    private void reportModifierCycles() {
+        if (worldObj == null || worldObj.isRemote) return;
+        getSpeedMultiplier();
+        getEnergyMultiplier();
+        getBatchMin();
+        getBatchMax();
+    }
+
     @Override
     public IStructureEntry getStructureEntry() {
         if (worldObj == null || !isFormed) return null;
@@ -494,6 +516,7 @@ public class TEMachineController extends AbstractMBModifierTE
         structureAgent.onFormed();
         updateRecipeGroupFromStructure();
         invalidatePortCache();
+        reportModifierCycles();
     }
 
     /**
