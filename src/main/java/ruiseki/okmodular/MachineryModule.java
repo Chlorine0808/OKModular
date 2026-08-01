@@ -42,6 +42,7 @@ import ruiseki.okmodular.core.event.MemoryEventHandler;
 import ruiseki.okmodular.structure.BlockResolver;
 import ruiseki.okmodular.structure.CustomStructureRegistry;
 import ruiseki.okmodular.structure.StructureManager;
+import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
 
 public class MachineryModule extends ModModuleBase {
 
@@ -163,6 +164,10 @@ public class MachineryModule extends ModModuleBase {
     @Override
     public void postInit(FMLPostInitializationEvent event) {
         TierConfigLoader.INSTANCE.load(configDir);
+        // Before the recipes: a `structure` input names a pattern, and resolving that name
+        // against an empty registry would report every recipe as pointing at nothing.
+        StructurePatternLoader.getInstance()
+            .loadAll(configDir);
         RecipeLoader.getInstance()
             .loadAll(configDir);
     }
@@ -203,6 +208,19 @@ public class MachineryModule extends ModModuleBase {
             hasErrors = true;
         }
 
+        try {
+            StructurePatternLoader.getInstance()
+                .loadAll(configDir);
+            sender.addChatMessage(
+                new ChatComponentText(EnumChatFormatting.GREEN + "  [Modular] Structure IO patterns reloaded"));
+        } catch (Exception e) {
+            sender.addChatMessage(
+                new ChatComponentText(
+                    EnumChatFormatting.RED + "  [Modular] Structure IO patterns failed: " + e.getMessage()));
+            hasErrors = true;
+        }
+
+        // After the patterns, for the reason postInit loads them in that order.
         try {
             RecipeLoader.getInstance()
                 .reload(configDir);
