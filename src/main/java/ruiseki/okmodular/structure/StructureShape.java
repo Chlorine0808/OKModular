@@ -80,16 +80,33 @@ public final class StructureShape {
      *         controller in the shape
      */
     public static int[] findControllerOffset(String[][] shape) {
+        int[] found = findSymbolOffset(shape, 'Q');
+        return found != null ? found : new int[] { 0, 0, 0 };
+    }
+
+    /**
+     * Locates an arbitrary symbol in an already-processed shape.
+     * <p>
+     * A machine has exactly one anchor and it is always {@code 'Q'}, but a structure IO pattern
+     * picks its own -- which cell of the pattern lands on the block the recipe names. Both searches
+     * live here so they cannot drift apart.
+     *
+     * @return {@code {col, layer, row}} = {@code {A, B, C}} of the first occurrence, scanning layers
+     *         then rows then columns, or <b>null</b> when the symbol is absent. Null rather than the
+     *         origin, so a pattern that forgot to draw its anchor is a reportable error instead of
+     *         a silent corner anchor.
+     */
+    public static int[] findSymbolOffset(String[][] shape, char symbol) {
         for (int layer = 0; layer < shape.length; layer++) {
             for (int row = 0; row < shape[layer].length; row++) {
                 String rowStr = shape[layer][row];
                 for (int col = 0; col < rowStr.length(); col++) {
-                    if (rowStr.charAt(col) == 'Q') {
+                    if (rowStr.charAt(col) == symbol) {
                         return new int[] { col, layer, row };
                     }
                 }
             }
         }
-        return new int[] { 0, 0, 0 };
+        return null;
     }
 }

@@ -2,6 +2,7 @@ package ruiseki.okmodular.structure;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Arrays;
 
@@ -79,6 +80,43 @@ public class StructureShapeTest {
     @DisplayName("Q が無ければ原点")
     public void testコントローラが無いとき() {
         assertArrayEquals(new int[] { 0, 0, 0 }, StructureShape.findControllerOffset(new String[][] { { ".." } }));
+    }
+
+    /**
+     * 構造 IO のパターンは自分のアンカー記号を選べる。
+     *
+     * 機械側の 'Q' は 1 種類しか無いが、パターン側は「どのセルが参照ブロックに重なるか」を
+     * ファイルごとに決める。**同じ探索を 2 つ書けば片方を直した日に食い違う**ので、
+     * `findControllerOffset` をこちらへ委譲させて 1 箇所に集める。
+     */
+    @Test
+    @DisplayName("findSymbolOffset は任意の記号を同じ順で返す")
+    public void test任意の記号を探せる() {
+        String[][] shape = { { "..", ".." }, { "..", "..", ".X" } };
+
+        assertArrayEquals(
+            new int[] { 1, 1, 2 },
+            StructureShape.findSymbolOffset(shape, 'X'),
+            "戻り値の順が {col, layer, row} = {A, B, C} になっていない");
+    }
+
+    @Test
+    @DisplayName("findSymbolOffset は見つからなければ null")
+    public void test記号が無いときは原点ではない() {
+        assertNull(
+            StructureShape.findSymbolOffset(new String[][] { { ".." } }, 'X'),
+            "無い記号に原点を返すと、書き忘れたアンカーが「原点指定」として黙って通る");
+    }
+
+    @Test
+    @DisplayName("findControllerOffset は findSymbolOffset の 'Q' 版")
+    public void testコントローラ探索は委譲() {
+        String[][] shape = { { "..", ".." }, { "..", "..", "Q." } };
+
+        assertArrayEquals(
+            StructureShape.findSymbolOffset(shape, 'Q'),
+            StructureShape.findControllerOffset(shape),
+            "2 つの探索が別々の答えを返している");
     }
 
     @Test
