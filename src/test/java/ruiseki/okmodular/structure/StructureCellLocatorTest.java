@@ -133,6 +133,52 @@ public class StructureCellLocatorTest {
     }
 
     @Test
+    @DisplayName("セルから世界座標を出せる（走査と同じ答えになる）")
+    public void testセルから世界座標を出せる() {
+        for (ExtendedFacing facing : ExtendedFacing.VALUES) {
+            for (int[] controllerOffset : CONTROLLER_OFFSETS) {
+                for (int[] cell : CELLS) {
+                    int[] expected = worldPositionOf(facing, cell, controllerOffset);
+
+                    int[] actual = StructureCellLocator
+                        .toWorld(facing, CX, CY, CZ, controllerOffset, cell[0], cell[1], cell[2]);
+
+                    assertArrayEquals(
+                        expected,
+                        actual,
+                        () -> "セル " + Arrays.toString(cell)
+                            + " の世界座標が "
+                            + facing.name()
+                            + " で走査と食い違う。構造 IO はここで求めた座標にブロックを置く");
+                }
+            }
+        }
+    }
+
+    /**
+     * 構造 IO は**構造の外**にもリージョンを置けるようにしたいので、
+     * 形成判定が触っていないセルでも往復すること自体を見ておく。
+     * 形成判定を通っていないセルは `locate` の入力に現れないため、
+     * 往復で確かめる以外に縛る手段が無い。
+     */
+    @Test
+    @DisplayName("セル → 世界 → セル で戻る")
+    public void testセルから往復して戻る() {
+        int[] farCell = { 9, -4, 7 };
+
+        for (ExtendedFacing facing : ExtendedFacing.VALUES) {
+            for (int[] controllerOffset : CONTROLLER_OFFSETS) {
+                int[] world = StructureCellLocator
+                    .toWorld(facing, CX, CY, CZ, controllerOffset, farCell[0], farCell[1], farCell[2]);
+                int[] back = StructureCellLocator
+                    .locate(facing, CX, CY, CZ, controllerOffset, world[0], world[1], world[2]);
+
+                assertArrayEquals(farCell, back, () -> "構造の外のセルが " + facing.name() + " で往復しない。リージョンを構造の外に置けなくなる");
+            }
+        }
+    }
+
+    @Test
     @DisplayName("オフセットが null なら原点扱い")
     public void testオフセットが無いとき() {
         int[] located = StructureCellLocator.locate(ExtendedFacing.DEFAULT, CX, CY, CZ, null, CX, CY, CZ);

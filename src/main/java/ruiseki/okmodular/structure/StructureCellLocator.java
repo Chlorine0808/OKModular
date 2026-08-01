@@ -51,4 +51,33 @@ public final class StructureCellLocator {
         }
         return cell;
     }
+
+    /**
+     * The other direction: where in the world a pattern cell lands.
+     * <p>
+     * This is the same arithmetic the scan performs, so a cell the scan visited resolves to the
+     * position it reported. It is not limited to those cells though -- any cell resolves, including
+     * ones outside the machine's own pattern, which is what lets a structure IO region reach beyond
+     * the blocks the formation check covers.
+     *
+     * @param controllerOffset the controller's own cell in the pattern, or null for the origin. Not
+     *                         modified.
+     * @return a new {@code {x, y, z}} world position
+     */
+    public static int[] toWorld(ExtendedFacing facing, int controllerX, int controllerY, int controllerZ,
+        int[] controllerOffset, int cellA, int cellB, int cellC) {
+        int[] abc = { cellA, cellB, cellC };
+        if (controllerOffset != null) {
+            abc[0] -= controllerOffset[0];
+            abc[1] -= controllerOffset[1];
+            abc[2] -= controllerOffset[2];
+        }
+
+        int[] world = new int[3];
+        facing.getWorldOffset(abc, world);
+        world[0] += controllerX;
+        world[1] += controllerY;
+        world[2] += controllerZ;
+        return world;
+    }
 }
