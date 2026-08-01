@@ -17,7 +17,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
@@ -606,50 +605,12 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
         return RecipeTickResult.BLOCK_MISSING;
     }
 
-    /**
-     * Get block ID string in format "modid:blockname:meta"
-     */
     private String getBlockId(Block block, int meta) {
-        UniqueIdentifier ui = GameRegistry.findUniqueIdentifierFor(block);
-        if (ui == null) {
-            return "minecraft:air:0";
-        }
-        return ui.modId + ":" + ui.name + ":" + meta;
+        return BlockIdMatcher.idOf(block, meta);
     }
 
-    /**
-     * Check if block ID matches the pattern.
-     * Supports wildcards like "modid:blockname:*" for any meta.
-     */
     private boolean matchesBlockId(String blockId, String pattern) {
-        if (pattern == null || blockId == null) return false;
-        if (pattern.equals("*")) return true;
-
-        String[] blockParts = blockId.split(":");
-        String[] patternParts = pattern.split(":");
-
-        // Handle different formats
-        if (patternParts.length == 2) {
-            // Pattern: "modid:blockname" - match any meta
-            return blockParts.length >= 2 && blockParts[0].equals(patternParts[0])
-                && blockParts[1].equals(patternParts[1]);
-        } else if (patternParts.length == 3) {
-            // Pattern: "modid:blockname:meta" or "modid:blockname:*"
-            if (blockParts.length < 3) return false;
-
-            if (!blockParts[0].equals(patternParts[0]) || !blockParts[1].equals(patternParts[1])) {
-                return false;
-            }
-
-            // Check meta
-            if (patternParts[2].equals("*")) {
-                return true;
-            }
-
-            return blockParts[2].equals(patternParts[2]);
-        }
-
-        return blockId.equals(pattern);
+        return BlockIdMatcher.matches(blockId, pattern);
     }
 
     // Getters

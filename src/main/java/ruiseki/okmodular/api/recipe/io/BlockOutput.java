@@ -18,7 +18,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
@@ -640,31 +639,10 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
     }
 
     private String getBlockId(Block block, int meta) {
-        UniqueIdentifier id = GameRegistry.findUniqueIdentifierFor(block);
-        if (id == null) return "minecraft:air:0";
-        return id.modId + ":" + id.name + ":" + meta;
+        return BlockIdMatcher.idOf(block, meta);
     }
 
     private boolean matchesBlockId(String blockId, String pattern) {
-        if (pattern.equals("*")) return true;
-
-        String[] blockParts = blockId.split(":");
-        String[] patternParts = pattern.split(":");
-
-        if (patternParts.length == 2) {
-            // Pattern: "modid:blockname" - match any meta
-            return blockParts.length >= 2 && blockParts[0].equals(patternParts[0])
-                && blockParts[1].equals(patternParts[1]);
-        } else if (patternParts.length == 3) {
-            // Pattern: "modid:blockname:meta" or "modid:blockname:*"
-            if (blockParts.length < 3) return false;
-
-            if (!blockParts[0].equals(patternParts[0]) || !blockParts[1].equals(patternParts[1])) {
-                return false;
-            }
-
-            return patternParts[2].equals("*") || blockParts[2].equals(patternParts[2]);
-        }
-        return blockId.equals(pattern);
+        return BlockIdMatcher.matches(blockId, pattern);
     }
 }
