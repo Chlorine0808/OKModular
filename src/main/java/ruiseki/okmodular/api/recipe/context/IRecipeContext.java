@@ -46,6 +46,32 @@ public interface IRecipeContext {
     List<ChunkCoordinates> getSymbolPositions(char symbol);
 
     /**
+     * Which pattern cell a world position occupies, in structure-local (ABC) coordinates.
+     * <p>
+     * Only positions the last structure check visited are known; anything else is null. This is
+     * the anchor half of structure IO: the recipe names a symbol, and the block found there says
+     * where in the pattern frame it sits.
+     *
+     * @return a new {@code {a, b, c}}, or null when the position is not part of the formed
+     *         structure -- including on a context that tracks no structure at all
+     */
+    default int[] getSymbolCell(int x, int y, int z) {
+        return null;
+    }
+
+    /**
+     * The other direction: where a pattern cell lands in the world.
+     * <p>
+     * <b>Not limited to cells the structure check visited.</b> A structure IO region may extend
+     * past the blocks the formation check covers, and those cells resolve too.
+     *
+     * @return a new {@code {x, y, z}}, or null on a context with no structure to measure against
+     */
+    default int[] getCellPosition(int a, int b, int c) {
+        return null;
+    }
+
+    /**
      * Get a condition context for expression evaluation.
      */
     ConditionContext getConditionContext();

@@ -352,9 +352,22 @@ public class TEMachineController extends AbstractMBModifierTE
      * @return the {@code {a, b, c}} pattern cell at that position, or null if the position is not
      *         part of the currently formed structure. The array belongs to the caller.
      */
+    @Override
     public int[] getSymbolCell(int x, int y, int z) {
         int[] cell = symbolCells.get(new ChunkCoordinates(x, y, z));
         return cell == null ? null : cell.clone();
+    }
+
+    /**
+     * The inverse of {@link #getSymbolCell}, and the reason structure IO can reach past the
+     * machine: this resolves any cell, not only the ones the scan reported.
+     * <p>
+     * The same three values the scan was given -- facing, controller position, controller offset --
+     * are all here, which is why the arithmetic is done on this side rather than handed out.
+     */
+    @Override
+    public int[] getCellPosition(int a, int b, int c) {
+        return StructureCellLocator.toWorld(extendedFacing, xCoord, yCoord, zCoord, structureOriginOffset, a, b, c);
     }
 
     public void clearSymbolPositions() {

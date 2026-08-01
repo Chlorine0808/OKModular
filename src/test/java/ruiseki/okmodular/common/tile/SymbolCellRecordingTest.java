@@ -92,6 +92,23 @@ public class SymbolCellRecordingTest {
     }
 
     /**
+     * 構造 IO は**記録されていないセルも解決する**。パターンは形成判定に含まれないセルへも
+     * 伸びるので、「記録済みの位置を引く」だけでは足りず、逆変換そのものが要る。
+     *
+     * 計算は `StructureCellLocatorTest` が値で縛っているので、ここは呼んでいるかだけ。
+     * 自前で `getWorldOffset` を書き直すと、`locate` との往復が静かに崩れる。
+     */
+    @Test
+    @DisplayName("セルから世界座標へ戻す口がある")
+    public void testセルから世界へ戻せる() {
+        String source = read(CONTROLLER);
+        // 整形で改行が入っても落ちないよう、空白を落としてから見る
+        String body = methodBody(source, "public int[] getCellPosition(").replaceAll("\\s+", "");
+
+        assertTrue(body.contains("StructureCellLocator.toWorld("), "getCellPosition が逆変換を自前で書いている。往復が崩れても例外は出ない");
+    }
+
+    /**
      * メソッド本体を波括弧の対応で切り出す。
      * ファイル全体に対する `contains` だと**別のメソッドにある呼び出しを拾って**
      * 配線されていないのに緑になるので、範囲を絞る。
