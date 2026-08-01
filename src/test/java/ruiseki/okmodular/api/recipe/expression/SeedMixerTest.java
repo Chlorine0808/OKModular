@@ -108,6 +108,38 @@ public class SeedMixerTest {
     }
 
     @Test
+    @DisplayName("実機と同じ形の種でも 1/3 ずつに割れる")
+    public void test実機の種で一様になる() {
+        // 機械の種は座標・ワールドシード・レシピ回数・開始 tick の XOR で作られる。
+        // 「ばらつくが一様に見えない」という報告に対して、種の作り方ごと写して数える。
+        long x = 389L, z = 179L, worldSeed = -8140596933576549875L;
+        int[] counts = new int[3];
+
+        for (int recipe = 0; recipe < 3000; recipe++) {
+            long startTick = 1000L + recipe * 400L; // duration 400 のレシピを連続で回した形
+            long recipeSeed = startTick ^ worldSeed ^ ((x << 32) | (z & 0xFFFFFFFFL));
+            long seed = x ^ (z << 32) ^ worldSeed ^ ((long) recipe << 16) ^ recipeSeed;
+
+            counts[(int) Math.floor(SeedMixer.toUnitInterval(seed, SeedMixer.RANDOM) * 3)]++;
+        }
+
+        for (int i = 0; i < 3; i++) {
+            assertTrue(counts[i] > 850 && counts[i] < 1150, "1+floor(random()*3) の " + (i + 1) + " が " + counts[i] + " 回");
+        }
+    }
+
+    @Test
+    @DisplayName("1.0 は返さない")
+    public void test上端を含まない() {
+        // "1 + floor(random() * 3)" が 4 を出さないことの根拠。53 bit を 2^-53 倍するので
+        // 最大でも (2^53 - 1) / 2^53 にしかならない。
+        for (long seed = -2000; seed < 2000; seed++) {
+            assertTrue(SeedMixer.toUnitInterval(seed, SeedMixer.RANDOM) < 1.0, "seed=" + seed + " が 1.0 を返した");
+            assertTrue(SeedMixer.toUnitInterval(seed, SeedMixer.CHANCE) < 1.0, "seed=" + seed + " が 1.0 を返した");
+        }
+    }
+
+    @Test
     @DisplayName("系統が違えば同じ種でも違う値")
     public void test系統が独立している() {
         // random() と chance() は同じ評価の中で両方書ける。同じ種から作るので、
