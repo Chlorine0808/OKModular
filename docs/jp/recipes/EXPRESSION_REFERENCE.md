@@ -60,7 +60,8 @@ OmoshiroiKamo の式パーサー (`ExpressionParser`) で使用できる変数�
 - `progress_tick`: 現在のレシピの進捗の raw tick 値
 
 #### その他
-- `redstone`: コントローラーが受けているレッドストーン信号強度 (0 - 15)
+- `redstone_signal`: コントローラーが受けているレッドストーン信号強度 (0 - 15)
+  - `redstone` という名前は将来のレッドストーンポート用に予約されているため使えません
 - `random_seed`: レシピ評価セッションのシード値（`random()` / `chance()` の再現性に使用）
 - `world_seed`: ワールドのシード値
 - `facing`: マシンの向き (0:下, 1:上, 2:北, 3:南, 4:西, 5:東)

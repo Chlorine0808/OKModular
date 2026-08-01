@@ -156,7 +156,7 @@ public class WorldPropertyExpression implements IExpression {
                 result = new EvaluationValue((double) (state != null ? state.getProgress() : 0));
                 break;
             }
-            case "redstone": {
+            case "redstone_signal": {
                 IRecipeContext rc = context.getRecipeContext();
                 result = new EvaluationValue((double) (rc != null ? rc.getRedstoneLevel() : 0));
                 break;

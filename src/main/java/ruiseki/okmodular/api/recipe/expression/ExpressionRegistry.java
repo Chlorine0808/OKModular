@@ -49,7 +49,11 @@ public class ExpressionRegistry {
         registerWorldProperty("tick");
         registerWorldProperty("recipe_tick");
         registerWorldProperty("progress_tick");
-        registerWorldProperty("redstone");
+        // Not "redstone": adding Type.REDSTONE auto-generates an expression under that
+        // exact name, and the collision is silent - registration order decides which one
+        // answers. The world property moved aside so the port type can have the name.
+        // No alias is kept, because an alias would keep the collision.
+        registerWorldProperty("redstone_signal");
         registerWorldProperty("seed");
         registerWorldProperty("world_seed");
         registerWorldProperty("random_seed");
