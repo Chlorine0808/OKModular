@@ -67,9 +67,16 @@ public abstract class AbstractModularRecipeOutput extends AbstractRecipeOutput i
      * @return The evaluated amount (always >= 0)
      */
     @Override
-    public void resolveAmount(ConditionContext context) {
-        if (amountExpr == null) return;
-        this.amount = (int) evaluateAmount(context);
+    public void resolveAmount(ConditionContext context, int draws) {
+        if (amountExpr == null) {
+            this.amount *= draws;
+            return;
+        }
+        long total = 0;
+        for (int i = 0; i < draws; i++) {
+            total += evaluateAmount(context.forDraw(i));
+        }
+        this.amount = (int) total;
         this.amountExpr = null;
     }
 

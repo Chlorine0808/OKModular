@@ -70,10 +70,15 @@ public interface IRecipeOutput extends IJsonMaterial {
      * Called on the copies a recipe caches when it starts. Those copies already decide
      * <em>what</em> gets produced; this makes them decide <em>how much</em> as well, so that
      * changing the machine mid-run cannot change the payout of work that was set up under
-     * the old state. An output with no expression has nothing to do here, which is why the
-     * default does nothing.
+     * the old state.
+     * <p>
+     * A batch of n is n runs of the recipe, so the amount is drawn n times and summed rather
+     * than evaluated once and multiplied. The difference only shows when the amount is
+     * random: multiplying a single draw by three can only ever pay out multiples of three.
+     *
+     * @param draws the batch size; one for an unbatched run
      */
-    default void resolveAmount(ConditionContext context) {}
+    default void resolveAmount(ConditionContext context, int draws) {}
 
     /**
      * Accept a visitor to perform operations on this output.

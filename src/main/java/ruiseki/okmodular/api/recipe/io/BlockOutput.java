@@ -336,11 +336,15 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
     }
 
     @Override
-    public void resolveAmount(ConditionContext context) {
+    public void resolveAmount(ConditionContext context, int draws) {
         // This one always holds an expression - the constructor wraps the plain amount in a
         // ConstantExpression - so it is rebuilt rather than dropped, which is also what
         // writeToNBT keys on.
-        this.amount = (int) getRequiredAmount(context);
+        long total = 0;
+        for (int i = 0; i < draws; i++) {
+            total += getRequiredAmount(context.forDraw(i));
+        }
+        this.amount = (int) total;
         this.amountExpr = new ConstantExpression(amount);
     }
 

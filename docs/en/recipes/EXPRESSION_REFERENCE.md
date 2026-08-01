@@ -154,6 +154,10 @@ Performance multipliers provided by the structure definition.
 > [!NOTE]
 > **The batch size is applied to amounts for you.** An amount written as an expression, such as `"amount": "2 + tier"`, is tripled when the machine runs a batch of three. Do not multiply by `batch` inside the expression — that applies it twice.
 > The `batch` variable is for when the batch size itself is what you want to reason about.
+>
+> **An output produced on completion draws once per item of the batch.** `"1 + floor(random() * 3)"`
+> at a batch of three yields anything from 3 to 9, not only multiples of three: a batch of n
+> is n runs of the recipe.
 
 ---
 
@@ -241,7 +245,8 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 | **`amount` on an output produced on completion** | **When the recipe starts.** See the note below |
 | `amount` on a `perTick` output | Every tick |
 | Resource amounts such as `energy` and `mana` | As above, by whether they are input or output and `perTick` |
-| A decorator's `chance` | When it is rolled |
+| A recipe's `chance` decorator | Once, when the recipe starts |
+| An output decorator's `chance` | When it is rolled |
 | `condition` / `conditions` | When the recipe starts, and every tick while it runs |
 
 > [!NOTE]

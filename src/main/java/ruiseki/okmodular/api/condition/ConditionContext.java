@@ -8,6 +8,7 @@ import net.minecraft.world.World;
 
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.expression.EvaluationValue;
+import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 
 /**
  * Represents a context in which a condition is checked.
@@ -81,6 +82,18 @@ public class ConditionContext {
 
     public IRecipeContext getRecipeContext() {
         return recipeContext;
+    }
+
+    /**
+     * The same context, drawing from a different point in the random stream.
+     * <p>
+     * For amounts resolved once per run of a batch: everything about the world and the
+     * machine stays put, only {@code random()} and {@code chance()} move. Draw zero is this
+     * context itself, so a batch of one behaves exactly as before.
+     */
+    public ConditionContext forDraw(int index) {
+        if (index == 0) return this;
+        return new ConditionContext(world, x, y, z, recipeContext, SeedMixer.forDraw(evaluationSeed, index));
     }
 
     /**

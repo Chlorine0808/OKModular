@@ -42,11 +42,25 @@ public final class SeedMixer {
 
     /**
      * @param seed   the context's evaluation seed; any value, including zero and negatives
-     * @param stream {@link #RANDOM} or {@link #CHANCE}
+     * @param stream {@link #RANDOM}, {@link #CHANCE} or {@link #RECIPE_CHANCE}
      * @return a number in [0, 1), stable for the same seed and stream
      */
     public static double toUnitInterval(long seed, long stream) {
         return (mix(seed + stream * STREAM_GAMMA) >>> 11) * UNIT;
+    }
+
+    /**
+     * A seed for one of several draws made from the same context.
+     * <p>
+     * A batch of n is n runs of the recipe, so an amount written with {@code random()} is
+     * drawn n times rather than once and multiplied - otherwise a batch of three can only
+     * ever pay out multiples of three.
+     *
+     * @param index which draw, from zero; index zero returns the seed unchanged so a batch
+     *              of one is bit-for-bit what it was
+     */
+    public static long forDraw(long seed, int index) {
+        return index == 0 ? seed : mix(seed + (index + 8L) * STREAM_GAMMA);
     }
 
     /** SplitMix64's finalizer. Every input bit reaches every output bit. */

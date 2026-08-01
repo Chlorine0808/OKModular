@@ -81,8 +81,10 @@ public class RecipeExecutionVisitor implements IRecipeVisitor {
             if (output.isPerTick()) {
                 agent.addPerTickOutput((IModularRecipeOutput) output.copy(batchSize));
             } else {
-                IRecipeOutput cached = output.copy(batchSize);
-                cached.resolveAmount(context);
+                // copy(1) rather than copy(batchSize): the batch is applied by resolving the
+                // amount once per run, not by scaling one result.
+                IRecipeOutput cached = output.copy(1);
+                cached.resolveAmount(context, batchSize);
                 agent.addCachedOutput(cached);
             }
         }
@@ -101,8 +103,10 @@ public class RecipeExecutionVisitor implements IRecipeVisitor {
             if (output.isPerTick()) {
                 agent.addPerTickOutput((IModularRecipeOutput) output.copy(batchSize));
             } else {
-                IRecipeOutput cached = output.copy(batchSize);
-                cached.resolveAmount(context);
+                // copy(1) rather than copy(batchSize): the batch is applied by resolving the
+                // amount once per run, not by scaling one result.
+                IRecipeOutput cached = output.copy(1);
+                cached.resolveAmount(context, batchSize);
                 agent.addCachedOutput(cached);
             }
         }

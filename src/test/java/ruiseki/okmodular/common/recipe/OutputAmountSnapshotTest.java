@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -92,7 +94,7 @@ public class OutputAmountSnapshotTest {
         ItemOutput output = ItemOutput.fromJson(json("{ \"item\": \"minecraft:gold_nugget\", \"amount\": \"2 + 3\" }"));
         assertNotEquals(5, output.getRequiredAmount(), "前提: 畳む前は控え値を返す");
 
-        output.resolveAmount(context());
+        output.resolveAmount(context(), 1);
 
         assertEquals(5, output.getRequiredAmount(), "畳んだのに式のままになっている");
         assertEquals(5, output.getRequiredAmount(context()), "文脈つきでも同じ値であるべき");
@@ -103,7 +105,7 @@ public class OutputAmountSnapshotTest {
     public void test数値の量は変わらない() {
         ItemOutput output = ItemOutput.fromJson(json("{ \"item\": \"minecraft:gold_nugget\", \"amount\": 3 }"));
 
-        output.resolveAmount(context());
+        output.resolveAmount(context(), 1);
 
         assertEquals(3, output.getRequiredAmount());
     }
@@ -131,6 +133,41 @@ public class OutputAmountSnapshotTest {
         agent.startRecipe(recipeWith(output), NO_PORTS, NO_PORTS, context());
 
         assertNotEquals(5, output.getRequiredAmount(), "レシピ定義そのものを畳んでしまっている");
+    }
+
+    // ========== バッチ ==========
+
+    @Test
+    @DisplayName("バッチは抽選を回数分行う")
+    public void testバッチで回数分引く() {
+        // 3 バッチは「3 回実行したのと同じ」なので、1〜3 個の出力なら 3〜9 の**連続値**になる。
+        // 式全体を 3 倍していた頃は 3 / 6 / 9 しか出なかった（実機で観測）。
+        Set<Long> seen = new HashSet<>();
+        for (long seed = 0; seed < 300; seed++) {
+            ItemOutput output = ItemOutput
+                .fromJson(json("{ \"item\": \"minecraft:flint\", \"amount\": \"1 + floor(random() * 3)\" }"));
+
+            output.resolveAmount(new ConditionContext(null, 0, 0, 0, null, seed), 3);
+            seen.add(output.getRequiredAmount());
+        }
+
+        for (long value : seen) {
+            assertTrue(value >= 3 && value <= 9, "3 回引いた合計の範囲外: " + value);
+        }
+        assertTrue(
+            seen.stream()
+                .anyMatch(v -> v % 3 != 0),
+            "3 の倍数しか出ていない。抽選が 1 回しか行われていない: " + seen);
+    }
+
+    @Test
+    @DisplayName("式で書いていない量はバッチ倍される")
+    public void test数値の量はバッチ倍() {
+        ItemOutput output = ItemOutput.fromJson(json("{ \"item\": \"minecraft:gold_nugget\", \"amount\": 3 }"));
+
+        output.resolveAmount(context(), 4);
+
+        assertEquals(12, output.getRequiredAmount());
     }
 
     @Test

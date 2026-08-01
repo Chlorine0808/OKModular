@@ -233,14 +233,21 @@ public class ItemOutput extends AbstractModularRecipeOutput {
     }
 
     @Override
-    public void resolveAmount(ConditionContext context) {
+    public void resolveAmount(ConditionContext context, int draws) {
         // This one keeps its amount in the stack rather than in the inherited field, so the
         // base implementation would write somewhere nothing reads.
-        if (amountExpr == null) return;
-        int resolved = (int) getRequiredAmount(context);
-        this.count = resolved;
-        if (output != null) output.stackSize = resolved;
-        this.amountExpr = null;
+        long total;
+        if (amountExpr == null) {
+            total = getRequiredAmount() * draws;
+        } else {
+            total = 0;
+            for (int i = 0; i < draws; i++) {
+                total += getRequiredAmount(context.forDraw(i));
+            }
+            this.amountExpr = null;
+        }
+        this.count = (int) total;
+        if (output != null) output.stackSize = (int) total;
     }
 
     @Override
