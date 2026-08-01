@@ -66,6 +66,7 @@ import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 import ruiseki.okmodular.core.tileentity.AbstractMBModifierTE;
+import ruiseki.okmodular.structure.StructureCellLocator;
 import ruiseki.okmodular.structure.StructureManager;
 import ruiseki.okmodular.util.Logger;
 
@@ -327,13 +328,39 @@ public class TEMachineController extends AbstractMBModifierTE
     private final Map<Character, List<ChunkCoordinates>> symbolPositions = new HashMap<>();
     private final Map<ChunkCoordinates, Character> posToSymbol = new HashMap<>();
 
+    /**
+     * Which pattern cell each tracked position occupies, in structure-local (ABC) coordinates.
+     * <p>
+     * Derived state, rebuilt by every structure check alongside {@link #symbolPositions}. It is not
+     * persisted for the same reason that map is not restored: the check repopulates both.
+     */
+    private final Map<ChunkCoordinates, int[]> symbolCells = new HashMap<>();
+
+    /**
+     * The controller's own cell in the pattern, as handed to the last structure check.
+     * <p>
+     * {@link #structureCheck} is the only place this arrives, and the scan runs underneath it, so
+     * it has to be parked somewhere {@link #finalizeSymbolPosition} can read.
+     */
+    private final int[] structureOriginOffset = new int[3];
+
     public Map<Character, List<ChunkCoordinates>> getSymbolPositionsMap() {
         return symbolPositions;
+    }
+
+    /**
+     * @return the {@code {a, b, c}} pattern cell at that position, or null if the position is not
+     *         part of the currently formed structure. The array belongs to the caller.
+     */
+    public int[] getSymbolCell(int x, int y, int z) {
+        int[] cell = symbolCells.get(new ChunkCoordinates(x, y, z));
+        return cell == null ? null : cell.clone();
     }
 
     public void clearSymbolPositions() {
         symbolPositions.clear();
         posToSymbol.clear();
+        symbolCells.clear();
     }
 
     @Override
@@ -347,6 +374,9 @@ public class TEMachineController extends AbstractMBModifierTE
         ChunkCoordinates coord = new ChunkCoordinates(x, y, z);
         symbolPositions.computeIfAbsent(symbol, k -> new ArrayList<>())
             .add(coord);
+        symbolCells.put(
+            coord,
+            StructureCellLocator.locate(extendedFacing, xCoord, yCoord, zCoord, structureOriginOffset, x, y, z));
     }
 
     @Override
@@ -414,6 +444,11 @@ public class TEMachineController extends AbstractMBModifierTE
 
     @Override
     protected boolean structureCheck(String piece, int ox, int oy, int oz) {
+        // The scan runs inside this call and reports world coordinates only, so park the offset
+        // where finalizeSymbolPosition can reach it before starting.
+        structureOriginOffset[0] = ox;
+        structureOriginOffset[1] = oy;
+        structureOriginOffset[2] = oz;
         return structureAgent.structureCheck(piece, ox, oy, oz);
     }
 
