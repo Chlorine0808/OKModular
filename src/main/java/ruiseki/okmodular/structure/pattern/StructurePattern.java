@@ -92,8 +92,11 @@ public final class StructurePattern {
     private List<Cell> resolve(String machineDefaultFacing) {
         String[][] processed = StructureShape.process(shape, machineDefaultFacing);
 
-        // A declared anchor is checked for at parse time, so a miss here means the pattern never
-        // drew one -- the whole pattern is then measured from its own first cell.
+        // A declared anchor is checked for at parse time, against the shape as written, so a miss
+        // here normally means the pattern never drew one and is measured from its own first cell.
+        // The one other way to get here is a ragged vertical pattern: transformForVertical sizes
+        // itself from the first layer, so rows past that length are dropped -- the same thing
+        // happens to a machine's own structure, and the fix belongs there rather than here.
         int[] found = StructureShape.findSymbolOffset(processed, anchor);
         int[] origin = found != null ? found : new int[] { 0, 0, 0 };
 
