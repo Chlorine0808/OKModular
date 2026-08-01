@@ -222,38 +222,49 @@ public class GuiManager {
 
     /**
      * Returns the status message when machine is actively processing.
+     * <p>
+     * <b>The progress bar is the last thing shown, not the first.</b> This used to name
+     * three reasons by hand and fall through to the percentage for everything else, so a
+     * recipe stopped mid-run by its own conditions - or by the machine's - kept displaying
+     * its frozen progress and said nothing about why it had stopped. The reason itself now
+     * decides, the same way it does on the idle path; see
+     * {@link ErrorReason#showsWhileRunning()}.
      */
     private String getProcessingStatusMessage(ProcessAgent agent) {
         ErrorReason lastError = controller.getLastProcessErrorReason();
 
-        // Show energy error even during processing
-        if (lastError == ErrorReason.NO_ENERGY) return LangHelpers.localize(lastError.getUnlocalizedName());
-        if (lastError == ErrorReason.OUTPUT_FULL) {
-            return LangHelpers
-                .localize(lastError.getUnlocalizedName(), diagnoseBlockedOutputs(controller.getOutputPorts()));
-        }
-
-        if (lastError == ErrorReason.OUTPUT_CAPACITY_INSUFFICIENT) {
-            String detail = controller.getLastProcessErrorDetail();
-            if (detail != null && !detail.isEmpty()) {
-                return LangHelpers.localize(lastError.getUnlocalizedName(), detail);
-            }
-            return LangHelpers.localize(lastError.getUnlocalizedName());
-        }
-
-        if (agent.isRunning() && !agent.isWaitingForOutput()) {
-            int percent = (int) (agent.getProgressPercent() * 100);
-            if (agent.getMaxProgress() <= 0) percent = 0;
-
-            String status = LangHelpers.localize("gui.status.processing", percent);
-            return status;
-        }
-
+        // Waiting to hand over its results is not an error the reason can describe better:
+        // whatever it says, what the player needs is which ports are full.
         if (agent.isWaitingForOutput()) {
             return LangHelpers.localize("gui.status.output_full", diagnoseBlockedOutputs(controller.getOutputPorts()));
         }
 
-        return LangHelpers.localize("gui.status.idle");
+        if (lastError.showsWhileRunning()) {
+            // The detail goes in unconditionally, for the reason given on the idle path:
+            // an extra argument is ignored, a missing one turns the text into "Format error".
+            return LangHelpers.localize(lastError.getUnlocalizedName(), runningErrorDetail(lastError));
+        }
+
+        int percent = (int) (agent.getProgressPercent() * 100);
+        if (agent.getMaxProgress() <= 0) percent = 0;
+
+        return LangHelpers.localize("gui.status.processing", percent);
+    }
+
+    /**
+     * The {@code %s} a running machine's status text wants.
+     * <p>
+     * Most reasons carry it on the controller - the condition that stopped the recipe, the
+     * port type that could not take the output. The full-output ones are diagnosed here
+     * instead, since the answer is a property of the ports right now rather than of the
+     * moment the error was recorded.
+     */
+    private String runningErrorDetail(ErrorReason reason) {
+        if (reason == ErrorReason.OUTPUT_FULL || reason == ErrorReason.BLOCK_OUTPUT_FULL) {
+            return diagnoseBlockedOutputs(controller.getOutputPorts());
+        }
+        String detail = controller.getLastProcessErrorDetail();
+        return detail == null ? "" : detail;
     }
 
     /**

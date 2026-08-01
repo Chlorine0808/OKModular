@@ -13,7 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * 待機中の GUI に出す状態の選び方の検証。
+ * GUI に出す状態の選び方の検証。
  *
  * ============================================
  * なぜこのテストがあるか
@@ -26,6 +26,17 @@ import org.junit.jupiter.api.Test;
  *
  * SSOT が繰り返し記録している「書かれているのに読む側が無い」の一種で、
  * これは**表示側が濾している**形。
+ *
+ * ============================================
+ * 稼働中の経路にも同じ穴があった
+ * ============================================
+ *
+ * **待機中を直しても、稼働中は手書きのままだった。** 列挙されていたのは 3 つで、
+ * 残りは進捗バーに落ちていた。だから**途中で止まったレシピは、止まった理由を言わずに
+ * 止まった進捗を出し続けた**。待機中の機械は少なくとも止まって見えるが、
+ * こちらは動いているように見える分たちが悪い。
+ * `cda9bc1` で足した `gui.status.paused` の詳細文（落ちた条件そのもの）は、
+ * **まさにこの経路でしか出ないので一度も表示されていなかった**。
  *
  * ============================================
  * なぜ述語にしたか
@@ -53,6 +64,32 @@ public class ErrorReasonDisplayTest {
 
     /** 待機中に出してはいけないもの。ここに無い定数はすべて出す。 */
     private static final Set<ErrorReason> HIDDEN = EnumSet.of(ErrorReason.NONE, ErrorReason.RUNNING);
+
+    /**
+     * 稼働中に出してはいけないもの。待機中の 2 つに `IDLE` を足しただけ。
+     * <p>
+     * どちらの一覧も「今まさに説明しようとしている状態と矛盾する定数」だけを外している。
+     * 待機中の `RUNNING` と、稼働中の `IDLE` が対になる。
+     */
+    private static final Set<ErrorReason> HIDDEN_WHILE_RUNNING = EnumSet
+        .of(ErrorReason.NONE, ErrorReason.RUNNING, ErrorReason.IDLE);
+
+    /**
+     * 稼働中の手書きホワイトリストに並んでいた 3 つ。
+     * <p>
+     * 述語に置き換えて**この 3 つが出なくなっていない**ことを確かめるための凍結。
+     */
+    private static final ErrorReason[] PREVIOUSLY_SHOWN_WHILE_RUNNING = { ErrorReason.NO_ENERGY,
+        ErrorReason.OUTPUT_FULL, ErrorReason.OUTPUT_CAPACITY_INSUFFICIENT };
+
+    /**
+     * 稼働中に握り潰されていたもの。**進捗バーの裏に隠れていた分。**
+     * <p>
+     * `PAUSED` と `CONDITION_NOT_MET` が本命 — レシピが条件で止まった、機械が条件で止まった、
+     * のどちらも「進捗 47%」と表示されていた。
+     */
+    private static final ErrorReason[] PREVIOUSLY_SWALLOWED_WHILE_RUNNING = { ErrorReason.PAUSED,
+        ErrorReason.CONDITION_NOT_MET, ErrorReason.INPUT_MISSING, ErrorReason.NO_MANA, ErrorReason.BLOCK_MISSING };
 
     /**
      * 改修前に `GuiManager` のホワイトリストに並んでいた 5 つ。
@@ -129,6 +166,42 @@ public class ErrorReasonDisplayTest {
     public void test漏れていたものが出る() {
         for (ErrorReason reason : PREVIOUSLY_SWALLOWED) {
             assertTrue(reason.showsWhenIdle(), reason + " がまだ出ない。これがこの修正の本体");
+        }
+    }
+
+    @Test
+    @DisplayName("稼働中に出さないのは NONE / RUNNING / IDLE だけ")
+    public void test稼働中に出さないものが三つだけ() {
+        for (ErrorReason reason : ErrorReason.values()) {
+            if (HIDDEN_WHILE_RUNNING.contains(reason)) {
+                assertFalse(reason.showsWhileRunning(), reason + " は稼働中に出してはいけない");
+            } else {
+                assertTrue(reason.showsWhileRunning(), reason + " が稼働中に出ない。既定は「出す」のはず");
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("IDLE を稼働中に出さない理由 — 動いている機械に「待機中」は矛盾するから")
+    public void testIDLEは稼働中に出さない() {
+        // 待機中に RUNNING を出さないのと同じ理由。前の状態が残っているときに来る。
+        assertFalse(ErrorReason.IDLE.showsWhileRunning());
+        assertTrue(ErrorReason.IDLE.showsWhenIdle(), "待機中まで巻き込んで隠してはいけない");
+    }
+
+    @Test
+    @DisplayName("稼働中に出ていた 3 つは今も出る")
+    public void test稼働中に退行していない() {
+        for (ErrorReason reason : PREVIOUSLY_SHOWN_WHILE_RUNNING) {
+            assertTrue(reason.showsWhileRunning(), reason + " が出なくなっている。改修前は出ていた");
+        }
+    }
+
+    @Test
+    @DisplayName("進捗バーの裏に隠れていたものが出るようになった")
+    public void test稼働中に漏れていたものが出る() {
+        for (ErrorReason reason : PREVIOUSLY_SWALLOWED_WHILE_RUNNING) {
+            assertTrue(reason.showsWhileRunning(), reason + " がまだ出ない。止まった理由が進捗バーに隠れたままになる");
         }
     }
 

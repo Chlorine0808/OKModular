@@ -94,4 +94,24 @@ public enum ErrorReason {
         return this != NONE && this != RUNNING;
     }
 
+    /**
+     * Whether a running machine should say this rather than show its progress.
+     * <p>
+     * <b>The running path had the same hand-written list, and it was worse.</b> It named
+     * three reasons - {@code NO_ENERGY}, {@code OUTPUT_FULL} and
+     * {@code OUTPUT_CAPACITY_INSUFFICIENT} - so a recipe frozen by {@code PAUSED} or
+     * {@code CONDITION_NOT_MET} went on drawing a progress bar as though nothing had
+     * happened. An idle machine at least looks stopped; this one looked like it was working.
+     * That is exactly the case the detail text added for
+     * {@code gui.status.paused} was written to explain, and the player never saw it.
+     * <p>
+     * Same default-yes rule as {@link #showsWhenIdle()}, with one more exclusion:
+     * {@link #IDLE} would claim the machine is doing nothing while this very method is being
+     * asked what a working one should show - the mirror of why {@link #RUNNING} is excluded
+     * above.
+     */
+    public boolean showsWhileRunning() {
+        return showsWhenIdle() && this != IDLE;
+    }
+
 }
