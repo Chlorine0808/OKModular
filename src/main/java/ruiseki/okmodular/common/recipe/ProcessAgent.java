@@ -354,6 +354,13 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
     @Override
     protected boolean produceOutputs(List<IModularPort> outputPorts, ConditionContext context) {
+        // A lost success draw ends the run with nothing to hand over. Reporting success is
+        // right: the run did finish, and answering false would leave the machine waiting for
+        // output space it does not need, forever. See IRecipe#producesOutput.
+        if (currentRecipe != null && !currentRecipe.producesOutput(context)) {
+            return true;
+        }
+
         // 1. Check capacity for all
         for (IRecipeOutput output : cachedOutputs) {
             if (output instanceof IModularRecipeOutput o) {
@@ -426,8 +433,8 @@ public class ProcessAgent extends AbstractRecipeProcess {
      * own conditions filled it. A recipe's conditions left it empty, so all a player saw was
      * that something was wrong.
      * <p>
-     * Null when a decorator refused rather than a named condition, since a {@code chance}
-     * roll has nothing to name.
+     * Null when a decorator refused rather than a named condition - {@code requirement}
+     * carries a condition of its own that is not in {@link IModularRecipe#getConditions()}.
      */
     public String getConditionFailure() {
         return conditionFailure;
@@ -437,11 +444,11 @@ public class ProcessAgent extends AbstractRecipeProcess {
      * Whether the recipe's conditions hold, remembering which one said no.
      * <p>
      * {@link IModularRecipe#isConditionMet} stays the authority: a decorator can refuse on
-     * top of the named conditions - {@code chance} is one - and asking the list directly
-     * would skip that. The list is only walked afterwards, on the path where the machine has
-     * already stopped, to find something to show. That second pass re-evaluates, so a
-     * condition built on {@code chance()} may name itself or not; the message is a hint, not
-     * a record.
+     * top of the named conditions - {@code requirement} is one - and asking the list
+     * directly would skip that. The list is only walked afterwards, on the path where the
+     * machine has already stopped, to find something to show. That second pass re-evaluates,
+     * so a condition built on {@code chance()} may name itself or not; the message is a
+     * hint, not a record.
      */
     private boolean conditionsHold(IModularRecipe recipe, ConditionContext context, boolean starting) {
         if (starting ? recipe.canStart(context) : recipe.isConditionMet(context)) {

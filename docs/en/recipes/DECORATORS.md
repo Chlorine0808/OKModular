@@ -16,7 +16,7 @@ inferred from the properties).
 
 | type name | Behaviour | Properties used for inference |
 |---------|------|------------------------|
-| `chance` | Controls the recipe's success chance | `chance` |
+| `chance` | Controls the recipe's success chance (a loss produces nothing) | `chance` |
 | `bonus` | Produces extra output by chance | `chance` + `outputs` |
 | `weighted_random` | Picks an output from a weighted list | `outputs` (each with `weight`) / `pool` / `rolls` |
 | `requirement` | Checks extra conditions and catalysts while running | `condition` / `requirements` |

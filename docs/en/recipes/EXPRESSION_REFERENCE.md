@@ -248,7 +248,7 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 | **`amount` on an output produced on completion** | **When the recipe starts.** See the note below |
 | `amount` on a `perTick` output | Every tick |
 | Resource amounts such as `energy` and `mana` | As above, by whether they are input or output and `perTick` |
-| A recipe's `chance` decorator | Once, when the recipe starts |
+| A recipe's `chance` decorator | Once per run (settled on completion) |
 | An output decorator's `chance` | When it is rolled |
 | `condition` / `conditions` | When the recipe starts, and every tick while it runs |
 

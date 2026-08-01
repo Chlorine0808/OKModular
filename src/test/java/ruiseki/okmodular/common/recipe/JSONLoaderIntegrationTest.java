@@ -483,8 +483,9 @@ public class JSONLoaderIntegrationTest {
         assertNotNull(recipe, "レシピが見つからない");
         assertTrue(recipe instanceof ChanceRecipeDecorator, "ChanceDecorator でラップされているべき");
 
-        // 抽選は開始時だけ。isConditionMet は稼働中も毎 tick 走るので、そこでは引かない
-        assertTrue(recipe.canStart(new ConditionContext(null, 0, 0, 0)), "100% 確率は常に成功すべき");
+        // 抽選が決めるのは出力を渡すかどうか。開始も稼働中の継続も抽選では止めない
+        // （詳細は ChanceRecipeDecoratorTest）
+        assertTrue(recipe.producesOutput(new ConditionContext(null, 0, 0, 0)), "100% 確率は常に成功すべき");
     }
 
     @Test
@@ -499,7 +500,7 @@ public class JSONLoaderIntegrationTest {
         int successCount = 0;
         int trials = 1000;
         for (int i = 0; i < trials; i++) {
-            if (recipe.canStart(new ConditionContext(null, 0, 0, 0, null, i))) successCount++;
+            if (recipe.producesOutput(new ConditionContext(null, 0, 0, 0, null, i))) successCount++;
         }
 
         // 50% ならば 1000回中 400〜600回程度に収まるはず
