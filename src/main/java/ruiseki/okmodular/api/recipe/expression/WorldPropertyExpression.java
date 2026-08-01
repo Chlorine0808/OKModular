@@ -107,12 +107,11 @@ public class WorldPropertyExpression implements IExpression {
                             context.getZ()));
                 break;
             // Both delegate to the function form rather than answering for themselves. They
-            // used to ask the world directly - canBlockSeeTheSky and getHeightValue - and
-            // both of those include the controller's own block. A controller is a solid
-            // cube, so canBlockSeeTheSky was false at its own position however open the sky
-            // above it was, and getHeightValue is never negative. The variables were
-            // constant zeroes, which reads in game exactly like a condition that is not
-            // being evaluated at all. See VisionFunctionExpression.SKY.
+            // used to ask the chunk's height map instead: can_see_void as
+            // getHeightValue() < 0, which is never true, and can_see_sky as
+            // canBlockSeeTheSky at the controller's own coordinates. The docs say the two
+            // spellings ask the same question, so only one of them gets to answer it.
+            // See VisionFunctionExpression.SKY for what the height map was actually saying.
             case "can_see_sky":
                 result = VisionFunctionExpression.SKY.evaluate(context);
                 break;

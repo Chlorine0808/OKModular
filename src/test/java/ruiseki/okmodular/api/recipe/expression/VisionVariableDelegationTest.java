@@ -27,18 +27,18 @@ import org.junit.jupiter.api.Test;
  *
  * - 関数形式 `can_see_sky()` は `VisionFunctionExpression` が
  * **コントローラの 1 つ上から**空に向かってブロックを走査する
- * - 変数形式 `can_see_sky` は `WorldPropertyExpression` が
- * `World.canBlockSeeTheSky(x, y, z)` を**コントローラ自身の座標で**呼んでいた
+ * - 変数形式は `WorldPropertyExpression` が chunk の heightMap を読んでいた
  *
- * `canBlockSeeTheSky` は chunk の heightMap 比較なので、**その座標のブロック自身を数える**。
- * コントローラは不透過キューブなので heightMap は常に「コントローラの y + 1」になり、
- * **どれだけ空が開けていても答えは必ず false**。`can_see_void` も同じで、
- * `getHeightValue()` は負にならないので必ず false。
+ * **`can_see_void` は定数 false だった** — `getHeightValue()` は負にならない。
  *
- * **変数形式は定数 0 だった。** ゲーム中では「条件が評価されていない」のと見分けがつかない
- * （`can_see_sky == 1` は絶対に始まらず、`can_see_sky == 0` は素通り）。
- * `726a0df` で変数として登録できるようにしたが、登録先の評価が壊れていたので
- * 「読めるようになっただけで効かない」状態が残っていた。
+ * **`can_see_sky` は定数ではなかった。** `canBlockSeeTheSky` は `y >= heightMap` で、
+ * heightMap は `Block.getLightOpacity()` から作られる。そして
+ * **この mod のブロックは全部 lightOpacity 0 を返す**（→ `VisionFunctionExpression.isAllowed`）ので
+ * 機械は heightMap から見えず、地上の機械では 2 つの綴りが**たまたま同じ答え**になっていた。
+ *
+ * **「たまたま合っている」を消すのがこのテストの目的。** heightMap 側の答えは
+ * 誰も選んでいない opacity 0 に乗っており、しかも**訊かれた座標のブロック自身を数える**ので、
+ * コントローラが光を遮るキューブになった日に**黙って常に false** になる。
  *
  * ============================================
  * なぜソース走査なのか
@@ -79,10 +79,9 @@ public class VisionVariableDelegationTest {
     public void test自分のブロックを数える判定を使っていない() {
         String source = read(WORLD_PROPERTY);
 
-        // どちらもコントローラ自身のブロックを勘定に入れるので、
-        // 不透過キューブであるコントローラでは答えが定数になる。
+        // どちらも heightMap 由来で、訊かれた座標のブロック自身を勘定に入れる。
         // 呼び出しの形（先頭のドットと開き括弧）で探す。名前だけだと説明文まで拾ってしまう。
-        assertFalse(source.contains(".canBlockSeeTheSky("), "canBlockSeeTheSky はコントローラ自身のブロックを数えるので、機械では常に false になる");
+        assertFalse(source.contains(".canBlockSeeTheSky("), "canBlockSeeTheSky は heightMap 比較なので、訊かれた座標のブロック自身を数える");
         assertFalse(source.contains(".getHeightValue("), "getHeightValue は負にならないので、can_see_void が常に false になる");
     }
 
@@ -95,6 +94,21 @@ public class VisionVariableDelegationTest {
         assertTrue(
             source.contains("Direction.SKY,") && source.contains("Collections.emptyList()"),
             "SKY / VOID の共有インスタンスが引数なしで作られていない。" + "変数形式にフィルタが混ざる");
+    }
+
+    @Test
+    @DisplayName("走査を透過する条件が 2 本あることを覚えておく")
+    public void test透過の判定が二本ある() {
+        String source = read(VISION_FUNCTION);
+
+        // **この mod のブロックは 2 本目で全部透過する。** コントローラとポートは
+        // isOpaque = false を明示しているので 1 本目、ケーシングは明示していないが
+        // lightOpacity が 0 なので 2 本目で通る（BlockOK の isOpaque が
+        // フィールド初期化子で、Block のコンストラクタが lightOpacity を決めた後に走るため）。
+        // 2 本目を消すとケーシングが空を遮るようになる = 挙動が変わる。
+        assertTrue(
+            source.contains("!block.isOpaqueCube() || block.getLightOpacity() == 0"),
+            "透過の判定が変わっている。ケーシングが空を遮るかどうかが変わるので、意図した変更か確かめること");
     }
 
     @Test

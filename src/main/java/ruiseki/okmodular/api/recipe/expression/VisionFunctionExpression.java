@@ -26,13 +26,22 @@ public class VisionFunctionExpression implements IExpression {
      * The argument-less forms, shared.
      * <p>
      * These are what the bare {@code can_see_sky} / {@code can_see_void} variables evaluate
-     * to. The docs say the two spellings ask the same question, and they have to actually do
-     * so: {@link WorldPropertyExpression} answered them with
-     * {@code World.canBlockSeeTheSky} and {@code getHeightValue}, both of which include the
-     * controller's own block. A machine controller is a solid cube, so it can never see the
-     * sky at its own position and the world's height map is never below zero - the variable
-     * form was a constant 0 either way, and a recipe gated on {@code can_see_sky == 1} could
-     * not run no matter where it was built.
+     * to. The docs say the two spellings ask the same question, so one of them has to be the
+     * implementation; {@link WorldPropertyExpression} used to answer separately, from the
+     * chunk's height map:
+     * <ul>
+     * <li>{@code can_see_void} read {@code World.getHeightValue(x, z) < 0}. A height map
+     * entry is never negative, so that variable was <b>a constant false</b>.
+     * <li>{@code can_see_sky} read {@code World.canBlockSeeTheSky} at the controller's own
+     * coordinates. That is {@code y >= heightMap}, and the height map is built from
+     * {@link net.minecraft.block.Block#getLightOpacity()} - which is <b>zero for every block
+     * this mod registers</b>, casings included (see {@link #isAllowed}). So the machine is
+     * invisible to the height map and the two spellings happened to agree.
+     * </ul>
+     * Agreeing by accident is the thing being removed. The height map answer rests on an
+     * opacity value that is zero for a reason nobody chose, and it counts the block at the
+     * asked-about coordinate, so a controller that ever became a light-blocking cube would
+     * silently start answering false everywhere.
      * <p>
      * Safe to share because the class holds nothing but its direction and its argument list.
      */
@@ -114,6 +123,22 @@ public class VisionFunctionExpression implements IExpression {
         }
     }
 
+    /**
+     * Whether the scan sees past this block.
+     * <p>
+     * <b>Every block this mod registers passes, and only one of the two reasons was chosen.</b>
+     * The controller and the ports set {@code isOpaque = false} deliberately, so
+     * {@code isOpaqueCube()} is false for them. A casing does not - but
+     * {@link Block#getLightOpacity()} answers zero for it all the same, because
+     * {@code Block(Material)} runs {@code lightOpacity = isOpaqueCube() ? 255 : 0} while
+     * {@code BlockOK.isOpaque} still holds its default {@code false}: that field's
+     * initialiser only runs once the superclass constructor has returned. So the casing is
+     * an opaque cube that reports no light opacity.
+     * <p>
+     * A machine is therefore see-through to this check, and to the chunk's height map with
+     * it. That is a defensible behaviour - a machine should not block its own view of the
+     * sky - but it is not one this code asked for, and it is not confined to expressions.
+     */
     private boolean isAllowed(Block block, boolean strict, Set<String> allowedBlockIds) {
         if (!allowedBlockIds.isEmpty()) {
             String blockId = Block.blockRegistry.getNameForObject(block);
