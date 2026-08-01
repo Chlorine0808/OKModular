@@ -35,6 +35,10 @@ public class MachineryConfig {
     @Config.DefaultInt(2)
     public static int ic2SourceTier = 2;
 
+    @Config.Comment("Directory structure IO patterns are read from, relative to this mod's config directory")
+    @Config.DefaultString("structure_io")
+    public static String structureIoDirectory = "structure_io";
+
     @Config.Comment("Default tint color for machine blocks (hex color code)")
     @Config.DefaultString("#FFFFFF")
     public static String defaultTintColor;
