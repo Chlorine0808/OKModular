@@ -33,15 +33,13 @@ public class VisionFunctionExpression implements IExpression {
      * <li>{@code can_see_void} read {@code World.getHeightValue(x, z) < 0}. A height map
      * entry is never negative, so that variable was <b>a constant false</b>.
      * <li>{@code can_see_sky} read {@code World.canBlockSeeTheSky} at the controller's own
-     * coordinates. That is {@code y >= heightMap}, and the height map is built from
-     * {@link net.minecraft.block.Block#getLightOpacity()} - which is <b>zero for every block
-     * this mod registers</b>, casings included (see {@link #isAllowed}). So the machine is
-     * invisible to the height map and the two spellings happened to agree.
+     * coordinates - {@code y >= heightMap}. Back then every block this mod registered
+     * reported no light opacity, so a machine was invisible to the height map and the two
+     * spellings happened to agree.
      * </ul>
-     * Agreeing by accident is the thing being removed. The height map answer rests on an
-     * opacity value that is zero for a reason nobody chose, and it counts the block at the
-     * asked-about coordinate, so a controller that ever became a light-blocking cube would
-     * silently start answering false everywhere.
+     * Agreeing by accident is the thing being removed. The height map counts the block at
+     * the asked-about coordinate, so now that a controller does stop light it would answer
+     * false everywhere - which is exactly the silent constant this was blamed for before.
      * <p>
      * Safe to share because the class holds nothing but its direction and its argument list.
      */
@@ -126,18 +124,13 @@ public class VisionFunctionExpression implements IExpression {
     /**
      * Whether the scan sees past this block.
      * <p>
-     * <b>Every block this mod registers passes, and only one of the two reasons was chosen.</b>
-     * The controller and the ports set {@code isOpaque = false} deliberately, so
-     * {@code isOpaqueCube()} is false for them. A casing does not - but
-     * {@link Block#getLightOpacity()} answers zero for it all the same, because
-     * {@code Block(Material)} runs {@code lightOpacity = isOpaqueCube() ? 255 : 0} while
-     * {@code BlockOK.isOpaque} still holds its default {@code false}: that field's
-     * initialiser only runs once the superclass constructor has returned. So the casing is
-     * an opaque cube that reports no light opacity.
-     * <p>
-     * A machine is therefore see-through to this check, and to the chunk's height map with
-     * it. That is a defensible behaviour - a machine should not block its own view of the
-     * sky - but it is not one this code asked for, and it is not confined to expressions.
+     * <b>Light opacity is the question, not whether the block renders as an opaque cube.</b>
+     * It used to accept either, and {@code !isOpaqueCube()} lets through every block that
+     * merely renders through a custom path while still being solid - a slab, a stair, and
+     * this mod's own controller and ports, which turn that flag off so their overlay pass
+     * renders. Opacity is what the chunk's height map and the world's skylight go by, so
+     * going by it too is what makes {@code can_see_sky} mean what a player would read into
+     * it. Glass and the like still pass: their opacity is zero.
      */
     private boolean isAllowed(Block block, boolean strict, Set<String> allowedBlockIds) {
         if (!allowedBlockIds.isEmpty()) {
@@ -150,8 +143,7 @@ public class VisionFunctionExpression implements IExpression {
             }
         }
         if (strict) return false;
-        if (!block.isOpaqueCube() || block.getLightOpacity() == 0) return true;
-        return false;
+        return block.getLightOpacity() == 0;
     }
 
     @Override

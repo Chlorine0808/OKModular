@@ -32,13 +32,14 @@ import org.junit.jupiter.api.Test;
  * **`can_see_void` は定数 false だった** — `getHeightValue()` は負にならない。
  *
  * **`can_see_sky` は定数ではなかった。** `canBlockSeeTheSky` は `y >= heightMap` で、
- * heightMap は `Block.getLightOpacity()` から作られる。そして
- * **この mod のブロックは全部 lightOpacity 0 を返す**（→ `VisionFunctionExpression.isAllowed`）ので
- * 機械は heightMap から見えず、地上の機械では 2 つの綴りが**たまたま同じ答え**になっていた。
+ * heightMap は `Block.getLightOpacity()` から作られる。当時は
+ * **この mod のブロックが全部 lightOpacity 0 を返していた**ので機械が heightMap から見えず、
+ * 地上の機械では 2 つの綴りが**たまたま同じ答え**になっていた。
  *
- * **「たまたま合っている」を消すのがこのテストの目的。** heightMap 側の答えは
- * 誰も選んでいない opacity 0 に乗っており、しかも**訊かれた座標のブロック自身を数える**ので、
- * コントローラが光を遮るキューブになった日に**黙って常に false** になる。
+ * **「たまたま合っている」を消すのがこのテストの目的。** heightMap 側は
+ * **訊かれた座標のブロック自身を数える**ので、`BlockLightOpacityTest` の修正で
+ * コントローラが光を遮るようになった今は**どこでも false** になる。
+ * 委譲していなければ、この時点で静かに壊れていた。
  *
  * ============================================
  * なぜソース走査なのか
@@ -94,21 +95,6 @@ public class VisionVariableDelegationTest {
         assertTrue(
             source.contains("Direction.SKY,") && source.contains("Collections.emptyList()"),
             "SKY / VOID の共有インスタンスが引数なしで作られていない。" + "変数形式にフィルタが混ざる");
-    }
-
-    @Test
-    @DisplayName("走査を透過する条件が 2 本あることを覚えておく")
-    public void test透過の判定が二本ある() {
-        String source = read(VISION_FUNCTION);
-
-        // **この mod のブロックは 2 本目で全部透過する。** コントローラとポートは
-        // isOpaque = false を明示しているので 1 本目、ケーシングは明示していないが
-        // lightOpacity が 0 なので 2 本目で通る（BlockOK の isOpaque が
-        // フィールド初期化子で、Block のコンストラクタが lightOpacity を決めた後に走るため）。
-        // 2 本目を消すとケーシングが空を遮るようになる = 挙動が変わる。
-        assertTrue(
-            source.contains("!block.isOpaqueCube() || block.getLightOpacity() == 0"),
-            "透過の判定が変わっている。ケーシングが空を遮るかどうかが変わるので、意図した変更か確かめること");
     }
 
     @Test

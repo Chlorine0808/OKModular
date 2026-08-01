@@ -77,7 +77,31 @@ public class BlockOK extends Block implements IBlockPropertyProvider, IBlock {
         setBlockName(name);
         setHarvestLevel("pickaxe", 0);
         this.setStepSound(getSoundForMaterial(mat));
+        setLightOpacity(SOLID);
     }
+
+    /**
+     * The light opacity of a block that stops skylight completely.
+     * <p>
+     * <b>Every block in this hierarchy is a full solid block, and it has to say so here
+     * rather than through {@link #isOpaque}.</b> Two things were wrong with leaving it to
+     * the superclass:
+     * <ol>
+     * <li><b>The superclass could not see the answer.</b> {@code Block(Material)} runs
+     * {@code lightOpacity = isOpaqueCube() ? 255 : 0}, and {@link #isOpaqueCube()} reads
+     * {@link #isOpaque} - whose initialiser has not run yet, because instance field
+     * initialisers run only after the superclass constructor returns. So every block came
+     * out at zero: transparent to skylight, and invisible to the chunk's height map, while
+     * {@code isOpaqueCube()} answered true from then on.
+     * <li><b>The answer is not {@code isOpaque} anyway.</b> The controller and the ports set
+     * {@code isOpaque = false} so their translucent overlay pass renders; they are still
+     * solid blocks that a player cannot see through. Deriving one from the other would make
+     * a rendering choice decide how the world is lit.
+     * </ol>
+     * A block that really is see-through calls {@code setLightOpacity(0)} in its own
+     * constructor - after this one has run, so it wins.
+     */
+    private static final int SOLID = 255;
 
     @Override
     public void init() {
