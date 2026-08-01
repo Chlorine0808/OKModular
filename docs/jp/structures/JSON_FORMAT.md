@@ -147,3 +147,9 @@
 
 ## 6. コマンド
 - `/okmodular reload`: 構造体定義、レシピ定義、Tier定義をリロードします。
+
+## 7. 関連
+
+- [構造 IO](./STRUCTURE_IO.md) — ここと同じ `layers` / `mappings` の書き方で、
+  ブロックの配置そのものをレシピの入出力にする仕組み。ファイルは `config/okmodular/structure_io/`。
+  **予約記号の扱いが一部違います**（`Q` は固定ではなくアンカーの既定値）。

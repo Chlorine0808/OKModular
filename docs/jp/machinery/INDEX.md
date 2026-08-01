@@ -71,6 +71,7 @@ Modular Machineryモジュールの技術ドキュメント一覧です。
 
 ### Structure System
 - [JSON フォーマット](../structures/JSON_FORMAT.md)
+- [構造 IO](../structures/STRUCTURE_IO.md) — ブロックの配置そのものを 1 つの入出力として扱う
 
 ---
 

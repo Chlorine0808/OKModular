@@ -71,6 +71,7 @@
 | `energy` / `mana` | エネルギー / マナ | `perTick` が true なら毎 tick |
 | `essentia` / `vis` | アスペクト | 値はアスペクト名 |
 | `symbol` | ブロック | 構造体のシンボル位置を操作 → §3.2 |
+| `structure` | ブロック | ブロックの配置全体を操作 → §3.3 |
 
 ```json
 { "item": "minecraft:coal", "amount": 64 }
@@ -165,6 +166,27 @@
 ```json
 "nbt": [ "nbt('stored_energy') += 1000" ]
 ```
+
+## 3.3 ブロックの配置（`structure`）
+
+`symbol` がブロックを 1 個ずつ数えるのに対し、`structure` は**配置全体**を扱います。形は
+名前付きのパターンとして 1 度だけ書き、一致判定も設置も一体で行われます。
+
+```json
+{ "type": "structure", "pattern": "altar_core", "symbol": "P", "consume": true }
+```
+
+| キー | 意味 |
+|---|---|
+| `pattern` | パターン名（`config/okmodular/structure_io/` のファイルで定義） |
+| `symbol` | パターンの基準にするブロックの記号 |
+| `amount` | 一致・書き込みを要求するアンカーの数。既定は 1 |
+| `consume` | input のみ。一致した配置を丸ごと消す |
+| `optional` | 一致しなくてもレシピを開始・完了できる |
+
+アンカーが 1 つと数えられるのは**すべてのセルが一致したときだけ**で、パターンは機械と一緒に
+回ります。フォーマットの詳細・予約文字・アンカーの決め方は
+[構造 IO](../structures/STRUCTURE_IO.md) を参照。
 
 ## 4. 条件とデコレータ
 

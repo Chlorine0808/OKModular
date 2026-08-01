@@ -72,6 +72,7 @@ The type is decided by which key is present in the object.
 | `energy` / `mana` | energy / mana | Per tick when `perTick` is true |
 | `essentia` / `vis` | aspect | The value is an aspect name |
 | `symbol` | block | Acts on a structure's symbol position → §3.2 |
+| `structure` | block | Acts on a whole arrangement of blocks → §3.3 |
 
 ```json
 { "item": "minecraft:coal", "amount": 64 }
@@ -168,6 +169,27 @@ use `+=`.
 ```json
 "nbt": [ "nbt('stored_energy') += 1000" ]
 ```
+
+## 3.3 Arrangements of blocks (`structure`)
+
+Where `symbol` counts blocks one at a time, `structure` acts on a whole arrangement — a shape
+written once as a named pattern and matched or placed as a unit.
+
+```json
+{ "type": "structure", "pattern": "altar_core", "symbol": "P", "consume": true }
+```
+
+| Key | Meaning |
+|---|---|
+| `pattern` | The pattern's name, from a file in `config/okmodular/structure_io/` |
+| `symbol` | The structure symbol whose blocks the pattern is anchored to |
+| `amount` | How many anchors must match / are written to. Default 1 |
+| `consume` | Input only. Clears the whole matched arrangement on start |
+| `optional` | Lets the recipe start and finish even when nothing matches |
+
+An anchor counts only when every cell of the pattern matches, and the pattern turns with the
+machine it sits in. The full format, the reserved characters and how the anchor is chosen are in
+[Structure IO](../structures/STRUCTURE_IO.md).
 
 ## 4. Conditions and decorators
 

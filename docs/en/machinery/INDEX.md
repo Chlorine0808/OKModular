@@ -71,6 +71,7 @@ An expression system for varying recipe input and output amounts. It allows flex
 
 ### Structure System
 - [JSON Format](../structures/JSON_FORMAT.md)
+- [Structure IO](../structures/STRUCTURE_IO.md) — using a whole arrangement of blocks as one recipe input or output
 
 ---
 

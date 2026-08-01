@@ -150,3 +150,10 @@ The following symbols have special meanings in the structure system.
 
 ## 6. Commands
 - `/okmodular reload`: Reloads structure definitions, recipe definitions and tier definitions.
+
+## 7. See Also
+
+- [Structure IO](./STRUCTURE_IO.md) — the same `layers` / `mappings` vocabulary used to make a
+  whole arrangement of blocks one recipe input or output. Files live in
+  `config/okmodular/structure_io/`. **The reserved symbols differ slightly**: `Q` there is the
+  default anchor rather than a fixed controller.
