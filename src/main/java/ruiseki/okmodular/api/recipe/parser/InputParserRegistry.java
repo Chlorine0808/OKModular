@@ -14,6 +14,7 @@ import ruiseki.okmodular.api.recipe.io.GasInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.ItemInput;
 import ruiseki.okmodular.api.recipe.io.ManaInput;
+import ruiseki.okmodular.api.recipe.io.StructureInput;
 import ruiseki.okmodular.api.recipe.io.VisInput;
 
 public class InputParserRegistry {
@@ -30,6 +31,9 @@ public class InputParserRegistry {
         register("essentia", EssentiaInput::fromJson);
         register("vis", VisInput::fromJson);
         register("symbol", BlockInput::fromJson);
+        // Registered under the same word it writes as its "type", so the round trip does not
+        // depend on the identifying-key fallback below the way "block" currently does.
+        register(StructureInput.TYPE, StructureInput::fromJson);
     }
 
     /**

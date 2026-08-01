@@ -15,6 +15,7 @@ import ruiseki.okmodular.api.recipe.io.GasInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.ItemInput;
 import ruiseki.okmodular.api.recipe.io.ManaInput;
+import ruiseki.okmodular.api.recipe.io.StructureInput;
 import ruiseki.okmodular.api.recipe.io.VisInput;
 import ruiseki.okmodular.util.Logger;
 
@@ -34,6 +35,7 @@ public class InputNBTRegistry {
         register("essentia", () -> new EssentiaInput("", 0));
         register("vis", () -> new VisInput("", 0));
         register("block", () -> new BlockInput());
+        register(StructureInput.TYPE, () -> new StructureInput());
     }
 
     public static void register(String id, Supplier<IRecipeInput> supplier) {
