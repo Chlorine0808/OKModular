@@ -82,6 +82,11 @@ public abstract class RecipeDecorator implements IModularRecipe {
     }
 
     @Override
+    public boolean canStart(ConditionContext context) {
+        return internal.canStart(context);
+    }
+
+    @Override
     public ConditionPolicy getConditionPolicy() {
         return internal.getConditionPolicy();
     }

@@ -124,7 +124,9 @@ public class SeedMixerTest {
         }
 
         for (int i = 0; i < 3; i++) {
-            assertTrue(counts[i] > 850 && counts[i] < 1150, "1+floor(random()*3) の " + (i + 1) + " が " + counts[i] + " 回");
+            assertTrue(
+                counts[i] > 850 && counts[i] < 1150,
+                "1+floor(random()*3) の " + (i + 1) + " が " + counts[i] + " 回");
         }
     }
 

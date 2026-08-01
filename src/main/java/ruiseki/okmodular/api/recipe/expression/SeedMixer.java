@@ -30,6 +30,9 @@ public final class SeedMixer {
     /** The stream {@code chance()} draws from, so the two never track each other. */
     public static final long CHANCE = 1L;
 
+    /** The stream a recipe's {@code chance} decorator draws from. */
+    public static final long RECIPE_CHANCE = 2L;
+
     /** Odd 64-bit constant, so distinct streams land far apart. */
     private static final long STREAM_GAMMA = 0x9E3779B97F4A7C15L;
 

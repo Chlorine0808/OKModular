@@ -63,7 +63,7 @@ public class ProcessAgent extends AbstractRecipeProcess {
         // conditions did not hold would start, eat its inputs, fail the check on the next
         // tick and be thrown away - then start again. A machine sat there dissolving its
         // input stack an item every other tick. Refusing here is before anything is consumed.
-        if (!conditionsHold(recipe, context)) return false;
+        if (!conditionsHold(recipe, context, true)) return false;
 
         // Calculate maximum possible batch size
         int batchMin = 1;
@@ -230,7 +230,7 @@ public class ProcessAgent extends AbstractRecipeProcess {
         // Before anything is drawn for this tick. A paused recipe must not go on paying for
         // itself, and an aborted one must not pay for the tick that killed it - which is
         // what happened while this check sat below the per-tick consumption in executeTick.
-        if (currentRecipe != null && !conditionsHold(currentRecipe, context)) {
+        if (currentRecipe != null && !conditionsHold(currentRecipe, context, false)) {
             if (currentRecipe.getConditionPolicy() == ConditionPolicy.ABORT) {
                 abort();
                 return TickResult.IDLE;
@@ -443,8 +443,8 @@ public class ProcessAgent extends AbstractRecipeProcess {
      * condition built on {@code chance()} may name itself or not; the message is a hint, not
      * a record.
      */
-    private boolean conditionsHold(IModularRecipe recipe, ConditionContext context) {
-        if (recipe.isConditionMet(context)) {
+    private boolean conditionsHold(IModularRecipe recipe, ConditionContext context, boolean starting) {
+        if (starting ? recipe.canStart(context) : recipe.isConditionMet(context)) {
             conditionBlocked = false;
             conditionFailure = null;
             return true;

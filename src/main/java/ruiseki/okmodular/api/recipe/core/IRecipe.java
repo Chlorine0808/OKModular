@@ -78,6 +78,18 @@ public interface IRecipe extends Comparable<IRecipe> {
     boolean isConditionMet(ConditionContext context);
 
     /**
+     * Whether the recipe may begin.
+     * <p>
+     * The same conditions as {@link #isConditionMet}, plus anything that is decided once for
+     * a run rather than examined continuously - a success chance is the one that exists.
+     * Rolling such a thing from {@code isConditionMet} means rolling it every tick, which
+     * turns a 60% recipe into one that has to win 60% a hundred and fifty times over.
+     */
+    default boolean canStart(ConditionContext context) {
+        return isConditionMet(context);
+    }
+
+    /**
      * What becomes of this recipe when its own conditions stop holding mid-run.
      * <p>
      * Recipe conditions used to be checked only while running, and a failure always threw

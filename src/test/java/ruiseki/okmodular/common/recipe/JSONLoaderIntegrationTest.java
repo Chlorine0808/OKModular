@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import ruiseki.okmodular.api.condition.BiomeCondition;
+import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.condition.Conditions;
 import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.modular.IPortType;
@@ -482,8 +483,8 @@ public class JSONLoaderIntegrationTest {
         assertNotNull(recipe, "レシピが見つからない");
         assertTrue(recipe instanceof ChanceRecipeDecorator, "ChanceDecorator でラップされているべき");
 
-        // 100% なので常に成功すべき (Context=null でも動作する実装)
-        assertTrue(recipe.isConditionMet(null), "100% 確率は常に成功すべき");
+        // 抽選は開始時だけ。isConditionMet は稼働中も毎 tick 走るので、そこでは引かない
+        assertTrue(recipe.canStart(new ConditionContext(null, 0, 0, 0)), "100% 確率は常に成功すべき");
     }
 
     @Test
@@ -493,10 +494,12 @@ public class JSONLoaderIntegrationTest {
         assertNotNull(recipe, "レシピが見つからない");
         assertTrue(recipe instanceof ChanceRecipeDecorator, "ChanceDecorator でラップされているべき");
 
+        // 抽選は評価の種から引くようになったので、試行は種を変えて回す
+        // （以前は decorator が持つ Random を叩いていた = 全機械で 1 本の列を共有していた）。
         int successCount = 0;
         int trials = 1000;
         for (int i = 0; i < trials; i++) {
-            if (recipe.isConditionMet(null)) successCount++;
+            if (recipe.canStart(new ConditionContext(null, 0, 0, 0, null, i))) successCount++;
         }
 
         // 50% ならば 1000回中 400〜600回程度に収まるはず
