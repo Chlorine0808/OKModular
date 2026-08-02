@@ -2,8 +2,8 @@ package ruiseki.okmodular.api.recipe.decorator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 
 import net.minecraft.util.ChunkCoordinates;
 
@@ -17,6 +17,7 @@ import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
+import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 
 /**
@@ -27,7 +28,6 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
 
     private final IExpression countExpr;
     private final List<BlockOutputSelection> selections;
-    private final Random rand = new Random();
 
     public static class BlockOutputSelection {
 
@@ -68,7 +68,7 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
                     List<ChunkCoordinates> allPositions = context.getSymbolPositions(selection.symbol);
 
                     // Randomly select N positions
-                    List<ChunkCoordinates> selectedPositions = selectRandomPositions(allPositions, selectCount);
+                    List<ChunkCoordinates> selectedPositions = select(allPositions, selectCount, condContext);
 
                     // Apply BlockOutput to selected positions only
                     for (ChunkCoordinates pos : selectedPositions) {
@@ -82,18 +82,35 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
     }
 
     /**
-     * Randomly select N positions from the list.
+     * The {@code count} positions this draw picks out of {@code positions}.
+     * <p>
+     * This was {@code Collections.shuffle} on a {@link java.util.Random} held as a field -
+     * see {@link BonusOutputDecorator#rolls} for why that could not stay. Shuffling needs a
+     * source that moves, and the evaluation seed does not move inside a run, so the shuffle
+     * is replaced rather than reseeded: every position draws a ticket from its own
+     * coordinates and the lowest {@code count} tickets win.
+     * <p>
+     * That gives the same set every time it is asked within a run, and a different set on the
+     * next run. It also makes the selection <b>grow</b> rather than reshuffle: raising the
+     * count keeps the positions the smaller count had already chosen, which is what a
+     * structure being filled in over time wants.
      */
-    private List<ChunkCoordinates> selectRandomPositions(List<ChunkCoordinates> positions, int count) {
-        if (positions.isEmpty() || count <= 0) {
+    List<ChunkCoordinates> select(List<ChunkCoordinates> positions, int count, ConditionContext context) {
+        if (positions == null || positions.isEmpty() || count <= 0) {
             return Collections.emptyList();
         }
 
-        List<ChunkCoordinates> copy = new ArrayList<>(positions);
-        Collections.shuffle(copy, rand);
+        long seed = context != null ? context.getEvaluationSeed() : 0L;
+        List<ChunkCoordinates> ordered = new ArrayList<>(positions);
+        ordered.sort(Comparator.comparingDouble(pos -> ticket(seed, pos)));
 
-        int actualCount = Math.min(count, copy.size());
-        return copy.subList(0, actualCount);
+        return new ArrayList<>(ordered.subList(0, Math.min(count, ordered.size())));
+    }
+
+    /** A position's place in the queue, in [0, 1). */
+    private static double ticket(long seed, ChunkCoordinates pos) {
+        return SeedMixer
+            .toUnitInterval(SeedMixer.forPosition(seed, pos.posX, pos.posY, pos.posZ), SeedMixer.RANDOM_BLOCK_OUTPUT);
     }
 
     /**

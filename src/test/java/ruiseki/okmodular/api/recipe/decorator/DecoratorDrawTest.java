@@ -2,12 +2,22 @@ package ruiseki.okmodular.api.recipe.decorator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
+
+import net.minecraft.util.ChunkCoordinates;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,6 +96,32 @@ public class DecoratorDrawTest {
     private static int pickedIndex(WeightedRandomDecorator decorator, ConditionContext context, int draw) {
         return decorator.getPool()
             .indexOf(decorator.pick(context, draw));
+    }
+
+    private static PerPositionProbabilityDecorator perPosition(double chance) {
+        return new PerPositionProbabilityDecorator(null, new ConstantExpression(chance), 'L', null);
+    }
+
+    private static RandomBlockOutputDecorator randomBlocks() {
+        return new RandomBlockOutputDecorator(null, new ConstantExpression(1), new ArrayList<>());
+    }
+
+    /**
+     * 5x5x2 の 50 マス。サンプルの SpatialCrafter の床と同じ形にしてある。
+     *
+     * 座標を負に振ってあるのは、構造体のセルがアンカー相対で**半分が負**だから。
+     * 非負前提で座標を詰める実装はここで潰れる。
+     */
+    private static List<ChunkCoordinates> cells() {
+        List<ChunkCoordinates> cells = new ArrayList<>();
+        for (int a = -2; a <= 2; a++) {
+            for (int b = -2; b <= -1; b++) {
+                for (int c = -2; c <= 2; c++) {
+                    cells.add(new ChunkCoordinates(a, b, c));
+                }
+            }
+        }
+        return cells;
     }
 
     // ============================================
@@ -242,6 +278,185 @@ public class DecoratorDrawTest {
         bonus(0.5).rolls(null);
         bonusBlock(0.5).rolls(null);
         weighted(1, 1).pick(null, 0);
+        perPosition(0.5).rollsAt(null, new ChunkCoordinates(0, 0, 0));
+        randomBlocks().select(cells(), 2, null);
     }
 
+    // ============================================
+    // 位置ごとの確率判定
+    // ============================================
+
+    @Test
+    @DisplayName("位置ごとの判定が全部同じ答えに潰れない")
+    public void test位置ごとに割れる() {
+        // 種は実行中ずっと固定なので、位置を混ぜないと 50 マスが同じ数を引く。
+        // 「全部置く」か「全部置かない」の二択になり、確率を書いた意味が消える。
+        PerPositionProbabilityDecorator decorator = perPosition(0.5);
+        ConditionContext context = seeded(20260802L);
+
+        int hits = 0;
+        for (ChunkCoordinates pos : cells()) {
+            if (decorator.rollsAt(context, pos)) hits++;
+        }
+
+        assertTrue(hits > 10 && hits < 40, "50 マス中 " + hits + " マスが当たった（0 や 50 に潰れている）");
+    }
+
+    @Test
+    @DisplayName("同じマスは何度聞いても同じ答え")
+    public void test位置ごとの判定が決定的である() {
+        PerPositionProbabilityDecorator decorator = perPosition(0.5);
+        ConditionContext context = seeded(77L);
+        ChunkCoordinates pos = new ChunkCoordinates(13, -4, 208);
+
+        boolean first = decorator.rollsAt(context, pos);
+        for (int i = 0; i < 20; i++) {
+            assertEquals(first, decorator.rollsAt(context, pos), i + " 回目で答えが変わった");
+        }
+    }
+
+    @Test
+    @DisplayName("位置ごとの判定でも確率 0 と 1 は言い切れる")
+    public void test位置ごとの確率の両端() {
+        for (ChunkCoordinates pos : cells()) {
+            assertFalse(perPosition(0.0).rollsAt(seeded(5L), pos), "確率 0 が当たった: " + pos);
+            assertTrue(perPosition(1.0).rollsAt(seeded(5L), pos), "確率 1 が外れた: " + pos);
+        }
+    }
+
+    @Test
+    @DisplayName("実行が変われば当たるマスも変わる")
+    public void test位置ごとの判定が実行ごとに変わる() {
+        // 隕石が毎回同じ形では困る。
+        PerPositionProbabilityDecorator decorator = perPosition(0.5);
+
+        int differed = 0;
+        for (ChunkCoordinates pos : cells()) {
+            if (decorator.rollsAt(seeded(1L), pos) != decorator.rollsAt(seeded(2L), pos)) differed++;
+        }
+
+        assertTrue(differed > 5, "種を変えても " + differed + " マスしか変わらなかった");
+    }
+
+    // ============================================
+    // N マスだけ選ぶ
+    // ============================================
+
+    @Test
+    @DisplayName("同じ種なら同じマスが選ばれる")
+    public void test選択が決定的である() {
+        RandomBlockOutputDecorator decorator = randomBlocks();
+        ConditionContext context = seeded(4649L);
+
+        List<ChunkCoordinates> first = decorator.select(cells(), 7, context);
+        for (int i = 0; i < 10; i++) {
+            assertEquals(first, decorator.select(cells(), 7, context), i + " 回目で選ばれたマスが変わった");
+        }
+    }
+
+    @Test
+    @DisplayName("数を増やしても前に選んだマスは外れない")
+    public void test選択が積み上がる() {
+        // シャッフルではなく「くじ番号の小さい順」なので、数を増やすと前の選択を含む。
+        // 稼働中に少しずつ置いていく形（徐々に組み上がる構造体）がこれで書ける。
+        RandomBlockOutputDecorator decorator = randomBlocks();
+        ConditionContext context = seeded(31415L);
+
+        List<ChunkCoordinates> few = decorator.select(cells(), 5, context);
+        List<ChunkCoordinates> many = decorator.select(cells(), 12, context);
+
+        assertEquals(5, few.size());
+        assertEquals(12, many.size());
+        assertTrue(many.containsAll(few), "数を増やしたら前に選んだマスが外れた");
+    }
+
+    @Test
+    @DisplayName("実行が変われば選ばれるマスも変わる")
+    public void test選択が実行ごとに変わる() {
+        RandomBlockOutputDecorator decorator = randomBlocks();
+
+        assertNotEquals(decorator.select(cells(), 8, seeded(1L)), decorator.select(cells(), 8, seeded(2L)));
+    }
+
+    @Test
+    @DisplayName("マス数より多く要求されても落ちない")
+    public void test選択の端() {
+        RandomBlockOutputDecorator decorator = randomBlocks();
+
+        assertEquals(
+            50,
+            decorator.select(cells(), 999, seeded(1L))
+                .size());
+        assertTrue(
+            decorator.select(cells(), 0, seeded(1L))
+                .isEmpty());
+        assertTrue(
+            decorator.select(cells(), -1, seeded(1L))
+                .isEmpty());
+        assertTrue(
+            decorator.select(Collections.emptyList(), 3, seeded(1L))
+                .isEmpty());
+        assertTrue(
+            decorator.select(null, 3, seeded(1L))
+                .isEmpty());
+    }
+
+    @Test
+    @DisplayName("選ばれるマスが特定の場所に偏らない")
+    public void test選択が偏らない() {
+        // くじ番号順に並べる実装なので、番号が座標に引きずられていると
+        // 「いつも同じ端から埋まる」になる。種を振って各マスの当選回数を見る。
+        RandomBlockOutputDecorator decorator = randomBlocks();
+        List<ChunkCoordinates> cells = cells();
+        int[] wins = new int[cells.size()];
+
+        for (long seed = 0; seed < 500; seed++) {
+            for (ChunkCoordinates pos : decorator.select(cells, 10, seeded(seed))) {
+                wins[cells.indexOf(pos)]++;
+            }
+        }
+
+        // 50 マスから 10 個を 500 回。期待値は 1 マスあたり 100。
+        for (int i = 0; i < wins.length; i++) {
+            assertTrue(wins[i] > 40 && wins[i] < 180, cells.get(i) + " が 500 回中 " + wins[i] + " 回選ばれた（偏っている）");
+        }
+    }
+
+    // ============================================
+    // 生の Random が戻ってこないこと
+    // ============================================
+
+    @Test
+    @DisplayName("デコレータに種無しの Random が残っていない")
+    public void test種無しのRandomが残っていない() {
+        Path decorators = Paths.get("src/main/java/ruiseki/okmodular/api/recipe/decorator");
+        List<String> offenders = new ArrayList<>();
+
+        try (Stream<Path> files = Files.walk(decorators)) {
+            files.filter(
+                p -> p.toString()
+                    .endsWith(".java"))
+                .forEach(p -> {
+                    if (read(p).contains("new Random()")) {
+                        offenders.add(
+                            p.getFileName()
+                                .toString());
+                    }
+                });
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        assertTrue(
+            offenders.isEmpty(),
+            offenders + " が種無しの Random を持っている。レシピは全マシンで共有されるので、" + "フィールドに持つと引いた値が他のマシンに依存する");
+    }
+
+    private static String read(Path path) {
+        try {
+            return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException("読めない: " + path, e);
+        }
+    }
 }

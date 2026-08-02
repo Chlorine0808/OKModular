@@ -1,7 +1,6 @@
 package ruiseki.okmodular.api.recipe.decorator;
 
 import java.util.List;
-import java.util.Random;
 
 import net.minecraft.util.ChunkCoordinates;
 
@@ -13,6 +12,7 @@ import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
+import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 
 /**
@@ -24,7 +24,6 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
     private final IExpression chanceExpr;
     private final char symbol;
     private final BlockOutput output;
-    private final Random rand = new Random();
 
     public PerPositionProbabilityDecorator(IModularRecipe internal, IExpression chanceExpr, char symbol,
         BlockOutput output) {
@@ -48,11 +47,10 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
             if (context != null) {
                 ConditionContext condContext = context.getConditionContext();
                 List<ChunkCoordinates> positions = context.getSymbolPositions(symbol);
-                double chance = chanceExpr.evaluateDouble(condContext);
 
                 // Check each position independently
                 for (ChunkCoordinates pos : positions) {
-                    if (rand.nextDouble() < chance) {
+                    if (rollsAt(condContext, pos)) {
                         output.applyAt(context, pos, condContext);
                     }
                 }
@@ -60,6 +58,23 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
         }
 
         return true;
+    }
+
+    /**
+     * Whether this one position is transformed.
+     * <p>
+     * See {@link BonusOutputDecorator#rolls} for why the shared {@link java.util.Random}
+     * field had to go. Here it cannot simply be swapped for the evaluation seed: that seed is
+     * fixed for the whole run, so every position would draw the same number and the decorator
+     * would degenerate into placing all of them or none of them - worse than the bug it is
+     * replacing, which at least varied. {@link SeedMixer#forPosition} mixes the coordinates
+     * in, so neighbours disagree while the run stays reproducible.
+     */
+    boolean rollsAt(ConditionContext context, ChunkCoordinates pos) {
+        double chance = chanceExpr.evaluateDouble(context);
+        long seed = context != null ? context.getEvaluationSeed() : 0L;
+        long positioned = SeedMixer.forPosition(seed, pos.posX, pos.posY, pos.posZ);
+        return SeedMixer.toUnitInterval(positioned, SeedMixer.PER_POSITION) < chance;
     }
 
     /**
