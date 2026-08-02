@@ -52,7 +52,41 @@ Omitting `rolls` on `weighted_random` draws once; omitting `weight` treats it as
 
 `chance` takes an expression as well as a number (`"chance": "0.1 + tier * 0.05"`).
 
-## 3. The requirement decorator
+## 3. How the draws work
+
+A decorator draws **from the machine's evaluation seed**, not from a random number generator
+carried around between calls, which gives the following.
+
+| | |
+|---|---|
+| **Fixed within one run** | The same answer however many times it is asked, across a save and reload or a chunk unload |
+| **Different between runs** | The next run gives a different result; the seed mixes in the tick the recipe started and how many recipes the machine has finished |
+| **Different per machine** | The seed mixes in the position |
+| **Different per position** | `per_position_probability` and `random_block_output` mix the block coordinates in as well |
+| **Independent of each other** | Each kind draws from its own stream, so `bonus` landing does not mean `bonus_block_output` lands too |
+
+The first one matters most in practice. The engine checks whether an output fits before
+placing it, so an answer that moved between the two would mean **"said it would fit, then
+placed nothing"**.
+
+### Batches
+
+A batch of n is n runs of the recipe folded into one, so **the draw happens n times**.
+
+- `bonus` / `bonus_block_output` roll n times and produce output once per hit
+- `weighted_random` picks `rolls × n` entries
+- `per_position_probability` and `random_block_output` act on the structure's cells, so they
+  **do not scale with the batch** - running them again would only rewrite the same blocks
+
+A `chance` written as an expression is re-evaluated for each of the n draws, so a chance
+containing `random()` varies between the runs inside one batch.
+
+> [!WARNING]
+> **Two decorators of the same kind on one recipe always give the same answer.**
+> Streams are assigned per kind, not per instance. Two `bonus` entries will land together
+> and miss together. For now, give them different `chance` values or fold them into one.
+
+## 4. The requirement decorator
 
 Takes `condition` (an extra condition), `requirements` (catalysts), or both.
 

@@ -159,6 +159,9 @@ Performance multipliers provided by the structure definition.
 > **An output produced on completion draws once per item of the batch.** `"1 + floor(random() * 3)"`
 > at a batch of three yields anything from 3 to 9, not only multiples of three: a batch of n
 > is n runs of the recipe.
+>
+> **The `bonus` and `weighted_random` decorators follow the same rule** - a batch of three
+> rolls three times. See [Decorators](./DECORATORS.md#batches).
 
 ---
 
@@ -174,6 +177,19 @@ Performance multipliers provided by the structure definition.
 - `clamp(val, min, max)`
 - `random()`: Random number between 0 and 1
 - `chance(x)`: Returns 1 or 0 based on probability `x` (0.0 - 1.0)
+
+> [!IMPORTANT]
+> **These are not a stream that advances on each call.** They are computed from the machine's
+> evaluation seed (`random_seed`), so **within one run they return the same value however
+> many times they are evaluated**, including across a save and reload. A different run gives
+> a different value.
+>
+> So `"1 + floor(random() * 3)"` evaluated every tick does not move. To make it move, mix
+> `progress_tick` or `tick` into the expression.
+>
+> There are two exceptions, both for drawing n times inside one run: **batches** (the note
+> above) and **decorators that draw per position**
+> ([Decorators](./DECORATORS.md#3-how-the-draws-work)). Those shift the seed and draw again.
 
 ### Advanced Functions
 - `can_see_sky(filter...)`: Check sky visibility. Specify IDs to treat blocks like glass as transparent
