@@ -177,4 +177,119 @@ public class SeedMixerTest {
         assertTrue(value >= 0.0 && value < 1.0);
         assertNotEquals(value, SeedMixer.toUnitInterval(1L, SeedMixer.RANDOM));
     }
+
+    // ============================================
+    // 位置由来の種（forPosition）
+    // ============================================
+    //
+    // 1 レシピの実行中、評価の種は固定される（`currentRecipeSeed` は開始時に 1 回だけ決まり、
+    // NBT で永続化される）。**それが欲しい性質**で、セーブ・ロードを跨いでも判定が揺れない。
+    //
+    // しかしそのせいで、**位置ごとに引きたいものが全部同じ値になる**。
+    // `PerPositionProbabilityDecorator` は座標を回して 1 個ずつ確率判定するが、
+    // 種が固定なら 50 マス全部が同じ数を引く ＝「全部置く」か「全部置かない」の二択に潰れる。
+    // 構造体 IO の重みテーブルも同じ穴を踏む。
+    //
+    // 位置を種に混ぜる口をここに置く。ここで縛るのは
+    // **「隣どうしが違う値になる」**ことと **「同じ位置なら何度でも同じ」**ことの両立。
+
+    @Test
+    @DisplayName("同じ位置・同じ種なら同じ値")
+    public void test位置由来_決定的である() {
+        // checkCapacity で引いた値と apply で引いた値が一致しないと、
+        // 「置けると答えたのに置かない」が起きる。
+        assertEquals(SeedMixer.forPosition(12345L, 4, -7, 92), SeedMixer.forPosition(12345L, 4, -7, 92));
+    }
+
+    @Test
+    @DisplayName("隣り合う位置が違う値になる")
+    public void test位置由来_隣が違う() {
+        long base = SeedMixer.forPosition(12345L, 0, 0, 0);
+
+        assertNotEquals(base, SeedMixer.forPosition(12345L, 1, 0, 0));
+        assertNotEquals(base, SeedMixer.forPosition(12345L, 0, 1, 0));
+        assertNotEquals(base, SeedMixer.forPosition(12345L, 0, 0, 1));
+    }
+
+    @Test
+    @DisplayName("軸を取り違えない")
+    public void test位置由来_軸ごとに違う() {
+        // 座標を足して混ぜるだけの実装（x + y + z）はここで落ちる。
+        // 構造体のセルは (a, b, c) が小さい整数なので、和が衝突する組が大量にある。
+        assertNotEquals(SeedMixer.forPosition(1L, 1, 0, 0), SeedMixer.forPosition(1L, 0, 1, 0));
+        assertNotEquals(SeedMixer.forPosition(1L, 0, 1, 0), SeedMixer.forPosition(1L, 0, 0, 1));
+        assertNotEquals(SeedMixer.forPosition(1L, 1, 2, 3), SeedMixer.forPosition(1L, 3, 2, 1));
+        assertNotEquals(SeedMixer.forPosition(1L, 2, 0, 0), SeedMixer.forPosition(1L, 1, 1, 0));
+    }
+
+    @Test
+    @DisplayName("原点でも素の種をそのまま返さない")
+    public void test位置由来_原点() {
+        // forDraw は index 0 を素通しする（バッチ 1 を従来どおりにするため）。
+        // forPosition は素通ししてはいけない。アンカーセルの (0,0,0) が
+        // 「位置を混ぜない draw」と同じ値になると、そのセルだけ他の判定と連動する。
+        assertNotEquals(12345L, SeedMixer.forPosition(12345L, 0, 0, 0));
+    }
+
+    @Test
+    @DisplayName("種が違えば同じ位置でも違う")
+    public void test位置由来_種が違えば違う() {
+        // 実行ごとに隕石の形が変わるのはここが担う。
+        assertNotEquals(SeedMixer.forPosition(1L, 3, 3, 3), SeedMixer.forPosition(2L, 3, 3, 3));
+    }
+
+    @Test
+    @DisplayName("負の座標でも散る")
+    public void test位置由来_負の座標() {
+        // 構造体のセルはアンカー相対なので **半分が負**。A/C は [-2, 2]、B は下向きに負。
+        // 座標を非負前提で詰める実装（シフトして OR するなど）はここで潰れる。
+        Set<Long> seen = new HashSet<>();
+        for (int a = -2; a <= 2; a++) {
+            for (int b = -2; b <= -1; b++) {
+                for (int c = -2; c <= 2; c++) {
+                    seen.add(SeedMixer.forPosition(777L, a, b, c));
+                }
+            }
+        }
+
+        assertEquals(50, seen.size(), "5x5x2 の 50 セルで重複が出た");
+    }
+
+    @Test
+    @DisplayName("50 セルの確率判定が全部同じ答えに潰れない")
+    public void test位置由来_セルごとの確率判定が潰れない() {
+        // PerPositionProbabilityDecorator が壊れていた形そのもの。
+        // 種を固定したまま位置を混ぜずに引くと、この数は 0 か 50 にしかならない。
+        int hits = 0;
+        for (int a = -2; a <= 2; a++) {
+            for (int b = -2; b <= -1; b++) {
+                for (int c = -2; c <= 2; c++) {
+                    if (SeedMixer.toUnitInterval(SeedMixer.forPosition(20260802L, a, b, c), SeedMixer.CHANCE) < 0.5) {
+                        hits++;
+                    }
+                }
+            }
+        }
+
+        assertTrue(hits > 10 && hits < 40, "50 セル中 " + hits + " 個が当たった（0 や 50 に潰れている）");
+    }
+
+    @Test
+    @DisplayName("位置を振ると区間に散る")
+    public void test位置由来_一様に散る() {
+        // 落ちるべきときに確実に落ちる粗い下限。期待値 200 に対して 100 で縛る。
+        int[] buckets = new int[10];
+        for (int x = 0; x < 20; x++) {
+            for (int y = 0; y < 5; y++) {
+                for (int z = 0; z < 20; z++) {
+                    double value = SeedMixer.toUnitInterval(SeedMixer.forPosition(0L, x, y, z), SeedMixer.RANDOM);
+                    buckets[(int) (value * 10)]++;
+                }
+            }
+        }
+
+        for (int i = 0; i < buckets.length; i++) {
+            assertTrue(buckets[i] >= 100, "位置由来の区間 " + i + " が " + buckets[i] + " 個");
+        }
+    }
 }

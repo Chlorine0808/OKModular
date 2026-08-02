@@ -33,8 +33,19 @@ public final class SeedMixer {
     /** The stream a recipe's {@code chance} decorator draws from. */
     public static final long RECIPE_CHANCE = 2L;
 
+    /**
+     * Reserved by {@link #forPosition}. Not a {@link #toUnitInterval} stream - it is listed
+     * here so a later stream does not claim the same slot and track position-derived seeds.
+     */
+    public static final long POSITION = 3L;
+
     /** Odd 64-bit constant, so distinct streams land far apart. */
     private static final long STREAM_GAMMA = 0x9E3779B97F4A7C15L;
+
+    /** Per-axis odd constants, so swapping two coordinates does not land on the same seed. */
+    private static final long X_GAMMA = 0xFF51AFD7ED558CCDL;
+    private static final long Y_GAMMA = 0xC2B2AE3D27D4EB4FL;
+    private static final long Z_GAMMA = 0x165667B19E3779F9L;
 
     private static final double UNIT = 1.0 / (double) (1L << 53);
 
@@ -61,6 +72,34 @@ public final class SeedMixer {
      */
     public static long forDraw(long seed, int index) {
         return index == 0 ? seed : mix(seed + (index + 8L) * STREAM_GAMMA);
+    }
+
+    /**
+     * A seed for one position, from a seed that is fixed for the whole run.
+     * <p>
+     * A machine's evaluation seed is settled when the recipe starts and persisted in NBT, so
+     * every evaluation inside one run answers the same number. That is the property that
+     * makes a run survive a save and reload - but it also means anything drawn <em>per
+     * position</em> draws the same number at every position. A decorator that walks fifty
+     * cells asking "does this one appear?" got fifty identical answers, so it placed all of
+     * them or none of them.
+     * <p>
+     * Mixing the coordinates in keeps the run reproducible while letting neighbours disagree.
+     * Coordinates may be world positions or structure-local {@code (a, b, c)} cells, and
+     * either may be negative - a structure's cells are anchor-relative, so about half of them
+     * are.
+     * <p>
+     * Unlike {@link #forDraw}, no argument is passed through unchanged: the cell at the
+     * origin has to differ from a draw that mixed in no position at all.
+     *
+     * @return a seed to hand to {@link #toUnitInterval}, stable for the same seed and position
+     */
+    public static long forPosition(long seed, int x, int y, int z) {
+        long h = seed + POSITION * STREAM_GAMMA;
+        h += x * X_GAMMA;
+        h += y * Y_GAMMA;
+        h += z * Z_GAMMA;
+        return mix(h);
     }
 
     /** SplitMix64's finalizer. Every input bit reaches every output bit. */
