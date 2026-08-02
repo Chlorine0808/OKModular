@@ -42,7 +42,7 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
         // 2. Apply probability check and bonus BlockOutputs
         if (!simulate) {
             // Find IRecipeContext to get ConditionContext for evaluation
-            IRecipeContext context = findRecipeContext(outputPorts);
+            IRecipeContext context = IRecipeContext.findIn(outputPorts);
             ConditionContext condContext = context != null ? context.getConditionContext() : null;
 
             double chance = chanceExpr.evaluateDouble(condContext);
@@ -58,19 +58,6 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
         }
 
         return true;
-    }
-
-    /**
-     * Find IRecipeContext from outputPorts.
-     * TEMachineController implements both IModularPort and IRecipeContext.
-     */
-    private IRecipeContext findRecipeContext(List<IModularPort> outputPorts) {
-        for (IModularPort port : outputPorts) {
-            if (port instanceof IRecipeContext) {
-                return (IRecipeContext) port;
-            }
-        }
-        return null;
     }
 
     /**

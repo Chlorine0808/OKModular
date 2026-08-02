@@ -92,7 +92,7 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
     public boolean checkCapacity(List<IModularPort> ports, int multiplier, ConditionContext context) {
         if (optional) return true;
 
-        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : findRecipeContext(ports);
+        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : IRecipeContext.findIn(ports);
         if (recipeContext == null) return false;
 
         List<ChunkCoordinates> positions = recipeContext.getSymbolPositions(symbol);
@@ -130,7 +130,7 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
     @Override
     public void apply(List<IModularPort> ports, int multiplier, ConditionContext context) {
         // Find IRecipeContext from ports
-        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : findRecipeContext(ports);
+        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : IRecipeContext.findIn(ports);
         if (recipeContext == null) {
             return;
         }
@@ -491,18 +491,6 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
         output.nbtExpressions = nbtExpressions;
         output.nbtListOp = nbtListOp;
         return output;
-    }
-
-    /**
-     * Find IRecipeContext from port list.
-     */
-    private IRecipeContext findRecipeContext(List<IModularPort> ports) {
-        for (IModularPort port : ports) {
-            if (port instanceof IRecipeContext) {
-                return (IRecipeContext) port;
-            }
-        }
-        return null;
     }
 
     /**

@@ -47,7 +47,7 @@ public class HarvestBlockDecorator extends RecipeDecorator {
     @Override
     public boolean processInputs(List<IModularPort> inputPorts, boolean simulate) {
         if (!simulate) {
-            IRecipeContext context = findRecipeContext(inputPorts);
+            IRecipeContext context = IRecipeContext.findIn(inputPorts);
             if (context != null) {
                 if (!checkAndHarvest(context, inputPorts, true)) {
                     return false;
@@ -60,7 +60,7 @@ public class HarvestBlockDecorator extends RecipeDecorator {
     @Override
     public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
         if (!simulate) {
-            IRecipeContext context = findRecipeContext(outputPorts);
+            IRecipeContext context = IRecipeContext.findIn(outputPorts);
             if (context != null) {
                 if (!checkAndHarvest(context, outputPorts, false)) {
                     return false;
@@ -189,15 +189,6 @@ public class HarvestBlockDecorator extends RecipeDecorator {
             }
         }
         return filtered;
-    }
-
-    private IRecipeContext findRecipeContext(List<IModularPort> ports) {
-        for (IModularPort port : ports) {
-            if (port instanceof IRecipeContext) {
-                return (IRecipeContext) port;
-            }
-        }
-        return null;
     }
 
     public static IModularRecipe fromJson(IModularRecipe recipe, JsonObject json) {

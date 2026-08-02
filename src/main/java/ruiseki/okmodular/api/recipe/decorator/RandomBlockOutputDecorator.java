@@ -56,7 +56,7 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
 
         // 2. Apply random BlockOutput selections
         if (!simulate) {
-            IRecipeContext context = findRecipeContext(outputPorts);
+            IRecipeContext context = IRecipeContext.findIn(outputPorts);
 
             if (context != null) {
                 ConditionContext condContext = context.getConditionContext();
@@ -94,18 +94,6 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
 
         int actualCount = Math.min(count, copy.size());
         return copy.subList(0, actualCount);
-    }
-
-    /**
-     * Find IRecipeContext from outputPorts.
-     */
-    private IRecipeContext findRecipeContext(List<IModularPort> outputPorts) {
-        for (IModularPort port : outputPorts) {
-            if (port instanceof IRecipeContext) {
-                return (IRecipeContext) port;
-            }
-        }
-        return null;
     }
 
     /**

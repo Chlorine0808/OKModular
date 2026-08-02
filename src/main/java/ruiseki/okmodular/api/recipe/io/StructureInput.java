@@ -98,7 +98,7 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
 
     @Override
     public boolean process(List<IModularPort> ports, int multiplier, boolean simulate, ConditionContext context) {
-        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : findRecipeContext(ports);
+        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : IRecipeContext.findIn(ports);
         if (recipeContext == null) return false;
 
         return check(recipeContext, multiplier, simulate, context);
@@ -181,13 +181,6 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
         if (index == -1) return true;
         TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
         return !(te instanceof IModularPort) || ((IModularPort) te).getAssignedIndex() == index;
-    }
-
-    private IRecipeContext findRecipeContext(List<IModularPort> ports) {
-        for (IModularPort port : ports) {
-            if (port instanceof IRecipeContext) return (IRecipeContext) port;
-        }
-        return null;
     }
 
     @Override

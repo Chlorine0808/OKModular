@@ -49,7 +49,7 @@ public class BonusOutputDecorator extends RecipeDecorator {
         if (!simulate) {
             // Context needs current machine state
             // TODO: Pass context to processOutputs or store it in TE
-            IRecipeContext context = findRecipeContext(outputPorts);
+            IRecipeContext context = IRecipeContext.findIn(outputPorts);
             ConditionContext condContext = context != null ? context.getConditionContext() : null;
 
             double finalChance = baseChanceExpr.evaluateDouble(condContext);
@@ -81,15 +81,6 @@ public class BonusOutputDecorator extends RecipeDecorator {
             }
         }
         return filtered;
-    }
-
-    private IRecipeContext findRecipeContext(List<IModularPort> outputPorts) {
-        for (IModularPort port : outputPorts) {
-            if (port instanceof IRecipeContext context) {
-                return context;
-            }
-        }
-        return null;
     }
 
     public IExpression getBaseChanceExpression() {

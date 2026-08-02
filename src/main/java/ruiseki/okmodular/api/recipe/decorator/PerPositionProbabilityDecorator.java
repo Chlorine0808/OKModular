@@ -43,7 +43,7 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
 
         // 2. Apply probability check for each position
         if (!simulate) {
-            IRecipeContext context = findRecipeContext(outputPorts);
+            IRecipeContext context = IRecipeContext.findIn(outputPorts);
 
             if (context != null) {
                 ConditionContext condContext = context.getConditionContext();
@@ -60,18 +60,6 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
         }
 
         return true;
-    }
-
-    /**
-     * Find IRecipeContext from outputPorts.
-     */
-    private IRecipeContext findRecipeContext(List<IModularPort> outputPorts) {
-        for (IModularPort port : outputPorts) {
-            if (port instanceof IRecipeContext) {
-                return (IRecipeContext) port;
-            }
-        }
-        return null;
     }
 
     /**

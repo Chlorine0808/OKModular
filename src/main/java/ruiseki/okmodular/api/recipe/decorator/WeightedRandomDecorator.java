@@ -42,7 +42,7 @@ public class WeightedRandomDecorator extends RecipeDecorator {
         }
 
         if (!simulate) {
-            IRecipeContext context = findRecipeContext(outputPorts);
+            IRecipeContext context = IRecipeContext.findIn(outputPorts);
             ConditionContext condContext = context != null ? context.getConditionContext() : null;
 
             for (int i = 0; i < rolls; i++) {
@@ -67,15 +67,6 @@ public class WeightedRandomDecorator extends RecipeDecorator {
             }
         }
         return filtered;
-    }
-
-    private IRecipeContext findRecipeContext(List<IModularPort> outputPorts) {
-        for (IModularPort port : outputPorts) {
-            if (port instanceof IRecipeContext context) {
-                return context;
-            }
-        }
-        return null;
     }
 
     /**

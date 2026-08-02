@@ -106,7 +106,7 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
     public boolean checkCapacity(List<IModularPort> ports, int multiplier, ConditionContext context) {
         if (optional) return true;
 
-        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : findRecipeContext(ports);
+        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : IRecipeContext.findIn(ports);
         if (recipeContext == null) return false;
 
         return checkCapacity(recipeContext, multiplier, context);
@@ -121,7 +121,7 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
 
     @Override
     public void apply(List<IModularPort> ports, int multiplier, ConditionContext context) {
-        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : findRecipeContext(ports);
+        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : IRecipeContext.findIn(ports);
         if (recipeContext == null) return;
 
         apply(recipeContext, multiplier, context);
@@ -241,13 +241,6 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
         if (index == -1) return true;
         TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
         return !(te instanceof IModularPort) || ((IModularPort) te).getAssignedIndex() == index;
-    }
-
-    private IRecipeContext findRecipeContext(List<IModularPort> ports) {
-        for (IModularPort port : ports) {
-            if (port instanceof IRecipeContext) return (IRecipeContext) port;
-        }
-        return null;
     }
 
     @Override

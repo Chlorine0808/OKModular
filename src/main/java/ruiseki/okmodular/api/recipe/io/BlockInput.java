@@ -92,7 +92,7 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
 
     @Override
     public boolean process(List<IModularPort> ports, int multiplier, boolean simulate, ConditionContext context) {
-        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : findRecipeContext(ports);
+        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : IRecipeContext.findIn(ports);
         if (recipeContext == null) return false;
 
         return check(recipeContext, multiplier, simulate, context);
@@ -580,19 +580,6 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
         }
 
         return input;
-    }
-
-    /**
-     * Find IRecipeContext from port list.
-     * TEMachineController implements both IModularPort and IRecipeContext.
-     */
-    private IRecipeContext findRecipeContext(List<IModularPort> ports) {
-        for (IModularPort port : ports) {
-            if (port instanceof IRecipeContext) {
-                return (IRecipeContext) port;
-            }
-        }
-        return null;
     }
 
     @Override

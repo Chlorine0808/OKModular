@@ -7,6 +7,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.recipe.core.IMachineState;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 
@@ -15,6 +16,26 @@ import ruiseki.okmodular.api.structure.core.IStructureEntry;
  * Provides access to world, structure information, and block positions.
  */
 public interface IRecipeContext {
+
+    /**
+     * Picks the controller out of a port list.
+     * <p>
+     * {@code TEMachineController} is both an {@link IModularPort} and an
+     * {@link IRecipeContext}, so anything handed a port list can reach the machine by
+     * scanning for it. Ten classes had written that scan out privately - six decorators and
+     * the four block IO types - which is the shape this project keeps finding: the same
+     * question spelled in several places, free to drift apart and answer differently. The
+     * thing being looked for names the search.
+     *
+     * @return the first port that is also a recipe context, or null if the list has none
+     */
+    static IRecipeContext findIn(List<IModularPort> ports) {
+        if (ports == null) return null;
+        for (IModularPort port : ports) {
+            if (port instanceof IRecipeContext context) return context;
+        }
+        return null;
+    }
 
     /**
      * Get the world where the structure exists.
