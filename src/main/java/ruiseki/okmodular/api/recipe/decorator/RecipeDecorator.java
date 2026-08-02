@@ -7,6 +7,8 @@ import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.recipe.context.IRecipeContext;
+import ruiseki.okmodular.api.recipe.core.IMachineState;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
@@ -24,6 +26,26 @@ public abstract class RecipeDecorator implements IModularRecipe {
 
     protected RecipeDecorator(IModularRecipe internal) {
         this.internal = internal;
+    }
+
+    /**
+     * How many runs of the recipe this completion stands for.
+     * <p>
+     * A batch of n is n runs folded into one, and the recipe's own outputs already pay out
+     * that way - {@code resolveAmount} draws the amount n times rather than drawing once and
+     * multiplying, so an amount written with {@code random()} can pay out something other
+     * than a multiple of n. Decorators drew once no matter the batch size, which quietly
+     * divided a bonus rate by n the moment a machine unlocked batching: the bonus fired at
+     * most once per completion while the completion was worth n runs.
+     *
+     * @return the batch size, or one when no machine is reachable (NEI's recipe view, a
+     *         validation pass, a port list with no controller in it)
+     */
+    protected static int batchSizeOf(ConditionContext context) {
+        if (context == null) return 1;
+        IRecipeContext recipe = context.getRecipeContext();
+        IMachineState state = recipe != null ? recipe.getMachineState() : null;
+        return state != null ? Math.max(1, state.getBatchSize()) : 1;
     }
 
     @Override

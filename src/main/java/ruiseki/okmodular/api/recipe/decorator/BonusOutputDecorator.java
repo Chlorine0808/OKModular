@@ -52,7 +52,8 @@ public class BonusOutputDecorator extends RecipeDecorator {
             ConditionContext condContext = context != null ? context.getConditionContext() : null;
 
             // TODO: Fetch modifier value from context or machine state using modifierKey
-            if (rolls(condContext)) {
+            int times = timesFiring(condContext);
+            for (int fired = 0; fired < times; fired++) {
                 for (IRecipeOutput bonus : bonusOutputs) {
                     if (bonus instanceof IModularRecipeOutput modularBonus) {
                         List<IModularPort> filtered = filterByType(outputPorts, modularBonus.getPortType());
@@ -89,6 +90,31 @@ public class BonusOutputDecorator extends RecipeDecorator {
         double chance = baseChanceExpr.evaluateDouble(context);
         long seed = context != null ? context.getEvaluationSeed() : 0L;
         return SeedMixer.toUnitInterval(seed, SeedMixer.BONUS_OUTPUT) < chance;
+    }
+
+    /**
+     * How many times the bonus fires for this completion.
+     * <p>
+     * See {@link RecipeDecorator#batchSizeOf} for why a batch has to roll more than once.
+     */
+    int timesFiring(ConditionContext context) {
+        return timesFiring(context, batchSizeOf(context));
+    }
+
+    /**
+     * The same, with the batch size supplied rather than read from the machine.
+     * <p>
+     * Draw zero is the context itself, so a batch of one is bit-for-bit what a single roll
+     * was before batching entered the picture. The chance is re-evaluated per draw, so a
+     * chance written with {@code random()} varies between the runs in a batch rather than
+     * being decided once for all of them.
+     */
+    int timesFiring(ConditionContext context, int batch) {
+        int fired = 0;
+        for (int draw = 0; draw < batch; draw++) {
+            if (rolls(context != null ? context.forDraw(draw) : null)) fired++;
+        }
+        return fired;
     }
 
     private List<IModularPort> filterByType(List<IModularPort> ports, IPortType.Type type) {

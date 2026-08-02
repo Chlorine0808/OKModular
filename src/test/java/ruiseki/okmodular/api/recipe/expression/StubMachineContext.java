@@ -135,6 +135,9 @@ public final class StubMachineContext {
     /** アイテムの容量は「スロット数 × 64」で表される（式レイヤの既存の扱い）。 */
     public static final double ITEM_CAPACITY = ITEM_SLOTS * (double) IMachineState.ITEMS_PER_SLOT;
 
+    // --- レシピ修飾: 1 でも 0 でもない値にしてある。掛け忘れも掛けすぎも数で出る ---
+    public static final int BATCH_SIZE = 4;
+
     private StubMachineContext() {}
 
     /** 機械が繋がっているコンテキストを作る。 */
@@ -463,7 +466,7 @@ public final class StubMachineContext {
         // --- recipe modifiers ---
         @Override
         public int getBatchSize() {
-            return 4;
+            return BATCH_SIZE;
         }
 
         @Override

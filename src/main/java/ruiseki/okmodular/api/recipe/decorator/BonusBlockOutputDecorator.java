@@ -44,8 +44,9 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
             IRecipeContext context = IRecipeContext.findIn(outputPorts);
             ConditionContext condContext = context != null ? context.getConditionContext() : null;
 
-            if (rolls(condContext)) {
-                if (context != null) {
+            int times = timesFiring(condContext);
+            if (context != null) {
+                for (int fired = 0; fired < times; fired++) {
                     // Apply all bonus BlockOutputs
                     for (BlockOutput output : bonusOutputs) {
                         output.apply(outputPorts, 1, condContext);
@@ -68,6 +69,20 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
         double chance = chanceExpr.evaluateDouble(context);
         long seed = context != null ? context.getEvaluationSeed() : 0L;
         return SeedMixer.toUnitInterval(seed, SeedMixer.BONUS_BLOCK_OUTPUT) < chance;
+    }
+
+    /** How many times the bonus fires. See {@link BonusOutputDecorator#timesFiring}. */
+    int timesFiring(ConditionContext context) {
+        return timesFiring(context, batchSizeOf(context));
+    }
+
+    /** The same, with the batch size supplied rather than read from the machine. */
+    int timesFiring(ConditionContext context, int batch) {
+        int fired = 0;
+        for (int draw = 0; draw < batch; draw++) {
+            if (rolls(context != null ? context.forDraw(draw) : null)) fired++;
+        }
+        return fired;
     }
 
     /**

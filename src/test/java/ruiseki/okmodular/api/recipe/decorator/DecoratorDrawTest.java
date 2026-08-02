@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
+import ruiseki.okmodular.api.recipe.expression.StubMachineContext;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 
 /**
@@ -84,12 +85,27 @@ public class DecoratorDrawTest {
         return new BonusBlockOutputDecorator(null, new ConstantExpression(chance), new ArrayList<>());
     }
 
-    private static WeightedRandomDecorator weighted(int... weights) {
+    /** スタブの機械が申告するバッチ数。ここで数字を書き写すと片方だけ変わる。 */
+    private static final int MACHINE_BATCH = StubMachineContext.BATCH_SIZE;
+
+    private static ConditionContext withMachine() {
+        return StubMachineContext.withMachine();
+    }
+
+    private static ConditionContext withoutMachine() {
+        return StubMachineContext.withoutMachine();
+    }
+
+    private static List<WeightedRandomDecorator.WeightedOutputEntry> poolOf(int... weights) {
         List<WeightedRandomDecorator.WeightedOutputEntry> pool = new ArrayList<>();
         for (int weight : weights) {
             pool.add(new WeightedRandomDecorator.WeightedOutputEntry(null, weight));
         }
-        return new WeightedRandomDecorator(null, pool, 1);
+        return pool;
+    }
+
+    private static WeightedRandomDecorator weighted(int... weights) {
+        return new WeightedRandomDecorator(null, poolOf(weights), 1);
     }
 
     /** 重み表のどの枠が当たったか。等値比較できないので添字で答え合わせする。 */
@@ -420,6 +436,99 @@ public class DecoratorDrawTest {
         for (int i = 0; i < wins.length; i++) {
             assertTrue(wins[i] > 40 && wins[i] < 180, cells.get(i) + " が 500 回中 " + wins[i] + " 回選ばれた（偏っている）");
         }
+    }
+
+    // ============================================
+    // バッチ回数分引く
+    // ============================================
+    //
+    // バッチ n は「レシピを n 回動かしたのを 1 回にまとめたもの」。
+    // レシピ本体の出力は既にそう払う（`resolveAmount` が n 回引く）のに、
+    // デコレータはバッチに関係なく **1 回しか引いていなかった**。
+    //
+    // つまりバッチを解禁した瞬間、ボーナスの期待値が **1/n に落ちる**。
+    // 出力は n 倍になるのにボーナスは据え置き、という気づきにくい下方修正になっていた。
+
+    @Test
+    @DisplayName("バッチ n ならボーナスを n 回引く")
+    public void testバッチ回数分引く() {
+        // 確率 1 なら回数がそのまま出るので、引いた回数を直接数えられる。
+        BonusOutputDecorator always = bonus(1.0);
+
+        assertEquals(1, always.timesFiring(seeded(1L), 1));
+        assertEquals(4, always.timesFiring(seeded(1L), 4));
+        assertEquals(16, always.timesFiring(seeded(1L), 16));
+    }
+
+    @Test
+    @DisplayName("外れる確率でもバッチ内で当たり外れが混ざる")
+    public void testバッチ内で割れる() {
+        // n 回とも同じ答えなら「1 回引いて n 倍した」のと変わらない。
+        // 抽選が引くたびに動いていることを、0 でも n でもない結果が出ることで見る。
+        BonusOutputDecorator decorator = bonus(0.5);
+
+        boolean mixed = false;
+        for (long seed = 0; seed < 50; seed++) {
+            int fired = decorator.timesFiring(seeded(seed), 8);
+            if (fired > 0 && fired < 8) mixed = true;
+        }
+
+        assertTrue(mixed, "バッチ 8 で毎回 0 か 8 しか出なかった（1 回引いて使い回している）");
+    }
+
+    @Test
+    @DisplayName("バッチ 1 は従来と同じ答え")
+    public void testバッチ1は据え置き() {
+        // forDraw(0) は文脈をそのまま返すので、バッチを入れても
+        // 既存のレシピの当たり外れは 1 ビットも変わらない。
+        BonusOutputDecorator decorator = bonus(0.5);
+        for (long seed = 0; seed < 100; seed++) {
+            assertEquals(decorator.rolls(seeded(seed)) ? 1 : 0, decorator.timesFiring(seeded(seed), 1));
+        }
+    }
+
+    @Test
+    @DisplayName("確率 0 はバッチを積んでも当たらない")
+    public void testバッチと確率0() {
+        assertEquals(0, bonus(0.0).timesFiring(seeded(1L), 16));
+    }
+
+    @Test
+    @DisplayName("bonus_block もバッチ回数分引く")
+    public void testブロック側もバッチ回数分引く() {
+        assertEquals(4, bonusBlock(1.0).timesFiring(seeded(1L), 4));
+        assertEquals(0, bonusBlock(0.0).timesFiring(seeded(1L), 4));
+    }
+
+    @Test
+    @DisplayName("重み表は rolls × バッチ回数だけ引く")
+    public void test重み表もバッチ回数分引く() {
+        // rolls は「1 回のレシピにつき何個選ぶか」。バッチ n なら n 倍。
+        WeightedRandomDecorator decorator = new WeightedRandomDecorator(null, poolOf(1, 1), 3);
+
+        assertEquals(3, decorator.totalRolls(withoutMachine()));
+        assertEquals(3 * MACHINE_BATCH, decorator.totalRolls(withMachine()));
+    }
+
+    // ============================================
+    // 機械からバッチ数を読めているか
+    // ============================================
+
+    @Test
+    @DisplayName("機械が繋がっていればバッチ数を読む")
+    public void test機械からバッチ数を読む() {
+        // ここが繋がっていないと、上のバッチ処理は書かれたのに誰も使わない形になる。
+        assertEquals(MACHINE_BATCH, bonus(1.0).timesFiring(withMachine()));
+        assertEquals(0, bonus(0.0).timesFiring(withMachine()));
+    }
+
+    @Test
+    @DisplayName("機械が繋がっていなければ 1 回")
+    public void test機械が無ければ1回() {
+        // NEI のレシピ表示や検証経路は機械を持たない。バッチを 0 と読んで
+        // 「一度も引かない」になると、ボーナスが黙って消える。
+        assertEquals(1, bonus(1.0).timesFiring(withoutMachine()));
+        assertEquals(1, bonus(1.0).timesFiring(null));
     }
 
     // ============================================

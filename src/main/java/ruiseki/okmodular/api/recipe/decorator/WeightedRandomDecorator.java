@@ -44,7 +44,8 @@ public class WeightedRandomDecorator extends RecipeDecorator {
             IRecipeContext context = IRecipeContext.findIn(outputPorts);
             ConditionContext condContext = context != null ? context.getConditionContext() : null;
 
-            for (int i = 0; i < rolls; i++) {
+            int draws = totalRolls(condContext);
+            for (int i = 0; i < draws; i++) {
                 WeightedOutputEntry picked = pick(condContext, i);
                 if (picked != null && picked.output instanceof IModularRecipeOutput modularOutput) {
                     List<IModularPort> filtered = filterByType(outputPorts, modularOutput.getPortType());
@@ -72,6 +73,17 @@ public class WeightedRandomDecorator extends RecipeDecorator {
      * @param index which draw, from zero
      * @return the chosen entry, or null if the pool is empty or every weight is zero
      */
+    /**
+     * How many entries this completion picks.
+     * <p>
+     * {@code rolls} is per run of the recipe, and a batch of n is n runs - see
+     * {@link RecipeDecorator#batchSizeOf}. The draws are numbered straight through rather
+     * than restarting per run in the batch, so no two land on the same point of the stream.
+     */
+    int totalRolls(ConditionContext context) {
+        return rolls * batchSizeOf(context);
+    }
+
     WeightedOutputEntry pick(ConditionContext context, int index) {
         int total = 0;
         for (WeightedOutputEntry entry : pool) {
