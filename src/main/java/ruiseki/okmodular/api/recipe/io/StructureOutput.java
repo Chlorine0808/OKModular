@@ -96,12 +96,11 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
     }
 
     /**
-     * Whether enough anchors exist to write the pattern at.
+     * Whether enough usable anchors exist to write the pattern at.
      * <p>
-     * The pattern itself always fits -- it overwrites -- so what is checked is that the machine
-     * actually has the blocks to anchor on and that their cells resolve. A recipe whose anchor
-     * symbol is absent has nowhere to put its output, and saying so here stops it from starting
-     * and consuming its inputs for nothing.
+     * The pattern always fits where it is allowed to go -- it overwrites -- so what is checked is
+     * that the machine has anchors whose cells all land somewhere this output may write. A recipe
+     * with nowhere to put its output would otherwise start, consume its inputs and place nothing.
      */
     @Override
     public boolean checkCapacity(List<IModularPort> ports, int multiplier, ConditionContext context) {
@@ -110,8 +109,14 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
         IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : findRecipeContext(ports);
         if (recipeContext == null) return false;
 
-        int required = (int) (getRequiredAmount(context) * multiplier);
-        return anchors(recipeContext, required).size() >= required;
+        return checkCapacity(recipeContext, multiplier, context);
+    }
+
+    public boolean checkCapacity(IRecipeContext context, int multiplier, ConditionContext condContext) {
+        if (optional) return true;
+
+        int required = (int) (getRequiredAmount(condContext) * multiplier);
+        return anchors(context, required).size() >= required;
     }
 
     @Override
@@ -161,15 +166,45 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
         List<ChunkCoordinates> positions = context.getSymbolPositions(symbol);
         if (positions == null) return found;
 
+        StructurePattern pattern = StructurePatternLoader.getInstance()
+            .get(patternName);
+        if (pattern == null) return found;
+
+        List<StructurePattern.Cell> cells = pattern.cellsFor(machineFacing(context));
         World world = context.getWorld();
+
         for (ChunkCoordinates pos : positions) {
             if (found.size() >= limit) break;
             if (!indexMatches(world, pos)) continue;
 
             int[] cell = context.getSymbolCell(pos.posX, pos.posY, pos.posZ);
-            if (cell != null) found.add(cell);
+            if (cell != null && clearOfMachine(context, cells, cell)) found.add(cell);
         }
         return found;
+    }
+
+    /**
+     * Whether writing the pattern at this anchor would leave the machine intact.
+     * <p>
+     * A symbol usually names many blocks -- a floor is one symbol repeated -- so <b>which</b> anchor
+     * gets written is chosen by this class, not by the recipe author. That makes it this class's
+     * job not to pick one that destroys the structure running the recipe: a pattern anchored near
+     * an edge reaches through the wall, replaces it, and nothing raises.
+     * <p>
+     * Any position the formation check recorded belongs to the machine, and
+     * {@link IRecipeContext#getSymbolCell} answers exactly that. It doubles as a fit test, because a
+     * pattern can only leave the machine's inside by crossing its shell.
+     * <p>
+     * The input side needs no equivalent. It consumes only what the author drew and what actually
+     * matched, so eating a wall means having written the wall's block into the pattern on purpose.
+     */
+    private boolean clearOfMachine(IRecipeContext context, List<StructurePattern.Cell> cells, int[] anchorCell) {
+        for (StructurePattern.Cell cell : cells) {
+            int[] pos = context.getCellPosition(anchorCell[0] + cell.a, anchorCell[1] + cell.b, anchorCell[2] + cell.c);
+            if (pos == null) return false;
+            if (context.getSymbolCell(pos[0], pos[1], pos[2]) != null) return false;
+        }
+        return true;
     }
 
     private boolean setBlockAt(World world, int[] pos, String blockId) {
