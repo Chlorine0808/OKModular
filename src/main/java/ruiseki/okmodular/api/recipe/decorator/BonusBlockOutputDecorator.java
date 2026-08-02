@@ -2,7 +2,6 @@ package ruiseki.okmodular.api.recipe.decorator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -14,6 +13,7 @@ import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
+import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 
 /**
@@ -24,7 +24,6 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
 
     private final IExpression chanceExpr;
     private final List<BlockOutput> bonusOutputs;
-    private final Random rand = new Random();
 
     public BonusBlockOutputDecorator(IModularRecipe internal, IExpression chanceExpr, List<BlockOutput> bonusOutputs) {
         super(internal);
@@ -45,9 +44,7 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
             IRecipeContext context = IRecipeContext.findIn(outputPorts);
             ConditionContext condContext = context != null ? context.getConditionContext() : null;
 
-            double chance = chanceExpr.evaluateDouble(condContext);
-
-            if (rand.nextDouble() < chance) {
+            if (rolls(condContext)) {
                 if (context != null) {
                     // Apply all bonus BlockOutputs
                     for (BlockOutput output : bonusOutputs) {
@@ -58,6 +55,19 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
         }
 
         return true;
+    }
+
+    /**
+     * Whether the bonus fires.
+     * <p>
+     * See {@link BonusOutputDecorator#rolls} for why a shared {@link java.util.Random} field
+     * had to go. This draws from its own stream rather than that one's: a recipe may carry
+     * both decorators, and sharing a stream would make them fire and skip in lockstep.
+     */
+    boolean rolls(ConditionContext context) {
+        double chance = chanceExpr.evaluateDouble(context);
+        long seed = context != null ? context.getEvaluationSeed() : 0L;
+        return SeedMixer.toUnitInterval(seed, SeedMixer.BONUS_BLOCK_OUTPUT) < chance;
     }
 
     /**

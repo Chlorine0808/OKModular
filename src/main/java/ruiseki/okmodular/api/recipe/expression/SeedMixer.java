@@ -39,6 +39,25 @@ public final class SeedMixer {
      */
     public static final long POSITION = 3L;
 
+    // One stream per decorator that draws, so two decorators on the same recipe do not fire
+    // and skip together. They all see the same evaluation seed; without separate streams a
+    // recipe carrying both a bonus and a weighted pick would have them agree every time.
+
+    /** The stream {@code bonus_output} draws from. */
+    public static final long BONUS_OUTPUT = 4L;
+
+    /** The stream {@code bonus_block_output} draws from. */
+    public static final long BONUS_BLOCK_OUTPUT = 5L;
+
+    /** The stream {@code weighted_random} draws from. */
+    public static final long WEIGHTED_OUTPUT = 6L;
+
+    /** The stream {@code random_block_output} draws from. */
+    public static final long RANDOM_BLOCK_OUTPUT = 7L;
+
+    /** The stream {@code per_position_probability} draws from. */
+    public static final long PER_POSITION = 8L;
+
     /** Odd 64-bit constant, so distinct streams land far apart. */
     private static final long STREAM_GAMMA = 0x9E3779B97F4A7C15L;
 

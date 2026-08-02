@@ -2,7 +2,6 @@ package ruiseki.okmodular.api.recipe.decorator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -15,6 +14,7 @@ import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
+import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.parser.OutputParserRegistry;
@@ -27,7 +27,6 @@ public class BonusOutputDecorator extends RecipeDecorator {
     private final IExpression baseChanceExpr;
     private final List<IRecipeOutput> bonusOutputs;
     private final String modifierKey;
-    private final Random rand = new Random();
 
     public BonusOutputDecorator(IModularRecipe internal, IExpression baseChanceExpr, List<IRecipeOutput> bonusOutputs,
         String modifierKey) {
@@ -52,10 +51,8 @@ public class BonusOutputDecorator extends RecipeDecorator {
             IRecipeContext context = IRecipeContext.findIn(outputPorts);
             ConditionContext condContext = context != null ? context.getConditionContext() : null;
 
-            double finalChance = baseChanceExpr.evaluateDouble(condContext);
             // TODO: Fetch modifier value from context or machine state using modifierKey
-
-            if (rand.nextFloat() < finalChance) {
+            if (rolls(condContext)) {
                 for (IRecipeOutput bonus : bonusOutputs) {
                     if (bonus instanceof IModularRecipeOutput modularBonus) {
                         List<IModularPort> filtered = filterByType(outputPorts, modularBonus.getPortType());
@@ -71,6 +68,27 @@ public class BonusOutputDecorator extends RecipeDecorator {
         }
 
         return true;
+    }
+
+    /**
+     * Whether the bonus fires.
+     * <p>
+     * This used to be {@code rand.nextFloat()} on a {@link java.util.Random} held as a field.
+     * A recipe is parsed once and shared by every machine running it, so that field was
+     * shared too: what a machine drew depended on how many times <em>other</em> machines had
+     * drawn, and a restart reset the sequence. Nothing about the outcome could be reproduced,
+     * so a run that was checked and then reapplied - after a save and reload, say - could
+     * disagree with itself.
+     * <p>
+     * The machine's evaluation seed is fixed for the whole run and persisted in NBT, so
+     * drawing from it gives the same answer every time it is asked, and a different answer on
+     * the next run. A context with no seed at all draws from zero rather than throwing; the
+     * older code still fired in that case, and this keeps that.
+     */
+    boolean rolls(ConditionContext context) {
+        double chance = baseChanceExpr.evaluateDouble(context);
+        long seed = context != null ? context.getEvaluationSeed() : 0L;
+        return SeedMixer.toUnitInterval(seed, SeedMixer.BONUS_OUTPUT) < chance;
     }
 
     private List<IModularPort> filterByType(List<IModularPort> ports, IPortType.Type type) {
