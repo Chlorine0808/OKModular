@@ -51,6 +51,11 @@ A file may hold a single pattern object, an array of them, or an object with a `
 `layers` takes either a bare array of row strings or `{ "rows": [...] }`, the same two forms a
 structure definition takes.
 
+> [!WARNING]
+> **Give every layer the same number of rows.** Row order is reversed within each layer, using
+> that layer's own row count, so a layer with fewer rows than the others is shifted against them.
+> Pad with rows of spaces rather than leaving them out.
+
 ### Reserved characters
 
 | Symbol | Meaning |
@@ -130,8 +135,24 @@ unit, and skipping the occupied cells would leave the machine having produced so
 not the arrangement the recipe promised. Put a `structure` input in front of it when the recipe
 should only run against particular ground.
 
-The capacity check asks whether enough anchors exist. A recipe whose anchor symbol is missing
-therefore refuses to start rather than consuming its inputs and placing nothing.
+It will not overwrite the machine, though. An anchor whose cells touch any block the formation
+check recorded is skipped, so a pattern anchored near an edge cannot reach through the wall and
+replace the structure that is running the recipe.
+
+The capacity check asks whether enough usable anchors exist. A recipe with nowhere to put its
+output therefore refuses to start rather than consuming its inputs and placing nothing.
+
+### Choosing where it lands
+
+A symbol usually names many blocks — a floor is one symbol repeated — and **the output picks the
+anchor, not you**. With several usable anchors, which one gets written is not something the recipe
+controls.
+
+The way to make that decision for it is the pattern's own footprint: **draw it wide enough that
+only one anchor can hold it.** A pattern spanning the full width of a chamber fits over exactly
+the centre block of the floor, because every other anchor would push it into the wall. An input
+and an output drawn to the same footprint therefore always act on the same spot, which is what
+makes "transform this arrangement in place" work.
 
 ## 4. Schema Versioning
 
