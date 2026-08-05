@@ -20,7 +20,7 @@ inferred from the properties).
 | `bonus` | Produces extra output by chance | `chance` + `outputs` |
 | `weighted_random` | Picks an output from a weighted list | `outputs` (each with `weight`) / `pool` / `rolls` |
 | `requirement` | Checks extra conditions and catalysts while running | `condition` / `requirements` |
-| `harvest_block` | Changes the mining characteristics used to break a block | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
+| `harvest_block` | ⚠ **Not implemented** (see below) | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
 | `per_position_probability` | Swaps a block output per position, by chance | `chance` + `symbol` + `output` |
 | `bonus_block_output` | Produces extra block output by chance | `chance` + `outputs` (first is `type: "block"`) |
 | `random_block_output` | Draws a block output from candidates | `count` / `selections` |
@@ -86,7 +86,18 @@ containing `random()` varies between the runs inside one batch.
 > Streams are assigned per kind, not per instance. Two `bonus` entries will land together
 > and miss together. For now, give them different `chance` values or fold them into one.
 
-## 4. The requirement decorator
+## 4. `harvest_block` does nothing
+
+⚠ **It parses, but its effect never runs.** Writing it into a recipe logs a warning on load.
+
+Decorator effects run from `produceExtraOutputs` on completion, and `harvest_block` has to
+run **before** the blocks it collects are overwritten, so it does not fit that hook. It needs
+a call site on the input side as well.
+
+The same result is available by mining the blocks by hand with a `silk_touch` or `fortune`
+tool.
+
+## 5. The requirement decorator
 
 Takes `condition` (an extra condition), `requirements` (catalysts), or both.
 

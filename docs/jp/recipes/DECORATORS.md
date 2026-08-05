@@ -19,7 +19,7 @@
 | `bonus` | 確率で追加の出力を生成 | `chance` + `outputs` |
 | `weighted_random` | 重み付きリストから出力を選択 | `outputs`（各要素に `weight`）／ `pool` ／ `rolls` |
 | `requirement` | 実行中に追加の条件・触媒をチェック | `condition` / `requirements` |
-| `harvest_block` | ブロック破壊時の採掘特性を変える | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
+| `harvest_block` | ⚠ **未実装**（下記） | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
 | `per_position_probability` | 座標ごとに確率でブロック出力を差し替える | `chance` + `symbol` + `output` |
 | `bonus_block_output` | 確率で追加のブロック出力を生成 | `chance` + `outputs`（先頭が `type: "block"`） |
 | `random_block_output` | 候補からブロック出力を抽選 | `count` / `selections` |
@@ -84,7 +84,17 @@
 > 例えば `bonus` を 2 つ並べると、片方が当たったときもう片方も必ず当たります。
 > 独立させたい場合は、今のところ `chance` の値を変えるか 1 つにまとめてください。
 
-## 4. requirement デコレータ
+## 4. `harvest_block` は動きません
+
+⚠ **パースは通りますが、効果は一度も実行されません。** レシピに書くとロード時に警告が出ます。
+
+デコレータの効果は完成時に `produceExtraOutputs` から実行されますが、`harvest_block` は
+**ブロックが書き換わる前**に採掘する必要があるので、出力適用後に走るこのフックには乗りません。
+入力側の口も別に要ります。
+
+同じことは `silk_touch` / `fortune` を持つ通常のツールで手動採掘すれば得られます。
+
+## 5. requirement デコレータ
 
 `condition`（追加の条件）と `requirements`（触媒）のどちらか、または両方を取ります。
 

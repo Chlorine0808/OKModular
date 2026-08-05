@@ -49,6 +49,17 @@ public class WeightedRandomDecorator extends RecipeDecorator {
     }
 
     /**
+     * How many entries this completion picks.
+     * <p>
+     * {@code rolls} is per run of the recipe, and a batch of n is n runs - see
+     * {@link RecipeDecorator#batchSizeOf}. The draws are numbered straight through rather
+     * than restarting per run in the batch, so no two land on the same point of the stream.
+     */
+    int totalRolls(ConditionContext context) {
+        return rolls * batchSizeOf(context);
+    }
+
+    /**
      * Picks one entry for draw {@code index}.
      * <p>
      * This was {@code WeightedRandom.getRandomItem} on a {@link java.util.Random} held as a
@@ -62,17 +73,6 @@ public class WeightedRandomDecorator extends RecipeDecorator {
      * @param index which draw, from zero
      * @return the chosen entry, or null if the pool is empty or every weight is zero
      */
-    /**
-     * How many entries this completion picks.
-     * <p>
-     * {@code rolls} is per run of the recipe, and a batch of n is n runs - see
-     * {@link RecipeDecorator#batchSizeOf}. The draws are numbered straight through rather
-     * than restarting per run in the batch, so no two land on the same point of the stream.
-     */
-    int totalRolls(ConditionContext context) {
-        return rolls * batchSizeOf(context);
-    }
-
     WeightedOutputEntry pick(ConditionContext context, int index) {
         int total = 0;
         for (WeightedOutputEntry entry : pool) {
