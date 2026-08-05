@@ -10,7 +10,6 @@ import com.google.gson.JsonObject;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
-import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
@@ -37,38 +36,23 @@ public class BonusOutputDecorator extends RecipeDecorator {
     }
 
     @Override
-    public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
-        // First process original outputs. If they fail, bonus also "fails" (recipe
-        // cannot complete)
-        if (!internal.processOutputs(outputPorts, simulate)) {
-            return false;
-        }
+    public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
+        super.produceExtraOutputs(outputPorts, context);
 
-        // Only process bonus if we are not simulating
-        if (!simulate) {
-            // Context needs current machine state
-            // TODO: Pass context to processOutputs or store it in TE
-            IRecipeContext context = IRecipeContext.findIn(outputPorts);
-            ConditionContext condContext = context != null ? context.getConditionContext() : null;
-
-            // TODO: Fetch modifier value from context or machine state using modifierKey
-            int times = timesFiring(condContext);
-            for (int fired = 0; fired < times; fired++) {
-                for (IRecipeOutput bonus : bonusOutputs) {
-                    if (bonus instanceof IModularRecipeOutput modularBonus) {
-                        List<IModularPort> filtered = filterByType(outputPorts, modularBonus.getPortType());
-                        // We don't block recipe if bonus fails (e.g. port full), we just attempt to
-                        // apply it.
-                        // This matches "bonus" behavior.
-                        if (modularBonus.checkCapacity(filtered, 1, condContext)) {
-                            modularBonus.apply(filtered, 1, condContext);
-                        }
+        // TODO: Fetch modifier value from context or machine state using modifierKey
+        int times = timesFiring(context);
+        for (int fired = 0; fired < times; fired++) {
+            for (IRecipeOutput bonus : bonusOutputs) {
+                if (bonus instanceof IModularRecipeOutput modularBonus) {
+                    List<IModularPort> filtered = filterByType(outputPorts, modularBonus.getPortType());
+                    // A bonus that does not fit is dropped rather than holding the recipe
+                    // open: it is a bonus.
+                    if (modularBonus.checkCapacity(filtered, 1, context)) {
+                        modularBonus.apply(filtered, 1, context);
                     }
                 }
             }
         }
-
-        return true;
     }
 
     /**

@@ -47,13 +47,21 @@ public class RecipeContextLookupTest {
 
     private static final Path MAIN = Paths.get("src/main/java/ruiseki/okmodular");
 
-    /** かつて private コピーを持っていた 10 クラス。 */
-    private static final String[] FORMER_COPIES = { "api/recipe/decorator/BonusOutputDecorator.java",
-        "api/recipe/decorator/BonusBlockOutputDecorator.java",
-        "api/recipe/decorator/PerPositionProbabilityDecorator.java",
-        "api/recipe/decorator/RandomBlockOutputDecorator.java", "api/recipe/decorator/WeightedRandomDecorator.java",
-        "api/recipe/decorator/HarvestBlockDecorator.java", "api/recipe/io/BlockInput.java",
-        "api/recipe/io/BlockOutput.java", "api/recipe/io/StructureInput.java", "api/recipe/io/StructureOutput.java" };
+    /**
+     * private コピーを持っていた 10 クラスのうち、**今も文脈を探す必要があるもの**。
+     *
+     * `bonus` / `bonus_block_output` / `weighted_random` の 3 つはこの一覧から外れた。
+     * デコレータの効果が `produceExtraOutputs(ports, context)` に移り、
+     * **文脈が引数で渡ってくる**ようになったので、ポート列を漁る理由が無くなったため。
+     * 探さなくてよくなったのであって、探し忘れているのではない。
+     *
+     * 位置を扱う 2 つとブロック IO の 4 つは、文脈が null の経路（検証・NEI）が残っているので
+     * 引き続きフォールバックとして探す。
+     */
+    private static final String[] FORMER_COPIES = { "api/recipe/decorator/PerPositionProbabilityDecorator.java",
+        "api/recipe/decorator/RandomBlockOutputDecorator.java", "api/recipe/decorator/HarvestBlockDecorator.java",
+        "api/recipe/io/BlockInput.java", "api/recipe/io/BlockOutput.java", "api/recipe/io/StructureInput.java",
+        "api/recipe/io/StructureOutput.java" };
 
     @Test
     @DisplayName("private なコピーが 1 つも残っていない")

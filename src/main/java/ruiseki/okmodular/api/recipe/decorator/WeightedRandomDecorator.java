@@ -12,7 +12,6 @@ import com.google.gson.JsonObject;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
-import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeOutput;
@@ -34,29 +33,19 @@ public class WeightedRandomDecorator extends RecipeDecorator {
     }
 
     @Override
-    public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
-        // Process original outputs first
-        if (!internal.processOutputs(outputPorts, simulate)) {
-            return false;
-        }
+    public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
+        super.produceExtraOutputs(outputPorts, context);
 
-        if (!simulate) {
-            IRecipeContext context = IRecipeContext.findIn(outputPorts);
-            ConditionContext condContext = context != null ? context.getConditionContext() : null;
-
-            int draws = totalRolls(condContext);
-            for (int i = 0; i < draws; i++) {
-                WeightedOutputEntry picked = pick(condContext, i);
-                if (picked != null && picked.output instanceof IModularRecipeOutput modularOutput) {
-                    List<IModularPort> filtered = filterByType(outputPorts, modularOutput.getPortType());
-                    if (modularOutput.checkCapacity(filtered, 1, condContext)) {
-                        modularOutput.apply(filtered, 1, condContext);
-                    }
+        int draws = totalRolls(context);
+        for (int i = 0; i < draws; i++) {
+            WeightedOutputEntry picked = pick(context, i);
+            if (picked != null && picked.output instanceof IModularRecipeOutput modularOutput) {
+                List<IModularPort> filtered = filterByType(outputPorts, modularOutput.getPortType());
+                if (modularOutput.checkCapacity(filtered, 1, context)) {
+                    modularOutput.apply(filtered, 1, context);
                 }
             }
         }
-
-        return true;
     }
 
     /**

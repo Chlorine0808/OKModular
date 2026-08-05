@@ -21,11 +21,20 @@ import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
 import ruiseki.okmodular.core.item.ItemUtils;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Decorator that harvests blocks affected by the recipe's BlockInputs and
  * BlockOutputs.
  * Supports Fortune, Silk Touch, Shears, and Harvest Level requirements.
+ * <p>
+ * <b>This one does not run.</b> Like the other decorators it hangs its work off
+ * {@code processInputs} / {@code processOutputs} with a {@code !simulate} guard, and the
+ * engine only ever calls those to simulate - see {@code DecoratorWiringTest}. The rest moved
+ * to {@link RecipeDecorator#produceExtraOutputs}, which runs after the cached outputs land.
+ * Harvesting has to happen <em>before</em> the blocks it collects are overwritten, and it
+ * also needs a hook on the input side, so it needs its own two call sites rather than this
+ * one. Item S in {@code run/StructureIO_todos.md}.
  */
 public class HarvestBlockDecorator extends RecipeDecorator {
 
@@ -200,6 +209,14 @@ public class HarvestBlockDecorator extends RecipeDecorator {
             .getAsBoolean();
         int harvestLevel = json.has("harvestLevel") ? json.get("harvestLevel")
             .getAsInt() : 0;
+
+        Logger.warn(
+            "harvest_block is parsed but does nothing yet: its effects hang off "
+                + "processInputs/processOutputs, which the engine only ever calls to simulate. "
+                + "The other decorators moved to produceExtraOutputs; this one cannot, because it "
+                + "has to run BEFORE the blocks it harvests are overwritten. Item S in "
+                + "run/StructureIO_todos.md. Saying so is better than a recipe that silently "
+                + "drops its drops.");
 
         return new HarvestBlockDecorator(recipe, fortune, silkTouch, shear, harvestLevel);
     }

@@ -377,6 +377,13 @@ public class ProcessAgent extends AbstractRecipeProcess {
             }
         }
 
+        // 3. Then whatever the decorators add on top. Without this call the decorators are
+        // inert: their effects sit behind processOutputs(ports, false), which nothing invokes
+        // because completion pays out the cached copies rather than asking the recipe.
+        if (currentRecipe != null) {
+            currentRecipe.produceExtraOutputs(outputPorts, context);
+        }
+
         return true;
     }
 

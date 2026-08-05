@@ -9,7 +9,6 @@ import com.google.gson.JsonObject;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
-import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
@@ -32,30 +31,15 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
     }
 
     @Override
-    public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
-        // 1. Process base recipe outputs
-        if (!internal.processOutputs(outputPorts, simulate)) {
-            return false;
-        }
+    public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
+        super.produceExtraOutputs(outputPorts, context);
 
-        // 2. Apply probability check and bonus BlockOutputs
-        if (!simulate) {
-            // Find IRecipeContext to get ConditionContext for evaluation
-            IRecipeContext context = IRecipeContext.findIn(outputPorts);
-            ConditionContext condContext = context != null ? context.getConditionContext() : null;
-
-            int times = timesFiring(condContext);
-            if (context != null) {
-                for (int fired = 0; fired < times; fired++) {
-                    // Apply all bonus BlockOutputs
-                    for (BlockOutput output : bonusOutputs) {
-                        output.apply(outputPorts, 1, condContext);
-                    }
-                }
+        int times = timesFiring(context);
+        for (int fired = 0; fired < times; fired++) {
+            for (BlockOutput output : bonusOutputs) {
+                output.apply(outputPorts, 1, context);
             }
         }
-
-        return true;
     }
 
     /**

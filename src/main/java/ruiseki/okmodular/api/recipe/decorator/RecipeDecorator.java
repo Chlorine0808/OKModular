@@ -128,6 +128,15 @@ public abstract class RecipeDecorator implements IModularRecipe {
         return internal.processOutputs(outputPorts, simulate);
     }
 
+    /**
+     * Passes the call down the chain. A decorator with an effect overrides this, calls
+     * {@code super} first so the rest of the chain runs, then does its own work.
+     */
+    @Override
+    public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
+        internal.produceExtraOutputs(outputPorts, context);
+    }
+
     @Override
     public boolean matchesInput(List<IModularPort> inputPorts) {
         return internal.matchesInput(inputPorts);

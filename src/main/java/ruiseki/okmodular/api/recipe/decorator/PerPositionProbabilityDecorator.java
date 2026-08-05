@@ -34,30 +34,23 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
     }
 
     @Override
-    public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
-        // 1. Process base recipe outputs
-        if (!internal.processOutputs(outputPorts, simulate)) {
-            return false;
-        }
+    public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
+        super.produceExtraOutputs(outputPorts, context);
 
-        // 2. Apply probability check for each position
-        if (!simulate) {
-            IRecipeContext context = IRecipeContext.findIn(outputPorts);
+        IRecipeContext recipeContext = context != null ? context.getRecipeContext() : null;
+        if (recipeContext == null) recipeContext = IRecipeContext.findIn(outputPorts);
+        if (recipeContext == null) return;
 
-            if (context != null) {
-                ConditionContext condContext = context.getConditionContext();
-                List<ChunkCoordinates> positions = context.getSymbolPositions(symbol);
+        List<ChunkCoordinates> positions = recipeContext.getSymbolPositions(symbol);
+        if (positions == null) return;
 
-                // Check each position independently
-                for (ChunkCoordinates pos : positions) {
-                    if (rollsAt(condContext, pos)) {
-                        output.applyAt(context, pos, condContext);
-                    }
-                }
+        // Each position is asked separately, which only means anything because the seed
+        // has the coordinates mixed in - see rollsAt.
+        for (ChunkCoordinates pos : positions) {
+            if (rollsAt(context, pos)) {
+                output.applyAt(recipeContext, pos, context);
             }
         }
-
-        return true;
     }
 
     /**

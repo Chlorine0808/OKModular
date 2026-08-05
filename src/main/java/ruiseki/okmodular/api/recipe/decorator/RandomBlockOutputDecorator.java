@@ -48,37 +48,21 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
     }
 
     @Override
-    public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
-        // 1. Process base recipe outputs
-        if (!internal.processOutputs(outputPorts, simulate)) {
-            return false;
-        }
+    public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
+        super.produceExtraOutputs(outputPorts, context);
 
-        // 2. Apply random BlockOutput selections
-        if (!simulate) {
-            IRecipeContext context = IRecipeContext.findIn(outputPorts);
+        IRecipeContext recipeContext = context != null ? context.getRecipeContext() : null;
+        if (recipeContext == null) recipeContext = IRecipeContext.findIn(outputPorts);
+        if (recipeContext == null) return;
 
-            if (context != null) {
-                ConditionContext condContext = context.getConditionContext();
-                for (BlockOutputSelection selection : selections) {
-                    // Evaluate selection count
-                    int selectCount = (int) countExpr.evaluateDouble(condContext);
+        for (BlockOutputSelection selection : selections) {
+            int selectCount = (int) countExpr.evaluateDouble(context);
+            List<ChunkCoordinates> allPositions = recipeContext.getSymbolPositions(selection.symbol);
 
-                    // Get all positions for this symbol
-                    List<ChunkCoordinates> allPositions = context.getSymbolPositions(selection.symbol);
-
-                    // Randomly select N positions
-                    List<ChunkCoordinates> selectedPositions = select(allPositions, selectCount, condContext);
-
-                    // Apply BlockOutput to selected positions only
-                    for (ChunkCoordinates pos : selectedPositions) {
-                        selection.output.applyAt(context, pos, condContext);
-                    }
-                }
+            for (ChunkCoordinates pos : select(allPositions, selectCount, context)) {
+                selection.output.applyAt(recipeContext, pos, context);
             }
         }
-
-        return true;
     }
 
     /**
