@@ -55,13 +55,17 @@ public class RecipeContextLookupTest {
      * **文脈が引数で渡ってくる**ようになったので、ポート列を漁る理由が無くなったため。
      * 探さなくてよくなったのであって、探し忘れているのではない。
      *
+     * `harvest_block` も外れたが、理由が違う。**文脈を拾っていた 2 つの override ごと消えた**。
+     * `processInputs` / `processOutputs` を検査専用に畳んだときに一緒に落ちたもので、
+     * 収穫の本体（`checkAndHarvest`）は呼ぶ側が居ないまま残っている（項目 S）。
+     * 呼ぶ側が付いたら、そこで文脈をどう渡すかを決めることになる。
+     *
      * 位置を扱う 2 つとブロック IO の 4 つは、文脈が null の経路（検証・NEI）が残っているので
      * 引き続きフォールバックとして探す。
      */
     private static final String[] FORMER_COPIES = { "api/recipe/decorator/PerPositionProbabilityDecorator.java",
-        "api/recipe/decorator/RandomBlockOutputDecorator.java", "api/recipe/decorator/HarvestBlockDecorator.java",
-        "api/recipe/io/BlockInput.java", "api/recipe/io/BlockOutput.java", "api/recipe/io/StructureInput.java",
-        "api/recipe/io/StructureOutput.java" };
+        "api/recipe/decorator/RandomBlockOutputDecorator.java", "api/recipe/io/BlockInput.java",
+        "api/recipe/io/BlockOutput.java", "api/recipe/io/StructureInput.java", "api/recipe/io/StructureOutput.java" };
 
     @Test
     @DisplayName("private なコピーが 1 つも残っていない")

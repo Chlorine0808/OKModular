@@ -47,15 +47,16 @@ import ruiseki.okmodular.testsupport.JavaSource;
  *
  * ここが今回このテストを書いて分かった一番大事なところ。
  *
- * `ModularRecipe.matchesInput` は `processInputs(inputPorts, true)` と**無修飾で**呼ぶ。
+ * 当時の `ModularRecipe.matchesInput` は `processInputs(inputPorts, true)` と**無修飾で**呼んでいた。
  * 無修飾呼び出しは `this` に束縛される。そして `this` は
  * **デコレータが包んでいる中身の `ModularRecipe`** であって、デコレータ自身ではない。
  * デコレータ側の `matchesInput` は `internal.matchesInput(...)` に委譲するだけなので、
  * 制御が外側に戻ってくることは無い。
  *
  * つまり `HarvestBlockDecorator.processInputs` は、
- * **`simulate = true` ですら一度も呼ばれない**。`!simulate` の中が死んでいるのではなく、
- * メソッドごと到達不能。`.processInputs(` の形で数えるとこれが出る。
+ * **`simulate = true` ですら一度も呼ばれていなかった**。`!simulate` の中が死んでいたのではなく、
+ * メソッドごと到達不能。`.processInputs(` の形で数えるとこれが出た。
+ * その 2 つはこのあと検査専用に畳んで消えたが、**数え方の理由は残る**。
  *
  * <pre>
  * 呼ばれ方              override に届くか
@@ -80,16 +81,15 @@ public class DecoratorOverrideReachabilityTest {
     private static final Path DECORATORS = Paths.get("src/main/java/ruiseki/okmodular/api/recipe/decorator");
 
     /**
-     * 修飾された呼び出し元がどこにも居ないメソッド。**空にするのが目標**で、増やすものではない。
+     * 修飾された呼び出し元がどこにも居ないメソッド。**今は空**。
      *
-     * この 2 つは visitor 導入前のエンジンの化石。入力の消費は `RecipeExecutionVisitor` が、
-     * 出力の払い出しは `ProcessAgent.cachedOutputs` が担っていて、
-     * 残っているのは `ModularRecipe` が自分で自分を呼ぶ検査だけになっている。
+     * このテストを書いた時点では `processInputs` / `processOutputs` の 2 つが載っていた。
+     * どちらも visitor 導入前のエンジンの化石で、残っていたのは
+     * `ModularRecipe` が自分で自分を呼ぶ検査だけ。**畳んで消した**ので一覧も空になった。
      *
-     * 消すのではなく畳む予定。読むと「ここが実行経路」に見えるのが問題の本体で、
-     * 実際デコレータを書いた人はここに効果を足した。
+     * 空のまま維持するのが目的で、足す場所ではない。足すなら理由を書くこと。
      */
-    private static final List<String> KNOWN_UNREACHABLE = Arrays.asList("processInputs", "processOutputs");
+    private static final List<String> KNOWN_UNREACHABLE = Arrays.<String>asList();
 
     @Test
     @DisplayName("override したメソッドに修飾された呼び出し元がある")
@@ -129,16 +129,21 @@ public class DecoratorOverrideReachabilityTest {
     @DisplayName("無修飾の自己呼び出しを到達とみなさない")
     public void test無修飾呼び出しは数えない() {
         // このテスト自身の判定基準の検査。ここが緩むと上の 2 つが黙って通るようになる。
-        String source = JavaSource.read(JavaSource.MAIN.resolve("api/recipe/core/ModularRecipe.java"));
-        String stripped = JavaSource.stripComments(source);
+        // 例を main のソースから取らないのは、直したら例が消えてしまうため。
+        // 実際 processInputs はこのあと畳んで消したので、そのまま書いていたら道連れになっていた。
+        assertFalse(
+            qualifiedCallPattern("processInputs").matcher("if (!processInputs(inputPorts, true)) return false;")
+                .find(),
+            "無修飾の自己呼び出しを到達と数えている。this は中身の側なのでデコレータには届かない");
 
         assertTrue(
-            stripped.contains("processInputs(inputPorts, true)"),
-            "ModularRecipe が自分で processInputs を呼ぶ形が変わった。このテストの前提が崩れている");
-        assertFalse(
-            qualifiedCallPattern("processInputs").matcher(stripped)
+            qualifiedCallPattern("processInputs").matcher("internal.processInputs(inputPorts, simulate);")
                 .find(),
-            "ModularRecipe の中の呼び出しが修飾された形になった。" + "それならデコレータに届くので KNOWN_UNREACHABLE を見直すこと");
+            "参照ごしの呼び出しを数えていない");
+        assertTrue(
+            qualifiedCallPattern("getName").matcher("recipes.stream().map(IModularRecipe::getName);")
+                .find(),
+            "メソッド参照を数えていない。実際の型で解決されるので override には届く");
     }
 
     /** decorator パッケージで `@Override` が付いているメソッドの名前。 */
@@ -226,6 +231,7 @@ public class DecoratorOverrideReachabilityTest {
 
     /** `ref.name(` と `ref::name`。どちらも実際の型に従って解決されるのでデコレータに届く。 */
     private static Pattern qualifiedCallPattern(String name) {
-        return Pattern.compile("(\\.|::)\\s*" + Pattern.quote(name) + "\\s*[(\\s]");
+        String quoted = Pattern.quote(name);
+        return Pattern.compile("(?:\\.\\s*" + quoted + "\\s*\\(|::\\s*" + quoted + "(?![A-Za-z0-9_$]))");
     }
 }

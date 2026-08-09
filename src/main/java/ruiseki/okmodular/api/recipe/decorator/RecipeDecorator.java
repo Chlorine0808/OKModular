@@ -118,16 +118,6 @@ public abstract class RecipeDecorator implements IModularRecipe {
         return internal.getConditionPolicy();
     }
 
-    @Override
-    public boolean processInputs(List<IModularPort> inputPorts, boolean simulate) {
-        return internal.processInputs(inputPorts, simulate);
-    }
-
-    @Override
-    public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
-        return internal.processOutputs(outputPorts, simulate);
-    }
-
     /**
      * Passes the call down the chain. A decorator with an effect overrides this, calls
      * {@code super} first so the rest of the chain runs, then does its own work.

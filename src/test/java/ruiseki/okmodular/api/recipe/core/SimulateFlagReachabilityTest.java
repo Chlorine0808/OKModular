@@ -72,14 +72,15 @@ public class SimulateFlagReachabilityTest {
     private static final String[] SCOPE = { "api/recipe", "common/recipe" };
 
     /**
-     * 片方の値でしか呼ばれていないと分かっているもの。**空にするのが目標**。
+     * 片方の値でしか呼ばれていないと分かっているもの。**今は空**。
      *
-     * どちらも `simulate = true` でしか呼ばれない。呼び出し元は
-     * `ModularRecipe.matchesInput` と `ModularRecipe.canOutput` の 2 箇所だけで、両方 true 固定。
+     * このテストを書いた時点では `processInputs/2` と `processOutputs/2` が載っていた。
+     * どちらも `simulate = true` でしか呼ばれず、呼び出し元は `ModularRecipe` の中の 2 箇所だけ。
      * 入力の消費は `RecipeExecutionVisitor` が、出力の払い出しは `ProcessAgent.cachedOutputs` が
-     * 担うようになっていて、**この 2 つの後半は visitor 導入前のエンジンの化石**。
+     * 担うようになっていて、**あの 2 つの後半は visitor 導入前のエンジンの化石**だった。
+     * `matchesInput` / `canOutput` に畳んで消したので、一覧も空になった。
      */
-    private static final List<String> KNOWN_ONE_SIDED = Arrays.asList("processInputs/2", "processOutputs/2");
+    private static final List<String> KNOWN_ONE_SIDED = Arrays.<String>asList();
 
     @Test
     @DisplayName("simulate で分岐するメソッドは両方の値で呼ばれている")

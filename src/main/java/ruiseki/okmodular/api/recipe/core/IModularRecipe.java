@@ -15,20 +15,6 @@ import ruiseki.okmodular.api.modular.IPortType;
 public interface IModularRecipe extends IRecipe {
 
     /**
-     * @param inputPorts List of input ports
-     * @param simulate   If true, only check. If false, consume inputs.
-     * @return true if all inputs are satisfied
-     */
-    boolean processInputs(List<IModularPort> inputPorts, boolean simulate);
-
-    /**
-     * @param outputPorts List of output ports
-     * @param simulate    If true, only check. If false, produce outputs.
-     * @return true if all outputs can be inserted
-     */
-    boolean processOutputs(List<IModularPort> outputPorts, boolean simulate);
-
-    /**
      * Anything a decorator produces beyond the recipe's own outputs, applied on completion.
      * <p>
      * Decorators used to hang their effects off {@code processOutputs(ports, false)}, and

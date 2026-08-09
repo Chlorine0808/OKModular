@@ -28,13 +28,22 @@ import ruiseki.okmodular.util.Logger;
  * BlockOutputs.
  * Supports Fortune, Silk Touch, Shears, and Harvest Level requirements.
  * <p>
- * <b>This one does not run.</b> Like the other decorators it hangs its work off
+ * <b>This one does not run.</b> Like the other decorators it hung its work off
  * {@code processInputs} / {@code processOutputs} with a {@code !simulate} guard, and the
- * engine only ever calls those to simulate - see {@code DecoratorWiringTest}. The rest moved
- * to {@link RecipeDecorator#produceExtraOutputs}, which runs after the cached outputs land.
- * Harvesting has to happen <em>before</em> the blocks it collects are overwritten, and it
- * also needs a hook on the input side, so it needs its own two call sites rather than this
- * one. Item S in {@code run/StructureIO_todos.md}.
+ * engine only ever called those to simulate - see {@code DecoratorWiringTest}. Those two
+ * methods are gone now, folded into the check-only {@code matchesInput} and {@code canOutput}
+ * so nothing else mistakes them for the execution path, and the overrides went with them.
+ * <p>
+ * The rest of the decorators moved to {@link RecipeDecorator#produceExtraOutputs}, which runs
+ * after the cached outputs land. Harvesting cannot: it has to happen <em>before</em> the
+ * blocks it collects are overwritten, and it also needs a hook on the input side, so it needs
+ * its own two call sites rather than that one. Item S in {@code run/StructureIO_todos.md}.
+ * <p>
+ * {@link #checkAndHarvest} is therefore parked - written, correct as far as anyone knows, and
+ * called by nobody. {@code DecoratorWiringTest.KNOWN_DEAD} names it so, and asserts it stays
+ * uncalled until item S gives it somewhere to hang; the day it gets a call site, that list
+ * fails until the entry is removed. Parked code a test points at is survivable. Parked code
+ * that looks like it runs is what cost six decorators.
  */
 public class HarvestBlockDecorator extends RecipeDecorator {
 
@@ -53,41 +62,19 @@ public class HarvestBlockDecorator extends RecipeDecorator {
         this.harvestLevel = harvestLevel;
     }
 
-    @Override
-    public boolean processInputs(List<IModularPort> inputPorts, boolean simulate) {
-        if (!simulate) {
-            IRecipeContext context = IRecipeContext.findIn(inputPorts);
-            if (context != null) {
-                if (!checkAndHarvest(context, inputPorts, true)) {
-                    return false;
-                }
-            }
-        }
-        return internal.processInputs(inputPorts, simulate);
-    }
-
-    @Override
-    public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
-        if (!simulate) {
-            IRecipeContext context = IRecipeContext.findIn(outputPorts);
-            if (context != null) {
-                if (!checkAndHarvest(context, outputPorts, false)) {
-                    return false;
-                }
-            }
-        }
-        return internal.processOutputs(outputPorts, simulate);
-    }
-
     /**
      * Harvest blocks from either inputs or outputs.
-     * 
+     * <p>
+     * <b>Nothing calls this.</b> See the class javadoc: the two hooks it used to hang off are
+     * gone, and item S owes it a pair of real ones. Package-private rather than private so
+     * the wiring test can name it without reflection.
+     *
      * @param context    Recipe context
      * @param ports      Available ports (for item insertion)
      * @param fromInputs True if checking inputs, false for outputs
      * @return true if all harvest level requirements are met
      */
-    private boolean checkAndHarvest(IRecipeContext context, List<IModularPort> ports, boolean fromInputs) {
+    boolean checkAndHarvest(IRecipeContext context, List<IModularPort> ports, boolean fromInputs) {
         List<ChunkCoordinates> targetPositions = new ArrayList<>();
         World world = context.getWorld();
 
