@@ -22,6 +22,11 @@ A special object named `default` can be used to define shared mappings.
 | `batchMin` | Integer / expression | Minimum batch size for recipes (default: 1) |
 | `batchMax` | Integer / expression | Maximum batch size for recipes (default: 1) |
 | `tier` | Integer | Machine tier (default: 0) |
+| `controllerOffset` | Array `[a, b, c]` | Where the controller stands in the structure. → [2.3](#23-controlleroffset--where-the-controller-stands) |
+| `externalPorts` | Array of symbols | Which port symbols may connect to the outside. → [2.4](#24-externalports--ports-that-reach-outside) |
+| `inputOnly` / `outputOnly` / `bothOnly` | Array of symbols | Fix a symbol's side IO. → [2.4](#24-externalports--ports-that-reach-outside) |
+| `tierStructures` | Array | Sub-structures that raise a tier or a count when built. → [2.5](#25-tierstructures--building-more-raises-a-tier) |
+| `modVersion` | String | Migration stamp, **written automatically**. Do not write it by hand |
 | `defaultFacing` | String | The structure's default facing (`UP`, `DOWN`). **Specifies the controller's facing.** Horizontal when omitted |
 | `durationPolicy` | String | When an expression-valued recipe `duration` is evaluated (`onStart` / `perTick`, default: `onStart`) |
 | `conditions` | Array/Object | [Machine Conditions](../machinery/MACHINE_CONDITIONS.md) |
@@ -104,6 +109,77 @@ structures built with `okmodular:glass:2`.
 > "I set the tier and the recipe still will not run". Put `component` and `tiers` inside
 > `mappings`.
 
+### 2.3 `controllerOffset` — where the controller stands
+
+Says where the controller (`Q`) sits within `layers`, as an offset from the anchor.
+
+```json
+"controllerOffset": [2, 0, 2]
+```
+
+The order matches `layers`: `[a, b, c]` (across, height, depth). Fewer than three entries is
+**ignored silently**. Left out, the position where `Q` was drawn is used as-is.
+
+### 2.4 `externalPorts` — ports that reach outside
+
+By default the ports inside a structure only face the machine. Symbols that outside pipes and
+cables may connect to are listed here.
+
+```json
+"externalPorts": ["E", "I"],
+"inputOnly":  ["I"],
+"outputOnly": ["O"]
+```
+
+| Key | Meaning |
+|---|---|
+| `externalPorts` | Symbols **allowed** to connect outwards. Per-side IO stays wrench-adjustable |
+| `inputOnly` | Pins that symbol to **input**. The wrench cannot change it |
+| `outputOnly` | Pins it to **output** |
+| `bothOnly` | Pins it to **both** |
+
+Values are arrays of strings, and **only the first character** is read as the symbol (`"EE"`
+means `E`). Empty strings are skipped.
+
+> [!NOTE]
+> `inputOnly` and its siblings are a **separate list** from `externalPorts`. A symbol that
+> should be both reachable and pinned has to appear in both.
+
+### 2.5 `tierStructures` — building more raises a tier
+
+Sub-structures built around the machine raise a component's tier, or count towards one.
+
+```json
+"tierStructures": [
+  {
+    "name": "coolant_tower",
+    "tier": 2,
+    "component": "cooling",
+    "mode": "tier",
+    "offsets": [
+      [3, 0, 0],
+      { "target": [-3, 0, 0], "anchor": [0, 1, 0] }
+    ]
+  }
+]
+```
+
+| Key | Default | Meaning |
+|---|---|---|
+| `name` | **required** | The sub-structure's name. Entries without one are skipped silently |
+| `tier` | `1` | Tier granted when it stands (the unit counted when `mode` is `"count"`) |
+| `component` | `"structure"` | Which component's tier this raises |
+| `mode` | `"tier"` | `"tier"` raises a tier, `"count"` counts instances |
+| `offsets` | none | Where it may be built, relative to the machine. Several entries mean several places |
+
+An `offsets` entry may be written two ways.
+
+- **Array** `[a, b, c]` — where the sub-structure sits relative to the machine
+- **Object** `{ "target": [...], "anchor": [...] }` — also says which point of the
+  sub-structure lines up
+
+Either form with fewer than three entries is **skipped silently, that entry only**.
+
 ## 3. Mappings
 Mappings link the characters in `layers` to block IDs.
 
@@ -127,6 +203,21 @@ Mappings link the characters in `layers` to block IDs.
   ]
 }
 ```
+
+A `blocks` entry may also be an object, with the block ID under `id`.
+
+```json
+"A": {
+  "blocks": [
+    { "id": "okmodular:casing_plain:0" },
+    { "id": "okmodular:casing_reinforced:0" }
+  ]
+}
+```
+
+> [!WARNING]
+> An object entry with no `id` **disappears silently**. The structure still forms on the
+> remaining choices, so it shows up as "this one block is not accepted for some reason".
 
 ## 4. Requirements
 Requirements define the internal components (ports) the machine must have.

@@ -82,10 +82,14 @@ public class DocumentedJsonKeyTest {
      * maxIn / maxOut / minIn / minOut  map_range 式の四隅
      * data                           block / block_below 条件のメタデータ
      * modifierKey                    bonus デコレータが読む機械修飾子
-     * controllerOffset / offsets / externalPorts / tierStructures  構造の配置
-     * inputOnly / outputOnly / bothOnly  構造要件が許すポートの向き
-     * modVersion                     構造 JSON の移行に使う版
      * </pre>
+     *
+     * 構造側の 9 個（`controllerOffset` / `offsets` / `externalPorts` / `tierStructures` /
+     * `inputOnly` / `outputOnly` / `bothOnly` / `id` / `modVersion`）は書き終えたので外した。
+     *
+     * ⚠ `modifierKey` は事情が違う。**書いても何も起きない**。
+     * `BonusOutputDecorator` が読んで持つところまではやるが、使う所に `TODO` が残っていて
+     * 確率に反映されない。docs に載せると嘘になるので、**直すまでここに置く**（項目 W）。
      *
      * レジストリに預ける名前もここに来る。式の構造化形式 4 つ
      * （`machine_property` / `component_tier` / `nbt_assignment` / `string_literal`）は
@@ -99,31 +103,22 @@ public class DocumentedJsonKeyTest {
      */
     private static final List<String> UNDOCUMENTED = Arrays.asList(
         "amountExpr",
-        "bothOnly",
         "component_tier",
-        "controllerOffset",
         "data",
-        "externalPorts",
-        "id",
-        "inputOnly",
         "machine_property",
         "maxIn",
         "maxOut",
         "minIn",
         "minOut",
-        "modVersion",
         "modifierKey",
         "nbt_assignment",
         "nbtlist",
         "nbtmatch",
-        "offsets",
         "op",
         "ops",
-        "outputOnly",
         "recipeprocessed",
         "recipeprocessedtype",
-        "string_literal",
-        "tierStructures");
+        "string_literal");
 
     @Test
     @DisplayName("docs の JSON 例に出るキーを実装が読んでいる")

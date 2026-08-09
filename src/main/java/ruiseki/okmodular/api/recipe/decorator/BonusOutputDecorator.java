@@ -17,6 +17,7 @@ import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.parser.OutputParserRegistry;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Decorator that adds a chance for bonus outputs when the recipe is completed.
@@ -128,6 +129,13 @@ public class BonusOutputDecorator extends RecipeDecorator {
         }
         String key = json.has("modifierKey") ? json.get("modifierKey")
             .getAsString() : null;
+        if (key != null) {
+            Logger.warn(
+                "modifierKey is read but does nothing yet: the chance is drawn without it, so a "
+                    + "recipe writing modifierKey gets exactly the same odds as one that does not. "
+                    + "produceExtraOutputs still carries the TODO. Item W in "
+                    + "run/StructureIO_todos.md. Saying so beats a key that silently changes nothing.");
+        }
         return new BonusOutputDecorator(recipe, chance, outputs, key);
     }
 }

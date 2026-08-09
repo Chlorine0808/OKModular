@@ -22,6 +22,11 @@
 | `batchMin` | Integer / 式 | レシピの最小バッチサイズ（デフォルト: 1） |
 | `batchMax` | Integer / 式 | レシピの最大バッチサイズ（デフォルト: 1） |
 | `tier` | Integer | マシンのティア（デフォルト: 0） |
+| `controllerOffset` | 配列 `[a, b, c]` | コントローラが構造体のどこに立つか。→ [2.3](#23-controlleroffset--コントローラの立ち位置) |
+| `externalPorts` | 配列（記号） | 外部と繋がってよいポート記号。→ [2.4](#24-externalports--外から繋げるポート) |
+| `inputOnly` / `outputOnly` / `bothOnly` | 配列（記号） | その記号の面 IO を固定する。→ [2.4](#24-externalports--外から繋げるポート) |
+| `tierStructures` | 配列 | 増設で Tier や個数が上がる副構造。→ [2.5](#25-tierstructures--増設で-tier-が上がる) |
+| `modVersion` | 文字列 | **書き出し時に自動で付く**移行用の版。手で書かない |
 | `defaultFacing` | 文字列 | 構造体のデフォルトの向き（`UP`, `DOWN`）。**コントローラの向きを指定する。**指定がない場合は横向き |
 | `durationPolicy` | 文字列 | 式で書かれたレシピの `duration` をいつ評価するか（`onStart` / `perTick`、デフォルト: `onStart`） |
 | `conditions` | 配列/オブジェクト | [機械の稼働条件](../machinery/MACHINE_CONDITIONS.md) |
@@ -101,6 +106,76 @@
 > 「Tier を設定したのにレシピが通らない」という形でしか現れませんでした。
 > `mappings` の中に `component` と `tiers` を書くのが正しい形です。
 
+### 2.3 `controllerOffset` — コントローラの立ち位置
+
+`layers` の中でコントローラ（`Q`）がどこに来るかを、**アンカーからのズレ**で指定します。
+
+```json
+"controllerOffset": [2, 0, 2]
+```
+
+順は `layers` と同じ `[a, b, c]`（横・高さ・奥行き）。3 要素未満だと**黙って無視されます**。
+指定しない場合は `Q` を書いた位置がそのまま使われます。
+
+### 2.4 `externalPorts` — 外から繋げるポート
+
+既定では、構造体の中のポートは**機械の内側だけ**を向きます。
+外のパイプやケーブルを繋ぎたい記号は、ここに並べます。
+
+```json
+"externalPorts": ["E", "I"],
+"inputOnly":  ["I"],
+"outputOnly": ["O"]
+```
+
+| キー | 意味 |
+|---|---|
+| `externalPorts` | 外部接続を**許す**記号。面ごとの IO はプレイヤーがレンチで変えられる |
+| `inputOnly` | その記号を**搬入固定**にする。レンチで変えられない |
+| `outputOnly` | 同じく**搬出固定** |
+| `bothOnly` | 同じく**双方向固定** |
+
+値は文字列の配列で、**先頭 1 文字だけ**が記号として読まれます（`"EE"` は `E`）。
+空文字は無視されます。
+
+> [!NOTE]
+> `inputOnly` などは `externalPorts` と**別の一覧**です。
+> 固定したい記号は両方に書いてください。
+
+### 2.5 `tierStructures` — 増設で Tier が上がる
+
+本体の周りに副構造を建てると、部品の Tier や個数が上がる仕組みです。
+
+```json
+"tierStructures": [
+  {
+    "name": "coolant_tower",
+    "tier": 2,
+    "component": "cooling",
+    "mode": "tier",
+    "offsets": [
+      [3, 0, 0],
+      { "target": [-3, 0, 0], "anchor": [0, 1, 0] }
+    ]
+  }
+]
+```
+
+| キー | 既定 | 意味 |
+|---|---|---|
+| `name` | **必須** | 副構造の名前。無い項目は黙って飛ばされます |
+| `tier` | `1` | 成立したときに与える Tier（`mode: "count"` なら数える単位） |
+| `component` | `"structure"` | どの部品の Tier を上げるか |
+| `mode` | `"tier"` | `"tier"` = Tier を上げる / `"count"` = 個数を数える |
+| `offsets` | なし | 本体から見てどこに建てられるか。複数書けば複数箇所 |
+
+`offsets` の要素は 2 通り書けます。
+
+- **配列** `[a, b, c]` — 本体から見た副構造の位置
+- **オブジェクト** `{ "target": [...], "anchor": [...] }` — 副構造側のどの点を合わせるかまで指定
+
+どちらも 3 要素未満だと**その項目だけ黙って飛ばされます**。
+
 ## 3. マッピング (Mappings)
 マッピングは、`layers` 内の文字をブロック ID にリンクします。
 
@@ -124,6 +199,21 @@
   ]
 }
 ```
+
+`blocks` の要素はオブジェクトでも書けます。ブロック ID は `id` に入れます。
+
+```json
+"A": {
+  "blocks": [
+    { "id": "okmodular:casing_plain:0" },
+    { "id": "okmodular:casing_reinforced:0" }
+  ]
+}
+```
+
+> [!WARNING]
+> オブジェクト形式で `id` を書き忘れると、**その候補だけが黙って消えます**。
+> 残りの候補で構造は成立してしまうので、「なぜかこのブロックだけ受け付けない」という形で出ます。
 
 ## 4. 要件 (Requirements)
 要件は、マシンが備えていなければならない内部コンポーネント（ポート）を定義します。
