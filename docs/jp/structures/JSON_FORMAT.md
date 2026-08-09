@@ -22,7 +22,6 @@
 | `batchMin` | Integer / 式 | レシピの最小バッチサイズ（デフォルト: 1） |
 | `batchMax` | Integer / 式 | レシピの最大バッチサイズ（デフォルト: 1） |
 | `tier` | Integer | マシンのティア（デフォルト: 0） |
-| `tierMap` | オブジェクト | 構造体の各パーツが提供する Tier の定義 |
 | `defaultFacing` | 文字列 | 構造体のデフォルトの向き（`UP`, `DOWN`）。**コントローラの向きを指定する。**指定がない場合は横向き |
 | `durationPolicy` | 文字列 | 式で書かれたレシピの `duration` をいつ評価するか（`onStart` / `perTick`、デフォルト: `onStart`） |
 | `conditions` | 配列/オブジェクト | [機械の稼働条件](../machinery/MACHINE_CONDITIONS.md) |
@@ -67,22 +66,40 @@
 > `logs/latest.log` に 1 回だけエラーが出ます。
 > **別の係数を読むのは問題ありません** — `"speedMultiplier": "energy_multi"` は動きます。
 
-### 2.2 Tier Map の詳細
-`tierMap` を使用すると、使用する材料（ブロック）に応じてマシンの一部に特定の Tier を割り当てることができます。
+### 2.2 部品ごとの Tier
+
+使用した材料（ブロック）に応じて、マシンの一部に Tier を割り当てられます。
+**マッピング側に書きます。** トップレベルの項目ではありません。
+
 ```json
-"tierMap": {
-  "glass": {
-    "okmodular:glass:1": 1,
-    "okmodular:glass:2": 2
+"mappings": {
+  "G": {
+    "component": "glass",
+    "tiers": {
+      "okmodular:glass:1": 1,
+      "okmodular:glass:2": 2
+    }
   },
-  "casing": {
-    "okmodular:modularMachineCasing:0": 1,
-    "okmodular:modularMachineCasing:1": 2,
-    "okmodular:modularMachineCasing:2": 3
+  "C": {
+    "component": "casing",
+    "tiers": {
+      "okmodular:casing_reinforced:0": 1,
+      "okmodular:casing_reinforced:1": 2,
+      "okmodular:casing_reinforced:2": 3
+    }
   }
 }
 ```
-レシピ側で `"tier": { "glass": 2 }` と指定されている場合、上記の設定では `glass:2` 以上のブロックを使用している構造体でのみそのレシピが有効になります。
+
+`component` が部品の名前、`tiers` が「そのブロックなら何 Tier か」の表です。
+レシピ側で `"tier": { "glass": 2 }` と指定されていれば、
+上の設定では `okmodular:glass:2` を使って組んだ構造体でのみそのレシピが有効になります。
+
+> [!WARNING]
+> ここは以前 **トップレベルの `tierMap`** として説明されていました。そんな項目は無く、
+> 読む側もいません。書いても**エラーもログも出ずに無視される**ので、
+> 「Tier を設定したのにレシピが通らない」という形でしか現れませんでした。
+> `mappings` の中に `component` と `tiers` を書くのが正しい形です。
 
 ## 3. マッピング (Mappings)
 マッピングは、`layers` 内の文字をブロック ID にリンクします。

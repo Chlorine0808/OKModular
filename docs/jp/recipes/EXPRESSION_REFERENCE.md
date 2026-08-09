@@ -135,10 +135,12 @@ fluid_f_out("lava")   item_f_in("minecraft:coal")
 > 一方 `fluid_f`（方向なし）は「容量 - 保持量」です。
 
 ### 統計・状態
-- `recipe_count`: マシンが処理したレシピの累計回数
+- `recipe_count` / `count_recipe`: マシンが処理したレシピの累計回数
+- `recipe_types_count` / `count_recipe_type`: 処理したレシピの**種類**数
 - `progress` / `progress_percent`: 現在のレシピの進行度 (0.0 ~ 1.0)
 - `tier`: マシンの現在の Tier
 - `is_running`: マシンが動作中であるか (1 or 0)
+- `is_waiting`: 出力先が埋まっていて待たされているか (1 or 0)
 - `timeplaced`: マシンが設置されてからの累積時間 (ticks)
 - `timecontinue`: マシンが連続稼働している時間 (ticks)
 

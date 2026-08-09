@@ -22,7 +22,6 @@ A special object named `default` can be used to define shared mappings.
 | `batchMin` | Integer / expression | Minimum batch size for recipes (default: 1) |
 | `batchMax` | Integer / expression | Maximum batch size for recipes (default: 1) |
 | `tier` | Integer | Machine tier (default: 0) |
-| `tierMap` | Object | The tiers each part of the structure provides |
 | `defaultFacing` | String | The structure's default facing (`UP`, `DOWN`). **Specifies the controller's facing.** Horizontal when omitted |
 | `durationPolicy` | String | When an expression-valued recipe `duration` is evaluated (`onStart` / `perTick`, default: `onStart`) |
 | `conditions` | Array/Object | [Machine Conditions](../machinery/MACHINE_CONDITIONS.md) |
@@ -70,22 +69,40 @@ for the available names).
 > once in `logs/latest.log`.
 > **Reading a different modifier is fine** - `"speedMultiplier": "energy_multi"` works.
 
-### 2.2 Tier Map Details
-`tierMap` assigns a specific tier to part of the machine according to the material (block) used.
+### 2.2 Per-part tiers
+
+A part of the machine can carry a tier that depends on the material it was built from.
+**This goes in the mapping**, not at the top level.
+
 ```json
-"tierMap": {
-  "glass": {
-    "okmodular:glass:1": 1,
-    "okmodular:glass:2": 2
+"mappings": {
+  "G": {
+    "component": "glass",
+    "tiers": {
+      "okmodular:glass:1": 1,
+      "okmodular:glass:2": 2
+    }
   },
-  "casing": {
-    "okmodular:modularMachineCasing:0": 1,
-    "okmodular:modularMachineCasing:1": 2,
-    "okmodular:modularMachineCasing:2": 3
+  "C": {
+    "component": "casing",
+    "tiers": {
+      "okmodular:casing_reinforced:0": 1,
+      "okmodular:casing_reinforced:1": 2,
+      "okmodular:casing_reinforced:2": 3
+    }
   }
 }
 ```
-When a recipe specifies `"tier": { "glass": 2 }`, with the settings above that recipe is only valid on structures built with `glass:2` or better.
+
+`component` names the part and `tiers` says which tier each block counts as.
+When a recipe asks for `"tier": { "glass": 2 }`, the settings above make it valid only on
+structures built with `okmodular:glass:2`.
+
+> [!WARNING]
+> This used to be described as a top-level `tierMap`. No such field exists and nothing reads
+> it, so writing one is **ignored without an error or a log line** - it shows up only as
+> "I set the tier and the recipe still will not run". Put `component` and `tiers` inside
+> `mappings`.
 
 ## 3. Mappings
 Mappings link the characters in `layers` to block IDs.

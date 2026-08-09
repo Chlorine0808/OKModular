@@ -138,10 +138,12 @@ means something where the kind holds more than one:
 > for the input tanks only. `fluid_f`, with no direction, is capacity minus held.
 
 ### Statistics & State
-- `recipe_count`: Cumulative number of recipes processed by the machine
+- `recipe_count` / `count_recipe`: Cumulative number of recipes processed by the machine
+- `recipe_types_count` / `count_recipe_type`: Number of distinct recipes processed
 - `progress` / `progress_percent`: Current recipe progress (0.0 ~ 1.0)
 - `tier`: Current machine Tier
 - `is_running`: Whether the machine is running (1 or 0)
+- `is_waiting`: Whether the machine is held up waiting for output room (1 or 0)
 - `timeplaced`: Cumulative time since the machine was placed (ticks)
 - `timecontinue`: Continuous uptime of the machine (ticks)
 
