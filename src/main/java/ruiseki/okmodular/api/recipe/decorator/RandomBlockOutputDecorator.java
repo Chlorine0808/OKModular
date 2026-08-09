@@ -56,14 +56,41 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
         if (recipeContext == null) recipeContext = IRecipeContext.findIn(outputPorts);
         if (recipeContext == null) return;
 
+        int selectCount = totalCount(context);
         for (BlockOutputSelection selection : selections) {
-            int selectCount = (int) countExpr.evaluateDouble(context);
             List<ChunkCoordinates> allPositions = recipeContext.getSymbolPositions(selection.symbol);
 
             for (ChunkCoordinates pos : select(allPositions, selectCount, context)) {
                 selection.output.applyAt(recipeContext, pos, context);
             }
         }
+    }
+
+    /**
+     * How many cells this completion replaces.
+     * <p>
+     * {@code count} is per run of the recipe and a batch of n is n runs, so a batch replaces n
+     * times as many cells - see {@link RecipeDecorator#batchSizeOf}. This is the one place the
+     * question was open: {@code per_position_probability} deliberately does <b>not</b> scale,
+     * because it asks each cell its own question and asking twice rewrites the same block.
+     * This one names a number of cells, and n runs of "replace 5 cells" is 5n cells.
+     * <p>
+     * The count is drawn once per run rather than drawn once and multiplied, which is how
+     * {@code resolveAmount} pays out a batched output, so a count written with
+     * {@code random()} can total something other than a multiple of n. Draw zero is the
+     * context itself, so a batch of one is bit-for-bit what it was before batching.
+     * <p>
+     * Nothing clamps the total here. {@link #select} takes as many cells as exist and stops,
+     * so a count past the end of the structure fills it rather than failing.
+     */
+    int totalCount(ConditionContext context) {
+        int batch = batchSizeOf(context);
+        int total = 0;
+
+        for (int draw = 0; draw < batch; draw++) {
+            total += (int) countExpr.evaluateDouble(context != null ? context.forDraw(draw) : null);
+        }
+        return total;
     }
 
     /**

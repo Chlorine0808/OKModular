@@ -510,6 +510,40 @@ public class DecoratorDrawTest {
         assertEquals(3 * MACHINE_BATCH, decorator.totalRolls(withMachine()));
     }
 
+    @Test
+    @DisplayName("N マス選ぶ側も count × バッチ数だけ選ぶ")
+    public void testマス選択もバッチ回数分() {
+        // ここだけ判断が割れていた。`per_position_probability` は倍にしない
+        // ── マスごとに問いを立てるので、2 回問うても同じブロックを書き直すだけだから。
+        // こちらは**マス数を名指しする**ので、「5 マス置く」を n 回なら 5n マス。
+        RandomBlockOutputDecorator decorator = new RandomBlockOutputDecorator(
+            null,
+            new ConstantExpression(5),
+            new ArrayList<>());
+
+        assertEquals(5, decorator.totalCount(withoutMachine()), "機械が無いときに倍している");
+        assertEquals(5 * MACHINE_BATCH, decorator.totalCount(withMachine()), "バッチ数を掛けていない");
+    }
+
+    @Test
+    @DisplayName("マス数を超えても構造体を埋めて止まる")
+    public void testバッチでマス数を超える() {
+        // count は式なのでバッチと合わせると簡単にマス数を超える。
+        // 打ち切りは select 側にあるので、倍にしても落ちない。
+        RandomBlockOutputDecorator decorator = new RandomBlockOutputDecorator(
+            null,
+            new ConstantExpression(40),
+            new ArrayList<>());
+
+        int total = decorator.totalCount(withMachine());
+        assertTrue(total > 50, "50 マスを超える数にならないと、この検査が意味を持たない（" + total + "）");
+        assertEquals(
+            50,
+            decorator.select(cells(), total, seeded(1L))
+                .size(),
+            "マス数を超えた要求で選択数が 50 を超えた");
+    }
+
     // ============================================
     // 機械からバッチ数を読めているか
     // ============================================

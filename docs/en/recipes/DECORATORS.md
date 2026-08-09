@@ -75,11 +75,25 @@ A batch of n is n runs of the recipe folded into one, so **the draw happens n ti
 
 - `bonus` / `bonus_block_output` roll n times and produce output once per hit
 - `weighted_random` picks `rolls × n` entries
-- `per_position_probability` and `random_block_output` act on the structure's cells, so they
-  **do not scale with the batch** - running them again would only rewrite the same blocks
+- `random_block_output` picks `count × n` cells
+- `per_position_probability` **does not scale with the batch** (see below)
 
-A `chance` written as an expression is re-evaluated for each of the n draws, so a chance
-containing `random()` varies between the runs inside one batch.
+A `chance` or a `count` written as an expression is re-evaluated for each of the n draws, so
+one containing `random()` varies between the runs inside a batch and the total need not be a
+multiple of n.
+
+> [!NOTE]
+> **`per_position_probability` is the one that does not scale, because it asks a different
+> question.** It asks *each cell* whether to replace it, and asking twice only rewrites the
+> same block. `random_block_output` names *a number of cells*, and n runs of "replace 5
+> cells" is 5n cells.
+>
+> Cells are finite, so a `count × n` past the size of the structure **fills what is there and
+> stops**. It is not an error.
+
+> [!TIP]
+> **Do not write `batch` into the expression.** The engine applies it, so `"count": "5 *
+> batch"` applies it **twice** - the same trap as an input or output `amount`.
 
 > [!WARNING]
 > **Two decorators of the same kind on one recipe always give the same answer.**
