@@ -113,7 +113,7 @@ Mappings link the characters in `layers` to block IDs.
 ### Object Format (partly planned)
 ```json
 "S": {
-  "block": "okmodular:modularMachineCasing:0",
+  "block": "okmodular:casing_plain:0",
   "max": 1
 }
 ```
@@ -122,8 +122,8 @@ Mappings link the characters in `layers` to block IDs.
 ```json
 "A": {
   "blocks": [
-    "omoshiroikamo:modifierNull:0",
-    "omoshiroikamo:modifierSpeed:0"
+    "okmodular:casing_plain:0",
+    "okmodular:casing_reinforced:0"
   ]
 }
 ```

@@ -110,7 +110,7 @@
 ### オブジェクト形式 (一部実装予定)
 ```json
 "S": {
-  "block": "okmodular:modularMachineCasing:0",
+  "block": "okmodular:casing_plain:0",
   "max": 1
 }
 ```
@@ -119,8 +119,8 @@
 ```json
 "A": {
   "blocks": [
-    "omoshiroikamo:modifierNull:0",
-    "omoshiroikamo:modifierSpeed:0"
+    "okmodular:casing_plain:0",
+    "okmodular:casing_reinforced:0"
   ]
 }
 ```
