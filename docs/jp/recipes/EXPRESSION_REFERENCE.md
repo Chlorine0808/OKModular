@@ -287,6 +287,57 @@ long は**大文字のみ**です（小文字の `l` は `1` と紛らわしい�
 `"speedMultiplier": "1 + tier * 0.25"` と書けます。ただし**その係数自身は読めません** —
 [構造体の JSON フォーマット](../structures/JSON_FORMAT.md) を参照。
 
+### 構造化形式 — 文字列の代わりにオブジェクトで書く
+
+式は文字列（`"tier * 2"`）のほかに、**オブジェクト**でも書けます。
+どこで書けるかは同じで、読み手が違うだけです。
+
+```json
+"amount": { "type": "arithmetic", "operation": "*",
+            "left":  { "type": "machine_property", "property": "tier" },
+            "right": { "type": "constant", "value": 2 } }
+```
+
+上は `"amount": "tier * 2"` と同じ意味です。**普通は文字列で書いてください** —
+短く読みやすく、同じものを 2 通りで書く必要はありません。
+オブジェクト形式は、式を機械が組み立てる場合や、文字列に収まらない指定をする場合のためのものです。
+
+| `type` | 必須キー | 意味 |
+|---|---|---|
+| `constant` | `value`（数値） | 定数 |
+| `string_literal` | `value`（文字列） | 文字列。`item('...')` のような関数に渡す値 |
+| `machine_property` | `property` | 機械のプロパティ 1 つ（`tier` / `energy` など） |
+| `world_property` | `property` | 世界のプロパティ 1 つ（`tick` / `moon_phase` など） |
+| `component_tier` | `component` | 部品の Tier（`"glass"` など） |
+| `arithmetic` | `operation` `left` `right` | 四則演算。`left` / `right` も式 |
+| `map_range` | `input` `minIn` `maxIn` `minOut` `maxOut`（任意で `clamp`） | 値の範囲を別の範囲に写す |
+| `nbt` | `key`（任意で `default` `symbol`） | NBT の値。`default` は読めなかったときの値 |
+| `nbt_assignment` | `key` `value`（任意で `op`） | NBT へ書き込む。下記 |
+
+#### `map_range` — 範囲を写す
+
+```json
+{ "type": "map_range", "input": { "type": "machine_property", "property": "energy_p" },
+  "minIn": 0, "maxIn": 1, "minOut": 100, "maxOut": 20, "clamp": true }
+```
+
+`minIn`〜`maxIn` を `minOut`〜`maxOut` に線形に写します。上の例は
+「充填率 0% で 100、100% で 20」なので、**溜まっているほど速い**という書き方になります。
+
+`minOut` > `maxOut` のように**逆向きに書けます**。`clamp`（既定 `false`）を `true` にすると、
+入力が範囲外でも出力が `minOut`〜`maxOut` から出ません。
+
+#### `nbt_assignment` の `op`
+
+NBT に書き込むときの演算子です。既定は `"="`。
+
+```json
+{ "type": "nbt_assignment", "key": "stored_power", "op": "+=",
+  "value": { "type": "constant", "value": 1000 } }
+```
+
+文字列形式の `nbt('stored_power') += 1000` と同じです。
+
 ### よくある間違い
 - **文字列の引用符**: 式自体は JSON 内で文字列として `"amount": "tier * 2"` のように記述します。
 - **大文字・小文字**: 変数名はすべて**小文字**です（`Tier` ではなく `tier`）。

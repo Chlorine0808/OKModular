@@ -85,6 +85,15 @@ public class DocumentedJsonTypeTest {
     private static final Path CONDITION_REGISTRY = SOURCE.resolve("ruiseki/okmodular/api/condition/Conditions.java");
     private static final Path REQUIREMENT_REGISTRY = SOURCE
         .resolve("ruiseki/okmodular/api/structure/io/RequirementRegistry.java");
+    /**
+     * 式の構造化形式（`{"type": "arithmetic", ...}`）を受けるレジストリ。
+     * <p>
+     * ここが抜けていた間、docs に式の構造化形式を書くと
+     * 「どのレジストリにも無い」と報告された。**型は登録されていて、この一覧が足りていなかった。**
+     * 「知っている型」の集合が実装より狭いと、正しい docs を間違いだと言う。
+     */
+    private static final Path EXPRESSION_REGISTRY = SOURCE
+        .resolve("ruiseki/okmodular/api/recipe/expression/ExpressionsParser.java");
 
     /**
      * `register("x", ...)` / `alias("x", ...)` の第 1 引数。
@@ -147,6 +156,7 @@ public class DocumentedJsonTypeTest {
         known.addAll(registered(DECORATOR_REGISTRY));
         known.addAll(registered(CONDITION_REGISTRY));
         known.addAll(registered(REQUIREMENT_REGISTRY));
+        known.addAll(registered(EXPRESSION_REGISTRY));
 
         List<String> missing = missingFrom(known, documented);
 

@@ -29,6 +29,23 @@ With `type` omitted, the type is inferred from which keys are present.
 |---|---|---|
 | `block` | The block at the machine's position | `{ "block": "stone" }` |
 | `block_below` | The block under the machine at Y-1 | `{ "block_below": "stone" }` |
+
+`block` and `block_below` can pin the metadata too, by writing the object form with `data`.
+
+```json
+{ "block": { "name": "minecraft:wool", "data": 14 } }
+```
+
+| `data` | Meaning |
+|---|---|
+| omitted | **Treated as `0`** - only metadata 0 matches |
+| `-1` | **Any metadata** - any colour of wool matches |
+| anything else | Only that metadata matches |
+
+> [!WARNING]
+> **Omitting it means metadata 0, not "any".**
+> `{ "block": "minecraft:wool" }` matches white wool and nothing else. Write `"data": -1`
+> when any variant will do.
 | `dimension` | Being in a particular dimension | `{ "dimension": 0 }` |
 | `biome` | Biome name / tag / temperature and humidity | `{ "biome": "Plains" }` / `{ "tag": "FOREST" }` |
 | `offset` | Any condition, evaluated at a relative position `(dx, dy, dz)` | — |

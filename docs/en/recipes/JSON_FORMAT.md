@@ -117,6 +117,64 @@ for worked examples see the [Expression Examples](./EXPRESSION_EXAMPLES.md).
 - The ternary operator `? :` and the logical operators `&&` / `||` are available
 - The batch size is applied to amounts automatically. Multiplying by `batch` inside the expression applies it twice
 
+## 3.1.5 Matching and rewriting an item's NBT
+
+An item input can **match** on NBT, and an item input or output can **rewrite** it.
+
+### `nbtmatch` — how strict the match is
+
+| Value | Meaning |
+|---|---|
+| `ignore` (**default**) | NBT is not looked at. An enchanted book is just a book |
+| `exact` | Only an **exact** NBT match is accepted |
+| `none` | Only items carrying **no** NBT are accepted |
+
+```json
+{ "item": "minecraft:diamond_sword", "nbtmatch": "exact", "nbt": [ ... ] }
+```
+
+> [!WARNING]
+> **The default is `ignore`.** Leave it out and NBT is not consulted at all, so an input
+> meant to accept only enchanted items **also accepts plain ones**, `nbt` or no `nbt`.
+
+### `nbtlist` — reaching into a list-typed NBT
+
+For lists such as `ench` (enchantments) or `Items` (an inventory).
+
+```json
+"nbtlist": {
+  "path": "ench",
+  "ops": [
+    { "id": 16, "lvl": ">=5" },
+    { "id": 20, "lvl": 0 },
+    { "id": 34, "lvl": "+1" }
+  ]
+}
+```
+
+| Key | Default | Meaning |
+|---|---|---|
+| `path` | `"Items"` | NBT path of the list |
+| `ops` | none | Operations on the list's entries, in the form below |
+
+Each entry in `ops` is both the condition an element must meet and what to do with it.
+**The way a value is written decides which.**
+
+| Written as | Behaviour |
+|---|---|
+| `">=5"`, `"<=5"`, `">5"`, `"<5"`, `"==5"`, `"!=5"` | **Condition** - only matching elements are affected |
+| `"+1"`, `"-1"` | **Relative** - added to or subtracted from the current value |
+| `5` (a non-zero number) or any other string | **Absolute** - set to that value |
+| `0` (the number zero) | **Remove** the element |
+
+The example requires id 16 to be level 5 or better, removes id 20, and raises id 34 by one.
+
+> [!WARNING]
+> **A numeric `0` means remove, not "set to zero".**
+> Unless the same `ops` block contains a relative change (`"+1"` and the like), in which case
+> `0` is read as "set to zero" instead - `{"Slot": 0, "Count": "+1"}` makes no sense read as
+> "delete slot 0". **Do not mix the two when you mean to delete.**
+
 ## 3.2 Blocks (`symbol`)
 
 Detects and acts on the block at a symbol position inside the structure. The naming is

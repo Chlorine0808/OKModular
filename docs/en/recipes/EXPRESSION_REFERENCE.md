@@ -297,6 +297,58 @@ A structure's performance modifiers see the machine just as a recipe does, so
 `"speedMultiplier": "1 + tier * 0.25"` works. **A modifier cannot read itself**, though —
 see [the structure JSON format](../structures/JSON_FORMAT.md).
 
+### Structured form — an object instead of a string
+
+An expression can be written as an **object** as well as a string (`"tier * 2"`). The places
+it is accepted are the same; only the reader differs.
+
+```json
+"amount": { "type": "arithmetic", "operation": "*",
+            "left":  { "type": "machine_property", "property": "tier" },
+            "right": { "type": "constant", "value": 2 } }
+```
+
+That means the same as `"amount": "tier * 2"`. **Write the string form normally** - it is
+shorter and there is no reason to keep two spellings of one thing. The object form is for
+expressions a program builds, or for anything a string cannot carry.
+
+| `type` | Required keys | Meaning |
+|---|---|---|
+| `constant` | `value` (number) | A constant |
+| `string_literal` | `value` (string) | A string, for functions like `item('...')` |
+| `machine_property` | `property` | One machine property (`tier`, `energy`, ...) |
+| `world_property` | `property` | One world property (`tick`, `moon_phase`, ...) |
+| `component_tier` | `component` | A component's tier (`"glass"` and so on) |
+| `arithmetic` | `operation`, `left`, `right` | Arithmetic; `left` and `right` are expressions too |
+| `map_range` | `input`, `minIn`, `maxIn`, `minOut`, `maxOut` (plus optional `clamp`) | Maps one range onto another |
+| `nbt` | `key` (plus optional `default`, `symbol`) | An NBT value; `default` is used when it cannot be read |
+| `nbt_assignment` | `key`, `value` (plus optional `op`) | Writes to NBT; see below |
+
+#### `map_range` — mapping one range onto another
+
+```json
+{ "type": "map_range", "input": { "type": "machine_property", "property": "energy_p" },
+  "minIn": 0, "maxIn": 1, "minOut": 100, "maxOut": 20, "clamp": true }
+```
+
+`minIn`..`maxIn` is mapped linearly onto `minOut`..`maxOut`. Above, that reads "100 when
+empty, 20 when full" - **faster the more is stored**.
+
+`minOut` may be greater than `maxOut`, which **runs the mapping backwards**. With `clamp`
+(default `false`) set to `true`, an input outside the range still produces an output inside
+`minOut`..`maxOut`.
+
+#### `op` on `nbt_assignment`
+
+The operator used when writing. The default is `"="`.
+
+```json
+{ "type": "nbt_assignment", "key": "stored_power", "op": "+=",
+  "value": { "type": "constant", "value": 1000 } }
+```
+
+That is the same as `nbt('stored_power') += 1000` in the string form.
+
 ### Common Pitfalls
 - **Quotes in JSON**: Expressions themselves must be strings in JSON, e.g., `"amount": "tier * 2"`.
 - **Case Sensitivity**: Variable names are all **lowercase** (e.g., `tier`, not `Tier`).

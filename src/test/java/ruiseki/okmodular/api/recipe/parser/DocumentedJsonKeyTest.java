@@ -64,62 +64,39 @@ public class DocumentedJsonKeyTest {
      * 外部ポートの名前（`externalPorts` の `energyInput`）。
      * どれもパーサが名前で探すものではないので、実装側に現れないのが正しい。
      *
+     * `nbtlist` の `ops` に書く `id` / `lvl` も同じ。あそこは**対象の NBT がどんな形か**で
+     * キーが決まる（`ench` なら `id` と `lvl`、インベントリなら `Slot` と `Count`）ので、
+     * `NBTPattern` はキーを列挙せず、来たものをそのまま読む。
+     *
      * 1 文字の大文字は記号として機械で除くが、それ以外はここに書く。
      */
     private static final List<String> AUTHOR_NAMED = Arrays
-        .asList("casing", "glass", "energyInput", "fluidInput", "itemOutput");
+        .asList("casing", "glass", "energyInput", "fluidInput", "itemOutput", "id", "lvl");
 
     /**
-     * パーサが読むのに docs に一言も無いキー。**空にするのが目標**。
+     * パーサが読むのに docs に一言も無いキー。**今は 2 つだけで、どちらも書く必要が無い。**
      *
-     * 全部レシピ / 構造 JSON に書ける本物の項目で、書けば効く。
-     * 効くのに誰も知らないので、**使われないまま壊れていても気づけない**。
+     * `recipeprocessed` / `recipeprocessedtype` は正規名だが、
+     * **別名の `recipe_count` / `recipe_types_count` が docs に載っている**ので書く人には届いている。
+     * 正規名を載せる理由が無いので、ここに残す。
+     *
+     * ============================================
+     * 一覧は 26 件あった
+     * ============================================
+     *
+     * 大半は素直に書けば済んだが、**書こうとして「動いていない」が 3 件出た**。
+     * 文章を足す作業に見えて、実際には棚卸しだった。
      *
      * <pre>
-     * amountExpr                     全入出力型の量を式で書く
-     * id                             入出力を特定のポート番号に結びつける
-     * nbtmatch / nbtlist / op / ops  item / block の NBT 照合と書き換え
-     * maxIn / maxOut / minIn / minOut  map_range 式の四隅
-     * data                           block / block_below 条件のメタデータ
-     * modifierKey                    bonus デコレータが読む機械修飾子
+     * modifierKey   bonus の確率に反映されず、TODO が残っていた。chance が式を取るので削除
+     * shear         harvest_block が読むだけで分岐が無かった。IShearable を見るよう実装
+     * amountExpr    読むのが readCommonAmountFields だけで、それを呼ぶ側が居なかった。
+     *               本物は普通のキーの値に式を書く形（"amount": "tier * 10"）。削除
      * </pre>
      *
-     * 構造側の 9 個（`controllerOffset` / `offsets` / `externalPorts` / `tierStructures` /
-     * `inputOnly` / `outputOnly` / `bothOnly` / `id` / `modVersion`）は書き終えたので外した。
-     *
-     * `modifierKey` はここから消えた。**実装せずに削除した**（項目 W）。
-     * やろうとしていたこと（機械の値で確率を掛ける）は `chance` が式を取ることで既にでき、
-     * `"chance": "0.25 * speed_multi"` と書ける。片方だけ実装すると
-     * **1 つの考えに綴りが 2 つ**でき、弱い方が違う答えを返す。
-     * 書かれていたらロード時に「無視した」と警告する。
-     *
-     * レジストリに預ける名前もここに来る。式の構造化形式 4 つ
-     * （`machine_property` / `component_tier` / `nbt_assignment` / `string_literal`）は
-     * `ExpressionsParser` が受け付けるのに docs に無い。
-     *
-     * `recipeprocessed` / `recipeprocessedtype` だけは事情が違う。
-     * **別名の `recipe_count` / `recipe_types_count` が docs に載っている**ので書く人には届いている。
-     * 正規名の方を載せる理由が無いので、ここに置く。
-     * この 2 つを調べたついでに `is_waiting` と `recipe_types_count` が
-     * 本当にどこにも無いことが分かったので、そちらは docs に足した。
+     * **docs に書けるかどうかは、その機能が動くかの検査になる。**
      */
-    private static final List<String> UNDOCUMENTED = Arrays.asList(
-        "amountExpr",
-        "component_tier",
-        "data",
-        "machine_property",
-        "maxIn",
-        "maxOut",
-        "minIn",
-        "minOut",
-        "nbt_assignment",
-        "nbtlist",
-        "nbtmatch",
-        "op",
-        "ops",
-        "recipeprocessed",
-        "recipeprocessedtype",
-        "string_literal");
+    private static final List<String> UNDOCUMENTED = Arrays.asList("recipeprocessed", "recipeprocessedtype");
 
     @Test
     @DisplayName("docs の JSON 例に出るキーを実装が読んでいる")
