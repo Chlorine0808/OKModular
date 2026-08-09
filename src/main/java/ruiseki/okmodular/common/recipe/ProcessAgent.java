@@ -35,6 +35,21 @@ public class ProcessAgent extends AbstractRecipeProcess {
     private int currentBatchSize = 1;
     private double workProgress;
 
+    /**
+     * The plan for the tick being processed: the speed multiplier, and the stretch of work
+     * the tick covers. {@code NaN} means no tick is in flight.
+     * <p>
+     * {@link #tick} decides whether the per-tick resources are there and {@link #executeTick}
+     * takes them, and <b>the two must arrive at the same count</b> or the machine draws what
+     * it never confirmed. The multiplier is an expression evaluated against the machine and
+     * nothing caches it, so resolving it twice in one tick is an invitation for the halves to
+     * disagree; the work amount can move mid-run too, under {@code DurationPolicy.PER_TICK}.
+     * Both are settled once, by {@link #planTick}, and read from here by both halves.
+     */
+    private double plannedSpeed = Double.NaN;
+    private long plannedFrom;
+    private long plannedTo;
+
     /** Whether the last condition check refused, and which condition said so. */
     private boolean conditionBlocked;
     private String conditionFailure;
@@ -232,6 +247,11 @@ public class ProcessAgent extends AbstractRecipeProcess {
         if (!isRunning()) return TickResult.IDLE;
         if (isWaitingForOutput()) return TickResult.WAITING_OUTPUT;
 
+        // A fresh tick, so the previous tick's plan is void. Nothing else clears it: the
+        // paths out of executeTick include an early return, and a plan left behind there
+        // would bill the next tick at the speed the machine used to have.
+        this.plannedSpeed = Double.NaN;
+
         // Before anything is drawn for this tick. A paused recipe must not go on paying for
         // itself, and an aborted one must not pay for the tick that killed it - which is
         // what happened while this check sat below the per-tick consumption in executeTick.
@@ -243,19 +263,18 @@ public class ProcessAgent extends AbstractRecipeProcess {
             return TickResult.PAUSED;
         }
 
-        // Generalized resource check for per-tick inputs/outputs
+        // Generalized resource check for per-tick inputs/outputs. The count is how many
+        // intervals this tick's work crosses, which is exactly what executeTick will draw.
         for (IModularRecipeInput input : perTickInputs) {
-            if (PerTickSchedule.isDue(progress, input.getInterval())) {
-                if (!input.process(inputPorts, 1, true, context)) {
-                    return mapResult(input.getFailureResult(true));
-                }
+            int due = dueThisTick(input.getInterval());
+            if (due > 0 && !input.process(inputPorts, due, true, context)) {
+                return mapResult(input.getFailureResult(true));
             }
         }
         for (IModularRecipeOutput output : perTickOutputs) {
-            if (PerTickSchedule.isDue(progress, output.getInterval())) {
-                if (!output.checkCapacity(outputPorts, 1, context)) {
-                    return mapResult(output.getFailureResult(true));
-                }
+            int due = dueThisTick(output.getInterval());
+            if (due > 0 && !output.checkCapacity(outputPorts, due, context)) {
+                return mapResult(output.getFailureResult(true));
             }
         }
 
@@ -294,22 +313,25 @@ public class ProcessAgent extends AbstractRecipeProcess {
     public void executeTick(List<IModularPort> inputPorts, List<IModularPort> outputPorts, ConditionContext context) {
         if (!isRunning() || isWaitingForOutput()) return;
 
-        double speedMultiplier = 1.0;
-        if (this.context instanceof ITieredMachine tiered) {
-            speedMultiplier = tiered.getSpeedMultiplier();
+        // The same plan tick() checked against, not a second reading of it.
+        planTick();
+        double speedMultiplier = plannedSpeed;
 
+        if (this.context instanceof ITieredMachine tiered) {
             IStructureEntry entry = tiered.getStructureEntry();
             if (entry != null && entry.isDynamic()) {
                 // A dynamic structure's amounts can change while it runs, so the
                 // reported totals are re-summed rather than left at their start value.
                 recomputePerTickTotals(context);
             }
-        }
 
-        // Machines that opted in re-resolve the work amount every tick. See
-        // DurationPolicy for what moving the denominator does to the progress bar.
-        if (this.context instanceof ITieredMachine tiered && tiered.getDurationPolicy() == DurationPolicy.PER_TICK) {
-            setMaxProgress(currentRecipe.getDuration(context));
+            // Machines that opted in re-resolve the work amount every tick. See
+            // DurationPolicy for what moving the denominator does to the progress bar.
+            // This lands after planTick, so a work amount that moves takes effect on the
+            // next tick rather than splitting this one's check from its consumption.
+            if (tiered.getDurationPolicy() == DurationPolicy.PER_TICK) {
+                setMaxProgress(currentRecipe.getDuration(context));
+            }
         }
 
         // 1. Tick-based resource consumption
@@ -320,16 +342,14 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
         // Process generalized per-tick inputs
         for (IModularRecipeInput input : perTickInputs) {
-            if (PerTickSchedule.isDue(progress, input.getInterval())) {
-                input.process(inputPorts, 1, false, context);
-            }
+            int due = dueThisTick(input.getInterval());
+            if (due > 0) input.process(inputPorts, due, false, context);
         }
 
         // Process generalized per-tick outputs
         for (IModularRecipeOutput output : perTickOutputs) {
-            if (PerTickSchedule.isDue(progress, output.getInterval())) {
-                output.apply(outputPorts, 1, context);
-            }
+            int due = dueThisTick(output.getInterval());
+            if (due > 0) output.apply(outputPorts, due, context);
         }
 
         // The conditions were checked in tick(), before any of the above was paid for.
@@ -346,6 +366,32 @@ public class ProcessAgent extends AbstractRecipeProcess {
         if (workProgress >= maxProgress) {
             handleCompletion();
         }
+    }
+
+    /**
+     * Settle what this tick will do, once, for both halves of it to read.
+     * <p>
+     * The stretch of work is clamped to the recipe's work amount because <b>progress past
+     * completion is thrown away</b> - {@code workProgress} resets on completion - so billing
+     * for it would charge for work the recipe never used. With the clamp the draw count over
+     * a whole recipe is {@code duration / interval} at any speed, which is what lets a recipe
+     * state its own cost.
+     */
+    private void planTick() {
+        if (!Double.isNaN(plannedSpeed)) return;
+
+        plannedSpeed = this.context instanceof ITieredMachine tiered ? tiered.getSpeedMultiplier() : 1.0;
+        plannedFrom = (long) workProgress;
+
+        double reached = workProgress + plannedSpeed;
+        if (maxProgress > 0 && reached > maxProgress) reached = maxProgress;
+        plannedTo = (long) reached;
+    }
+
+    /** How many times a resource with this interval comes due during this tick. */
+    private int dueThisTick(int interval) {
+        planTick();
+        return PerTickSchedule.dueCount(plannedFrom, plannedTo, interval);
     }
 
     /**
@@ -407,6 +453,7 @@ public class ProcessAgent extends AbstractRecipeProcess {
         this.manaPerTick = 0;
         this.manaOutputPerTick = 0;
         this.workProgress = 0;
+        this.plannedSpeed = Double.NaN;
         clearCaches();
     }
 

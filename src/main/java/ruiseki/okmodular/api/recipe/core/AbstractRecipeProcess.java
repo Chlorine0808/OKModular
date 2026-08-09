@@ -54,58 +54,22 @@ public abstract class AbstractRecipeProcess {
     protected abstract void onStart(IModularRecipe recipe, List<IModularPort> inputPorts);
 
     /**
-     * Main tick method (Template Method).
-     * Defines the skeleton of the recipe processing algorithm.
+     * Advance the recipe by one tick: draw the per-tick resources, run the recipe's own tick
+     * logic, move progress and complete when it is done.
+     * <p>
+     * This used to carry a default body, and nothing has ever run it - {@code ProcessAgent}
+     * is the only subclass and overrides it. The body was a stale earlier design that
+     * advanced progress by one per tick with no speed multiplier, and it carried its own
+     * spelling of the per-tick schedule that had already drifted from the live one. A dead
+     * function on what looks like the main path is worse than no function, so the step is
+     * declared here and implemented there.
      */
-    public void executeTick(List<IModularPort> inputPorts, List<IModularPort> outputPorts, ConditionContext context) {
-        if (!running || waitingForOutput) return;
-
-        // 1. Tick-based resource consumption (Energy, Mana, etc.)
-        if (!consumePerTickResources(inputPorts)) {
-            onResourceMissing();
-            return;
-        }
-
-        // Process generalized per-tick inputs
-        for (IModularRecipeInput input : perTickInputs) {
-            if (input.getInterval() > 0 && progress % input.getInterval() == 0) {
-                input.process(inputPorts, 1, false, context);
-            }
-        }
-
-        // Process generalized per-tick outputs
-        for (IModularRecipeOutput output : perTickOutputs) {
-            if (output.getInterval() > 0 && progress % output.getInterval() == 0) {
-                output.apply(outputPorts, 1, context);
-            }
-        }
-
-        // 2. Continuous condition check
-        if (!checkContinuousConditions(context)) {
-            abort();
-            return;
-        }
-
-        // 3. Per-tick recipe logic
-        currentRecipe.onTick(context);
-
-        // 4. Progress update
-        progress++;
-        onProgressUpdate(progress, maxProgress);
-
-        // 5. Completion check
-        if (progress >= maxProgress) {
-            handleCompletion();
-        }
-    }
+    public abstract void executeTick(List<IModularPort> inputPorts, List<IModularPort> outputPorts,
+        ConditionContext context);
 
     protected abstract boolean consumePerTickResources(List<IModularPort> inputPorts);
 
     protected abstract void onResourceMissing();
-
-    protected boolean checkContinuousConditions(ConditionContext context) {
-        return currentRecipe.isConditionMet(context);
-    }
 
     protected void onProgressUpdate(long current, int max) {
         // Can be overridden for syncing or particles

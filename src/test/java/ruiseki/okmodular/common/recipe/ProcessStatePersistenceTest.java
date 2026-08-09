@@ -77,6 +77,9 @@ public class ProcessStatePersistenceTest {
         TRANSIENT.put("context", "機械の TileEntity 自身。持ち主が復元する");
         TRANSIENT.put("conditionBlocked", "毎 tick 計算し直す。古い値を持ち越すと止まったままになる");
         TRANSIENT.put("conditionFailure", "同上。表示用の理由文字列");
+        TRANSIENT.put("plannedSpeed", "その tick だけの計画。tick() の頭で毎回捨てる。持ち越すと昔の速度で請求する");
+        TRANSIENT.put("plannedFrom", "同上。workProgress から引き直せる");
+        TRANSIENT.put("plannedTo", "同上。workProgress と速度から引き直せる");
     }
 
     @Test

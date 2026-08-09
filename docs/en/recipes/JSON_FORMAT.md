@@ -83,6 +83,46 @@ The type is decided by which key is present in the object.
 
 Writing `consume: false` leaves the input unconsumed (a catalyst).
 
+### `perTick` - drawn for as long as the recipe runs
+
+Drawn all the way through the recipe rather than once at the start. A boolean turns it on; a
+number sets the interval.
+
+```json
+{ "energy": 100, "perTick": true }
+{ "fluid": "water", "amount": 50, "perTick": 3 }
+```
+
+Both `pertick` and `perTick` are read.
+
+> [!IMPORTANT]
+> **The unit is work done, not ticks of the clock.**
+> A machine at 1.5x speed does 1.5 work per tick, so it draws **1.5 units of a `perTick`
+> resource per tick** as well - at interval 1 that is 1 and 2 alternating.
+>
+> What this buys is the total. **A recipe draws `ceil(duration / interval)` times whatever
+> the speed**, so "this recipe costs 100k EU" is a property of the recipe rather than of the
+> machine that happened to run it.
+>
+> The flip side is that **a single tick's draw comes in a lump**. A recipe drawing 100/tick
+> on a 5x machine draws 500 on the ticks it draws at all, and the buffer has to take it.
+
+> [!NOTE]
+> **To let the machine change the total, write a machine property into the amount.**
+> There is no switch that changes what `perTick` means per machine: it would give one idea
+> two spellings, and an expression says more than a switch could.
+>
+> | To make it | Write |
+> |---|---|
+> | Cost more the faster it runs | `"energy": "100 * speed_multi"` |
+> | Cost less the faster it runs | `"energy": "100 / speed_multi"` |
+> | Independent of speed (default) | `"energy": 100` |
+> | Follow the structure's `energyMultiplier` | `"energy": "100 * energy_multi"` |
+> | Rise with the square of the tier | `"energy": "100 * tier ^ 2"` |
+>
+> A structure's `energyMultiplier` applies **only when a recipe reads `energy_multi`**.
+> Setting it alone does nothing.
+
 ## 3.1 Dynamic amounts
 
 `amount` takes an expression instead of a fixed value.
