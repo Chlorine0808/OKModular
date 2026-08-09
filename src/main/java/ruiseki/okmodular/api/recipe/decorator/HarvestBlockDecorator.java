@@ -128,12 +128,9 @@ public class HarvestBlockDecorator extends RecipeDecorator {
         if (fromInputs) {
             for (IRecipeInput input : internal.getInputs()) {
                 if (input instanceof BlockInput bi && bi.isConsume()) {
-                    targetPositions.addAll(
-                        context.getSymbolPositions(
-                            bi.toJson()
-                                .get("symbol")
-                                .getAsString()
-                                .charAt(0)));
+                    // Was bi.toJson().get("symbol"), which serialised the whole input - NBT
+                    // expressions and all - to read one char, at every harvest.
+                    targetPositions.addAll(context.getSymbolPositions(bi.getSymbol()));
                 }
             }
         } else {

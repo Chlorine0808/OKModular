@@ -250,11 +250,28 @@ The following symbols have special meanings in the structure system.
 ### 5.1 System Reserved Symbols (Mandatory)
 **These symbols cannot be overridden in `mappings`.**
 
-| Symbol | Meaning | Description |
-| :--- | :--- | :--- |
-| `Q` | Controller | **Exactly one is required per structure** |
-| `_` | Air | Treated as a forced air block |
-| (Space) | Any | Space excluded from validation |
+| Symbol | Meaning | Description | Can a recipe point at it |
+| :--- | :--- | :--- | :--- |
+| `Q` | Controller | **Exactly one is required per structure** | ✅ |
+| `_` | Air | Treated as a forced air block | ✅ |
+| (Space) | Any | Space excluded from validation | ❌ **load error** |
+
+### 5.2 What "point at" means - that the positions are recorded
+
+`"symbol"` is the only way a recipe reaches a structure's cells (`block` and `structure`
+inputs and outputs, `per_position_probability`, `random_block_output`, `harvest_block`, and
+the `nbt` expression). Only symbols whose positions are recorded can be pointed at.
+
+**A space cannot be recorded.** It is excluded from validation, so the engine never visits
+those coordinates and there is nothing to record. Writing one is a **load error** - better to
+fail where it was written than to succeed at run time having acted on nothing.
+
+> [!WARNING]
+> **Placing a block at `_` un-forms the machine.**
+> `_` does not mean "air", it means **"this has to be empty for the machine to stand"**, so
+> naming it in a block output breaks the structure on the next check.
+> Being able to take its positions is still right - particles and checks want them - so this
+> is **not refused at load**. The consequence of placing there is immediate and visible.
 
 ## 6. Commands
 - `/okmodular reload`: Reloads structure definitions, recipe definitions and tier definitions.

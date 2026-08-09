@@ -30,6 +30,7 @@ import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.INBTWriteExpression;
 import ruiseki.okmodular.api.recipe.expression.NBTListOperation;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.api.structure.core.StructureSymbols;
 import ruiseki.okmodular.util.Logger;
 
 /**
@@ -88,6 +89,11 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
     @Override
     public IPortType.Type getPortType() {
         return IPortType.Type.BLOCK;
+    }
+
+    /** Which structure symbol this input reads, as {@code BlockOutput.getSymbol} does. */
+    public char getSymbol() {
+        return symbol;
     }
 
     @Override
@@ -522,9 +528,11 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
     }
 
     public static BlockInput fromJson(JsonObject json) {
-        char symbol = json.get("symbol")
-            .getAsString()
-            .charAt(0);
+        char symbol = StructureSymbols.requireAddressable(
+            json.get("symbol")
+                .getAsString()
+                .charAt(0),
+            "a block input");
         String block = json.has("block") ? json.get("block")
             .getAsString() : null;
         String replace = json.has("replace") ? json.get("replace")

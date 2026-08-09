@@ -1,5 +1,7 @@
 package ruiseki.okmodular.structure;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
@@ -12,10 +14,11 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import ruiseki.okmodular.api.structure.core.StructureSymbols;
 import ruiseki.okmodular.testsupport.JavaSource;
 
 /**
- * 構造の記号が**位置を記録されている**ことの検証。
+ * 構造の記号が**位置を記録されている**ことと、記録されない記号を**書けない**ことの検証。
  *
  * ============================================
  * 記録されていない記号は、存在しないのと同じ
@@ -31,15 +34,25 @@ import ruiseki.okmodular.testsupport.JavaSource;
  * ── デコレータ 6 種が死んでいたときとまったく同じ形。
  *
  * ============================================
- * 包んでいない 2 つ
+ * 「ブロックが無いから要らない」は理由になっていなかった
  * ============================================
  *
- * `Q`（コントローラ）と `_`（空気）は包まれていない。
- * どちらも「そこに何があるか」が定義から自明なので、位置を覚える意味が薄い
- * ── という読み方はできる。だが**それは書いてなかった**ので、
- * `"symbol": "_"` と書いた人には「なぜか効かない」としか見えない。
+ * `Q`（コントローラ）と `_`（空気）は長く包まれていなかった。
+ * 「機械は自分の座標を知っている」「空気に回収するものは無い」——
+ * どちらも**ブロックの話しかしていない**。
  *
- * 意図なら意図として、ここに名前を残す。
+ * マスに効果を置く側（パーティクル・音・湧き・そこに何が立っているかの判定）は、
+ * そのマスに何が入っていようと**座標が欲しい**。今は 2 つとも包んである。
+ *
+ * ============================================
+ * 空白だけは書いた時点で断る
+ * ============================================
+ *
+ * `' '` は構造の一部ですらない。形状の読み取りで飛ばされ、builder に渡らず、
+ * その座標は**一度も訪れられない**。記録しようが無いし、記録できるようにするには
+ * 「見なくていい」と言われたマスを engine に歩かせることになる。
+ *
+ * だから**ロード時に断る**。走らせてから静かに 0 マスで終わるより、書いた瞬間に落ちるほうがいい。
  */
 @DisplayName("構造の記号の位置記録")
 public class SymbolTrackingCoverageTest {
@@ -47,22 +60,24 @@ public class SymbolTrackingCoverageTest {
     private static final Path REGISTRY = JavaSource.MAIN.resolve("structure/CustomStructureRegistry.java");
 
     /**
-     * 位置を記録しない記号と、その理由。**増やすものではない**。
+     * `"symbol"` を読む場所。**ここを増やしたら `requireAddressable` も通すこと。**
      *
-     * <pre>
-     * Q  コントローラ。1 つしか無く、機械自身の座標がそれ
-     * _  空気。「何も無い」ことに作用するデコレータは今のところ無い
-     * </pre>
-     *
-     * どちらも `getSymbolPositions('Q')` / `('_')` が**必ず空を返す**。
-     * デコレータや構造 IO からこの 2 つを指したくなったら、
-     * まずここを空にすること。指したまま動かないのが一番悪い。
+     * 同じ判定を 7 箇所に手書きすると、いずれ 1 箇所だけ古くなる
+     * （`findRecipeContext` が private コピー 10 個に増えたのと同じ形）。
+     * 述語は `StructureSymbols` の 1 本だけ。
      */
-    private static final List<String> UNTRACKED = Arrays.asList("'Q'", "'_'");
+    private static final List<String> SYMBOL_READERS = Arrays.asList(
+        "api/recipe/io/BlockInput.java",
+        "api/recipe/io/BlockOutput.java",
+        "api/recipe/io/StructureInput.java",
+        "api/recipe/io/StructureOutput.java",
+        "api/recipe/decorator/PerPositionProbabilityDecorator.java",
+        "api/recipe/decorator/RandomBlockOutputDecorator.java",
+        "api/recipe/expression/NbtExpression.java");
 
     @Test
-    @DisplayName("builder に足す記号は位置を記録している")
-    public void test記録されない記号が増えていない() {
+    @DisplayName("builder に足す記号はすべて位置を記録している")
+    public void test記録されない記号が無い() {
         String source = JavaSource.stripComments(JavaSource.read(REGISTRY));
         List<String> untracked = new ArrayList<>();
 
@@ -70,12 +85,11 @@ public class SymbolTrackingCoverageTest {
             .matcher(source);
 
         while (added.find()) {
-            String symbol = added.group(1)
-                .trim();
-            if (UNTRACKED.contains(symbol)) continue;
             if (added.group(2)
                 .contains("wrapTracking")) continue;
-            untracked.add(symbol);
+            untracked.add(
+                added.group(1)
+                    .trim());
         }
 
         assertTrue(
@@ -85,23 +99,84 @@ public class SymbolTrackingCoverageTest {
     }
 
     @Test
-    @DisplayName("記録しない記号の一覧が古くなっていない")
-    public void test免除リストが正しい() {
+    @DisplayName("記号を読む側はすべて requireAddressable を通っている")
+    public void test書けない記号を素通ししていない() {
+        List<String> unchecked = new ArrayList<>();
+
+        for (String reader : SYMBOL_READERS) {
+            String source = JavaSource.stripComments(JavaSource.read(JavaSource.MAIN.resolve(reader)));
+            if (!source.contains("\"symbol\"")) {
+                unchecked.add(reader + "（もう symbol を読んでいない。SYMBOL_READERS から消すこと）");
+                continue;
+            }
+            if (!source.contains("StructureSymbols.requireAddressable(")) unchecked.add(reader);
+        }
+
+        assertTrue(
+            unchecked.isEmpty(),
+            unchecked + " が \"symbol\" を requireAddressable を通さずに読んでいる。"
+                + "位置の記録されない記号がそのまま通ると、実行時に**対象 0 マスで正常終了**する");
+    }
+
+    @Test
+    @DisplayName("symbol を読む場所の一覧が古くなっていない")
+    public void test一覧が漏れていない() {
+        List<String> missing = new ArrayList<>();
+
+        for (Path file : JavaSource.allMainSources()) {
+            String source = JavaSource.stripComments(JavaSource.read(file));
+            // 型推論の has("symbol") とパーサ表の get("symbol") は読み取りではない。
+            if (!source.contains(".get(\"symbol\")")) continue;
+            if (source.contains("parsers.get(\"symbol\")")) continue;
+
+            String label = JavaSource.MAIN.relativize(file)
+                .toString()
+                .replace('\\', '/');
+            if (!SYMBOL_READERS.contains(label)) missing.add(label);
+        }
+
+        assertTrue(missing.isEmpty(), missing + " が \"symbol\" を読むのに SYMBOL_READERS に無い。足して requireAddressable を通すこと");
+    }
+
+    @Test
+    @DisplayName("空白だけが書けない記号")
+    public void test書けない記号は空白だけ() {
+        assertTrue(StructureSymbols.isAddressable(StructureSymbols.CONTROLLER), "Q は書けるはず。包むようにしたので");
+        assertTrue(StructureSymbols.isAddressable(StructureSymbols.AIR), "_ は書けるはず。包むようにしたので");
+        assertTrue(!StructureSymbols.isAddressable(StructureSymbols.ANYTHING), "空白が書けることになっている");
+        assertTrue(StructureSymbols.isAddressable('G'), "普通の記号が書けなくなっている");
+    }
+
+    @Test
+    @DisplayName("書けない記号はロード時に落ちる")
+    public void test空白はロードで断られる() {
+        IllegalArgumentException refused = assertThrows(
+            IllegalArgumentException.class,
+            () -> StructureSymbols.requireAddressable(StructureSymbols.ANYTHING, "a block output"),
+            "空白が通っている。走らせてから静かに 0 マスで終わる");
+
+        assertTrue(
+            refused.getMessage()
+                .contains("a block output"),
+            "どこが書いたのかが message に無い。JSON のどこを直せばいいのか分からない: " + refused.getMessage());
+
+        assertEquals('G', StructureSymbols.requireAddressable('G', "a block output"), "普通の記号まで断っている");
+    }
+
+    @Test
+    @DisplayName("mappings が予約記号を上書きできない")
+    public void test予約記号は上書きできない() {
         String source = JavaSource.stripComments(JavaSource.read(REGISTRY));
 
-        for (String symbol : UNTRACKED) {
-            Matcher added = Pattern
-                .compile(
-                    "builder\\.addElement\\(\\s*" + Pattern.quote(symbol) + "\\s*,\\s*([^;]*?)\\)\\s*;",
-                    Pattern.DOTALL)
-                .matcher(source);
+        assertTrue(
+            source.contains("StructureSymbols.isReserved(symbol)"),
+            "mappings の読み飛ばしが isReserved を通らなくなった。予約記号の一覧が 2 箇所に分かれる");
 
-            assertTrue(added.find(), symbol + " をもう builder に足していない。UNTRACKED から消すこと");
-            assertTrue(
-                !added.group(1)
-                    .contains("wrapTracking"),
-                symbol + " は包まれるようになった。UNTRACKED から消すこと");
+        for (char symbol : new char[] { StructureSymbols.CONTROLLER, StructureSymbols.AIR,
+            StructureSymbols.ANYTHING }) {
+            assertTrue(StructureSymbols.isReserved(symbol), "'" + symbol + "' が予約でなくなっている");
         }
+        assertTrue(!StructureSymbols.isReserved('G'), "普通の記号が予約になっている");
     }
 
     @Test
@@ -116,5 +191,6 @@ public class SymbolTrackingCoverageTest {
 
         assertTrue(added >= 3, "builder.addElement が 3 箇所未満。走査が壊れている（" + added + " 箇所）");
         assertTrue(source.contains("wrapTracking("), "wrapTracking が消えた。位置を覚える仕組みごと無くなっている");
+        assertTrue(SYMBOL_READERS.size() >= 7, "symbol を読む場所が 7 箇所未満。一覧が削られている");
     }
 }

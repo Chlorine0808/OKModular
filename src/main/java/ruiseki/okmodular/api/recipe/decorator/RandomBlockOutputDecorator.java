@@ -19,6 +19,7 @@ import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
+import ruiseki.okmodular.api.structure.core.StructureSymbols;
 
 /**
  * Decorator that randomly selects N positions from all positions with a specific symbol
@@ -119,9 +120,11 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
         JsonArray selectionsArray = json.getAsJsonArray("selections");
         for (JsonElement elem : selectionsArray) {
             JsonObject selObj = elem.getAsJsonObject();
-            char symbol = selObj.get("symbol")
-                .getAsString()
-                .charAt(0);
+            char symbol = StructureSymbols.requireAddressable(
+                selObj.get("symbol")
+                    .getAsString()
+                    .charAt(0),
+                "random_block_output");
             BlockOutput output = BlockOutput.fromJson(selObj.getAsJsonObject("output"));
             selections.add(new BlockOutputSelection(symbol, output));
         }

@@ -14,6 +14,7 @@ import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
+import ruiseki.okmodular.api.structure.core.StructureSymbols;
 
 /**
  * Decorator that applies probability check independently for each block position.
@@ -83,9 +84,11 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
      */
     public static IModularRecipe fromJson(IModularRecipe recipe, JsonObject json) {
         IExpression chance = ExpressionsParser.parse(json.get("chance"));
-        char symbol = json.get("symbol")
-            .getAsString()
-            .charAt(0);
+        char symbol = StructureSymbols.requireAddressable(
+            json.get("symbol")
+                .getAsString()
+                .charAt(0),
+            "per_position_probability");
         BlockOutput output = BlockOutput.fromJson(json.getAsJsonObject("output"));
 
         return new PerPositionProbabilityDecorator(recipe, chance, symbol, output);

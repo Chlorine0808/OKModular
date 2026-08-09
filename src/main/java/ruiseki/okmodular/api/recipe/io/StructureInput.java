@@ -21,6 +21,7 @@ import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
+import ruiseki.okmodular.api.structure.core.StructureSymbols;
 import ruiseki.okmodular.structure.pattern.StructurePattern;
 import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
 import ruiseki.okmodular.util.Logger;
@@ -275,9 +276,11 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
     }
 
     public static IRecipeInput fromJson(JsonObject json) {
-        char symbol = json.has("symbol") ? json.get("symbol")
-            .getAsString()
-            .charAt(0) : '\0';
+        char symbol = json.has("symbol") ? StructureSymbols.requireAddressable(
+            json.get("symbol")
+                .getAsString()
+                .charAt(0),
+            "a structure input") : '\0';
         String pattern = json.has("pattern") ? json.get("pattern")
             .getAsString() : null;
         boolean consume = json.has("consume") && json.get("consume")

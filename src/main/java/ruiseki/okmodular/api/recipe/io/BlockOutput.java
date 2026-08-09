@@ -31,6 +31,7 @@ import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.INBTWriteExpression;
 import ruiseki.okmodular.api.recipe.expression.NBTListOperation;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.api.structure.core.StructureSymbols;
 import ruiseki.okmodular.util.Logger;
 
 /**
@@ -422,9 +423,11 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
      * Create BlockOutput from JSON.
      */
     public static BlockOutput fromJson(JsonObject json) {
-        char symbol = json.get("symbol")
-            .getAsString()
-            .charAt(0);
+        char symbol = StructureSymbols.requireAddressable(
+            json.get("symbol")
+                .getAsString()
+                .charAt(0),
+            "a block output");
         String block = json.has("block") ? json.get("block")
             .getAsString() : null;
         String replace = json.has("replace") ? json.get("replace")

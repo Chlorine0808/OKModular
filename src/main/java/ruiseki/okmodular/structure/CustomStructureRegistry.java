@@ -26,6 +26,7 @@ import ruiseki.okmodular.api.structure.core.BlockMapping;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.api.structure.core.IStructureLayer;
 import ruiseki.okmodular.api.structure.core.ISymbolMapping;
+import ruiseki.okmodular.api.structure.core.StructureSymbols;
 import ruiseki.okmodular.api.structure.core.TieredBlockMapping;
 import ruiseki.okmodular.util.Logger;
 
@@ -102,9 +103,14 @@ public class CustomStructureRegistry {
                 Logger.warn(
                     "CustomStructureRegistry: no controller block registered — call registerControllerBlock() in preInit");
             } else {
-                builder.addElement('Q', ofBlock(controllerBlock, 0));
+                builder.addElement(
+                    StructureSymbols.CONTROLLER,
+                    wrapTracking(StructureSymbols.CONTROLLER, ofBlock(controllerBlock, 0)));
             }
-            builder.addElement('_', isAir());
+            // The controller's cell and the empty ones are wrapped like any other symbol.
+            // Neither holds a block worth taking, which is why they were left bare, but an
+            // effect placed at a cell wants the position whatever the cell holds.
+            builder.addElement(StructureSymbols.AIR, wrapTracking(StructureSymbols.AIR, isAir()));
 
             if (!entry.getMappings()
                 .containsKey('F')) {
@@ -120,7 +126,7 @@ public class CustomStructureRegistry {
             for (Map.Entry<Character, ISymbolMapping> mapEntry : entry.getMappings()
                 .entrySet()) {
                 char symbol = mapEntry.getKey();
-                if (symbol == 'Q' || symbol == '_' || symbol == ' ') continue;
+                if (StructureSymbols.isReserved(symbol)) continue;
 
                 IStructureElement<IMachineController> element = createElementFromMapping(mapEntry.getValue());
                 if (element != null) {
