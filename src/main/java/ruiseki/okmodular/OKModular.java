@@ -33,6 +33,7 @@ import ruiseki.okmodular.common.command.CommandModularReload;
 import ruiseki.okmodular.common.command.CommandModularWand;
 import ruiseki.okmodular.config.MachineryConfig;
 import ruiseki.okmodular.config.WorldGenConfig;
+import ruiseki.okmodular.integration.waila.BlockProvider;
 
 /**
  * OK Modular: modular multiblock machinery, split out of Omoshiroi Kamo.
@@ -105,6 +106,12 @@ public class OKModular extends ModBase {
     @EventHandler
     public void init(FMLInitializationEvent event) {
         super.init(event);
+        // Without this, every getWailaInfo this mod writes is unreachable: the split brought
+        // the interfaces across but left the provider that hands them to WAILA behind, and
+        // OKCore's own provider registers for a same-named interface in a different package.
+        if (Mods.Waila.isLoaded()) {
+            BlockProvider.init();
+        }
     }
 
     @Override
