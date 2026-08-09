@@ -240,14 +240,14 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
         // Generalized resource check for per-tick inputs/outputs
         for (IModularRecipeInput input : perTickInputs) {
-            if (input.getInterval() > 0 && progress % input.getInterval() == 0) {
+            if (PerTickSchedule.isDue(progress, input.getInterval())) {
                 if (!input.process(inputPorts, 1, true, context)) {
                     return mapResult(input.getFailureResult(true));
                 }
             }
         }
         for (IModularRecipeOutput output : perTickOutputs) {
-            if (output.getInterval() > 0 && progress % output.getInterval() == 0) {
+            if (PerTickSchedule.isDue(progress, output.getInterval())) {
                 if (!output.checkCapacity(outputPorts, 1, context)) {
                     return mapResult(output.getFailureResult(true));
                 }
@@ -315,14 +315,14 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
         // Process generalized per-tick inputs
         for (IModularRecipeInput input : perTickInputs) {
-            if (input.getInterval() > 0 && progress % input.getInterval() == 0) {
+            if (PerTickSchedule.isDue(progress, input.getInterval())) {
                 input.process(inputPorts, 1, false, context);
             }
         }
 
         // Process generalized per-tick outputs
         for (IModularRecipeOutput output : perTickOutputs) {
-            if (output.getInterval() > 0 && progress % output.getInterval() == 0) {
+            if (PerTickSchedule.isDue(progress, output.getInterval())) {
                 output.apply(outputPorts, 1, context);
             }
         }
