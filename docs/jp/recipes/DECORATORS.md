@@ -16,7 +16,7 @@
 | type 名 | 動作 | 推論に使われるプロパティ |
 |---------|------|------------------------|
 | `chance` | レシピの成功確率を制御（外れると出力なし） | `chance` |
-| `bonus` | 確率で追加の出力を生成 | `chance` + `outputs` |
+| `bonus` | 確率で追加の出力を生成 | `chance` + `outputs`（`modifierKey` は[廃止](#廃止-modifierkey)） |
 | `weighted_random` | 重み付きリストから出力を選択 | `outputs`（各要素に `weight`）／ `pool` ／ `rolls` |
 | `requirement` | 実行中に追加の条件・触媒をチェック | `condition` / `requirements` |
 | `harvest_block` | 消えるブロックを採掘して回収（下記） | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
@@ -83,6 +83,24 @@
 > 系統はデコレータの種類ごとに割り当てられており、インスタンスごとではありません。
 > 例えば `bonus` を 2 つ並べると、片方が当たったときもう片方も必ず当たります。
 > 独立させたい場合は、今のところ `chance` の値を変えるか 1 つにまとめてください。
+
+### 廃止: `modifierKey`
+
+`bonus` の `modifierKey` は**廃止しました**。書いても無視され、ロード時に警告が出ます。
+
+もともと**一度も効いていません**でした。読まれてフィールドに入るだけで、
+確率に反映する所が `TODO` のまま残っていたので、書いても書かなくても同じ目が出ていました。
+
+やりたかったこと（機械の値で確率を動かす）は **`chance` が式を取る**ので既に書けます。
+
+```json
+{ "type": "bonus", "chance": "0.25 * speed_multi", "outputs": [...] }
+{ "type": "bonus", "chance": "0.1 + tier * 0.05",  "outputs": [...] }
+```
+
+`modifierKey` で名指しできたはずの値は `speed_multi` / `energy_multi` / `batch` として
+すべて式から見えます。しかも式なら**組み合わせられる**ので、キー 1 つより強い。
+片方だけ実装すると 1 つの考えに綴りが 2 つでき、弱い方が違う答えを返します。
 
 ## 4. `harvest_block` — 消えるブロックを採掘して回収する
 

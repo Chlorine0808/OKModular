@@ -21,26 +21,39 @@ import ruiseki.okmodular.util.Logger;
 
 /**
  * Decorator that adds a chance for bonus outputs when the recipe is completed.
+ *
+ * <h2>There used to be a {@code modifierKey}</h2>
+ *
+ * It was read into a field and carried a {@code TODO} where it should have been applied, so
+ * writing it drew exactly the same odds as leaving it out. What it was reaching for -
+ * "scale the chance by something about the machine" - is what {@code chance} already does,
+ * because {@code chance} is parsed as an expression:
+ *
+ * <pre>
+ * "chance": "0.25 * speed_multi"
+ * "chance": "0.1 + tier * 0.05"
+ * </pre>
+ *
+ * Every modifier {@code modifierKey} could have named is reachable that way -
+ * {@code speed_multi}, {@code energy_multi}, {@code batch} - and an expression can combine
+ * them, which a single key never could. Finishing it would have meant two spellings for one
+ * idea, with the weaker one answering differently. It is gone rather than implemented.
  */
 public class BonusOutputDecorator extends RecipeDecorator {
 
     private final IExpression baseChanceExpr;
     private final List<IRecipeOutput> bonusOutputs;
-    private final String modifierKey;
 
-    public BonusOutputDecorator(IModularRecipe internal, IExpression baseChanceExpr, List<IRecipeOutput> bonusOutputs,
-        String modifierKey) {
+    public BonusOutputDecorator(IModularRecipe internal, IExpression baseChanceExpr, List<IRecipeOutput> bonusOutputs) {
         super(internal);
         this.baseChanceExpr = baseChanceExpr;
         this.bonusOutputs = bonusOutputs;
-        this.modifierKey = modifierKey;
     }
 
     @Override
     public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
         super.produceExtraOutputs(outputPorts, context);
 
-        // TODO: Fetch modifier value from context or machine state using modifierKey
         int times = timesFiring(context);
         for (int fired = 0; fired < times; fired++) {
             for (IRecipeOutput bonus : bonusOutputs) {
@@ -127,15 +140,13 @@ public class BonusOutputDecorator extends RecipeDecorator {
         for (JsonElement e : arr) {
             outputs.add(OutputParserRegistry.parse(e.getAsJsonObject()));
         }
-        String key = json.has("modifierKey") ? json.get("modifierKey")
-            .getAsString() : null;
-        if (key != null) {
+        if (json.has("modifierKey")) {
             Logger.warn(
-                "modifierKey is read but does nothing yet: the chance is drawn without it, so a "
-                    + "recipe writing modifierKey gets exactly the same odds as one that does not. "
-                    + "produceExtraOutputs still carries the TODO. Item W in "
-                    + "run/StructureIO_todos.md. Saying so beats a key that silently changes nothing.");
+                "modifierKey is gone. It never did anything - the chance was always drawn "
+                    + "without it - and what it was for is already how chance works: write "
+                    + "\"chance\": \"0.25 * speed_multi\" or any other expression. "
+                    + "The key is ignored.");
         }
-        return new BonusOutputDecorator(recipe, chance, outputs, key);
+        return new BonusOutputDecorator(recipe, chance, outputs);
     }
 }

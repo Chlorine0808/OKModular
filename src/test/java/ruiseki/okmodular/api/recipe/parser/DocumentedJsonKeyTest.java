@@ -87,9 +87,11 @@ public class DocumentedJsonKeyTest {
      * 構造側の 9 個（`controllerOffset` / `offsets` / `externalPorts` / `tierStructures` /
      * `inputOnly` / `outputOnly` / `bothOnly` / `id` / `modVersion`）は書き終えたので外した。
      *
-     * ⚠ `modifierKey` は事情が違う。**書いても何も起きない**。
-     * `BonusOutputDecorator` が読んで持つところまではやるが、使う所に `TODO` が残っていて
-     * 確率に反映されない。docs に載せると嘘になるので、**直すまでここに置く**（項目 W）。
+     * `modifierKey` はここから消えた。**実装せずに削除した**（項目 W）。
+     * やろうとしていたこと（機械の値で確率を掛ける）は `chance` が式を取ることで既にでき、
+     * `"chance": "0.25 * speed_multi"` と書ける。片方だけ実装すると
+     * **1 つの考えに綴りが 2 つ**でき、弱い方が違う答えを返す。
+     * 書かれていたらロード時に「無視した」と警告する。
      *
      * レジストリに預ける名前もここに来る。式の構造化形式 4 つ
      * （`machine_property` / `component_tier` / `nbt_assignment` / `string_literal`）は
@@ -110,7 +112,6 @@ public class DocumentedJsonKeyTest {
         "maxOut",
         "minIn",
         "minOut",
-        "modifierKey",
         "nbt_assignment",
         "nbtlist",
         "nbtmatch",

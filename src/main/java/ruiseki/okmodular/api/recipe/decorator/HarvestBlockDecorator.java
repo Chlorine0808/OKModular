@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
+import net.minecraftforge.common.IShearable;
 
 import com.google.gson.JsonObject;
 
@@ -61,9 +63,11 @@ import ruiseki.okmodular.util.Logger;
  */
 public class HarvestBlockDecorator extends RecipeDecorator {
 
+    /** What {@link IShearable} is handed as the tool. Nothing reads its damage or enchants. */
+    private static final ItemStack SHEARS = new ItemStack(Items.shears);
+
     private final int fortune;
     private final boolean silkTouch;
-    @SuppressWarnings("unused")
     private final boolean shear;
     private final int harvestLevel;
 
@@ -172,8 +176,13 @@ public class HarvestBlockDecorator extends RecipeDecorator {
 
         List<ItemStack> drops = new ArrayList<>();
 
+        // Silk touch first when both are set: it promises the block itself for anything that
+        // allows it, while shears only speak for blocks that implement IShearable. For leaves
+        // the two agree anyway.
         if (silkTouch && block.canSilkHarvest(world, null, x, y, z, meta)) {
             drops.add(new ItemStack(block, 1, meta));
+        } else if (shear && block instanceof IShearable shearable && shearable.isShearable(SHEARS, world, x, y, z)) {
+            drops.addAll(shearable.onSheared(SHEARS, world, x, y, z, fortune));
         } else {
             // Standard drop with fortune
             drops.addAll(block.getDrops(world, x, y, z, meta, fortune));

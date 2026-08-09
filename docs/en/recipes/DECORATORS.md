@@ -17,7 +17,7 @@ inferred from the properties).
 | type name | Behaviour | Properties used for inference |
 |---------|------|------------------------|
 | `chance` | Controls the recipe's success chance (a loss produces nothing) | `chance` |
-| `bonus` | Produces extra output by chance | `chance` + `outputs` |
+| `bonus` | Produces extra output by chance | `chance` + `outputs` (`modifierKey` is [gone](#removed-modifierkey)) |
 | `weighted_random` | Picks an output from a weighted list | `outputs` (each with `weight`) / `pool` / `rolls` |
 | `requirement` | Checks extra conditions and catalysts while running | `condition` / `requirements` |
 | `harvest_block` | Mines the blocks that are about to disappear (see below) | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
@@ -85,6 +85,26 @@ containing `random()` varies between the runs inside one batch.
 > **Two decorators of the same kind on one recipe always give the same answer.**
 > Streams are assigned per kind, not per instance. Two `bonus` entries will land together
 > and miss together. For now, give them different `chance` values or fold them into one.
+
+### Removed: `modifierKey`
+
+`bonus` no longer takes `modifierKey`. Writing it is ignored, with a warning on load.
+
+It never worked. The value was read into a field and the place that should have applied it
+carried a `TODO`, so a recipe with it drew exactly the same odds as one without.
+
+What it was for - letting something about the machine move the chance - is already how
+`chance` works, because `chance` is an expression:
+
+```json
+{ "type": "bonus", "chance": "0.25 * speed_multi", "outputs": [...] }
+{ "type": "bonus", "chance": "0.1 + tier * 0.05",  "outputs": [...] }
+```
+
+Every value `modifierKey` could have named is visible there as `speed_multi`,
+`energy_multi` or `batch`, and an expression can **combine** them, which one key never
+could. Implementing it would have left one idea with two spellings, the weaker one
+answering differently.
 
 ## 4. `harvest_block` — mine the blocks that are about to disappear
 

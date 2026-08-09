@@ -134,8 +134,7 @@ public class DecoratorWiringTest {
         BonusOutputDecorator top = new BonusOutputDecorator(
             bottom,
             new ConstantExpression(0.0),
-            new ArrayList<IRecipeOutput>(),
-            null);
+            new ArrayList<IRecipeOutput>());
 
         top.produceExtraOutputs(Collections.<IModularPort>emptyList(), new ConditionContext(null, 0, 0, 0, null, 1L));
 

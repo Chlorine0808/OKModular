@@ -78,7 +78,7 @@ public class DecoratorDrawTest {
     }
 
     private static BonusOutputDecorator bonus(double chance) {
-        return new BonusOutputDecorator(null, new ConstantExpression(chance), new ArrayList<IRecipeOutput>(), null);
+        return new BonusOutputDecorator(null, new ConstantExpression(chance), new ArrayList<IRecipeOutput>());
     }
 
     private static BonusBlockOutputDecorator bonusBlock(double chance) {
