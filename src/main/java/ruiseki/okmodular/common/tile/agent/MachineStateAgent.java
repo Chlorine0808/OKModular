@@ -29,6 +29,7 @@ import ruiseki.okmodular.core.energy.IOKEnergySource;
 import ruiseki.okmodular.core.gas.GasTankInfo;
 import ruiseki.okmodular.core.gas.IGasHandler;
 import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.aspects.IAspectContainer;
 import vazkii.botania.api.mana.IManaPool;
 import vazkii.botania.api.mana.spark.ISparkAttachable;
@@ -202,19 +203,125 @@ public class MachineStateAgent implements IMachineState {
             .sum();
     }
 
-    @Override
-    public long getStoredFluid() {
+    /**
+     * The ports of a kind on one side. {@link #sumPortProperty} and
+     * {@link #sumNamedResource} only ever look at the input side, which is why the
+     * output-side figures below cannot use them.
+     */
+    private List<IModularPort> ports(IPortType.Type type, boolean output) {
+        return output ? controller.getPortManager()
+            .getOutputPorts(type)
+            : controller.getPortManager()
+                .getInputPorts(type);
+    }
+
+    /**
+     * Fluid held on one side, optionally of one kind.
+     * <p>
+     * Every fluid figure funnels through this and {@link #fluidSpace}, so the direction and
+     * the name are arguments rather than four near-identical loops. They were four loops, and
+     * the ones for the output side and for input space had simply never been written -
+     * {@link IMachineState} carried {@code default}s returning 0 in their place, which meant
+     * a recipe asking for output-tank contents got a confident zero.
+     *
+     * @param name a fluid name, or null for every fluid
+     */
+    private long fluidAmount(boolean output, String name) {
         long total = 0;
-        for (IModularPort port : controller.getPortManager()
-            .getInputPorts(IPortType.Type.FLUID)) {
+        for (IModularPort port : ports(IPortType.Type.FLUID, output)) {
             if (!(port instanceof IFluidHandler fluidPort)) continue;
             FluidTankInfo[] tanks = fluidPort.getTankInfo(ForgeDirection.UNKNOWN);
             if (tanks == null) continue;
             for (FluidTankInfo tank : tanks) {
-                if (tank.fluid != null) total += tank.fluid.amount;
+                if (tank.fluid == null) continue;
+                if (name != null && !tank.fluid.getFluid()
+                    .getName()
+                    .equals(name)) continue;
+                total += tank.fluid.amount;
             }
         }
         return total;
+    }
+
+    /**
+     * Room left on one side, optionally for one fluid.
+     * <p>
+     * Asked about a named fluid, an empty tank counts: it can take that fluid. A tank holding
+     * something else does not, however much room it has.
+     *
+     * @param name a fluid name, or null for room regardless of what would go in it
+     */
+    private long fluidSpace(boolean output, String name) {
+        long total = 0;
+        for (IModularPort port : ports(IPortType.Type.FLUID, output)) {
+            if (!(port instanceof IFluidHandler fluidPort)) continue;
+            FluidTankInfo[] tanks = fluidPort.getTankInfo(ForgeDirection.UNKNOWN);
+            if (tanks == null) continue;
+            for (FluidTankInfo tank : tanks) {
+                if (name != null && tank.fluid != null
+                    && !tank.fluid.getFluid()
+                        .getName()
+                        .equals(name))
+                    continue;
+                total += Math.max(0, tank.capacity - (tank.fluid != null ? tank.fluid.amount : 0));
+            }
+        }
+        return total;
+    }
+
+    /** Gas held on one side, optionally of one kind. Mirrors {@link #fluidAmount}. */
+    private long gasAmount(boolean output, String name) {
+        long total = 0;
+        for (IModularPort port : ports(IPortType.Type.GAS, output)) {
+            if (!(port instanceof IGasHandler gasPort)) continue;
+            GasTankInfo[] tanks = gasPort.getTankInfo(ForgeDirection.UNKNOWN);
+            if (tanks == null) continue;
+            for (GasTankInfo tank : tanks) {
+                if (tank.gas == null) continue;
+                if (name != null && !tank.gas.getGas()
+                    .getName()
+                    .equals(name)) continue;
+                total += tank.gas.amount;
+            }
+        }
+        return total;
+    }
+
+    /** Room left for gas on one side, optionally for one kind. Mirrors {@link #fluidSpace}. */
+    private long gasSpace(boolean output, String name) {
+        long total = 0;
+        for (IModularPort port : ports(IPortType.Type.GAS, output)) {
+            if (!(port instanceof IGasHandler gasPort)) continue;
+            GasTankInfo[] tanks = gasPort.getTankInfo(ForgeDirection.UNKNOWN);
+            if (tanks == null) continue;
+            for (GasTankInfo tank : tanks) {
+                if (name != null && tank.gas != null
+                    && !tank.gas.getGas()
+                        .getName()
+                        .equals(name))
+                    continue;
+                total += Math.max(0, tank.capacity - (tank.gas != null ? tank.gas.amount : 0));
+            }
+        }
+        return total;
+    }
+
+    /** Everything an aspect container on one kind of port holds, across all aspects. */
+    private long totalAspects(IPortType.Type type) {
+        return sumPortProperty(type, IAspectContainer.class, container -> {
+            AspectList held = container.getAspects();
+            if (held == null) return 0L;
+            long sum = 0;
+            for (Aspect aspect : held.getAspects()) {
+                if (aspect != null) sum += held.getAmount(aspect);
+            }
+            return sum;
+        });
+    }
+
+    @Override
+    public long getStoredFluid() {
+        return fluidAmount(false, null);
     }
 
     @Override
@@ -234,22 +341,7 @@ public class MachineStateAgent implements IMachineState {
 
     @Override
     public long getStoredFluid(String name) {
-        if (name == null || name.isEmpty()) return 0;
-        long total = 0;
-        for (IModularPort port : controller.getPortManager()
-            .getInputPorts(IPortType.Type.FLUID)) {
-            if (!(port instanceof IFluidHandler fluidPort)) continue;
-            FluidTankInfo[] tanks = fluidPort.getTankInfo(ForgeDirection.UNKNOWN);
-            if (tanks == null) continue;
-            for (FluidTankInfo tank : tanks) {
-                if (tank.fluid != null && tank.fluid.getFluid()
-                    .getName()
-                    .equals(name)) {
-                    total += tank.fluid.amount;
-                }
-            }
-        }
-        return total;
+        return named(name) ? fluidAmount(false, name) : 0;
     }
 
     @Override
@@ -258,23 +350,43 @@ public class MachineStateAgent implements IMachineState {
     }
 
     @Override
+    public long getTotalFluidInput() {
+        return fluidAmount(false, null);
+    }
+
+    @Override
+    public long getFluidOutput(String name) {
+        return named(name) ? fluidAmount(true, name) : 0;
+    }
+
+    @Override
+    public long getTotalFluidOutput() {
+        return fluidAmount(true, null);
+    }
+
+    @Override
+    public long getFluidInputSpace(String name) {
+        return named(name) ? fluidSpace(false, name) : 0;
+    }
+
+    @Override
+    public long getTotalFluidInputSpace() {
+        return fluidSpace(false, null);
+    }
+
+    @Override
     public long getFluidOutputSpace(String name) {
-        if (name == null || name.isEmpty()) return 0;
-        long total = 0;
-        for (IModularPort port : controller.getPortManager()
-            .getOutputPorts(IPortType.Type.FLUID)) {
-            if (!(port instanceof IFluidHandler fluidPort)) continue;
-            FluidTankInfo[] tanks = fluidPort.getTankInfo(ForgeDirection.UNKNOWN);
-            if (tanks == null) continue;
-            for (FluidTankInfo tank : tanks) {
-                if (tank.fluid == null || tank.fluid.getFluid()
-                    .getName()
-                    .equals(name)) {
-                    total += Math.max(0, tank.capacity - (tank.fluid != null ? tank.fluid.amount : 0));
-                }
-            }
-        }
-        return total;
+        return named(name) ? fluidSpace(true, name) : 0;
+    }
+
+    @Override
+    public long getTotalFluidOutputSpace() {
+        return fluidSpace(true, null);
+    }
+
+    /** Whether the caller named a resource at all. Empty means "the kind as a whole". */
+    private static boolean named(String name) {
+        return name != null && !name.isEmpty();
     }
 
     @Override
@@ -298,22 +410,62 @@ public class MachineStateAgent implements IMachineState {
             .sum();
     }
 
+    /**
+     * These two used to read the tanks through {@code drawGas(UNKNOWN, MAX_VALUE, false)}
+     * while {@link #getGasCapacity()} read {@code getTankInfo}, so
+     * {@code getSpace(GAS, BOTH, null)} subtracted a figure obtained one way from a figure
+     * obtained another. The ports return a single tank either way, so nothing moves today -
+     * but a port with two tanks would have made the two disagree, and only one of them would
+     * have been right. One way of asking now.
+     */
     @Override
     public long getStoredGas(String name) {
-        return sumNamedResource(IPortType.Type.GAS, IGasHandler.class, name, (port, gasName) -> {
-            var drawn = port.drawGas(ForgeDirection.UNKNOWN, Integer.MAX_VALUE, false);
-            return (drawn != null && drawn.getGas()
-                .getName()
-                .equals(gasName)) ? (long) drawn.amount : 0L;
-        });
+        return named(name) ? gasAmount(false, name) : 0;
     }
 
     @Override
     public long getTotalStoredGas() {
-        return sumPortProperty(IPortType.Type.GAS, IGasHandler.class, p -> {
-            var drawn = p.drawGas(ForgeDirection.UNKNOWN, Integer.MAX_VALUE, false);
-            return drawn != null ? drawn.amount : 0;
-        });
+        return gasAmount(false, null);
+    }
+
+    @Override
+    public long getGasInput(String name) {
+        return named(name) ? gasAmount(false, name) : 0;
+    }
+
+    @Override
+    public long getTotalGasInput() {
+        return gasAmount(false, null);
+    }
+
+    @Override
+    public long getGasOutput(String name) {
+        return named(name) ? gasAmount(true, name) : 0;
+    }
+
+    @Override
+    public long getTotalGasOutput() {
+        return gasAmount(true, null);
+    }
+
+    @Override
+    public long getGasInputSpace(String name) {
+        return named(name) ? gasSpace(false, name) : 0;
+    }
+
+    @Override
+    public long getTotalGasInputSpace() {
+        return gasSpace(false, null);
+    }
+
+    @Override
+    public long getGasOutputSpace(String name) {
+        return named(name) ? gasSpace(true, name) : 0;
+    }
+
+    @Override
+    public long getTotalGasOutputSpace() {
+        return gasSpace(true, null);
     }
 
     @Override
@@ -343,6 +495,11 @@ public class MachineStateAgent implements IMachineState {
     }
 
     @Override
+    public long getTotalStoredEssentia() {
+        return totalAspects(IPortType.Type.ESSENTIA);
+    }
+
+    @Override
     public long getEssentiaCapacity() {
         return sumPortProperty(
             IPortType.Type.ESSENTIA,
@@ -355,6 +512,11 @@ public class MachineStateAgent implements IMachineState {
         Aspect aspect = Aspect.getAspect(aspectName);
         if (aspect == null) return 0;
         return sumPortProperty(IPortType.Type.VIS, IAspectContainer.class, p -> (long) p.containerContains(aspect));
+    }
+
+    @Override
+    public long getTotalStoredVis() {
+        return totalAspects(IPortType.Type.VIS);
     }
 
     @Override
