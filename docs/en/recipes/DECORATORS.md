@@ -119,10 +119,10 @@ the blocks a consuming input takes and the ones an output overwrites are collect
 
 | Key | Default | Meaning |
 |---|---|---|
-| `harvestLevel` | **`0`** | A block harder than this **stops the recipe from starting** (see below) |
+| `harvestLevel` | **`0`** / expression | A block harder than this **stops the recipe from starting** (see below) |
 | `fortune` | `0` | Fortune level, applied to the drops |
 | `silkTouch` | `false` | Silk touch: collects the block itself |
-| `shear` | `false` | ⚠ Read, but **does nothing yet** |
+| `shear` | `false` | Shears: leaves and vines come back as themselves (`IShearable` blocks only) |
 
 ### The three moments it runs at
 
@@ -146,8 +146,10 @@ positions.
 > never starts. It simply does not begin - no exception, no log line - so it reads as "this
 > machine does not work". Omitting it now logs a warning on load.
 >
-> **Nothing on the machine raises this.** A higher tier does not mine harder blocks; the
-> number in the recipe is the whole story.
+> **It takes an expression as well as a number.** `"harvestLevel": "tier"` lets a better
+> machine mine harder blocks. It is evaluated once, when the recipe starts.
+
+With both `silkTouch` and `shear` set, **silk touch wins**.
 
 Drops go into the item ports. Anything that does not fit is dropped on the floor.
 

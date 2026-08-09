@@ -18,6 +18,9 @@ import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
+import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.io.BlockInput;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
@@ -55,11 +58,12 @@ import ruiseki.okmodular.util.Logger;
  * consume and the ones an output will overwrite - and answers once. Both are resolvable at
  * start, so nothing is guessed. The two harvest hooks after it never refuse.
  *
- * <h2>What {@code harvestLevel} is, and is not</h2>
+ * <h2>What {@code harvestLevel} is</h2>
  *
- * It is a number written in the recipe, defaulting to <b>0</b>. Nothing on the machine defines
- * it: a higher tier does not mine harder blocks. Level 0 is what a wooden pick manages, so a
- * recipe that leaves it out refuses to start the moment its structure contains iron ore.
+ * An expression, defaulting to <b>0</b> - what a wooden pick manages - so a recipe that leaves
+ * it out refuses to start the moment its structure contains iron ore. Writing
+ * {@code "harvestLevel": "tier"} lets a better machine mine harder blocks; it is evaluated
+ * once in {@link #canStart}, so both sides are judged against the same number.
  */
 public class HarvestBlockDecorator extends RecipeDecorator {
 
@@ -69,15 +73,15 @@ public class HarvestBlockDecorator extends RecipeDecorator {
     private final int fortune;
     private final boolean silkTouch;
     private final boolean shear;
-    private final int harvestLevel;
+    private final IExpression harvestLevelExpr;
 
     public HarvestBlockDecorator(IModularRecipe internal, int fortune, boolean silkTouch, boolean shear,
-        int harvestLevel) {
+        IExpression harvestLevelExpr) {
         super(internal);
         this.fortune = fortune;
         this.silkTouch = silkTouch;
         this.shear = shear;
-        this.harvestLevel = harvestLevel;
+        this.harvestLevelExpr = harvestLevelExpr;
     }
 
     /**
@@ -95,7 +99,9 @@ public class HarvestBlockDecorator extends RecipeDecorator {
         // here would make the recipe look impossible everywhere it is merely unevaluated.
         if (recipe == null || recipe.getWorld() == null) return true;
 
-        return levelAllows(recipe, positionsFrom(recipe, true)) && levelAllows(recipe, positionsFrom(recipe, false));
+        int allowed = (int) harvestLevelExpr.evaluateDouble(context);
+        return levelAllows(recipe, positionsFrom(recipe, true), allowed)
+            && levelAllows(recipe, positionsFrom(recipe, false), allowed);
     }
 
     @Override
@@ -140,8 +146,13 @@ public class HarvestBlockDecorator extends RecipeDecorator {
         return targetPositions;
     }
 
-    /** Whether every block at these positions is soft enough. Air and toolless blocks pass. */
-    private boolean levelAllows(IRecipeContext context, List<ChunkCoordinates> positions) {
+    /**
+     * Whether every block at these positions is soft enough. Air and toolless blocks pass.
+     *
+     * @param allowed the evaluated {@code harvestLevel}, settled once by the caller so both
+     *                sides are judged against the same number
+     */
+    private boolean levelAllows(IRecipeContext context, List<ChunkCoordinates> positions, int allowed) {
         World world = context.getWorld();
 
         for (ChunkCoordinates pos : positions) {
@@ -150,7 +161,7 @@ public class HarvestBlockDecorator extends RecipeDecorator {
 
             int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
             if (block.getHarvestTool(meta) == null) continue;
-            if (block.getHarvestLevel(meta) > harvestLevel) return false;
+            if (block.getHarvestLevel(meta) > allowed) return false;
         }
         return true;
     }
@@ -240,15 +251,15 @@ public class HarvestBlockDecorator extends RecipeDecorator {
             .getAsBoolean();
         boolean shear = json.has("shear") && json.get("shear")
             .getAsBoolean();
-        int harvestLevel = json.has("harvestLevel") ? json.get("harvestLevel")
-            .getAsInt() : 0;
+        IExpression harvestLevel = json.has("harvestLevel") ? ExpressionsParser.parse(json.get("harvestLevel"))
+            : new ConstantExpression(0);
 
         if (!json.has("harvestLevel")) {
             Logger.warn(
                 "harvest_block with no harvestLevel defaults to 0, which is what a wooden pick "
                     + "manages. Any block in the structure that needs better - iron ore needs 1 - "
-                    + "stops the recipe from starting at all. Nothing on the machine raises this; "
-                    + "it is a number the recipe states.");
+                    + "stops the recipe from starting at all. Write \"harvestLevel\": \"tier\" to "
+                    + "let the machine decide instead of a fixed number.");
         }
 
         return new HarvestBlockDecorator(recipe, fortune, silkTouch, shear, harvestLevel);
