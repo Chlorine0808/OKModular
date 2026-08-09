@@ -20,7 +20,7 @@ inferred from the properties).
 | `bonus` | Produces extra output by chance | `chance` + `outputs` |
 | `weighted_random` | Picks an output from a weighted list | `outputs` (each with `weight`) / `pool` / `rolls` |
 | `requirement` | Checks extra conditions and catalysts while running | `condition` / `requirements` |
-| `harvest_block` | ⚠ **Not implemented** (see below) | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
+| `harvest_block` | Mines the blocks that are about to disappear (see below) | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
 | `per_position_probability` | Swaps a block output per position, by chance | `chance` + `symbol` + `output` |
 | `bonus_block_output` | Produces extra block output by chance | `chance` + `outputs` (first is `type: "block"`) |
 | `random_block_output` | Draws a block output from candidates | `count` / `selections` |
@@ -86,16 +86,50 @@ containing `random()` varies between the runs inside one batch.
 > Streams are assigned per kind, not per instance. Two `bonus` entries will land together
 > and miss together. For now, give them different `chance` values or fold them into one.
 
-## 4. `harvest_block` does nothing
+## 4. `harvest_block` — mine the blocks that are about to disappear
 
-⚠ **It parses, but its effect never runs.** Writing it into a recipe logs a warning on load.
+Blocks a structure IO recipe removes come back as drops rather than simply vanishing. Both
+the blocks a consuming input takes and the ones an output overwrites are collected.
 
-Decorator effects run from `produceExtraOutputs` on completion, and `harvest_block` has to
-run **before** the blocks it collects are overwritten, so it does not fit that hook. It needs
-a call site on the input side as well.
+```json
+"decorators": [
+  { "type": "harvest_block", "harvestLevel": 2, "fortune": 3 }
+]
+```
 
-The same result is available by mining the blocks by hand with a `silk_touch` or `fortune`
-tool.
+| Key | Default | Meaning |
+|---|---|---|
+| `harvestLevel` | **`0`** | A block harder than this **stops the recipe from starting** (see below) |
+| `fortune` | `0` | Fortune level, applied to the drops |
+| `silkTouch` | `false` | Silk touch: collects the block itself |
+| `shear` | `false` | ⚠ Read, but **does nothing yet** |
+
+### The three moments it runs at
+
+Unlike the other decorators it does not fit `produceExtraOutputs`, which runs **after** the
+outputs land - by then the block it was meant to collect has been overwritten.
+
+| Moment | What happens |
+|---|---|
+| Before the recipe starts | Refuses if any block is too hard |
+| Just before inputs are consumed | Collects what a `consume: true` `BlockInput` takes |
+| Just before outputs are applied | Collects what a `BlockOutput` overwrites |
+
+**Only the first moment may refuse.** Refusing mid-consumption would take the materials and
+stop; refusing at completion would take them, do the work, and hand back nothing while the
+machine waits forever. So the check happens once, at the start, across **both** sets of
+positions.
+
+> [!WARNING]
+> **`harvestLevel` defaults to 0, which is what a wooden pick manages.**
+> Leave it out and a single iron ore (level 1) anywhere in the structure means the recipe
+> never starts. It simply does not begin - no exception, no log line - so it reads as "this
+> machine does not work". Omitting it now logs a warning on load.
+>
+> **Nothing on the machine raises this.** A higher tier does not mine harder blocks; the
+> number in the recipe is the whole story.
+
+Drops go into the item ports. Anything that does not fit is dropped on the floor.
 
 ## 5. The requirement decorator
 

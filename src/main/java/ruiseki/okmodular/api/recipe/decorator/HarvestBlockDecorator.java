@@ -11,6 +11,7 @@ import net.minecraft.world.World;
 
 import com.google.gson.JsonObject;
 
+import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
@@ -27,23 +28,36 @@ import ruiseki.okmodular.util.Logger;
  * Decorator that harvests blocks affected by the recipe's BlockInputs and
  * BlockOutputs.
  * Supports Fortune, Silk Touch, Shears, and Harvest Level requirements.
- * <p>
- * <b>This one does not run.</b> Like the other decorators it hung its work off
- * {@code processInputs} / {@code processOutputs} with a {@code !simulate} guard, and the
- * engine only ever called those to simulate - see {@code DecoratorWiringTest}. Those two
- * methods are gone now, folded into the check-only {@code matchesInput} and {@code canOutput}
- * so nothing else mistakes them for the execution path, and the overrides went with them.
- * <p>
- * The rest of the decorators moved to {@link RecipeDecorator#produceExtraOutputs}, which runs
- * after the cached outputs land. Harvesting cannot: it has to happen <em>before</em> the
- * blocks it collects are overwritten, and it also needs a hook on the input side, so it needs
- * its own two call sites rather than that one. Item S in {@code run/StructureIO_todos.md}.
- * <p>
- * {@link #checkAndHarvest} is therefore parked - written, correct as far as anyone knows, and
- * called by nobody. {@code DecoratorWiringTest.KNOWN_DEAD} names it so, and asserts it stays
- * uncalled until item S gives it somewhere to hang; the day it gets a call site, that list
- * fails until the entry is removed. Parked code a test points at is survivable. Parked code
- * that looks like it runs is what cost six decorators.
+ *
+ * <h2>Three moments, not one</h2>
+ *
+ * The other five decorators all fit on {@link RecipeDecorator#produceExtraOutputs}, which runs
+ * after the cached outputs land. This one cannot: by then a {@code BlockOutput} has already
+ * replaced the block it was supposed to collect. It needs three separate moments, and getting
+ * them wrong is what left it dead for so long.
+ *
+ * <pre>
+ * canStart              レシピが始まる前   硬すぎるブロックがあれば断る
+ * beforeInputsConsumed  入力を消す直前     BlockInput が持っていくブロックを採る
+ * beforeOutputsApplied  出力を書く直前     BlockOutput が上書きするブロックを採る
+ * </pre>
+ *
+ * <h2>Why the gate is at the start and only at the start</h2>
+ *
+ * The harvest-level check has to be able to refuse, and start is the only moment where
+ * refusing is honest. Refusing while consuming would take the inputs and stop; refusing while
+ * producing would take the inputs, finish the work, and hand back nothing while the machine
+ * waits forever for output room it does not need.
+ *
+ * So {@link #canStart} looks at <em>both</em> sets of positions - the ones an input will
+ * consume and the ones an output will overwrite - and answers once. Both are resolvable at
+ * start, so nothing is guessed. The two harvest hooks after it never refuse.
+ *
+ * <h2>What {@code harvestLevel} is, and is not</h2>
+ *
+ * It is a number written in the recipe, defaulting to <b>0</b>. Nothing on the machine defines
+ * it: a higher tier does not mine harder blocks. Level 0 is what a wooden pick manages, so a
+ * recipe that leaves it out refuses to start the moment its structure contains iron ore.
  */
 public class HarvestBlockDecorator extends RecipeDecorator {
 
@@ -63,65 +77,88 @@ public class HarvestBlockDecorator extends RecipeDecorator {
     }
 
     /**
-     * Harvest blocks from either inputs or outputs.
+     * Refuses the run when any block it would collect is too hard for {@code harvestLevel}.
      * <p>
-     * <b>Nothing calls this.</b> See the class javadoc: the two hooks it used to hang off are
-     * gone, and item S owes it a pair of real ones. Package-private rather than private so
-     * the wiring test can name it without reflection.
-     *
-     * @param context    Recipe context
-     * @param ports      Available ports (for item insertion)
-     * @param fromInputs True if checking inputs, false for outputs
-     * @return true if all harvest level requirements are met
+     * Both sides are checked here because this is the only moment refusing costs nothing.
+     * See the class javadoc.
      */
-    boolean checkAndHarvest(IRecipeContext context, List<IModularPort> ports, boolean fromInputs) {
-        List<ChunkCoordinates> targetPositions = new ArrayList<>();
-        World world = context.getWorld();
+    @Override
+    public boolean canStart(ConditionContext context) {
+        if (!super.canStart(context)) return false;
 
-        // 1. Identify all affected positions
+        IRecipeContext recipe = context != null ? context.getRecipeContext() : null;
+        // No machine means no world to look at - validation and NEI take this path. Refusing
+        // here would make the recipe look impossible everywhere it is merely unevaluated.
+        if (recipe == null || recipe.getWorld() == null) return true;
+
+        return levelAllows(recipe, positionsFrom(recipe, true)) && levelAllows(recipe, positionsFrom(recipe, false));
+    }
+
+    @Override
+    public void beforeInputsConsumed(List<IModularPort> inputPorts, ConditionContext context) {
+        super.beforeInputsConsumed(inputPorts, context);
+        harvest(context, inputPorts, true);
+    }
+
+    @Override
+    public void beforeOutputsApplied(List<IModularPort> outputPorts, ConditionContext context) {
+        super.beforeOutputsApplied(outputPorts, context);
+        harvest(context, outputPorts, false);
+    }
+
+    /**
+     * The blocks this recipe is about to remove on one side.
+     *
+     * @param fromInputs true for the blocks a consuming {@code BlockInput} takes, false for
+     *                   the ones a {@code BlockOutput} overwrites
+     */
+    private List<ChunkCoordinates> positionsFrom(IRecipeContext context, boolean fromInputs) {
+        List<ChunkCoordinates> targetPositions = new ArrayList<>();
+
         if (fromInputs) {
             for (IRecipeInput input : internal.getInputs()) {
-                if (input instanceof BlockInput) {
-                    BlockInput bi = (BlockInput) input;
-                    if (bi.isConsume()) {
-                        targetPositions.addAll(
-                            context.getSymbolPositions(
-                                bi.toJson()
-                                    .get("symbol")
-                                    .getAsString()
-                                    .charAt(0)));
-                    }
+                if (input instanceof BlockInput bi && bi.isConsume()) {
+                    targetPositions.addAll(
+                        context.getSymbolPositions(
+                            bi.toJson()
+                                .get("symbol")
+                                .getAsString()
+                                .charAt(0)));
                 }
             }
         } else {
             for (IRecipeOutput output : internal.getOutputs()) {
-                if (output instanceof BlockOutput) {
-                    BlockOutput bo = (BlockOutput) output;
+                if (output instanceof BlockOutput bo) {
                     targetPositions.addAll(bo.getPositions(context));
                 }
             }
         }
+        return targetPositions;
+    }
 
-        // 2. Validate harvest level for all positions first
-        for (ChunkCoordinates pos : targetPositions) {
+    /** Whether every block at these positions is soft enough. Air and toolless blocks pass. */
+    private boolean levelAllows(IRecipeContext context, List<ChunkCoordinates> positions) {
+        World world = context.getWorld();
+
+        for (ChunkCoordinates pos : positions) {
             Block block = world.getBlock(pos.posX, pos.posY, pos.posZ);
             if (block.isAir(world, pos.posX, pos.posY, pos.posZ)) continue;
 
-            String harvestTool = block.getHarvestTool(world.getBlockMetadata(pos.posX, pos.posY, pos.posZ));
-            if (harvestTool != null) {
-                int level = block.getHarvestLevel(world.getBlockMetadata(pos.posX, pos.posY, pos.posZ));
-                if (level > harvestLevel) {
-                    return false; // Requirement not met, abort recipe
-                }
-            }
+            int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
+            if (block.getHarvestTool(meta) == null) continue;
+            if (block.getHarvestLevel(meta) > harvestLevel) return false;
         }
-
-        // 3. Perform harvesting
-        for (ChunkCoordinates pos : targetPositions) {
-            harvestAt(world, pos, ports);
-        }
-
         return true;
+    }
+
+    /** Collects one side's blocks into the ports. {@link #canStart} already allowed it. */
+    private void harvest(ConditionContext context, List<IModularPort> ports, boolean fromInputs) {
+        IRecipeContext recipe = context != null ? context.getRecipeContext() : null;
+        if (recipe == null || recipe.getWorld() == null) return;
+
+        for (ChunkCoordinates pos : positionsFrom(recipe, fromInputs)) {
+            harvestAt(recipe.getWorld(), pos, ports);
+        }
     }
 
     private void harvestAt(World world, ChunkCoordinates pos, List<IModularPort> ports) {
@@ -197,13 +234,13 @@ public class HarvestBlockDecorator extends RecipeDecorator {
         int harvestLevel = json.has("harvestLevel") ? json.get("harvestLevel")
             .getAsInt() : 0;
 
-        Logger.warn(
-            "harvest_block is parsed but does nothing yet: its effects hang off "
-                + "processInputs/processOutputs, which the engine only ever calls to simulate. "
-                + "The other decorators moved to produceExtraOutputs; this one cannot, because it "
-                + "has to run BEFORE the blocks it harvests are overwritten. Item S in "
-                + "run/StructureIO_todos.md. Saying so is better than a recipe that silently "
-                + "drops its drops.");
+        if (!json.has("harvestLevel")) {
+            Logger.warn(
+                "harvest_block with no harvestLevel defaults to 0, which is what a wooden pick "
+                    + "manages. Any block in the structure that needs better - iron ore needs 1 - "
+                    + "stops the recipe from starting at all. Nothing on the machine raises this; "
+                    + "it is a number the recipe states.");
+        }
 
         return new HarvestBlockDecorator(recipe, fortune, silkTouch, shear, harvestLevel);
     }

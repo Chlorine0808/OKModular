@@ -118,6 +118,11 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
         this.workProgress = this.progress;
 
+        // Last moment the input blocks are still standing. harvest_block collects them here;
+        // after the visitor below runs, a consuming BlockInput has removed them and nothing
+        // remembers what they were.
+        recipe.beforeInputsConsumed(inputPorts, context);
+
         // Consume and setup state (Specific to ProcessAgent)
         RecipeExecutionVisitor consumeVisitor = new RecipeExecutionVisitor(
             RecipeExecutionVisitor.Mode.CONSUME,
@@ -370,7 +375,13 @@ public class ProcessAgent extends AbstractRecipeProcess {
             }
         }
 
-        // 2. Apply outputs
+        // 2. Last moment the blocks an output is about to overwrite are still there.
+        // produceExtraOutputs below is too late: by then a BlockOutput has replaced them.
+        if (currentRecipe != null) {
+            currentRecipe.beforeOutputsApplied(outputPorts, context);
+        }
+
+        // 3. Apply outputs
         for (IRecipeOutput output : cachedOutputs) {
             if (output instanceof IModularRecipeOutput o) {
                 o.apply(outputPorts, 1, context);

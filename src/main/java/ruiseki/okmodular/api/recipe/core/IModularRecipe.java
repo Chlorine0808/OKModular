@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 
@@ -35,8 +36,34 @@ public interface IModularRecipe extends IRecipe {
      *
      * @param context the same context the outputs were applied with; carries the run's seed
      */
-    default void produceExtraOutputs(List<IModularPort> outputPorts,
-        ruiseki.okmodular.api.condition.ConditionContext context) {}
+    default void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {}
+
+    /**
+     * Anything that has to happen while the input blocks are still standing.
+     * <p>
+     * Called from {@code ProcessAgent.startRecipe} immediately before the consuming visitor
+     * runs, so a decorator can still see what a {@code BlockInput} is about to take away.
+     * There is no equivalent moment later: once the visitor has run, the blocks are gone and
+     * nothing records what they were.
+     * <p>
+     * This is not the place to refuse. The batch size is already chosen and the run is about
+     * to begin; a decorator that wants to stop a recipe overrides {@link #canStart}, which is
+     * asked before any of this.
+     */
+    default void beforeInputsConsumed(List<IModularPort> inputPorts, ConditionContext context) {}
+
+    /**
+     * Anything that has to happen while the blocks an output will overwrite are still there.
+     * <p>
+     * Called from {@code ProcessAgent.produceOutputs} between the capacity check and the
+     * application of {@code cachedOutputs}. {@link #produceExtraOutputs} is too late for this
+     * - it runs after the outputs have landed, by which point a {@code BlockOutput} has
+     * already replaced whatever was in the way.
+     * <p>
+     * Also not a place to refuse: the inputs were consumed at start, so answering no here
+     * would take the materials and hand back nothing.
+     */
+    default void beforeOutputsApplied(List<IModularPort> outputPorts, ConditionContext context) {}
 
     boolean matchesInput(List<IModularPort> inputPorts);
 

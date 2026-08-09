@@ -77,17 +77,21 @@ public class DecoratorWiringTest {
         .get("src/main/java/ruiseki/okmodular/common/recipe/ProcessAgent.java");
 
     /**
-     * まだ呼ぶ側が居ない実装。`ファイル名#メソッド名` で書く。**空にするのが目標**。
+     * まだ呼ぶ側が居ない実装。`ファイル名#メソッド名` で書く。**今は空**。
      *
-     * `harvest_block` は「ブロックが書き換わる**前**に採掘する」ので、
-     * 出力適用後に走る `produceExtraOutputs` には乗らない。入力側の口も別に要る。
-     * → `run/StructureIO_todos.md` の項目 S。
+     * `harvest_block` が最後まで残っていた。出力適用後に走る `produceExtraOutputs` には
+     * 乗らない（採るはずのブロックがもう上書きされている）ので、
+     * **専用の口が 2 つ**要ったため。項目 S として片付いた:
      *
-     * 死んでいる印が `if (!simulate)` から「呼ぶ側の数」に変わっているのは、
-     * ぶら下がっていた `processInputs` / `processOutputs` 自体が消えたため。
-     * **止まっているコードそのものは残っている**ので、印の方を実態に合わせた。
+     * <pre>
+     * canStart              硬すぎるブロックがあれば断る（断ってよい唯一の瞬間）
+     * beforeInputsConsumed  BlockInput が持っていくブロックを採る
+     * beforeOutputsApplied  BlockOutput が上書きするブロックを採る
+     * </pre>
+     *
+     * 空のまま維持するのが目的で、足す場所ではない。
      */
-    private static final List<String> KNOWN_DEAD = Arrays.asList("HarvestBlockDecorator.java#checkAndHarvest");
+    private static final List<String> KNOWN_DEAD = Arrays.<String>asList();
 
     @Test
     @DisplayName("ProcessAgent が完成時に呼んでいる")
@@ -98,6 +102,28 @@ public class DecoratorWiringTest {
             body.contains("produceExtraOutputs"),
             "ProcessAgent.produceOutputs がデコレータの口を呼んでいない。" + "デコレータは例外もログも出さずに何もしなくなるので、"
                 + "レシピを書いた側からは「確率が低い」と見分けが付かない");
+    }
+
+    @Test
+    @DisplayName("ブロックが消える前の口を呼んでいる")
+    public void test消える前に呼ばれている() {
+        String source = JavaSource.stripComments(JavaSource.read(PROCESS_AGENT));
+
+        // 入力側。消費する visitor より**前**でなければ、採るはずのブロックがもう無い。
+        String start = JavaSource.methodBody(source, "public boolean startRecipe(");
+        int harvest = start.indexOf("beforeInputsConsumed");
+        int consume = start.indexOf("Mode.CONSUME");
+        assertTrue(harvest >= 0, "startRecipe が beforeInputsConsumed を呼んでいない");
+        assertTrue(consume >= 0, "startRecipe の消費 visitor が見つからない。このテストの前提が崩れている");
+        assertTrue(harvest < consume, "beforeInputsConsumed が消費より後にある。呼ばれた時点でブロックはもう消えている");
+
+        // 出力側。適用より**前**でなければ、上書きされた後を採ることになる。
+        String produce = JavaSource.methodBody(source, "protected boolean produceOutputs(");
+        int before = produce.indexOf("beforeOutputsApplied");
+        int apply = produce.indexOf("o.apply(outputPorts");
+        assertTrue(before >= 0, "produceOutputs が beforeOutputsApplied を呼んでいない");
+        assertTrue(apply >= 0, "produceOutputs の適用が見つからない。このテストの前提が崩れている");
+        assertTrue(before < apply, "beforeOutputsApplied が適用より後にある。上書き後のブロックを採ることになる");
     }
 
     @Test
