@@ -170,15 +170,25 @@ Performance multipliers provided by the structure definition.
 ## 4. Function Reference
 
 ### Math Functions
-- `abs(x)`, `sqrt(x)`, `pow(base, exp)`
+- `abs(x)`, `sqrt(x)`, `cbrt(x)`, `pow(base, exp)`
 - `min(a, b...)`, `max(a, b...)`
 - `sin(x)`, `cos(x)`, `tan(x)` (Input in **radians**)
 - `asin(x)`, `acos(x)`, `atan(x)` (Output in radians)
+- `atan2(y, x)`: Arc tangent that keeps the quadrant
 - `rad(deg)`, `deg(rad)` (Convert degrees/radians)
-- `floor(x)`, `ceil(x)`, `round(x)`
+- `floor(x)`, `ceil(x)` / `ceiling(x)`, `round(x)`
 - `clamp(val, min, max)`
+- `sign(x)`: Sign of the value (-1 / 0 / 1)
+- `exp(x)`, `log(x)` / `ln(x)` (natural log), `log10(x)`
+- `fact(n)`: Factorial
+- `perm(n, r)` / `npr(n, r)` / `permu(n, r)` / `permutation(n, r)`: Permutations
+- `combi(n, r)` / `ncr(n, r)` / `combination(n, r)`: Combinations
 - `random()`: Random number between 0 and 1
 - `chance(x)`: Returns 1 or 0 based on probability `x` (0.0 - 1.0)
+
+> [!NOTE]
+> `log(x)` is the **natural** logarithm, the same as `ln`. For base 10 use `log10(x)`.
+> All three answer **0** rather than throwing when `x <= 0`.
 
 > [!IMPORTANT]
 > **These are not a stream that advances on each call.** They are computed from the machine's

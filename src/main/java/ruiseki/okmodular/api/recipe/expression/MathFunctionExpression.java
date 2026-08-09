@@ -17,11 +17,20 @@ public class MathFunctionExpression implements IExpression {
     private final String functionName;
     private final List<IExpression> arguments;
 
+    /**
+     * The names a recipe may write. {@code ExpressionRegistry} registers exactly these, so a
+     * function with a {@code case} below but no entry here cannot be called at all - which is
+     * where {@code cbrt}, {@code ceiling} and {@code ln} sat until
+     * {@code MathFunctionCoverageTest} went looking. Implemented, correct, unreachable.
+     */
     public static final Set<String> SUPPORTED_FUNCTIONS = Collections.unmodifiableSet(
         new HashSet<>(
             Arrays.asList(
                 "abs",
                 "sqrt",
+                "cbrt",
+                "ceiling",
+                "ln",
                 "sin",
                 "cos",
                 "tan",

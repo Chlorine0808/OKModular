@@ -167,15 +167,25 @@ fluid_f_out("lava")   item_f_in("minecraft:coal")
 ## 4. 関数リファレンス
 
 ### 数学関数
-- `abs(x)`, `sqrt(x)`, `pow(base, exp)`
+- `abs(x)`, `sqrt(x)`, `cbrt(x)`, `pow(base, exp)`
 - `min(a, b...)`, `max(a, b...)`
 - `sin(x)`, `cos(x)`, `tan(x)` (入力は**ラジアン**)
 - `asin(x)`, `acos(x)`, `atan(x)` (出力はラジアン)
+- `atan2(y, x)`: 象限を保った逆正接
 - `rad(deg)`, `deg(rad)` (度とラジアンの変換)
-- `floor(x)`, `ceil(x)`, `round(x)`
+- `floor(x)`, `ceil(x)` / `ceiling(x)`, `round(x)`
 - `clamp(val, min, max)`
+- `sign(x)`: 符号 (-1 / 0 / 1)
+- `exp(x)`, `log(x)` / `ln(x)` (自然対数), `log10(x)`
+- `fact(n)`: 階乗
+- `perm(n, r)` / `npr(n, r)` / `permu(n, r)` / `permutation(n, r)`: 順列
+- `combi(n, r)` / `ncr(n, r)` / `combination(n, r)`: 組み合わせ
 - `random()`: 0 以上 1 未満の乱数
 - `chance(x)`: 確率 `x` (0.0 - 1.0) に基づいて 1 または 0 を返す
+
+> [!NOTE]
+> `log(x)` は**自然対数**です（`ln` と同じもの）。常用対数は `log10(x)`。
+> `log` / `ln` / `log10` は `x <= 0` のとき例外ではなく **0** を返します。
 
 > [!IMPORTANT]
 > **この 2 つは「引くたびに動く乱数」ではありません。** 機械の評価シードから計算されるので、
