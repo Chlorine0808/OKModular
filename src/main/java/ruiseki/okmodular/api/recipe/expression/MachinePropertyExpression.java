@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import net.minecraftforge.common.util.ForgeDirection;
+
 import com.google.gson.JsonObject;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
@@ -192,12 +194,15 @@ public class MachinePropertyExpression implements IExpression {
 
         // --- structure ---
         register("tier", ctx -> new EvaluationValue(machine(ctx).getTier()));
-        register(
-            "facing",
-            ctx -> new EvaluationValue(
-                ctx.getRecipeContext()
-                    .getFacing()
-                    .ordinal()));
+        // The null check is not decoration. WorldPropertyExpression carried a second, dead
+        // copy of this property that guarded getFacing(), and the guard is the only part of
+        // it worth keeping: evaluate() proves the recipe context and the machine state are
+        // there, not that the structure has resolved a facing yet.
+        register("facing", ctx -> {
+            ForgeDirection facing = ctx.getRecipeContext()
+                .getFacing();
+            return new EvaluationValue(facing != null ? facing.ordinal() : 0);
+        });
 
         // --- recipe modifiers ---
         register("batch", ctx -> new EvaluationValue(machine(ctx).getBatchSize()));

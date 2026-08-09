@@ -7,6 +7,19 @@ import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 
 /**
  * Expression that evaluates to a world property (e.g., time, moon_phase).
+ * <p>
+ * Every label in the switch has to be a name {@code ExpressionRegistry.registerWorldProperty}
+ * hands here, and every name it hands here has to have a label - {@code WorldPropertyPathTest}
+ * asserts both. An unregistered label is unreachable code that reads like a feature; a name
+ * with no label falls to {@code default} and returns zero, which the caller has no way to tell
+ * from a genuine zero.
+ * <p>
+ * Three labels were unreachable when that test was written. {@code total_time} returned
+ * exactly what {@code tick} returns and was never registered or documented. {@code moon} is
+ * handled by the registry, which maps it to {@code moon_phase} before construction, so the
+ * label could never match. {@code facing} is a machine property, not a world one, and the
+ * registry sends it to {@link MachinePropertyExpression} - the null guard it had here moved
+ * there, since that is where the live copy is.
  */
 public class WorldPropertyExpression implements IExpression {
 
@@ -37,13 +50,7 @@ public class WorldPropertyExpression implements IExpression {
                     (double) (context.getWorld()
                         .getWorldTime() % 24000L));
                 break;
-            case "total_time":
-                result = new EvaluationValue(
-                    (double) context.getWorld()
-                        .getTotalWorldTime());
-                break;
             case "moon_phase":
-            case "moon":
                 result = new EvaluationValue(
                     (double) context.getWorld()
                         .getMoonPhase());
@@ -159,13 +166,6 @@ public class WorldPropertyExpression implements IExpression {
             case "redstone_signal": {
                 IRecipeContext rc = context.getRecipeContext();
                 result = new EvaluationValue((double) (rc != null ? rc.getRedstoneLevel() : 0));
-                break;
-            }
-            case "facing": {
-                IRecipeContext rc = context.getRecipeContext();
-                result = new EvaluationValue(
-                    (double) (rc != null && rc.getFacing() != null ? rc.getFacing()
-                        .ordinal() : 0));
                 break;
             }
             default:
