@@ -53,6 +53,7 @@ import ruiseki.okmodular.api.recipe.core.IMachineState;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.core.ITieredMachine;
 import ruiseki.okmodular.api.recipe.error.ErrorReason;
+import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.api.structure.core.ConditionPolicy;
@@ -136,8 +137,16 @@ public class TEMachineController extends AbstractMBModifierTE
     private long timePlacedCount = 0;
     @NBTPersist
     private long timeContinuousCount = 0;
-    @NBTPersist
-    private long currentRecipeSeed = 0;
+    /**
+     * The tick the running recipe started on, or zero when the machine has never run one.
+     * <p>
+     * There used to be a {@code currentRecipeSeed} beside this, persisted too, holding the
+     * same tick XORed with the world seed and the position. Both were set from the same
+     * {@code getTotalWorldTime()} on the same line, and the evaluation seed XORed the world
+     * seed and the position back in - so the extra field carried <b>no fact this one does
+     * not</b>, and its XOR chain cancelled the world seed out. See
+     * {@link SeedMixer#forEvaluation}.
+     */
     @NBTPersist
     private long currentRecipeStartTick = 0;
 
@@ -797,8 +806,10 @@ public class TEMachineController extends AbstractMBModifierTE
 
         if (selection.isRunnable()) {
             activeRecipeColor = selection.getColor();
-            currentRecipeSeed = worldObj.getTotalWorldTime() ^ worldObj.getSeed()
-                ^ ((long) xCoord << 32 | (zCoord & 0xFFFFFFFFL));
+            // What makes this run's draws differ from the last run's at this machine. The
+            // rest of the evaluation seed - the world, the position, the recipe count - is
+            // mixed in by SeedMixer.forEvaluation at the moment of evaluation, so there is
+            // nothing to persist here beyond the tick itself.
             currentRecipeStartTick = worldObj.getTotalWorldTime();
             ConditionContext context = getConditionContext();
             if (processAgent
@@ -1403,10 +1414,13 @@ public class TEMachineController extends AbstractMBModifierTE
 
     @Override
     public ConditionContext getConditionContext() {
-        long seed = (long) xCoord ^ ((long) zCoord << 32)
-            ^ worldObj.getSeed()
-            ^ ((long) machineStateAgent.getRecipeProcessedCount() << 16)
-            ^ currentRecipeSeed;
+        long seed = SeedMixer.forEvaluation(
+            worldObj.getSeed(),
+            xCoord,
+            yCoord,
+            zCoord,
+            machineStateAgent.getRecipeProcessedCount(),
+            currentRecipeStartTick);
         return new ConditionContext(worldObj, xCoord, yCoord, zCoord, this, seed);
     }
 

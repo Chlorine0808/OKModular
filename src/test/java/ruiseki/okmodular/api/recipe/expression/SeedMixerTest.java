@@ -10,6 +10,8 @@ import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import ruiseki.okmodular.testsupport.JavaSource;
+
 /**
  * 評価の種から乱数を作る部分。
  *
@@ -182,7 +184,7 @@ public class SeedMixerTest {
     // 位置由来の種（forPosition）
     // ============================================
     //
-    // 1 レシピの実行中、評価の種は固定される（`currentRecipeSeed` は開始時に 1 回だけ決まり、
+    // 1 レシピの実行中、評価の種は固定される（開始 tick が開始時に 1 回だけ決まり、
     // NBT で永続化される）。**それが欲しい性質**で、セーブ・ロードを跨いでも判定が揺れない。
     //
     // しかしそのせいで、**位置ごとに引きたいものが全部同じ値になる**。
@@ -291,5 +293,108 @@ public class SeedMixerTest {
         for (int i = 0; i < buckets.length; i++) {
             assertTrue(buckets[i] >= 100, "位置由来の区間 " + i + " が " + buckets[i] + " 個");
         }
+    }
+
+    // ============================================
+    // 機械が渡す評価の種（forEvaluation）
+    // ============================================
+    //
+    // 旧実装は XOR の連鎖で、**ワールドシードが 2 回入って打ち消し合っていた**:
+    //
+    // 実行の種 = 開始tick ^ ワールドシード ^ 位置
+    // 評価の種 = 位置 ^ ワールドシード ^ 処理回数 ^ 実行の種
+    // = 位置 ^ 位置 ^ 処理回数 ^ 開始tick ← ワールドシードが消える
+    //
+    // しかも待機中は実行の種が 0 なのでワールドシードが 1 個だけ残る。
+    // **稼働中か待機中かでワールドシード依存が入れ替わる**という一貫性の無さがあった。
+    //
+    // `y` はどちらの式にも入っていなかったので、**同じ x,z に積んだ 2 台が同じ目を出す**。
+    // 機械を縦に積むのは普通の建て方。
+    //
+    // ここで縛るのは 5 つ: ワールド・位置（y を含む）・処理回数・実行が変われば変わること、
+    // そして 1 回の実行の中では変わらないこと。
+
+    @Test
+    @DisplayName("同じ状況なら何度でも同じ種")
+    public void test評価_決定的である() {
+        // 「1 回の実行の中では固定」がこれ。確認したときと適用するときで違う値が出ると、
+        // 「置けると答えたのに置かない」が起きる。
+        assertEquals(
+            SeedMixer.forEvaluation(4649L, 10, 64, -20, 7, 1234L),
+            SeedMixer.forEvaluation(4649L, 10, 64, -20, 7, 1234L));
+    }
+
+    @Test
+    @DisplayName("ワールドシードが違えば違う種")
+    public void test評価_ワールドシードが効く() {
+        // ここが旧実装で打ち消し合っていた。同じ座標・同じ tick・同じ回数なら、
+        // **別のワールドでも同じ目**が出ていた。
+        assertNotEquals(
+            SeedMixer.forEvaluation(1L, 10, 64, -20, 7, 1234L),
+            SeedMixer.forEvaluation(2L, 10, 64, -20, 7, 1234L));
+    }
+
+    @Test
+    @DisplayName("待機中でもワールドシードが効く")
+    public void test評価_待機中もワールドシードが効く() {
+        // 開始 tick 0 = 一度もレシピを回していない機械。旧実装ではここだけ
+        // ワールドシードが残っていたので、稼働中と待機中で挙動が入れ替わっていた。
+        assertNotEquals(
+            SeedMixer.forEvaluation(1L, 10, 64, -20, 0, 0L),
+            SeedMixer.forEvaluation(2L, 10, 64, -20, 0, 0L));
+    }
+
+    @Test
+    @DisplayName("縦に積んだ 2 台が違う種を持つ")
+    public void test評価_高さが効く() {
+        // y はどちらの式にも入っていなかった。同じ x,z の 2 台が、同 tick・同回数なら
+        // 完全に同じ抽選をしていた。
+        assertNotEquals(
+            SeedMixer.forEvaluation(4649L, 10, 64, -20, 7, 1234L),
+            SeedMixer.forEvaluation(4649L, 10, 65, -20, 7, 1234L));
+    }
+
+    @Test
+    @DisplayName("処理回数と実行が変われば種も変わる")
+    public void test評価_実行ごとに変わる() {
+        long base = SeedMixer.forEvaluation(4649L, 10, 64, -20, 7, 1234L);
+
+        assertNotEquals(base, SeedMixer.forEvaluation(4649L, 10, 64, -20, 8, 1234L), "処理回数が効いていない");
+        assertNotEquals(base, SeedMixer.forEvaluation(4649L, 10, 64, -20, 7, 1235L), "開始 tick が効いていない");
+    }
+
+    @Test
+    @DisplayName("成分が打ち消し合わない")
+    public void test評価_打ち消し合わない() {
+        // XOR の連鎖だと、同じ値が 2 回入ったところが消える。足して混ぜる形なら消えない。
+        // 「x と処理回数を入れ替えた」「位置とシードを入れ替えた」で衝突しないことを見る。
+        // j は 1 から。0 だと 3 本とも「全部 0」の同じ呼び出しになって、
+        // 数が合わないのが実装のせいなのかテストのせいなのか分からなくなる。
+        Set<Long> seen = new HashSet<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                seen.add(SeedMixer.forEvaluation(i, j, 0, 0, 0, 0L));
+                seen.add(SeedMixer.forEvaluation(i, 0, 0, 0, j, 0L));
+                seen.add(SeedMixer.forEvaluation(i, 0, 0, 0, 0, j));
+            }
+        }
+
+        assertEquals(3 * 8 * 8, seen.size(), "成分の入れ替えで同じ種になった組がある");
+    }
+
+    @Test
+    @DisplayName("機械が forEvaluation を通っている")
+    public void test機械が自前で組み立てていない() {
+        // 種の組み立てが TE 側に散ると、また片方だけ古くなる。
+        // 旧実装は「実行の種」と「評価の種」の 2 箇所に別々の綴りで書かれていて、
+        // その 2 つが XOR で打ち消し合っていた。
+        String source = JavaSource
+            .stripComments(JavaSource.read(JavaSource.MAIN.resolve("common/tile/TEMachineController.java")));
+
+        assertTrue(source.contains("SeedMixer.forEvaluation("), "TEMachineController が forEvaluation を通っていない");
+        assertTrue(!source.contains("currentRecipeSeed"), "currentRecipeSeed が戻っている。開始 tick と同じ事実を 2 つ持つことになる");
+        assertTrue(
+            !source.contains("worldObj.getSeed()\n") && !source.contains("^ worldObj.getSeed()"),
+            "ワールドシードを TE 側で XOR している。打ち消し合いが戻る");
     }
 }

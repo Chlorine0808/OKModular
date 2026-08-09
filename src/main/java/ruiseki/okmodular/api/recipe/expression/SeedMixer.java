@@ -121,6 +121,38 @@ public final class SeedMixer {
         return mix(h);
     }
 
+    /**
+     * The evaluation seed a machine hands to every expression it evaluates.
+     *
+     * <h2>This used to be a chain of XORs, and they cancelled</h2>
+     *
+     * The run seed was {@code startTick ^ worldSeed ^ position} and the evaluation seed was
+     * {@code position ^ worldSeed ^ processed ^ runSeed}, so <b>the world seed appeared twice
+     * and XORed itself away</b>. Two worlds with different seeds drew identically at the same
+     * coordinates, the same tick and the same recipe count - except while the machine was idle
+     * and the run seed was zero, where only one copy was present and the world seed survived.
+     * Whether the world seed mattered depended on whether the machine was busy.
+     * <p>
+     * The {@code y} coordinate was in neither term, so <b>two machines stacked at the same x
+     * and z drew the same numbers</b>. Building a column of them is an ordinary thing to do.
+     * <p>
+     * Adding through the finalizer instead of XORing means no component can remove another,
+     * and {@link #forPosition} already gives each axis its own gamma.
+     *
+     * @param worldSeed the world's seed, so two worlds differ
+     * @param x         the controller's position; {@code y} included, unlike the old chain
+     * @param processed how many recipes this machine has finished, so successive runs differ
+     *                  even when nothing else does
+     * @param startTick the tick the running recipe started on, or zero when idle. Fixed for
+     *                  the whole run and persisted, which is what keeps a run's draws stable
+     *                  across a save and reload
+     */
+    public static long forEvaluation(long worldSeed, int x, int y, int z, long processed, long startTick) {
+        long h = forPosition(worldSeed, x, y, z);
+        h = mix(h + processed * STREAM_GAMMA);
+        return mix(h + startTick * STREAM_GAMMA);
+    }
+
     /** SplitMix64's finalizer. Every input bit reaches every output bit. */
     private static long mix(long z) {
         z += STREAM_GAMMA;
