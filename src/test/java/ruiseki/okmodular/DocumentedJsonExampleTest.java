@@ -138,11 +138,6 @@ public class DocumentedJsonExampleTest {
     // ============================================================
 
     /**
-     * 断片は `{ }` で包む。docs には `"tierMap": { ... }` のように
-     * **キーから始まる抜粋**が多く、それ自体は JSON として不完全だが、
-     * 例としては正しい。包めば構文だけは確かめられる。
-     */
-    /**
      * ブロック全体として読めなければ、**1 行ずつの抜粋**として読み直す。
      * <p>
      * docs には「こう書けます」を 3 行並べたブロックがある。
@@ -193,6 +188,11 @@ public class DocumentedJsonExampleTest {
         }
     }
 
+    /**
+     * 断片は `{ }` で包む。docs には `"nbt": [...]` のように
+     * **キーから始まる抜粋**が多く、それ自体は JSON として不完全だが、例としては正しい。
+     * 包めば構文だけは確かめられる。
+     */
     private static String wrapFragment(String block) {
         String trimmed = block.trim();
         if (trimmed.startsWith("{") || trimmed.startsWith("[")) return trimmed;
