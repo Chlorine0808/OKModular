@@ -14,15 +14,14 @@ import ruiseki.okmodular.api.recipe.expression.SeedMixer;
  * the machine and is answered once when the pattern is placed. <b>Which cell gets what</b> is
  * answered per cell, from the machine's evaluation seed and the cell's own coordinates.
  * <p>
- * {@link #resolve} is the line between them. It takes the machine's context and hands back a
- * {@link Resolved} holding plain numbers, which is then asked about every cell. Splitting it
- * that way is not tidiness: a sphere of radius eight is 2145 cells, and evaluating
- * {@code "tier * 0.1"} once per cell would be 2145 evaluations of a value that cannot differ
- * between them. Scattering is the coordinates' job, not the expression's.
+ * {@link #resolve} is the line between them, and where it falls depends on what was written.
+ * A chance and a table of plain numbers are settled there, once, and no per-cell context is ever
+ * built - a sphere of radius eight is 2145 cells, and asking a written-down number 2145 times
+ * would be 2145 answers that cannot differ.
  * <p>
- * The day a weight is allowed to read the cell it sits in - "denser toward the middle" - the
- * evaluation moves from {@link #resolve} down into {@link Resolved}, and nothing outside this
- * file has to know.
+ * An expression may read the cell it sits in - "denser toward the middle" - so its value is not
+ * knowable at {@link #resolve} at all, and {@link Resolved} evaluates it per cell instead. That
+ * is the same split, moved one step later, and nothing outside this file had to change for it.
  *
  * <h2>Why this is not a block ID</h2>
  *
@@ -53,6 +52,18 @@ public final class CellMapping {
     private final IExpression[] weights;
     private final IExpression chance;
 
+    /**
+     * Whether every number here is written down, so it can be settled once for a placement.
+     * <p>
+     * An expression may read the cell it sits in ({@code cell_y}), and there is no way to ask it
+     * whether it does without giving every expression a second notion of "constant" alongside
+     * {@link ConstantExpression}. So the test is the one that already exists: a plain number is
+     * settled once, and anything else is asked at every cell. That costs a machine-only
+     * expression like {@code "tier * 0.2"} one evaluation per cell instead of one per placement,
+     * which is a few thousand cheap evaluations once per recipe.
+     */
+    private final boolean settled;
+
     CellMapping(String blockId) {
         this(blockId, new ConstantExpression(ALWAYS));
     }
@@ -65,6 +76,18 @@ public final class CellMapping {
         this.choices = choices;
         this.weights = weights;
         this.chance = chance;
+        this.settled = written(chance) && allWritten(weights);
+    }
+
+    private static boolean written(IExpression expression) {
+        return expression instanceof ConstantExpression;
+    }
+
+    private static boolean allWritten(IExpression[] expressions) {
+        for (IExpression expression : expressions) {
+            if (!written(expression)) return false;
+        }
+        return true;
     }
 
     /**
@@ -83,19 +106,22 @@ public final class CellMapping {
     }
 
     /**
-     * Settle the expressions against the machine, for one placement of the pattern.
+     * Settle what can be settled against the machine, for one placement of the pattern.
      * <p>
-     * Call once and ask the result about every cell. Calling it per cell is not wrong, only
-     * wasteful - see the note at the top of this class.
+     * Call once and ask the result about every cell. When every number here is written down the
+     * work happens now and no per-cell context is ever built; otherwise the numbers cannot be
+     * known until the cell is named, and {@link Resolved} does it there instead.
      */
     public Resolved resolve(ConditionContext context) {
-        double[] settled = new double[weights.length];
+        if (!settled) return new Resolved(this, context, null, 0, 0);
+
+        double[] numbers = new double[weights.length];
         double total = 0;
         for (int i = 0; i < weights.length; i++) {
-            settled[i] = weights[i].evaluateDouble(context);
-            total += settled[i];
+            numbers[i] = weights[i].evaluateDouble(context);
+            total += numbers[i];
         }
-        return new Resolved(choices, settled, total, chance.evaluateDouble(context));
+        return new Resolved(this, context, numbers, total, chance.evaluateDouble(context));
     }
 
     @Override
@@ -108,16 +134,20 @@ public final class CellMapping {
         return text.toString();
     }
 
-    /** One mapping with its numbers settled, ready to be asked about individual cells. */
+    /** One mapping part-way settled, ready to be asked about individual cells. */
     public static final class Resolved {
 
-        private final String[] choices;
+        private final CellMapping mapping;
+        private final ConditionContext machine;
+
+        /** The settled weights, or null when they can only be known per cell. */
         private final double[] weights;
         private final double totalWeight;
         private final double chance;
 
-        Resolved(String[] choices, double[] weights, double totalWeight, double chance) {
-            this.choices = choices;
+        Resolved(CellMapping mapping, ConditionContext machine, double[] weights, double totalWeight, double chance) {
+            this.mapping = mapping;
+            this.machine = machine;
             this.weights = weights;
             this.totalWeight = totalWeight;
             this.chance = chance;
@@ -126,20 +156,43 @@ public final class CellMapping {
         /**
          * The block to place at one cell of this placement.
          *
-         * @param seed the machine's evaluation seed, fixed for the run
-         * @param x    where the cell landed in the world
+         * @param worldX where the cell landed in the world; the draw is mixed from this, so one
+         *               pattern written at two anchors comes out as two arrangements
+         * @param cellX  how far the cell sits from its anchor, on the world's axes. This is what
+         *               {@code cell_x} reads, and it is the <b>same</b> at every anchor, which is
+         *               why a shape written with it repeats while the scatter does not
          * @return {@code modid:name}, {@code modid:name:meta}, or null when this draw leaves
          *         the cell alone. <b>Alone, not empty</b> - a cell that loses its chance is as
          *         if it had been drawn as a space, so whatever stood there stays. To clear it
          *         instead, give it {@code _}.
          */
-        public String blockFor(long seed, int x, int y, int z) {
-            if (chance < ALWAYS && !isWritten(seed, x, y, z)) return null;
-            if (choices.length == 1) return choices[0];
-            return pick(seed, x, y, z);
+        public String blockFor(int worldX, int worldY, int worldZ, int cellX, int cellY, int cellZ) {
+            long seed = machine != null ? machine.getEvaluationSeed() : 0L;
+
+            if (weights != null) {
+                if (!passes(seed, worldX, worldY, worldZ, chance)) return null;
+                return pick(seed, worldX, worldY, worldZ, weights, totalWeight);
+            }
+
+            ConditionContext here = ConditionContext.forCell(machine, worldX, worldY, worldZ, cellX, cellY, cellZ);
+
+            // The gate first. A cell that loses it never evaluates the table, so a chance of 0.3
+            // over a sphere costs the weights three tenths of what asking in the other order would.
+            if (!passes(seed, worldX, worldY, worldZ, mapping.chance.evaluateDouble(here))) return null;
+
+            double[] numbers = new double[mapping.weights.length];
+            double total = 0;
+            for (int i = 0; i < numbers.length; i++) {
+                numbers[i] = mapping.weights[i].evaluateDouble(here);
+                total += numbers[i];
+            }
+            return pick(seed, worldX, worldY, worldZ, numbers, total);
         }
 
-        private boolean isWritten(long seed, int x, int y, int z) {
+        /** Whether this cell is written at all. A chance at or above one skips the draw. */
+        private boolean passes(long seed, int x, int y, int z, double chance) {
+            if (chance >= ALWAYS) return true;
+
             long cell = SeedMixer.forPosition(seed, x, y, z);
             return SeedMixer.toUnitInterval(cell, SeedMixer.PATTERN_CELL_CHANCE) < chance;
         }
@@ -147,27 +200,28 @@ public final class CellMapping {
         /**
          * Which entry of the table this cell draws.
          * <p>
-         * A different stream from {@link #isWritten}: sharing one would make the cells that
-         * won their chance be exactly the cells that drew the first entry, so a table behind a
+         * A different stream from {@link #passes}: sharing one would make the cells that won
+         * their chance be exactly the cells that drew the first entry, so a table behind a
          * chance would only ever place one of its blocks.
          * <p>
          * A total weight of zero is refused when the pattern is read, so reaching it here
          * means an expression brought it to zero. Nothing is placed rather than the first
          * entry being handed out for free.
          */
-        private String pick(long seed, int x, int y, int z) {
-            if (totalWeight <= 0) return null;
+        private String pick(long seed, int x, int y, int z, double[] weights, double total) {
+            if (weights.length == 1) return mapping.choices[0];
+            if (total <= 0) return null;
 
             long cell = SeedMixer.forPosition(seed, x, y, z);
-            double roll = SeedMixer.toUnitInterval(cell, SeedMixer.PATTERN_CELL_WEIGHT) * totalWeight;
+            double roll = SeedMixer.toUnitInterval(cell, SeedMixer.PATTERN_CELL_WEIGHT) * total;
 
             double passed = 0;
-            for (int i = 0; i < choices.length; i++) {
+            for (int i = 0; i < weights.length; i++) {
                 passed += weights[i];
-                if (roll < passed) return choices[i];
+                if (roll < passed) return mapping.choices[i];
             }
             // The roll is below the total by construction; this only catches floating-point drift.
-            return choices[choices.length - 1];
+            return mapping.choices[weights.length - 1];
         }
     }
 }

@@ -3,9 +3,11 @@ package ruiseki.okmodular.structure.pattern;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.structure.StructureShape;
 
 /**
@@ -110,6 +112,21 @@ public final class StructurePattern {
      *                             pattern's.</b>
      * @return an unmodifiable list, shared between calls with the same facing
      */
+    /**
+     * Each distinct mapping in {@code cells}, settled once for one placement.
+     * <p>
+     * Shared by the input and the output side because both lay the same pattern over an anchor and
+     * then ask about every cell. Resolving inside the cell loop instead - which the input side did
+     * - re-evaluates one mapping's expressions once per cell it appears in.
+     */
+    public static Map<CellMapping, CellMapping.Resolved> settle(List<Cell> cells, ConditionContext context) {
+        Map<CellMapping, CellMapping.Resolved> settled = new IdentityHashMap<>();
+        for (Cell cell : cells) {
+            if (!settled.containsKey(cell.mapping)) settled.put(cell.mapping, cell.mapping.resolve(context));
+        }
+        return settled;
+    }
+
     public List<Cell> cellsFor(String machineDefaultFacing) {
         String key = machineDefaultFacing == null ? "" : machineDefaultFacing.toUpperCase();
         List<Cell> cached = resolved.get(key);

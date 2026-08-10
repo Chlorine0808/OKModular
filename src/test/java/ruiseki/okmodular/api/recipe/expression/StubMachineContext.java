@@ -150,6 +150,16 @@ public final class StubMachineContext {
         return new ConditionContext(null, 0, 0, 0);
     }
 
+    /**
+     * 機械つきで、評価シードを指定したコンテキスト。
+     *
+     * シードは実行ごとに変わる値で、`withMachine()` は 0 に固定される。
+     * 「別の実行なら別の散らばりになる」を見るテストが実行を作り分けるための口。
+     */
+    public static ConditionContext withSeed(long seed) {
+        return new ConditionContext(null, 0, 0, 0, new StubRecipeContext(new StubMachineState()), seed);
+    }
+
     /** 機械状態そのもの。汎用アクセサを直接叩くテスト用。 */
     public static IMachineState machineState() {
         return new StubMachineState();

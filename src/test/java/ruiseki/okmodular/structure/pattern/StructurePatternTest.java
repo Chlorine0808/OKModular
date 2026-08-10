@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import com.google.gson.JsonParser;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
 import ruiseki.okmodular.api.recipe.expression.EvaluationValue;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.StubMachineContext;
@@ -68,7 +69,7 @@ public class StructurePatternTest {
             map.put(
                 cell.a + "," + cell.b + "," + cell.c,
                 cell.mapping.resolve(StubMachineContext.withoutMachine())
-                    .blockFor(0L, 0, 0, 0));
+                    .blockFor(0, 0, 0, 0, 0, 0));
         }
         return map;
     }
@@ -94,12 +95,22 @@ public class StructurePatternTest {
         return mappingOf(value).resolve(context);
     }
 
+    /**
+     * 別の実行に当てる。
+     *
+     * 種は `blockFor` の引数ではなく**文脈が持つ**（K1 でセルごとに文脈を作るようになり、
+     * 種はそこから取る形になった）。実行を作り分けたいテストはここを通す。
+     */
+    private static CellMapping.Resolved resolvedOf(String value, long seed) {
+        return resolvedOf(value, StubMachineContext.withSeed(seed));
+    }
+
     /** 20x20 のマスに置いて、実際にブロックが入った数を数える。 */
-    private static int placedOf(CellMapping.Resolved mapping, long seed) {
+    private static int placedOf(CellMapping.Resolved mapping) {
         int placed = 0;
         for (int x = 0; x < 20; x++) {
             for (int z = 0; z < 20; z++) {
-                if (mapping.blockFor(seed, x, 64, z) != null) placed++;
+                if (mapping.blockFor(x, 64, z, 0, 0, 0) != null) placed++;
             }
         }
         return placed;
@@ -118,7 +129,7 @@ public class StructurePatternTest {
     @Test
     @DisplayName("chance を書いたセルは確率で欠ける")
     public void testchanceでセルが欠ける() {
-        int placed = placedOf(resolvedOf("{ 'block': 'minecraft:stone', 'chance': 0.5 }"), 4649L);
+        int placed = placedOf(resolvedOf("{ 'block': 'minecraft:stone', 'chance': 0.5 }", 4649L));
 
         assertTrue(placed > 150 && placed < 250, "400 マス中 " + placed + " マス。0 や 400 に潰れているなら座標が混ざっていない");
     }
@@ -126,31 +137,35 @@ public class StructurePatternTest {
     @Test
     @DisplayName("chance 1 は必ず置き、0 は決して置かない")
     public void testchanceの両端() {
-        assertEquals(400, placedOf(resolvedOf("{ 'block': 'minecraft:stone', 'chance': 1.0 }"), 1L));
-        assertEquals(0, placedOf(resolvedOf("{ 'block': 'minecraft:stone', 'chance': 0.0 }"), 1L));
+        assertEquals(400, placedOf(resolvedOf("{ 'block': 'minecraft:stone', 'chance': 1.0 }", 1L)));
+        assertEquals(0, placedOf(resolvedOf("{ 'block': 'minecraft:stone', 'chance': 0.0 }", 1L)));
     }
 
     @Test
     @DisplayName("同じ種・同じ座標なら何度聞いても同じ")
     public void testchanceが決定的である() {
         // 置く前に確かめる経路があるので、ここが揺れると「置けると答えたのに置かない」。
-        CellMapping.Resolved mapping = resolvedOf("{ 'block': 'minecraft:stone', 'chance': 0.5 }");
+        CellMapping.Resolved mapping = resolvedOf("{ 'block': 'minecraft:stone', 'chance': 0.5 }", 99L);
 
         for (int x = 0; x < 30; x++) {
-            assertEquals(mapping.blockFor(99L, x, 64, 7), mapping.blockFor(99L, x, 64, 7), "x=" + x + " で答えが変わった");
+            assertEquals(
+                mapping.blockFor(x, 64, 7, 0, 0, 0),
+                mapping.blockFor(x, 64, 7, 0, 0, 0),
+                "x=" + x + " で答えが変わった");
         }
     }
 
     @Test
     @DisplayName("実行が変われば欠けるマスも変わる")
     public void testchanceが実行ごとに変わる() {
-        CellMapping.Resolved mapping = resolvedOf("{ 'block': 'minecraft:stone', 'chance': 0.5 }");
+        CellMapping.Resolved oneRun = resolvedOf("{ 'block': 'minecraft:stone', 'chance': 0.5 }", 1L);
+        CellMapping.Resolved another = resolvedOf("{ 'block': 'minecraft:stone', 'chance': 0.5 }", 2L);
         StringBuilder first = new StringBuilder();
         StringBuilder second = new StringBuilder();
 
         for (int x = 0; x < 40; x++) {
-            first.append(mapping.blockFor(1L, x, 64, 0) == null ? '.' : '#');
-            second.append(mapping.blockFor(2L, x, 64, 0) == null ? '.' : '#');
+            first.append(oneRun.blockFor(x, 64, 0, 0, 0, 0) == null ? '.' : '#');
+            second.append(another.blockFor(x, 64, 0, 0, 0, 0) == null ? '.' : '#');
         }
 
         assertNotEquals(first.toString(), second.toString(), "種を変えても同じ並びになった");
@@ -159,8 +174,8 @@ public class StructurePatternTest {
     @Test
     @DisplayName("chance を書かなければ今までどおり必ず置く")
     public void testchance無しは据え置き() {
-        assertEquals(400, placedOf(resolvedOf("'minecraft:stone'"), 1L), "文字列で書いた対応が欠けるようになっている");
-        assertEquals(400, placedOf(resolvedOf("{ 'block': 'minecraft:stone' }"), 1L), "chance の無いオブジェクトが欠けている");
+        assertEquals(400, placedOf(resolvedOf("'minecraft:stone'", 1L)), "文字列で書いた対応が欠けるようになっている");
+        assertEquals(400, placedOf(resolvedOf("{ 'block': 'minecraft:stone' }", 1L)), "chance の無いオブジェクトが欠けている");
     }
 
     @Test
@@ -180,11 +195,11 @@ public class StructurePatternTest {
     }
 
     /** 40x40 のマスに置いて、何が何マス入ったかを数える。置かなかったマスは "null"。 */
-    private static Map<String, Integer> picksOf(CellMapping.Resolved mapping, long seed) {
+    private static Map<String, Integer> picksOf(CellMapping.Resolved mapping) {
         Map<String, Integer> counts = new HashMap<>();
         for (int x = 0; x < 40; x++) {
             for (int z = 0; z < 40; z++) {
-                counts.merge(String.valueOf(mapping.blockFor(seed, x, 64, z)), 1, Integer::sum);
+                counts.merge(String.valueOf(mapping.blockFor(x, 64, z, 0, 0, 0)), 1, Integer::sum);
             }
         }
         return counts;
@@ -204,8 +219,7 @@ public class StructurePatternTest {
     @DisplayName("重みの比率どおりに散る")
     public void testweightsが比率どおり() {
         Map<String, Integer> picks = picksOf(
-            resolvedOf("{ 'weights': { 'minecraft:iron_ore': 3, 'minecraft:gold_ore': 1 } }"),
-            4649L);
+            resolvedOf("{ 'weights': { 'minecraft:iron_ore': 3, 'minecraft:gold_ore': 1 } }", 4649L));
 
         // 1600 マスを 3:1 なら 1200 と 400。落ちるべきときに確実に落ちる粗さで縛る。
         assertTrue(picks.getOrDefault("minecraft:iron_ore", 0) > 1050, "鉄が少なすぎる: " + picks);
@@ -218,10 +232,14 @@ public class StructurePatternTest {
     @DisplayName("同じ種・同じ座標なら同じブロックを引く")
     public void testweightsが決定的である() {
         CellMapping.Resolved mapping = resolvedOf(
-            "{ 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 1 } }");
+            "{ 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 1 } }",
+            7L);
 
         for (int x = 0; x < 30; x++) {
-            assertEquals(mapping.blockFor(7L, x, 64, 3), mapping.blockFor(7L, x, 64, 3), "x=" + x + " で答えが変わった");
+            assertEquals(
+                mapping.blockFor(x, 64, 3, 0, 0, 0),
+                mapping.blockFor(x, 64, 3, 0, 0, 0),
+                "x=" + x + " で答えが変わった");
         }
     }
 
@@ -229,8 +247,7 @@ public class StructurePatternTest {
     @DisplayName("重み 0 の項目は選ばれない")
     public void testweightsの重み0() {
         Map<String, Integer> picks = picksOf(
-            resolvedOf("{ 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 0 } }"),
-            1L);
+            resolvedOf("{ 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 0 } }", 1L));
 
         assertEquals(1600, picks.getOrDefault("minecraft:iron_ore", 0), "重み 0 の項目が選ばれている: " + picks);
     }
@@ -239,10 +256,10 @@ public class StructurePatternTest {
     @DisplayName("`_` は空気、空白は触らない")
     public void testweightsの予約キー() {
         // 形を描くときと同じ語彙。「確率で空気にする」と「確率で手を付けない」は別のこと。
-        Map<String, Integer> air = picksOf(resolvedOf("{ 'weights': { '_': 1 } }"), 1L);
+        Map<String, Integer> air = picksOf(resolvedOf("{ 'weights': { '_': 1 } }", 1L));
         assertEquals(1600, air.getOrDefault("minecraft:air", 0), "`_` が空気になっていない: " + air);
 
-        Map<String, Integer> untouched = picksOf(resolvedOf("{ 'weights': { ' ': 1 } }"), 1L);
+        Map<String, Integer> untouched = picksOf(resolvedOf("{ 'weights': { ' ': 1 } }", 1L));
         assertEquals(1600, untouched.getOrDefault("null", 0), "空白が「触らない」になっていない: " + untouched);
     }
 
@@ -251,8 +268,9 @@ public class StructurePatternTest {
     public void testchanceとweightsが直交する() {
         // 50% のセルに置き、置くセルの内訳が 1:1 ＝ 400 / 400 / 800(触らない)。
         Map<String, Integer> picks = picksOf(
-            resolvedOf("{ 'chance': 0.5, 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 1 } }"),
-            20260810L);
+            resolvedOf(
+                "{ 'chance': 0.5, 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 1 } }",
+                20260810L));
 
         assertTrue(
             picks.getOrDefault("null", 0) > 700 && picks.getOrDefault("null", 0) < 900,
@@ -267,8 +285,7 @@ public class StructurePatternTest {
         // 系統を分け忘れると、chance に当たったセルが**全部同じブロック**になる。
         // 番号が違うだけでは足りないので、実際に両方が混ざることを見る。
         Map<String, Integer> picks = picksOf(
-            resolvedOf("{ 'chance': 0.5, 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 1 } }"),
-            31415L);
+            resolvedOf("{ 'chance': 0.5, 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 1 } }", 31415L));
 
         assertTrue(picks.getOrDefault("minecraft:iron_ore", 0) > 0, "置いたセルが片方に寄り切っている: " + picks);
         assertTrue(picks.getOrDefault("minecraft:gold_ore", 0) > 0, "置いたセルが片方に寄り切っている: " + picks);
@@ -332,8 +349,17 @@ public class StructurePatternTest {
     // `chance` も重みも、数のかわりに式が書けます。Tier で濃さが変わる鉱脈、
     // 天候で内訳が変わる配置、といったものがここで書けるようになる。
     //
-    // **評価は配置ごとに 1 回だけ**です。式が読むもの（Tier・充填率・天候）はセルごとに
-    // 同じ値なので、セルごとに評価しても答えは変わらず、半径 8 の球なら 2145 倍払うだけ。
+    // **評価の回数は、書いたものが数か式かで変わります。**
+    //
+    // 数で書いた `chance` や重みは配置につき 1 回で畳まれ、セルごとの文脈は 1 つも作られません。
+    // 式は K1（`cell_x` / `cell_y` / `cell_z`）でセルを読めるようになったので、
+    // **その値が配置の時点では分かりません** — セルごとに評価します。
+    //
+    // Tier しか読まない式まで巻き込まれますが、それを見分けるには `IExpression` に
+    // 「配置内で不変か」を足して全 composite に転送させる必要があり、
+    // `ConstantExpression` と別の「定数」概念が 2 つできます。数千回の軽い評価と引き換えに
+    // 概念を 1 つに保つ判断です（K1 の設計、`StructureIO_todos.md`）。
+    //
     // 散らばりは座標由来の抽選が担当していて、式の仕事ではありません。
 
     @Test
@@ -341,8 +367,7 @@ public class StructurePatternTest {
     public void testchanceを式で書く() {
         // スタブの機械は tier 3。tier * 0.25 = 0.75。
         int placed = placedOf(
-            resolvedOf("{ 'block': 'minecraft:stone', 'chance': 'tier * 0.25' }", StubMachineContext.withMachine()),
-            4649L);
+            resolvedOf("{ 'block': 'minecraft:stone', 'chance': 'tier * 0.25' }", StubMachineContext.withSeed(4649L)));
 
         assertTrue(placed > 250 && placed < 350, "400 マス中 " + placed + " マス。tier 3 なら 75% で 300 前後のはず");
     }
@@ -354,8 +379,7 @@ public class StructurePatternTest {
         Map<String, Integer> picks = picksOf(
             resolvedOf(
                 "{ 'weights': { 'minecraft:iron_ore': 'tier', 'minecraft:gold_ore': 1 } }",
-                StubMachineContext.withMachine()),
-            4649L);
+                StubMachineContext.withSeed(4649L)));
 
         assertTrue(picks.getOrDefault("minecraft:iron_ore", 0) > 1050, "鉄が少なすぎる: " + picks);
         assertTrue(picks.getOrDefault("minecraft:gold_ore", 0) > 250, "金が少なすぎる: " + picks);
@@ -363,18 +387,38 @@ public class StructurePatternTest {
     }
 
     @Test
-    @DisplayName("式の評価は配置につき 1 回だけ")
-    public void test式は配置ごとに1回だけ評価される() {
-        // ここが緩むと、球 1 つ置くのに式を数千回評価することになる。
+    @DisplayName("数で書いた chance と重みは配置につき 1 回だけ評価される")
+    public void test数は配置ごとに1回だけ評価される() {
+        // 既存のパターンはほぼ全部この経路。ここが緩むと、球 1 つ置くのに
+        // 定数の読み出しを数千回やることになる（しかもセルごとに文脈を 1 つ作る）。
+        CountingConstant chance = new CountingConstant(0.5);
+        CountingConstant weight = new CountingConstant(1.0);
+        CellMapping mapping = new CellMapping(new String[] { "minecraft:stone" }, new IExpression[] { weight }, chance);
+
+        CellMapping.Resolved resolved = mapping.resolve(StubMachineContext.withoutMachine());
+        for (int x = 0; x < 100; x++) resolved.blockFor(x, 64, 0, x, 0, 0);
+
+        assertEquals(1, chance.evaluated, "数の chance をセルごとに評価している");
+        assertEquals(1, weight.evaluated, "数の重みをセルごとに評価している");
+    }
+
+    @Test
+    @DisplayName("式で書いた chance と重みはセルごとに評価される")
+    public void test式はセルごとに評価される() {
+        // K1 で式が `cell_x` を読めるようになったので、配置の時点では値が決まらない。
+        // ここを 1 回に畳むと「中心ほど濃い」が全セル同じ濃さになる。
         Counting chance = new Counting(0.5);
         Counting weight = new Counting(1.0);
         CellMapping mapping = new CellMapping(new String[] { "minecraft:stone" }, new IExpression[] { weight }, chance);
 
         CellMapping.Resolved resolved = mapping.resolve(StubMachineContext.withoutMachine());
-        for (int x = 0; x < 100; x++) resolved.blockFor(1L, x, 64, 0);
+        for (int x = 0; x < 100; x++) resolved.blockFor(x, 64, 0, x, 0, 0);
 
-        assertEquals(1, chance.evaluated, "chance をセルごとに評価している");
-        assertEquals(1, weight.evaluated, "重みをセルごとに評価している");
+        assertEquals(100, chance.evaluated, "chance が配置につき 1 回に畳まれている");
+        // 重みは chance に当たったセルだけ。0.5 なので全部でも 0 でもない
+        assertTrue(
+            weight.evaluated > 20 && weight.evaluated < 80,
+            "重みの評価が " + weight.evaluated + " 回。chance に外れたセルでも評価している（100）か、" + "そもそも評価していない（0）");
     }
 
     @Test
@@ -390,7 +434,28 @@ public class StructurePatternTest {
             "定数 1.0 の chance まで非決定扱いになっている");
     }
 
-    /** 評価された回数を数える式。 */
+    /**
+     * 評価された回数を数える**数**。
+     *
+     * `ConstantExpression` を継承しているのが要点で、`CellMapping` が
+     * 「畳んでよいか」を `instanceof ConstantExpression` で判定するのでこちらは速い経路に乗る。
+     */
+    private static final class CountingConstant extends ConstantExpression {
+
+        int evaluated;
+
+        CountingConstant(double value) {
+            super(value);
+        }
+
+        @Override
+        public EvaluationValue evaluate(ConditionContext context) {
+            evaluated++;
+            return super.evaluate(context);
+        }
+    }
+
+    /** 評価された回数を数える式。数ではないので遅い経路（セルごと）に乗る。 */
     private static final class Counting implements IExpression {
 
         int evaluated;
@@ -415,11 +480,18 @@ public class StructurePatternTest {
         // ブロック ID 1 個だけの対応は動いてはいけない。
         StructurePattern pattern = parse(
             "{ 'name': 'core', 'mappings': { 'S': 'minecraft:stone' }, 'layers': [ ['SQ'] ] }".replace('\'', '"'));
-        CellMapping.Resolved cell = pattern.cellsFor(null)
-            .get(0).mapping.resolve(StubMachineContext.withoutMachine());
+        CellMapping cell = pattern.cellsFor(null)
+            .get(0).mapping;
 
-        assertEquals("minecraft:stone", cell.blockFor(0L, 0, 0, 0));
-        assertEquals("minecraft:stone", cell.blockFor(4649L, 10, 64, -20));
+        assertEquals(
+            "minecraft:stone",
+            cell.resolve(StubMachineContext.withoutMachine())
+                .blockFor(0, 0, 0, 0, 0, 0));
+        assertEquals(
+            "minecraft:stone",
+            cell.resolve(StubMachineContext.withSeed(4649L))
+                .blockFor(10, 64, -20, 3, -4, 5),
+            "種も座標もセルも無視するはず");
     }
 
     @Test

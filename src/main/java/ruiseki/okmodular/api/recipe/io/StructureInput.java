@@ -1,6 +1,7 @@
 package ruiseki.okmodular.api.recipe.io;
 
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -22,6 +23,7 @@ import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.api.structure.core.StructureSymbols;
+import ruiseki.okmodular.structure.pattern.CellMapping;
 import ruiseki.okmodular.structure.pattern.StructurePattern;
 import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
 import ruiseki.okmodular.util.Logger;
@@ -144,6 +146,11 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
 
     private boolean allCellsMatch(IRecipeContext context, World world, List<StructurePattern.Cell> cells,
         int[] anchorCell, ConditionContext condContext) {
+        Map<CellMapping, CellMapping.Resolved> settled = StructurePattern.settle(cells, condContext);
+
+        int[] anchorPos = context.getCellPosition(anchorCell[0], anchorCell[1], anchorCell[2]);
+        if (anchorPos == null) return false;
+
         for (StructurePattern.Cell cell : cells) {
             int[] pos = context.getCellPosition(anchorCell[0] + cell.a, anchorCell[1] + cell.b, anchorCell[2] + cell.c);
             if (pos == null) return false;
@@ -151,9 +158,9 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
             String id = BlockIdMatcher
                 .idOf(world.getBlock(pos[0], pos[1], pos[2]), world.getBlockMetadata(pos[0], pos[1], pos[2]));
             // An input only ever sees mappings that answer the same everywhere - the parser
-            // refuses the rest - so neither the seed nor the position can change the answer.
-            String expected = cell.mapping.resolve(condContext)
-                .blockFor(0L, pos[0], pos[1], pos[2]);
+            // refuses the rest - so neither the position nor the cell can change the answer.
+            String expected = settled.get(cell.mapping)
+                .blockFor(pos[0], pos[1], pos[2], pos[0] - anchorPos[0], pos[1] - anchorPos[1], pos[2] - anchorPos[2]);
             if (!BlockIdMatcher.matches(id, expected)) return false;
         }
         return true;

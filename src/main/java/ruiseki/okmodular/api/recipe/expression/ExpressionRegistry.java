@@ -68,6 +68,13 @@ public class ExpressionRegistry {
             registerMachineProperty(property);
         }
 
+        // --- Cell Properties ---
+        // Where a pattern cell sits relative to its anchor. Driven off the same enum that
+        // defines them, for the reason the machine properties are.
+        for (String property : CellPropertyExpression.propertyNames()) {
+            registerCellProperty(property);
+        }
+
         // --- Constants ---
         registerVariable("pi", name -> ConstantExpression.PI);
         registerVariable("e", name -> ConstantExpression.E);
@@ -240,6 +247,10 @@ public class ExpressionRegistry {
 
     public static void registerMachineProperty(String name) {
         registerVariable(name, MachinePropertyExpression::new);
+    }
+
+    public static void registerCellProperty(String name) {
+        registerVariable(name, CellPropertyExpression::new);
     }
 
     public static void registerFunction(String name, IFunctionFactory factory) {

@@ -22,17 +22,79 @@ public class ConditionContext {
     private final IRecipeContext recipeContext;
     private final long evaluationSeed;
 
+    /** Offset from the anchor of the pattern cell being asked about, or null outside a pattern. */
+    private final int[] cell;
+
     // Cache for evaluation results during a single evaluation session
     private final Map<String, EvaluationValue> resultCache = new HashMap<>();
     private NBTTagCompound workingNBT;
 
     public ConditionContext(World world, int x, int y, int z, IRecipeContext recipeContext, long evaluationSeed) {
+        this(world, x, y, z, recipeContext, evaluationSeed, null);
+    }
+
+    private ConditionContext(World world, int x, int y, int z, IRecipeContext recipeContext, long evaluationSeed,
+        int[] cell) {
         this.world = world;
         this.x = x;
         this.y = y;
         this.z = z;
         this.recipeContext = recipeContext;
         this.evaluationSeed = evaluationSeed;
+        this.cell = cell;
+    }
+
+    /**
+     * The same machine, asked about one cell of a pattern it is writing.
+     * <p>
+     * <b>The machine is an argument rather than six loose values, so it cannot be left behind.</b>
+     * Building a bare context here would leave {@code tier} and every other machine property
+     * answering zero, with nothing raised - the failure {@code fix-expression} had to clear out of
+     * seven call sites.
+     * <p>
+     * {@code x} / {@code y} / {@code z} become the cell's own world position, which is what
+     * {@code OffsetCondition} and {@code BiomePatternCondition} already do: those coordinates mean
+     * "the position being asked about", not "the controller". That is what lets a pattern read the
+     * depth, the light or the biome at each cell rather than at the machine.
+     *
+     * @param machine the machine's context, or null where there is none (a load-time check, NEI)
+     * @param cellX   offset from the anchor, on the world's axes - so {@code cellY} is up
+     */
+    public static ConditionContext forCell(ConditionContext machine, int worldX, int worldY, int worldZ, int cellX,
+        int cellY, int cellZ) {
+        World world = machine != null ? machine.world : null;
+        IRecipeContext recipeContext = machine != null ? machine.recipeContext : null;
+        long runSeed = machine != null ? machine.evaluationSeed : 0L;
+
+        // Mixed per position, or random() inside a chance would answer the same at every cell and
+        // place all of them or none - the whole-pattern coin flip forPosition exists to prevent.
+        long seed = SeedMixer.forPosition(runSeed, worldX, worldY, worldZ);
+
+        return new ConditionContext(
+            world,
+            worldX,
+            worldY,
+            worldZ,
+            recipeContext,
+            seed,
+            new int[] { cellX, cellY, cellZ });
+    }
+
+    /** Whether this context is being asked about a particular pattern cell. */
+    public boolean hasCell() {
+        return cell != null;
+    }
+
+    public int getCellX() {
+        return cell == null ? 0 : cell[0];
+    }
+
+    public int getCellY() {
+        return cell == null ? 0 : cell[1];
+    }
+
+    public int getCellZ() {
+        return cell == null ? 0 : cell[2];
     }
     // ... rest of constructors ...
 
@@ -93,7 +155,9 @@ public class ConditionContext {
      */
     public ConditionContext forDraw(int index) {
         if (index == 0) return this;
-        return new ConditionContext(world, x, y, z, recipeContext, SeedMixer.forDraw(evaluationSeed, index));
+        // The cell is carried over: this says "the same question, a different draw", and dropping
+        // it would make cell_y answer zero from the second draw on without raising anything.
+        return new ConditionContext(world, x, y, z, recipeContext, SeedMixer.forDraw(evaluationSeed, index), cell);
     }
 
     /**

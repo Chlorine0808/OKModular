@@ -121,10 +121,53 @@ as a number.
 
 A vein that grows **denser** with the machine, and richer in iron as it does.
 
-**They are evaluated once per placement.** What an expression reads - the tier, how full a
-tank is, the weather - is the same at every cell, so evaluating per cell would give the same
-answer two thousand times over for a sphere. **Scattering across cells is the coordinates'
-job**, not the expression's.
+**A `chance` or a weight written as a plain number is evaluated once per placement.** The tier,
+how full a tank is, the weather - all the same at every cell, so evaluating per cell would give
+the same answer two thousand times over for a sphere. **Scattering across cells is the
+coordinates' job**, not the expression's.
+
+**An expression is evaluated per cell**, because it can read `cell_x` / `cell_y` / `cell_z`
+below and so its value is not knowable at placement time. An expression that only reads the
+machine is carried along with them; that is a deliberate trade, keeping one test for "can this
+be settled early" in exchange for a few thousand cheap evaluations.
+
+#### Reading where the cell is
+
+| Variable | What it is | Direction |
+| :--- | :--- | :--- |
+| `x` / `y` / `z` | **the cell's own world position** | as Minecraft's |
+| `cell_x` / `cell_y` / `cell_z` | **how far the cell sits from the anchor** | same axes; `cell_y` is up |
+
+They relate as `y = the anchor's world y + cell_y`. One coordinate system, two origins.
+
+```json
+"mappings": {
+  "X": { "block": "minecraft:iron_ore",
+         "chance": "1 - sqrt(cell_x^2 + cell_y^2 + cell_z^2) / 8" }
+}
+```
+
+A blob of radius eight centred on the anchor, **thinning toward the edge**. Draw one solid cube
+of `X` and the expression makes the gradient; there is no need to split the shells across
+several characters and draw each layer by hand.
+
+| What you want | Written as |
+| :--- | :--- |
+| A softened outline | `"chance": "1 - sqrt(cell_x^2 + cell_y^2 + cell_z^2) / 8"` |
+| Thinner above the anchor | `"chance": "1 + cell_y * 0.2"` (`cell_y` is up, so negative above) |
+| Better ore toward the middle | weights written in terms of the distance |
+| Only below a depth | `"chance": "y < 40 ? 1 : 0"` |
+| Stripes, chequerboard | `"chance": "cell_x % 2"` |
+
+> [!WARNING]
+> **`cell_*` is measured on the world's axes, so a shape does not turn with the machine.**
+> Spheres and strata do not care - geology should be level with the world rather than with the
+> machine, so this is the right way round for them. What it does affect is a stripe like
+> `cell_x % 2`: **turning the machine 90° leaves the stripes pointing the same way.**
+
+> [!NOTE]
+> **`cell_*` only means anything inside a pattern's `mappings`.** Written in a recipe's `amount`
+> or `duration` it answers zero, the way `tier` answers zero when no machine is connected.
 
 > [!NOTE]
 > **An expression-valued `chance` counts as undecided even if it would evaluate to 1.0.**
@@ -151,8 +194,15 @@ The draw mixes in the cell's **world coordinates**, so:
 - the next run lays it out differently
 
 > [!NOTE]
-> **This alone does not make a vein.** Cells draw independently of each other, so the mix comes
-> out **evenly scattered** - salt and pepper. Clumping needs noise with spatial correlation.
+> **`cell_*` gives you the shape, but a shape alone is not a vein.** Even with the density
+> falling off by distance, *which* cells get written is still an independent draw per cell, so
+> the inside of that softened sphere is **evenly scattered** - salt and pepper. Clumping needs
+> noise with spatial correlation.
+
+> [!NOTE]
+> **`cell_*` can only take away.** A cell that was not drawn does not appear. Getting a sphere
+> of radius eight means drawing 17×17×17 and carving it with an expression, so making the shape
+> itself from an expression needs a separate key.
 
 ### The anchor
 
