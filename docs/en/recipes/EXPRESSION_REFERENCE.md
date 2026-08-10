@@ -17,9 +17,21 @@ These can be used in the `amount` field of JSON recipes, the `expression` key in
 Standard arithmetic and logical operations are supported.
 
 - **Arithmetic**: `+`, `-`, `*`, `/`, `%` (modulo)
+- **Power**: `^` / `**` (the same operator, and the same thing as writing `pow(a, b)`)
 - **Comparison**: `==`, `!=`, `>`, `<`, `>=`, `<=`
 - **Logical**: `&&` (AND), `||` (OR), `!` (NOT)
 - **Grouping**: `()`, `{}`
+
+### How the power binds
+
+Tighter than `*` and `/`, looser than a leading minus, and **right-associative**.
+
+| Written | Read as | Value |
+| :--- | :--- | :--- |
+| `2 * 3 ^ 2` | `2 * (3 ^ 2)` | 18 |
+| `2 ^ 3 ^ 2` | `2 ^ (3 ^ 2)` | 512 |
+| `-2 ^ 2` | `-(2 ^ 2)` | -4 |
+| `2 ^ -1` | the exponent may carry a sign | 0.5 |
 
 > [!TIP]
 > Conditional expressions (e.g., `1 == 1`) are treated as `1` (true) or `0` (false) in numerical calculations.

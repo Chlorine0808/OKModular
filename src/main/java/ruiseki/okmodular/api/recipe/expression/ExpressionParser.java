@@ -43,6 +43,28 @@ public class ExpressionParser {
         return false;
     }
 
+    /**
+     * Eats the same character twice, for the two-character operators.
+     * <p>
+     * <b>The rewind is what makes this safe, not the doubling.</b> {@link #eat} consumes what it
+     * matches, so looking for <code>**</code> in <code>nbt('k') *= 2</code> eats the
+     * <code>*</code> before finding <code>=</code> instead of a second <code>*</code>. Without
+     * putting it back, every compound assignment would break -- the same failure
+     * {@link #eatBinaryOperator} exists to prevent one layer up.
+     * <p>
+     * A space between the halves is accepted. <code>2 * * 3</code> and <code>2 ^ ^ 3</code> are
+     * not valid as anything else -- there is no prefix <code>*</code> or <code>^</code> - so
+     * there is no other reading to protect.
+     */
+    private boolean eatTwice(int charToEat) {
+        int mark = pos;
+        if (eat(charToEat) && eat(charToEat)) return true;
+
+        pos = mark - 1;
+        nextChar();
+        return false;
+    }
+
     public RecipeScriptException error(String message) {
         return new RecipeScriptException(input, Math.max(0, pos), message);
     }
@@ -284,24 +306,66 @@ public class ExpressionParser {
         }
     }
 
-    // term = factor ( ( "*" | "/" | "%" ) factor )*
+    // term = unary ( ( "*" | "/" | "%" ) unary )*
     private Object parseTerm() {
-        Object x = parseFactor();
+        Object x = parseUnary();
         for (;;) {
-            if (eatBinaryOperator('*')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "*");
+            if (eatBinaryOperator('*')) x = new ArithmeticExpression(asExpression(x), asExpression(parseUnary()), "*");
             else if (eatBinaryOperator('/'))
-                x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "/");
-            else if (eat('%')) x = new ArithmeticExpression(asExpression(x), asExpression(parseFactor()), "%");
+                x = new ArithmeticExpression(asExpression(x), asExpression(parseUnary()), "/");
+            else if (eat('%')) x = new ArithmeticExpression(asExpression(x), asExpression(parseUnary()), "%");
             else return x;
         }
     }
 
-    private Object parseFactor() {
-        if (eat('+')) return parseFactor(); // unary plus
-        if (eat('-')) return new ArithmeticExpression(new ConstantExpression(0), asExpression(parseFactor()), "-");
+    // unary = ( "+" | "-" | "!" ) unary | power
+    //
+    // Above the power level, so -2 ^ 2 is -(2 ^ 2) = -4, which is how the notation reads
+    // everywhere else. Leaving the sign inside would make it (-2) ^ 2 = 4 and raise nothing:
+    // the recipe would simply hold a different number than it says.
+    private Object parseUnary() {
+        if (eat('+')) return parseUnary(); // unary plus
+        if (eat('-')) return new ArithmeticExpression(new ConstantExpression(0), asExpression(parseUnary()), "-");
         if (eat('!')) {
-            return new OpNot(asCondition(parseFactor()));
+            return new OpNot(asCondition(parseUnary()));
         }
+        return parsePower();
+    }
+
+    /**
+     * power = primary ( ( "^" | "**" ) unary )?
+     * <p>
+     * <b>Surface syntax only.</b> Both spellings become the same {@code pow()} call the recipe
+     * could have written by hand, so there is one evaluation to be right about rather than an
+     * operator and a function that can drift apart.
+     * <p>
+     * Right-associative, and the exponent is a full unary, so {@code 2 ^ 3 ^ 2} is
+     * {@code 2 ^ (3 ^ 2)} and {@code 2 ^ -1} parses at all.
+     */
+    private Object parsePower() {
+        Object base = parsePrimary();
+
+        if (eatTwice('*')) return powerCall("pow", base);
+        if (eat('^')) return powerCall("pow", base);
+        return base;
+    }
+
+    /**
+     * Builds the call an operator stands for, through the same registry a written call goes
+     * through -- so the operator cannot outlive the function it desugars to.
+     */
+    private IExpression powerCall(String function, Object base) {
+        List<IExpression> args = new ArrayList<>();
+        args.add(asExpression(base));
+        args.add(asExpression(parseUnary()));
+
+        IExpression call = ExpressionRegistry.createFunction(function, args, this);
+        if (call == null) throw error("Operator needs " + function + "(), which is not registered");
+        return call;
+    }
+
+    private Object parsePrimary() {
+        while (isSpace(ch)) nextChar();
 
         int startPos = this.pos;
         // Array literals: ['item1', 'item2', ...]
