@@ -247,7 +247,8 @@ public class ExpressionRegistry {
     }
 
     private static void validateMathArgs(String name, int argCount, ExpressionParser parser) {
-        if (name.equals("pow") || name.equals("min")
+        if (name.equals("pow") || name.equals("tetrate")
+            || name.equals("min")
             || name.equals("max")
             || name.equals("atan2")
             || name.equals("npr")
@@ -258,8 +259,11 @@ public class ExpressionRegistry {
             || name.equals("combi")
             || name.equals("combination")) {
             if (argCount < 2) throw parser.error(name + "() requires at least 2 arguments");
-        } else if (name.equals("log")) {
-            if (argCount < 1 || argCount > 2) throw parser.error("log() requires 1 or 2 arguments");
+        } else if (name.equals("log") || name.equals("fact")) {
+            // fact(n) is n!, fact(n, k) the n-tuple factorial - the same optional-second-argument
+            // shape log() already has, rather than a second name that would make fact(n, 1) and
+            // fact(n) two spellings of one thing.
+            if (argCount < 1 || argCount > 2) throw parser.error(name + "() requires 1 or 2 arguments");
         } else if (name.equals("clamp")) {
             if (argCount < 3) throw parser.error(name + "() requires at least 3 arguments");
         } else if (name.equals("random")) {

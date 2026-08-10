@@ -18,6 +18,7 @@ Standard arithmetic and logical operations are supported.
 
 - **Arithmetic**: `+`, `-`, `*`, `/`, `%` (modulo)
 - **Power**: `^` / `**` (the same operator, and the same thing as writing `pow(a, b)`)
+- **Power tower**: `^^` (`a ^^ 3` is `a ^ (a ^ a)`, the same as writing `tetrate(a, n)`)
 - **Comparison**: `==`, `!=`, `>`, `<`, `>=`, `<=`
 - **Logical**: `&&` (AND), `||` (OR), `!` (NOT)
 - **Grouping**: `()`, `{}`
@@ -32,6 +33,19 @@ Tighter than `*` and `/`, looser than a leading minus, and **right-associative**
 | `2 ^ 3 ^ 2` | `2 ^ (3 ^ 2)` | 512 |
 | `-2 ^ 2` | `-(2 ^ 2)` | -4 |
 | `2 ^ -1` | the exponent may carry a sign | 0.5 |
+
+`^^` sits at the same level and is right-associative in the same way.
+
+> [!WARNING]
+> **`^^` has an extremely small usable range.** With a base of 2 a double holds four levels;
+> `2 ^^ 5` (2 to the 65536th) is Infinity, and so are `3 ^^ 4` and `10 ^^ 3`. That is the
+> notation's nature, not a limitation of the implementation.
+>
+> The tower stops at **64 levels**. Not to rein in big numbers, but to **stop an expression
+> that would not finish**. A base above e^(1/e) ≈ 1.4447 reaches Infinity within a few levels
+> and stops on its own; at or below it the tower *converges* (`1.4 ^^ n` settles near 1.887,
+> `1 ^^ n` is 1 forever) and the value never says stop. The dangerous expression is
+> `"1.4 ^^ 1000000000"`, not `"2 ^^ 1000000000"`.
 
 > [!TIP]
 > Conditional expressions (e.g., `1 == 1`) are treated as `1` (true) or `0` (false) in numerical calculations.
@@ -193,6 +207,8 @@ Performance multipliers provided by the structure definition.
 - `sign(x)`: Sign of the value (-1 / 0 / 1)
 - `exp(x)`, `log(x)` / `ln(x)` (natural log), `log10(x)`
 - `fact(n)`: Factorial
+- `fact(n, k)`: Multifactorial. `n(n-k)(n-2k)…` for as long as the terms stay positive (`fact(10, 2)` = 10·8·6·4·2 = 3840)
+- `tetrate(a, n)`: A tower of `n` copies of `a` (the same as `a ^^ n`)
 - `perm(n, r)` / `npr(n, r)` / `permu(n, r)` / `permutation(n, r)`: Permutations
 - `combi(n, r)` / `ncr(n, r)` / `combination(n, r)`: Combinations
 - `random()`: Random number between 0 and 1

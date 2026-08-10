@@ -333,7 +333,7 @@ public class ExpressionParser {
     }
 
     /**
-     * power = primary ( ( "^" | "**" ) unary )?
+     * power = primary ( ( "^" | "**" ) unary | "^^" unary )?
      * <p>
      * <b>Surface syntax only.</b> Both spellings become the same {@code pow()} call the recipe
      * could have written by hand, so there is one evaluation to be right about rather than an
@@ -341,10 +341,16 @@ public class ExpressionParser {
      * <p>
      * Right-associative, and the exponent is a full unary, so {@code 2 ^ 3 ^ 2} is
      * {@code 2 ^ (3 ^ 2)} and {@code 2 ^ -1} parses at all.
+     * <p>
+     * {@code ^^} is a tower - {@code a ^^ 3} is {@code a ^ (a ^ a)} - and it goes to
+     * {@code tetrate()} rather than to {@code pow()}, because the height is an expression and
+     * so the number of powers is not known until the thing is evaluated. It is checked before
+     * {@code ^}, or the tower reads as a power whose exponent begins with an operator.
      */
     private Object parsePower() {
         Object base = parsePrimary();
 
+        if (eatTwice('^')) return powerCall("tetrate", base);
         if (eatTwice('*')) return powerCall("pow", base);
         if (eat('^')) return powerCall("pow", base);
         return base;

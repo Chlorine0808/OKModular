@@ -59,8 +59,21 @@ public class MathFunctionExpression implements IExpression {
                 "round",
                 "chance",
                 "pow",
+                "tetrate",
                 "min",
                 "max")));
+
+    /**
+     * How many levels of a tower are built before it is abandoned.
+     * <p>
+     * <b>Not a guard against big numbers -- a guard against not finishing.</b> A base above
+     * e^(1/e) diverges and saturates the double range within a handful of steps, so Infinity
+     * stops it on its own. A base at or below that <i>converges</i> ({@code 1.4 ^^ n} settles
+     * near 1.887, {@code 1 ^^ n} is 1 forever), and nothing about the value ever says stop.
+     * {@code "1.4 ^^ 1000000000"} is the expression that would sit in the tick loop, not
+     * {@code "2 ^^ 1000000000"}.
+     */
+    private static final int TOWER_LIMIT = 64;
 
     public MathFunctionExpression(String functionName, List<IExpression> arguments) {
         this.functionName = functionName.toLowerCase();
@@ -151,8 +164,14 @@ public class MathFunctionExpression implements IExpression {
                 return new EvaluationValue(Math.exp(val));
             case "round":
                 return new EvaluationValue((double) Math.round(val));
-            case "fact":
-                return new EvaluationValue(factorial(val));
+            case "fact": {
+                // The step is optional, the way log()'s base is: fact(n) is n! and fact(n, 2)
+                // is the double factorial. One name, because fact(n, 1) has to mean n!.
+                double step = arguments.size() >= 2 ? arguments.get(1)
+                    .evaluate(context)
+                    .asDouble() : 1;
+                return new EvaluationValue(factorial(val, step));
+            }
             case "sign":
                 return new EvaluationValue(Math.signum(val));
             case "chance":
@@ -191,6 +210,13 @@ public class MathFunctionExpression implements IExpression {
                     .asDouble();
                 return new EvaluationValue(Math.pow(val, p));
             }
+            case "tetrate": {
+                if (arguments.size() < 2) return EvaluationValue.ZERO;
+                double height = arguments.get(1)
+                    .evaluate(context)
+                    .asDouble();
+                return new EvaluationValue(tetrate(val, height));
+            }
             case "min": {
                 if (arguments.size() < 2) return EvaluationValue.ZERO;
                 double v2 = arguments.get(1)
@@ -227,15 +253,68 @@ public class MathFunctionExpression implements IExpression {
     }
 
     private double factorial(double n) {
-        if (n <= 0) {
-            return 1;
-        }
-        if (n > 170) {
-            return Double.POSITIVE_INFINITY;
-        }
+        return factorial(n, 1);
+    }
+
+    /**
+     * The n-tuple factorial: n(n-k)(n-2k)... for as long as the terms stay positive.
+     * <p>
+     * A step of one is the ordinary factorial, a step of two the double factorial. There is one
+     * loop rather than a separate one per step <b>because the answers have to agree</b>: the
+     * terms are not exact in a double past 18!, so multiplying the same chain in a different
+     * order gives a different number in the low bits, and {@code fact(n, 1)} has to keep
+     * answering exactly what {@code fact(n)} answered before this existed.
+     * <p>
+     * That is why the loop climbs from the smallest term of the chain instead of descending from
+     * {@code n}. For a step of one it is 1·2·3·…·n, unchanged.
+     *
+     * @param step the gap between terms; zero or negative gives 0, having no chain to walk (and
+     *             a step of zero would never terminate)
+     */
+    private double factorial(double n, double step) {
+        if (step <= 0) return 0;
+
+        long k = (long) Math.floor(step);
+        long last = (long) Math.floor(n);
+        if (last <= 0) return 1;
+
         double res = 1;
-        for (int i = 1; i <= (int) n; i++) {
+        // i > 0 catches the overflow a huge step would cause; the chain is bounded either way,
+        // because the product reaches Infinity within 171 terms whatever the step is.
+        for (long i = ((last - 1) % k) + 1; i > 0 && i <= last; i += k) {
             res *= i;
+            if (Double.isInfinite(res)) return Double.POSITIVE_INFINITY;
+        }
+        return res;
+    }
+
+    /**
+     * Tetration: a tower of {@code height} copies of {@code base}, evaluated from the top.
+     * <p>
+     * {@code a ^^ 0} is 1, {@code a ^^ 1} is a, {@code a ^^ 2} is a^a. <b>The usable range is
+     * tiny</b> -- {@code 2 ^^ 4} is 65536 and {@code 2 ^^ 5} is already past what a double
+     * holds, as is {@code 3 ^^ 4} and {@code 10 ^^ 3}. That is the notation's nature rather
+     * than a limitation here.
+     * <p>
+     * A negative height gives 0 and a base that would need a fractional power of a negative
+     * number gives 0, which is how the rest of this class answers a question outside its
+     * domain ({@code sqrt(-1)}, {@code asin(2)}). Infinity is passed through, because
+     * "too big to hold" is a real answer and {@code fact} already reports it that way.
+     *
+     * @param height rounded down; a tower of fractional height is not elementary
+     */
+    private double tetrate(double base, double height) {
+        if (height < 0) return 0;
+
+        long levels = (long) Math.floor(height);
+        if (levels == 0) return 1;
+
+        double res = base;
+        long steps = Math.min(levels - 1, TOWER_LIMIT);
+        for (long i = 0; i < steps; i++) {
+            res = Math.pow(base, res);
+            if (Double.isNaN(res)) return 0;
+            if (Double.isInfinite(res)) return res;
         }
         return res;
     }
