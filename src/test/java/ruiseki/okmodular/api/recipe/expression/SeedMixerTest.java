@@ -2,9 +2,14 @@ package ruiseki.okmodular.api.recipe.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
@@ -380,6 +385,59 @@ public class SeedMixerTest {
         }
 
         assertEquals(3 * 8 * 8, seen.size(), "成分の入れ替えで同じ種になった組がある");
+    }
+
+    // ============================================
+    // 系統の番号がぶつかっていないこと
+    // ============================================
+    //
+    // 系統を分ける目的は「同じ種から引いた 2 つが連動しないこと」だけなので、
+    // **番号が重複したら黙って連動します**。P（`bonus` を 2 つ書くと必ず同じ答え）が
+    // まさにそれで、あちらは番号ではなく軸が足りていない版。
+    //
+    // 番号は手で振るので、足すたびに 1 つずつ目で確かめる作業になります。それをやめる。
+
+    @Test
+    @DisplayName("宣言された系統の番号が重複していない")
+    public void test系統の番号が重複していない() throws Exception {
+        Map<Long, String> byValue = new LinkedHashMap<>();
+
+        for (Field field : SeedMixer.class.getDeclaredFields()) {
+            if (!Modifier.isPublic(field.getModifiers())) continue;
+            if (!Modifier.isStatic(field.getModifiers())) continue;
+            if (field.getType() != long.class) continue;
+
+            String clash = byValue.put(field.getLong(null), field.getName());
+            assertNull(clash, clash + " と " + field.getName() + " が同じ番号。この 2 つは必ず連動する");
+        }
+
+        assertTrue(byValue.size() >= 11, "系統が 11 個未満。走査が壊れているか、宣言が消えた（" + byValue.size() + " 個）");
+    }
+
+    @Test
+    @DisplayName("パターンのセル用に 2 系統ある")
+    public void testパターンのセル系統() {
+        // 重み表つき mappings は 1 セルにつき 2 回引く ——「何か置くか」と「何を置くか」。
+        // 同じ系統だと**置くと決めたセルが必ず同じブロックを引く**ので、重み表が death する。
+        assertNotEquals(SeedMixer.PATTERN_CELL_CHANCE, SeedMixer.PATTERN_CELL_WEIGHT, "置くかどうかと何を置くかが同じ系統になっている");
+    }
+
+    @Test
+    @DisplayName("同じセルで 2 系統が別々の答えを返す")
+    public void testセルの2系統が連動しない() {
+        // 番号が違うだけでは足りない。実際に値が割れることを見る。
+        int agreed = 0;
+        for (int x = 0; x < 20; x++) {
+            for (int z = 0; z < 20; z++) {
+                long cell = SeedMixer.forPosition(4649L, x, 64, z);
+                boolean gate = SeedMixer.toUnitInterval(cell, SeedMixer.PATTERN_CELL_CHANCE) < 0.5;
+                boolean pick = SeedMixer.toUnitInterval(cell, SeedMixer.PATTERN_CELL_WEIGHT) < 0.5;
+                if (gate == pick) agreed++;
+            }
+        }
+
+        // 独立なら 400 回中 200 前後。連動していれば 0 か 400 になる。
+        assertTrue(agreed > 150 && agreed < 250, "2 系統が連動している（400 セル中 " + agreed + " 回一致）");
     }
 
     @Test

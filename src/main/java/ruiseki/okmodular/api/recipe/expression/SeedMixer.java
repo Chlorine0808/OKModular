@@ -58,6 +58,16 @@ public final class SeedMixer {
     /** The stream {@code per_position_probability} draws from. */
     public static final long PER_POSITION = 8L;
 
+    // A pattern mapping with a weight table asks two questions of every cell, and they have to
+    // be independent: sharing a stream would mean the cells that get written are exactly the
+    // cells that drew the same entry, so the table would collapse to one block.
+
+    /** The stream deciding whether a pattern cell is written at all. */
+    public static final long PATTERN_CELL_CHANCE = 9L;
+
+    /** The stream deciding which entry of a weight table a pattern cell gets. */
+    public static final long PATTERN_CELL_WEIGHT = 10L;
+
     /** Odd 64-bit constant, so distinct streams land far apart. */
     private static final long STREAM_GAMMA = 0x9E3779B97F4A7C15L;
 
@@ -85,6 +95,14 @@ public final class SeedMixer {
      * A batch of n is n runs of the recipe, so an amount written with {@code random()} is
      * drawn n times rather than once and multiplied - otherwise a batch of three can only
      * ever pay out multiples of three.
+     *
+     * <b>The offset is not decoration.</b> Draw indices share {@link #STREAM_GAMMA} with the
+     * stream constants above, so without it draw 1 would sit on top of stream 1. The two
+     * still share one number line - a stream and a draw index only stay apart because the
+     * streams start at zero and the draws start past them. The day a third axis wants
+     * numbering (a decorator's position in the chain, for one - two {@code bonus} entries on
+     * one recipe currently fire together for want of it), give the axes separate gammas the
+     * way the coordinates already have, rather than widening this offset again.
      *
      * @param index which draw, from zero; index zero returns the seed unchanged so a batch
      *              of one is bit-for-bit what it was
