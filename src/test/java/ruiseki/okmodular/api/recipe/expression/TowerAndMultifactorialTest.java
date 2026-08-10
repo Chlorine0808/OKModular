@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Timeout;
  * 指数タワー `^^` / `tetrate()` と k 重階乗 `fact(n, k)`。
  *
  * ============================================
- * `^^` が pow() に脱糖できない理由
+ * `^^` を pow() の呼び出しに展開できない理由
  * ============================================
  *
  * `^` は段数が 1 段と決まっているので、パース時に `pow()` の呼び出しへ書き換えられる。
@@ -59,7 +59,7 @@ public class TowerAndMultifactorialTest {
     @DisplayName("`^^` と `tetrate()` は同じもの")
     public void test演算子と関数が一致する() {
         assertEquals(16.0, evaluate("tetrate(2, 3)"), "tetrate() 自体が壊れている");
-        assertEquals(16.0, evaluate("2 ^^ 3"), "`^^` が tetrate() に脱糖していない");
+        assertEquals(16.0, evaluate("2 ^^ 3"), "`^^` が tetrate() の呼び出しに展開されていない");
     }
 
     @Test

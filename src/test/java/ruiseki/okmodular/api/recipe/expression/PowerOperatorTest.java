@@ -63,8 +63,8 @@ public class PowerOperatorTest {
     @DisplayName("`^` / `**` / `pow()` は同じもの")
     public void test三つの綴りが一致する() {
         assertEquals(1024.0, evaluate("pow(2, 10)"), "pow() 自体が壊れている");
-        assertEquals(1024.0, evaluate("2 ^ 10"), "`^` が pow() に脱糖していない");
-        assertEquals(1024.0, evaluate("2 ** 10"), "`**` が pow() に脱糖していない");
+        assertEquals(1024.0, evaluate("2 ^ 10"), "`^` が pow() の呼び出しに展開されていない");
+        assertEquals(1024.0, evaluate("2 ** 10"), "`**` が pow() の呼び出しに展開されていない");
     }
 
     @Test
