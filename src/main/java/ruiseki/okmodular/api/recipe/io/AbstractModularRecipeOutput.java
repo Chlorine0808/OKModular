@@ -73,7 +73,7 @@ public abstract class AbstractModularRecipeOutput extends AbstractRecipeOutput i
         for (int i = 0; i < draws; i++) {
             total += evaluateAmount(context.forDraw(i));
         }
-        this.amount = (int) total;
+        this.amount = Amounts.toInt(total);
         this.amountExpr = null;
     }
 

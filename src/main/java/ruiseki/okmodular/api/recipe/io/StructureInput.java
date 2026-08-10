@@ -122,7 +122,7 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
 
         List<StructurePattern.Cell> cells = pattern.cellsFor(machineFacing(context));
         World world = context.getWorld();
-        int required = (int) (getRequiredAmount(condContext) * multiplier);
+        int required = Amounts.toInt(getRequiredAmount(condContext) * multiplier);
         int found = 0;
 
         for (ChunkCoordinates anchor : anchors) {

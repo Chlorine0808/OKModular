@@ -119,7 +119,7 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
     public boolean checkCapacity(IRecipeContext context, int multiplier, ConditionContext condContext) {
         if (optional) return true;
 
-        int required = (int) (getRequiredAmount(condContext) * multiplier);
+        int required = Amounts.toInt(getRequiredAmount(condContext) * multiplier);
         return anchors(context, required).size() >= required;
     }
 
@@ -147,7 +147,7 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
         long seed = condContext != null ? condContext.getEvaluationSeed() : 0L;
         List<int[]> written = new ArrayList<>();
 
-        for (int[] anchorCell : anchors(context, (int) (getRequiredAmount(condContext) * multiplier))) {
+        for (int[] anchorCell : anchors(context, Amounts.toInt(getRequiredAmount(condContext) * multiplier))) {
             for (StructurePattern.Cell cell : cells) {
                 int[] pos = context
                     .getCellPosition(anchorCell[0] + cell.a, anchorCell[1] + cell.b, anchorCell[2] + cell.c);

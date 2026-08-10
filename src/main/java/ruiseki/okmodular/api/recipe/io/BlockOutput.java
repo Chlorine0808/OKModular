@@ -101,7 +101,7 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
 
         World world = recipeContext.getWorld();
         int available = 0;
-        int totalRequired = (int) (getRequiredAmount(context) * multiplier);
+        int totalRequired = Amounts.toInt(getRequiredAmount(context) * multiplier);
 
         // Condition check
         for (ChunkCoordinates pos : positions) {
@@ -155,7 +155,7 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
         List<ChunkCoordinates> positions = context.getSymbolPositions(symbol);
         if (positions == null) return;
 
-        int totalRequired = (int) (getRequiredAmount(condContext) * multiplier);
+        int totalRequired = Amounts.toInt(getRequiredAmount(condContext) * multiplier);
         String block = getBlock();
         String replace = getReplace();
         NBTTagCompound nbtResult = getNbt(context, condContext);
@@ -344,7 +344,7 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
         for (int i = 0; i < draws; i++) {
             total += getRequiredAmount(context.forDraw(i));
         }
-        this.amount = (int) total;
+        this.amount = Amounts.toInt(total);
         this.amountExpr = new ConstantExpression(amount);
     }
 

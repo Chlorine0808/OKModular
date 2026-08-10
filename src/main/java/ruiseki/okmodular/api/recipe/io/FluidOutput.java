@@ -53,7 +53,8 @@ public class FluidOutput extends AbstractModularRecipeOutput {
 
     @Override
     public void apply(List<IModularPort> ports, int multiplier, ConditionContext context) {
-        FluidStack output = FluidRegistry.getFluidStack(fluidName, (int) getRequiredAmount(context) * multiplier);
+        FluidStack output = FluidRegistry
+            .getFluidStack(fluidName, Amounts.toInt(getRequiredAmount(context) * multiplier));
         if (output == null) return;
 
         int remaining = output.amount;

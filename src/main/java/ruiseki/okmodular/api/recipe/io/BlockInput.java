@@ -119,7 +119,7 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
         if (positions == null) return optional;
 
         World world = context.getWorld();
-        int totalRequired = (int) (getRequiredAmount(condContext) * multiplier);
+        int totalRequired = Amounts.toInt(getRequiredAmount(condContext) * multiplier);
         int found = 0;
         int processed = 0;
 
