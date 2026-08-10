@@ -140,6 +140,7 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
 
         World world = context.getWorld();
         List<StructurePattern.Cell> cells = pattern.cellsFor(machineFacing(context));
+        long seed = condContext != null ? condContext.getEvaluationSeed() : 0L;
         List<int[]> written = new ArrayList<>();
 
         for (int[] anchorCell : anchors(context, (int) (getRequiredAmount(condContext) * multiplier))) {
@@ -147,7 +148,10 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
                 int[] pos = context
                     .getCellPosition(anchorCell[0] + cell.a, anchorCell[1] + cell.b, anchorCell[2] + cell.c);
                 if (pos == null) continue;
-                if (setBlockAt(world, pos, cell.blockId)) written.add(pos);
+
+                // Asked here rather than read off the cell: a mapping may answer per position.
+                String blockId = cell.mapping.blockFor(seed, pos[0], pos[1], pos[2]);
+                if (blockId != null && setBlockAt(world, pos, blockId)) written.add(pos);
             }
         }
 

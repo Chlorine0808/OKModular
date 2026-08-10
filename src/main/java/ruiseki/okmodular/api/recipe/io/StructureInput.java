@@ -150,7 +150,9 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
 
             String id = BlockIdMatcher
                 .idOf(world.getBlock(pos[0], pos[1], pos[2]), world.getBlockMetadata(pos[0], pos[1], pos[2]));
-            if (!BlockIdMatcher.matches(id, cell.blockId)) return false;
+            // An input only ever sees mappings that answer the same everywhere, so the seed
+            // and the position it is handed cannot change the answer.
+            if (!BlockIdMatcher.matches(id, cell.mapping.blockFor(0L, pos[0], pos[1], pos[2]))) return false;
         }
         return true;
     }

@@ -35,32 +35,37 @@ public final class StructurePattern {
         public final int c;
         /** The character this cell was drawn with, kept for error messages. */
         public final char symbol;
-        /** {@code modid:name}, {@code modid:name:meta} or {@code modid:name:*}. */
-        public final String blockId;
+        /** What goes here. Ask it with {@link CellMapping#blockFor}; it need not be constant. */
+        public final CellMapping mapping;
 
-        Cell(int a, int b, int c, char symbol, String blockId) {
+        Cell(int a, int b, int c, char symbol, CellMapping mapping) {
             this.a = a;
             this.b = b;
             this.c = c;
             this.symbol = symbol;
-            this.blockId = blockId;
+            this.mapping = mapping;
         }
 
         @Override
         public String toString() {
-            return "'" + symbol + "'@(" + a + "," + b + "," + c + ")=" + blockId;
+            return "'" + symbol + "'@(" + a + "," + b + "," + c + ")=" + mapping;
         }
     }
 
     private final String name;
     private final char anchor;
     private final String[][] shape;
-    private final Map<Character, String> mappings;
+    private final Map<Character, CellMapping> mappings;
 
-    /** Resolved cells per machine facing. Built on demand; a pattern is usually asked for one. */
+    /**
+     * Cells per machine facing. Built on demand; a pattern is usually asked for one.
+     * <p>
+     * Only the geometry is cached. What each cell contains is asked for at placement time,
+     * because a mapping may answer differently per position - see {@link CellMapping}.
+     */
     private final Map<String, List<Cell>> resolved = new HashMap<>();
 
-    StructurePattern(String name, char anchor, String[][] shape, Map<Character, String> mappings) {
+    StructurePattern(String name, char anchor, String[][] shape, Map<Character, CellMapping> mappings) {
         this.name = name;
         this.anchor = anchor;
         this.shape = shape;
@@ -106,9 +111,9 @@ public final class StructurePattern {
                 String rowStr = processed[layer][row];
                 for (int col = 0; col < rowStr.length(); col++) {
                     char symbol = rowStr.charAt(col);
-                    String blockId = mappings.get(symbol);
-                    if (blockId == null) continue; // space, and an anchor used only as a marker
-                    cells.add(new Cell(col - origin[0], layer - origin[1], row - origin[2], symbol, blockId));
+                    CellMapping mapping = mappings.get(symbol);
+                    if (mapping == null) continue; // space, and an anchor used only as a marker
+                    cells.add(new Cell(col - origin[0], layer - origin[1], row - origin[2], symbol, mapping));
                 }
             }
         }

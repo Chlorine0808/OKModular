@@ -65,7 +65,7 @@ public final class StructurePatternParser {
             anchorDeclared = true;
         }
 
-        Map<Character, String> mappings = readMappings(json, fileName, name);
+        Map<Character, CellMapping> mappings = readMappings(json, fileName, name);
         verifySymbols(shape, mappings, anchor, fileName, name);
 
         if (anchorDeclared && StructureShape.findSymbolOffset(shape, anchor) == null) {
@@ -117,11 +117,11 @@ public final class StructurePatternParser {
         return shape;
     }
 
-    private static Map<Character, String> readMappings(JsonObject json, String fileName, String name) {
-        Map<Character, String> mappings = new HashMap<>();
+    private static Map<Character, CellMapping> readMappings(JsonObject json, String fileName, String name) {
+        Map<Character, CellMapping> mappings = new HashMap<>();
         // Put air in first so a pattern may still override it, the way a structure's 'F' can be
         // overridden -- the reserved meaning is a default, not a lock.
-        mappings.put('_', AIR);
+        mappings.put('_', new CellMapping(AIR));
 
         if (json.has("mappings")) {
             for (Map.Entry<String, JsonElement> entry : json.getAsJsonObject("mappings")
@@ -146,7 +146,7 @@ public final class StructurePatternParser {
                 mappings.put(
                     entry.getKey()
                         .charAt(0),
-                    value.getAsString());
+                    new CellMapping(value.getAsString()));
             }
         }
         return mappings;
@@ -159,8 +159,8 @@ public final class StructurePatternParser {
      * too: a pattern that silently drops a character checks fewer blocks than it looks like it
      * checks, and the recipe just never fires.
      */
-    private static void verifySymbols(String[][] shape, Map<Character, String> mappings, char anchor, String fileName,
-        String name) {
+    private static void verifySymbols(String[][] shape, Map<Character, CellMapping> mappings, char anchor,
+        String fileName, String name) {
         for (String[] layer : shape) {
             for (String row : layer) {
                 for (int col = 0; col < row.length(); col++) {

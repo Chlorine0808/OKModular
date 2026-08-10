@@ -50,13 +50,34 @@ public class StructurePatternTest {
             "test.json");
     }
 
-    /** セルを {@code "a,b,c"} → ブロック ID の対応に潰す。順序に依存した検証を書かないため。 */
+    /**
+     * セルを {@code "a,b,c"} → ブロック ID の対応に潰す。順序に依存した検証を書かないため。
+     *
+     * セルが持つのはブロック ID そのものではなく**対応（`CellMapping`）**で、
+     * 置くブロックは種と座標から決まります。重み表つきの対応が入ると 1 つに定まらないので、
+     * ここは「1 つに定まる対応を、ある 1 箇所に置いたら何になるか」を見ています。
+     */
     private static Map<String, String> byCell(List<StructurePattern.Cell> cells) {
         Map<String, String> map = new HashMap<>();
         for (StructurePattern.Cell cell : cells) {
-            map.put(cell.a + "," + cell.b + "," + cell.c, cell.blockId);
+            map.put(cell.a + "," + cell.b + "," + cell.c, cell.mapping.blockFor(0L, 0, 0, 0));
         }
         return map;
+    }
+
+    @Test
+    @DisplayName("同じ対応は何度引いても同じブロックを返す")
+    public void test対応が決定的である() {
+        // 置く前に「置けるか」を確かめる経路があるので、2 回聞いて答えが変わると
+        // 「置けると答えたのに置かない」が起きる。座標や種が変わっても、
+        // ブロック ID 1 個だけの対応は動いてはいけない。
+        StructurePattern pattern = parse(
+            "{ 'name': 'core', 'mappings': { 'S': 'minecraft:stone' }, 'layers': [ ['SQ'] ] }".replace('\'', '"'));
+        StructurePattern.Cell cell = pattern.cellsFor(null)
+            .get(0);
+
+        assertEquals("minecraft:stone", cell.mapping.blockFor(0L, 0, 0, 0));
+        assertEquals("minecraft:stone", cell.mapping.blockFor(4649L, 10, 64, -20));
     }
 
     @Test
