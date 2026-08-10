@@ -131,7 +131,7 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
 
             int[] anchorCell = context.getSymbolCell(anchor.posX, anchor.posY, anchor.posZ);
             if (anchorCell == null) continue;
-            if (!allCellsMatch(context, world, cells, anchorCell)) continue;
+            if (!allCellsMatch(context, world, cells, anchorCell, condContext)) continue;
 
             found++;
             if (!simulate && consume) {
@@ -143,16 +143,18 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
     }
 
     private boolean allCellsMatch(IRecipeContext context, World world, List<StructurePattern.Cell> cells,
-        int[] anchorCell) {
+        int[] anchorCell, ConditionContext condContext) {
         for (StructurePattern.Cell cell : cells) {
             int[] pos = context.getCellPosition(anchorCell[0] + cell.a, anchorCell[1] + cell.b, anchorCell[2] + cell.c);
             if (pos == null) return false;
 
             String id = BlockIdMatcher
                 .idOf(world.getBlock(pos[0], pos[1], pos[2]), world.getBlockMetadata(pos[0], pos[1], pos[2]));
-            // An input only ever sees mappings that answer the same everywhere, so the seed
-            // and the position it is handed cannot change the answer.
-            if (!BlockIdMatcher.matches(id, cell.mapping.blockFor(0L, pos[0], pos[1], pos[2]))) return false;
+            // An input only ever sees mappings that answer the same everywhere - the parser
+            // refuses the rest - so neither the seed nor the position can change the answer.
+            String expected = cell.mapping.resolve(condContext)
+                .blockFor(0L, pos[0], pos[1], pos[2]);
+            if (!BlockIdMatcher.matches(id, expected)) return false;
         }
         return true;
     }

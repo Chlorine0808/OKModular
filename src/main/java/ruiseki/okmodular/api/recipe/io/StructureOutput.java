@@ -1,7 +1,9 @@
 package ruiseki.okmodular.api.recipe.io;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
@@ -25,6 +27,7 @@ import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.api.structure.core.StructureSymbols;
+import ruiseki.okmodular.structure.pattern.CellMapping;
 import ruiseki.okmodular.structure.pattern.StructurePattern;
 import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
 import ruiseki.okmodular.util.Logger;
@@ -140,6 +143,7 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
 
         World world = context.getWorld();
         List<StructurePattern.Cell> cells = pattern.cellsFor(machineFacing(context));
+        Map<CellMapping, CellMapping.Resolved> settled = settle(cells, condContext);
         long seed = condContext != null ? condContext.getEvaluationSeed() : 0L;
         List<int[]> written = new ArrayList<>();
 
@@ -150,7 +154,8 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
                 if (pos == null) continue;
 
                 // Asked here rather than read off the cell: a mapping may answer per position.
-                String blockId = cell.mapping.blockFor(seed, pos[0], pos[1], pos[2]);
+                String blockId = settled.get(cell.mapping)
+                    .blockFor(seed, pos[0], pos[1], pos[2]);
                 if (blockId != null && setBlockAt(world, pos, blockId)) written.add(pos);
             }
         }
@@ -161,6 +166,23 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
         for (int[] pos : written) {
             world.func_147453_f(pos[0], pos[1], pos[2], world.getBlock(pos[0], pos[1], pos[2]));
         }
+    }
+
+    /**
+     * Evaluate each distinct mapping's expressions once for the whole placement.
+     * <p>
+     * A chance or a weight may be written as an expression, and what those read - the tier,
+     * how full a tank is, the weather - is the same at every cell of every anchor. Asking per
+     * cell would evaluate it once for each of a sphere's two thousand cells and get the same
+     * answer every time. Scattering is the coordinates' job, further down.
+     */
+    private static Map<CellMapping, CellMapping.Resolved> settle(List<StructurePattern.Cell> cells,
+        ConditionContext context) {
+        Map<CellMapping, CellMapping.Resolved> settled = new IdentityHashMap<>();
+        for (StructurePattern.Cell cell : cells) {
+            if (!settled.containsKey(cell.mapping)) settled.put(cell.mapping, cell.mapping.resolve(context));
+        }
+        return settled;
     }
 
     /**

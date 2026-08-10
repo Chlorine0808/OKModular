@@ -9,6 +9,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
+import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.structure.StructureException;
 import ruiseki.okmodular.structure.StructureShape;
 
@@ -163,8 +166,10 @@ public final class StructurePatternParser {
         }
 
         JsonObject mapping = value.getAsJsonObject();
-        double chance = mapping.has("chance") ? mapping.get("chance")
-            .getAsDouble() : 1.0;
+        // An expression as readily as a number: "tier * 0.1" for a vein that thickens with the
+        // machine. It is settled once per placement -- see CellMapping.
+        IExpression chance = mapping.has("chance") ? ExpressionsParser.parse(mapping.get("chance"))
+            : new ConstantExpression(1.0);
 
         if (mapping.has("block") && mapping.has("weights")) {
             throw new StructureException(
@@ -206,7 +211,8 @@ public final class StructurePatternParser {
      * and matching is exactly what this is not for - there is no such block to place. Left in,
      * it would be a table entry that silently does nothing when drawn.
      */
-    private static CellMapping readWeights(JsonObject table, double chance, String key, String fileName, String name) {
+    private static CellMapping readWeights(JsonObject table, IExpression chance, String key, String fileName,
+        String name) {
         if (table.entrySet()
             .isEmpty()) {
             throw new StructureException(
@@ -217,21 +223,32 @@ public final class StructurePatternParser {
         }
 
         List<String> choices = new ArrayList<>();
-        List<Double> weights = new ArrayList<>();
-        double total = 0;
+        List<IExpression> weights = new ArrayList<>();
+        // Only what is written down can be checked here. A weight written as an expression is
+        // whatever the machine makes it, so the "adds up to zero" guard below only sees the
+        // constants -- an expression that reaches zero at run time places nothing, which
+        // CellMapping.Resolved.pick handles rather than handing out the first entry free.
+        double constantTotal = 0;
+        boolean allConstant = true;
 
         for (Map.Entry<String, JsonElement> entry : table.entrySet()) {
             String blockId = entry.getKey();
-            double weight = entry.getValue()
-                .getAsDouble();
+            IExpression weight = ExpressionsParser.parse(entry.getValue());
 
-            if (weight < 0) {
-                throw new StructureException(
-                    StructureException.ErrorType.INVALID_FORMAT,
-                    fileName,
-                    name,
-                    "mapping '" + key + "' gives \"" + blockId + "\" a negative weight (" + weight + ")");
+            if (weight instanceof ConstantExpression) {
+                double value = weight.evaluateDouble(null);
+                if (value < 0) {
+                    throw new StructureException(
+                        StructureException.ErrorType.INVALID_FORMAT,
+                        fileName,
+                        name,
+                        "mapping '" + key + "' gives \"" + blockId + "\" a negative weight (" + value + ")");
+                }
+                constantTotal += value;
+            } else {
+                allConstant = false;
             }
+
             if (blockId.endsWith(":*")) {
                 throw new StructureException(
                     StructureException.ErrorType.INVALID_FORMAT,
@@ -245,10 +262,9 @@ public final class StructurePatternParser {
 
             choices.add(resolveChoice(blockId));
             weights.add(weight);
-            total += weight;
         }
 
-        if (total <= 0) {
+        if (allConstant && constantTotal <= 0) {
             throw new StructureException(
                 StructureException.ErrorType.INVALID_FORMAT,
                 fileName,
@@ -256,9 +272,7 @@ public final class StructurePatternParser {
                 "mapping '" + key + "' has 'weights' that add up to zero; there is nothing for it to draw");
         }
 
-        double[] asArray = new double[weights.size()];
-        for (int i = 0; i < asArray.length; i++) asArray[i] = weights.get(i);
-        return new CellMapping(choices.toArray(new String[0]), asArray, chance);
+        return new CellMapping(choices.toArray(new String[0]), weights.toArray(new IExpression[0]), chance);
     }
 
     /** {@code _} is air and a space is "leave it alone", as in {@code layers}. */

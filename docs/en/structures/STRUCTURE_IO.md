@@ -108,6 +108,29 @@ Block IDs, plus the same two reserved characters `layers` uses.
 
 "Sometimes clear it" and "sometimes skip it" are different things, so both can be written.
 
+#### Writing them as expressions
+
+`chance` and each weight take an [expression](../recipes/EXPRESSION_REFERENCE.md) as readily
+as a number.
+
+```json
+"mappings": {
+  "X": { "chance": "tier * 0.2", "weights": { "minecraft:iron_ore": "tier", "minecraft:gold_ore": 1 } }
+}
+```
+
+A vein that grows **denser** with the machine, and richer in iron as it does.
+
+**They are evaluated once per placement.** What an expression reads - the tier, how full a
+tank is, the weather - is the same at every cell, so evaluating per cell would give the same
+answer two thousand times over for a sphere. **Scattering across cells is the coordinates'
+job**, not the expression's.
+
+> [!NOTE]
+> **An expression-valued `chance` counts as undecided even if it would evaluate to 1.0.**
+> What it comes to is not knowable when the file is read. For a pattern a `structure` input
+> is meant to use, leave `chance` out or write the constant `1.0`.
+
 > [!IMPORTANT]
 > **A cell that loses its `chance` is left alone, not emptied.** Whatever stood there stays.
 > To clear it instead, give `weights` an entry for `"_"`.
