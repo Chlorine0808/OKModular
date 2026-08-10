@@ -34,7 +34,10 @@ public final class CellMapping {
     /** A chance at or above this always places, and skips the draw entirely. */
     private static final double ALWAYS = 1.0;
 
-    private final String blockId;
+    /** What may go here. One entry for a plain block; null entries mean "leave it alone". */
+    private final String[] choices;
+    private final double[] weights;
+    private final double totalWeight;
     private final double chance;
 
     CellMapping(String blockId) {
@@ -42,8 +45,17 @@ public final class CellMapping {
     }
 
     CellMapping(String blockId, double chance) {
-        this.blockId = blockId;
+        this(new String[] { blockId }, new double[] { 1.0 }, chance);
+    }
+
+    CellMapping(String[] choices, double[] weights, double chance) {
+        this.choices = choices;
+        this.weights = weights;
         this.chance = chance;
+
+        double total = 0;
+        for (double weight : weights) total += weight;
+        this.totalWeight = total;
     }
 
     /**
@@ -54,7 +66,7 @@ public final class CellMapping {
      * recipe loads - see {@code StructureInput}.
      */
     public boolean isDeterministic() {
-        return chance >= ALWAYS;
+        return chance >= ALWAYS && choices.length == 1;
     }
 
     /**
@@ -69,7 +81,8 @@ public final class CellMapping {
      */
     public String blockFor(long seed, int x, int y, int z) {
         if (chance < ALWAYS && !isWritten(seed, x, y, z)) return null;
-        return blockId;
+        if (choices.length == 1) return choices[0];
+        return pick(seed, x, y, z);
     }
 
     private boolean isWritten(long seed, int x, int y, int z) {
@@ -77,8 +90,41 @@ public final class CellMapping {
         return SeedMixer.toUnitInterval(cell, SeedMixer.PATTERN_CELL_CHANCE) < chance;
     }
 
+    /**
+     * Which entry of the table this cell draws.
+     * <p>
+     * A different stream from {@link #isWritten}: sharing one would make the cells that won
+     * their chance be exactly the cells that drew the first entry, so a table behind a chance
+     * would only ever place one of its blocks.
+     * <p>
+     * A total weight of zero is refused when the pattern is read, so reaching it here means
+     * the weights came from somewhere that can move. Nothing is placed rather than the first
+     * entry being handed out for free.
+     */
+    private String pick(long seed, int x, int y, int z) {
+        if (totalWeight <= 0) return null;
+
+        long cell = SeedMixer.forPosition(seed, x, y, z);
+        double roll = SeedMixer.toUnitInterval(cell, SeedMixer.PATTERN_CELL_WEIGHT) * totalWeight;
+
+        double passed = 0;
+        for (int i = 0; i < choices.length; i++) {
+            passed += weights[i];
+            if (roll < passed) return choices[i];
+        }
+        // The roll is below the total by construction; this only catches floating-point drift.
+        return choices[choices.length - 1];
+    }
+
     @Override
     public String toString() {
-        return chance >= ALWAYS ? blockId : blockId + "@" + chance;
+        StringBuilder text = new StringBuilder();
+        for (int i = 0; i < choices.length; i++) {
+            if (i > 0) text.append('/');
+            text.append(choices[i] == null ? " " : choices[i]);
+            if (choices.length > 1) text.append('=')
+                .append(weights[i]);
+        }
+        return chance >= ALWAYS ? text.toString() : text + "@" + chance;
     }
 }

@@ -158,6 +158,151 @@ public class StructurePatternTest {
             "何が足りないのか message が言っていない");
     }
 
+    /** 40x40 のマスに置いて、何が何マス入ったかを数える。置かなかったマスは "null"。 */
+    private static Map<String, Integer> picksOf(CellMapping mapping, long seed) {
+        Map<String, Integer> counts = new HashMap<>();
+        for (int x = 0; x < 40; x++) {
+            for (int z = 0; z < 40; z++) {
+                counts.merge(String.valueOf(mapping.blockFor(seed, x, 64, z)), 1, Integer::sum);
+            }
+        }
+        return counts;
+    }
+
+    // ============================================
+    // weights — 置くとして、何を置くか
+    // ============================================
+    //
+    // `chance` と直交した別の軸。あちらは「そのセルに何か置くか」、こちらは「置くなら何を」。
+    // 両方書けば「70% のセルに置き、その内訳が 8:2」になる。
+    //
+    // 2 つの軸に別々の系統を使っているのはここが理由で、同じ系統だと
+    // **置くと決まったセルが必ず同じ内訳を引く**（当たったセルが全部同じブロックになる）。
+
+    @Test
+    @DisplayName("重みの比率どおりに散る")
+    public void testweightsが比率どおり() {
+        Map<String, Integer> picks = picksOf(
+            mappingOf("{ 'weights': { 'minecraft:iron_ore': 3, 'minecraft:gold_ore': 1 } }"),
+            4649L);
+
+        // 1600 マスを 3:1 なら 1200 と 400。落ちるべきときに確実に落ちる粗さで縛る。
+        assertTrue(picks.getOrDefault("minecraft:iron_ore", 0) > 1050, "鉄が少なすぎる: " + picks);
+        assertTrue(picks.getOrDefault("minecraft:iron_ore", 0) < 1350, "鉄が多すぎる: " + picks);
+        assertTrue(picks.getOrDefault("minecraft:gold_ore", 0) > 250, "金が少なすぎる: " + picks);
+        assertTrue(picks.getOrDefault("minecraft:gold_ore", 0) < 550, "金が多すぎる: " + picks);
+    }
+
+    @Test
+    @DisplayName("同じ種・同じ座標なら同じブロックを引く")
+    public void testweightsが決定的である() {
+        CellMapping mapping = mappingOf("{ 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 1 } }");
+
+        for (int x = 0; x < 30; x++) {
+            assertEquals(mapping.blockFor(7L, x, 64, 3), mapping.blockFor(7L, x, 64, 3), "x=" + x + " で答えが変わった");
+        }
+    }
+
+    @Test
+    @DisplayName("重み 0 の項目は選ばれない")
+    public void testweightsの重み0() {
+        Map<String, Integer> picks = picksOf(
+            mappingOf("{ 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 0 } }"),
+            1L);
+
+        assertEquals(1600, picks.getOrDefault("minecraft:iron_ore", 0), "重み 0 の項目が選ばれている: " + picks);
+    }
+
+    @Test
+    @DisplayName("`_` は空気、空白は触らない")
+    public void testweightsの予約キー() {
+        // 形を描くときと同じ語彙。「確率で空気にする」と「確率で手を付けない」は別のこと。
+        Map<String, Integer> air = picksOf(mappingOf("{ 'weights': { '_': 1 } }"), 1L);
+        assertEquals(1600, air.getOrDefault("minecraft:air", 0), "`_` が空気になっていない: " + air);
+
+        Map<String, Integer> untouched = picksOf(mappingOf("{ 'weights': { ' ': 1 } }"), 1L);
+        assertEquals(1600, untouched.getOrDefault("null", 0), "空白が「触らない」になっていない: " + untouched);
+    }
+
+    @Test
+    @DisplayName("chance と weights は組み合わせられる")
+    public void testchanceとweightsが直交する() {
+        // 50% のセルに置き、置くセルの内訳が 1:1 ＝ 400 / 400 / 800(触らない)。
+        Map<String, Integer> picks = picksOf(
+            mappingOf("{ 'chance': 0.5, 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 1 } }"),
+            20260810L);
+
+        assertTrue(
+            picks.getOrDefault("null", 0) > 700 && picks.getOrDefault("null", 0) < 900,
+            "欠け方が 50% でない: " + picks);
+        assertTrue(picks.getOrDefault("minecraft:iron_ore", 0) > 300, "鉄が少なすぎる: " + picks);
+        assertTrue(picks.getOrDefault("minecraft:gold_ore", 0) > 300, "金が少なすぎる: " + picks);
+    }
+
+    @Test
+    @DisplayName("置くと決まったセルの内訳が一律にならない")
+    public void test2つの軸が連動しない() {
+        // 系統を分け忘れると、chance に当たったセルが**全部同じブロック**になる。
+        // 番号が違うだけでは足りないので、実際に両方が混ざることを見る。
+        Map<String, Integer> picks = picksOf(
+            mappingOf("{ 'chance': 0.5, 'weights': { 'minecraft:iron_ore': 1, 'minecraft:gold_ore': 1 } }"),
+            31415L);
+
+        assertTrue(picks.getOrDefault("minecraft:iron_ore", 0) > 0, "置いたセルが片方に寄り切っている: " + picks);
+        assertTrue(picks.getOrDefault("minecraft:gold_ore", 0) > 0, "置いたセルが片方に寄り切っている: " + picks);
+    }
+
+    // ============================================
+    // 書き方の間違いはロードで断る
+    // ============================================
+
+    @Test
+    @DisplayName("block と weights は同時に書けない")
+    public void testblockとweightsは排他() {
+        // block は「1 項目だけの weights」の短縮形。両方書くのは同じマスの中身を
+        // 2 通り指定したということで、どちらかを黙って選ぶしかなくなる。
+        assertThrows(
+            StructureException.class,
+            () -> mappingOf("{ 'block': 'minecraft:stone', 'weights': { 'minecraft:iron_ore': 1 } }"),
+            "block と weights の両方が通っている");
+    }
+
+    @Test
+    @DisplayName("空の weights は読み込まない")
+    public void test空のweightsは断る() {
+        assertThrows(StructureException.class, () -> mappingOf("{ 'weights': {} }"), "空の weights が通っている");
+    }
+
+    @Test
+    @DisplayName("重みが全部 0 の weights は読み込まない")
+    public void test重みの合計0は断る() {
+        // 引く先が無いので、実行時には静かに何も置かないマスになる。
+        assertThrows(
+            StructureException.class,
+            () -> mappingOf("{ 'weights': { 'minecraft:iron_ore': 0, 'minecraft:gold_ore': 0 } }"),
+            "合計 0 の weights が通っている");
+    }
+
+    @Test
+    @DisplayName("負の重みは読み込まない")
+    public void test負の重みは断る() {
+        assertThrows(
+            StructureException.class,
+            () -> mappingOf("{ 'weights': { 'minecraft:iron_ore': -1, 'minecraft:gold_ore': 2 } }"),
+            "負の重みが通っている");
+    }
+
+    @Test
+    @DisplayName("ワイルドカードは weights に書けない")
+    public void testワイルドカードは断る() {
+        // 照合には使えても**設置はできない**。書けるのに置けないものを残すと、
+        // 実行時に静かに何も起きないマスになる。
+        assertThrows(
+            StructureException.class,
+            () -> mappingOf("{ 'weights': { 'minecraft:stone:*': 1 } }"),
+            "ワイルドカードが weights に書けてしまっている");
+    }
+
     @Test
     @DisplayName("同じ対応は何度引いても同じブロックを返す")
     public void test対応が決定的である() {

@@ -183,6 +183,16 @@ public class StructureInputTest {
     }
 
     @Test
+    @DisplayName("重み表を持つパターンも入力に使えない")
+    public void test重み表のパターンは入力に使えない() {
+        loadPattern(
+            "{ 'name': 'veined', 'mappings': { 'S': { 'weights': { 'minecraft:iron_ore': 1,"
+                + " 'minecraft:gold_ore': 1 } } }, 'layers': [ ['S'] ] }");
+
+        assertThrows(IllegalArgumentException.class, () -> parseNaming("veined"), "中身が振れるパターンを照合に使えてしまっている");
+    }
+
+    @Test
     @DisplayName("形の決まったパターンは今までどおり使える")
     public void test決定的なパターンは通る() {
         loadPattern("{ 'name': 'solid', 'mappings': { 'S': 'minecraft:stone' }, 'layers': [ ['S'] ] }");

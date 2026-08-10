@@ -45,7 +45,7 @@ A file may hold a single pattern object, an array of them, or an object with a `
 | :--- | :--- | :--- |
 | `name` | String | Identifier a recipe refers to (required, must be unique) |
 | `layers` | Array | The shape, written exactly as in a structure definition (required) |
-| `mappings` | Object | Character → block ID. Block IDs only; the object and list forms a structure accepts are not available here |
+| `mappings` | Object | Character → block ID, or [an object describing the cell](#writing-a-cell---chance-and-weights). The list form a structure accepts is not available here |
 | `anchor` | String | Single character marking the cell that lands on the block the recipe names. Defaults to `Q` |
 
 `layers` takes either a bare array of row strings or `{ "rows": [...] }`, the same two forms a
@@ -67,6 +67,69 @@ structure definition takes.
 Any other character **must** have an entry in `mappings`. One that does not stops the file from
 loading and is reported in `structures/errors.txt`, because a silently dropped character would
 make the pattern check fewer blocks than it looks like it checks.
+
+### Writing a cell - chance and weights
+
+An entry in `mappings` takes an object as well as a block ID string.
+
+| Key | Decides | Default |
+| :--- | :--- | :--- |
+| `block` | The block that goes in the cell | — |
+| `weights` | **What goes in, if anything does.** Block ID → how often | — |
+| `chance` | **Whether anything goes in at all** (0.0 to 1.0) | `1.0` |
+
+```json
+"mappings": {
+  "A": "minecraft:stone",
+  "B": { "block": "minecraft:stone", "chance": 0.7 },
+  "C": { "weights": { "minecraft:iron_ore": 8, "minecraft:gold_ore": 2 } },
+  "D": { "chance": 0.7, "weights": { "minecraft:iron_ore": 8, "minecraft:gold_ore": 2 } }
+}
+```
+
+- **B** - stone in 70% of the cells; the rest are **left alone**
+- **C** - every cell filled, split 8:2
+- **D** - 70% of the cells filled, and those are split 8:2
+
+`chance` and `weights` are **two independent axes**. Write either or both.
+
+**`block` is the one-entry form of `weights`**, so writing both is a load error: it says what
+goes in the same cell twice, and the engine would have to pick one silently.
+
+#### Keys of `weights`
+
+Block IDs, plus the same two reserved characters `layers` uses.
+
+| Key | Meaning |
+| :--- | :--- |
+| `_` | Air - **clears the cell** |
+| `" "` (space) | **Leave the cell alone** |
+| `modid:name:*` | ❌ **load error.** A wildcard matches blocks; it does not name one to place |
+
+"Sometimes clear it" and "sometimes skip it" are different things, so both can be written.
+
+> [!IMPORTANT]
+> **A cell that loses its `chance` is left alone, not emptied.** Whatever stood there stays.
+> To clear it instead, give `weights` an entry for `"_"`.
+
+> [!WARNING]
+> **A pattern with a chance or a weight table cannot be used as a `structure` input**, and
+> saying so is a load error. Coming out differently every time is the point of it, which
+> leaves an input with no arrangement to match against. Left to run, the recipe would simply
+> never fire, which reads as a structure that will not detect.
+
+#### How it scatters
+
+The draw mixes in the cell's **world coordinates**, so:
+
+- neighbouring cells get **different answers** - it does not collapse into all-or-nothing
+- one recipe writing at **two anchors** gets **two different arrangements**
+- within one run the answer never moves, across a save and reload included
+- the next run lays it out differently
+
+> [!NOTE]
+> **This alone does not make a vein.** Cells draw independently of each other, so the mix comes
+> out **evenly scattered** - salt and pepper. Clumping needs noise with spatial correlation.
 
 ### The anchor
 

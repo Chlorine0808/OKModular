@@ -163,22 +163,109 @@ public final class StructurePatternParser {
         }
 
         JsonObject mapping = value.getAsJsonObject();
-        if (!mapping.has("block")) {
+        double chance = mapping.has("chance") ? mapping.get("chance")
+            .getAsDouble() : 1.0;
+
+        if (mapping.has("block") && mapping.has("weights")) {
             throw new StructureException(
                 StructureException.ErrorType.INVALID_FORMAT,
                 fileName,
                 name,
-                "mapping '" + key + "' says how often to place something but not what to place; add 'block'");
+                "mapping '" + key
+                    + "' has both 'block' and 'weights', which say what goes in the same cell twice; "
+                    + "'block' is the one-entry form of 'weights', so write whichever fits");
         }
 
-        String blockId = mapping.get("block")
-            .getAsString();
-        if (!mapping.has("chance")) return new CellMapping(blockId);
+        if (mapping.has("block")) {
+            return new CellMapping(
+                mapping.get("block")
+                    .getAsString(),
+                chance);
+        }
 
-        return new CellMapping(
-            blockId,
-            mapping.get("chance")
-                .getAsDouble());
+        if (mapping.has("weights")) {
+            return readWeights(mapping.getAsJsonObject("weights"), chance, key, fileName, name);
+        }
+
+        throw new StructureException(
+            StructureException.ErrorType.INVALID_FORMAT,
+            fileName,
+            name,
+            "mapping '" + key + "' says how often to place something but not what to place; add 'block' or 'weights'");
+    }
+
+    /**
+     * A weight table: block ID to how often it is drawn, relative to the others.
+     * <p>
+     * The two reserved characters keep the meaning they have in {@code layers}, because this
+     * is the same author writing the same cells: {@code _} is air, and a space leaves the cell
+     * alone. "Sometimes clear it" and "sometimes skip it" are different things and both want
+     * saying.
+     * <p>
+     * A wildcard is refused. Elsewhere a block ID may end in {@code :*} to match any metadata,
+     * and matching is exactly what this is not for - there is no such block to place. Left in,
+     * it would be a table entry that silently does nothing when drawn.
+     */
+    private static CellMapping readWeights(JsonObject table, double chance, String key, String fileName, String name) {
+        if (table.entrySet()
+            .isEmpty()) {
+            throw new StructureException(
+                StructureException.ErrorType.INVALID_FORMAT,
+                fileName,
+                name,
+                "mapping '" + key + "' has an empty 'weights'; there is nothing for it to draw");
+        }
+
+        List<String> choices = new ArrayList<>();
+        List<Double> weights = new ArrayList<>();
+        double total = 0;
+
+        for (Map.Entry<String, JsonElement> entry : table.entrySet()) {
+            String blockId = entry.getKey();
+            double weight = entry.getValue()
+                .getAsDouble();
+
+            if (weight < 0) {
+                throw new StructureException(
+                    StructureException.ErrorType.INVALID_FORMAT,
+                    fileName,
+                    name,
+                    "mapping '" + key + "' gives \"" + blockId + "\" a negative weight (" + weight + ")");
+            }
+            if (blockId.endsWith(":*")) {
+                throw new StructureException(
+                    StructureException.ErrorType.INVALID_FORMAT,
+                    fileName,
+                    name,
+                    "mapping '" + key
+                        + "' draws from \""
+                        + blockId
+                        + "\", and a wildcard matches blocks rather than naming one to place");
+            }
+
+            choices.add(resolveChoice(blockId));
+            weights.add(weight);
+            total += weight;
+        }
+
+        if (total <= 0) {
+            throw new StructureException(
+                StructureException.ErrorType.INVALID_FORMAT,
+                fileName,
+                name,
+                "mapping '" + key + "' has 'weights' that add up to zero; there is nothing for it to draw");
+        }
+
+        double[] asArray = new double[weights.size()];
+        for (int i = 0; i < asArray.length; i++) asArray[i] = weights.get(i);
+        return new CellMapping(choices.toArray(new String[0]), asArray, chance);
+    }
+
+    /** {@code _} is air and a space is "leave it alone", as in {@code layers}. */
+    private static String resolveChoice(String blockId) {
+        if ("_".equals(blockId)) return AIR;
+        if (" ".equals(blockId)) return null;
+        return blockId;
     }
 
     /**
