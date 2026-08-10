@@ -54,6 +54,10 @@ public class ProcessAgent extends AbstractRecipeProcess {
     private boolean conditionBlocked;
     private String conditionFailure;
 
+    /** This run's success draw: whether it has been made, and what it said. See {@link #payoutSucceeds}. */
+    private boolean payoutDecided;
+    private boolean payoutSucceeded;
+
     public ProcessAgent(IRecipeContext context) {
         this.context = context;
         reset();
@@ -369,6 +373,35 @@ public class ProcessAgent extends AbstractRecipeProcess {
     }
 
     /**
+     * Whether this run hands over its outputs, asked once and remembered.
+     *
+     * <h2>The draw sits inside the method that retries</h2>
+     *
+     * {@code produceOutputs} both decides the payout and tries to place it, and a full output
+     * port makes it answer false and <b>run again on the next tick</b>. So the draw was made
+     * again on every tick the machine spent blocked. Nobody designed that; it is where the
+     * call happens to sit.
+     * <p>
+     * A fixed {@code chance} survived it, because the evaluation seed does not move inside a
+     * run and the same question gives the same answer. <b>An expression-valued chance did
+     * not.</b> {@code "chance": "energy_p"} is re-evaluated against a machine whose energy is
+     * still moving while it waits, so a run that won on the tick it finished could lose on
+     * the next one - and losing means completing with nothing, after the inputs are already
+     * gone. The longer the output stayed blocked, the likelier it was.
+     * <p>
+     * Deciding once and keeping the answer is what the draw meant in the first place. The
+     * decision is persisted because a machine can be saved while it waits, and re-drawing
+     * after a reload is the same bug through a different door.
+     */
+    private boolean payoutSucceeds(ConditionContext context) {
+        if (!payoutDecided) {
+            payoutSucceeded = currentRecipe.producesOutput(context);
+            payoutDecided = true;
+        }
+        return payoutSucceeded;
+    }
+
+    /**
      * Settle what this tick will do, once, for both halves of it to read.
      * <p>
      * The stretch of work is clamped to the recipe's work amount because <b>progress past
@@ -408,7 +441,7 @@ public class ProcessAgent extends AbstractRecipeProcess {
         // A lost success draw ends the run with nothing to hand over. Reporting success is
         // right: the run did finish, and answering false would leave the machine waiting for
         // output space it does not need, forever. See IRecipe#producesOutput.
-        if (currentRecipe != null && !currentRecipe.producesOutput(context)) {
+        if (currentRecipe != null && !payoutSucceeds(context)) {
             return true;
         }
 
@@ -454,6 +487,8 @@ public class ProcessAgent extends AbstractRecipeProcess {
         this.manaOutputPerTick = 0;
         this.workProgress = 0;
         this.plannedSpeed = Double.NaN;
+        this.payoutDecided = false;
+        this.payoutSucceeded = false;
         clearCaches();
     }
 
@@ -647,6 +682,8 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
         if (running || waitingForOutput) {
             nbt.setDouble("workProgress", workProgress);
+            nbt.setBoolean("payoutDecided", payoutDecided);
+            nbt.setBoolean("payoutSucceeded", payoutSucceeded);
 
             NBTTagList outputList = new NBTTagList();
             for (IRecipeOutput output : cachedOutputs) {
@@ -688,6 +725,8 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
         if (running || waitingForOutput) {
             workProgress = nbt.getDouble("workProgress");
+            payoutDecided = nbt.getBoolean("payoutDecided");
+            payoutSucceeded = nbt.getBoolean("payoutSucceeded");
 
             if (currentRecipeName != null && !currentRecipeName.isEmpty()) {
                 this.currentRecipe = RecipeLoader.getInstance()

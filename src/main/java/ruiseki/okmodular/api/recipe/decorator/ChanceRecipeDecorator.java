@@ -38,12 +38,16 @@ public class ChanceRecipeDecorator extends RecipeDecorator {
      * anything comes out of it. That is what a success rate is, and it is the only placement
      * where the number is observable.
      * <p>
-     * <b>Still one draw per run.</b> The machine's evaluation seed is fixed when a recipe
-     * starts and does not move until the next one begins, so this answers the same at the
-     * end as it would have at the start. The draw comes from that seed rather than a
-     * {@link java.util.Random} held by the decorator: that field belonged to the recipe
-     * definition, so every machine in the world running this recipe was pulling from one
-     * shared sequence.
+     * <b>One draw per run</b>, though not because this method is called once - {@code
+     * ProcessAgent.produceOutputs} runs again on every tick the output stays blocked, and
+     * this sits at the top of it. The agent asks once and keeps the answer; see
+     * {@code ProcessAgent#payoutSucceeds}. A fixed {@code chance} was safe without that,
+     * since the evaluation seed does not move inside a run - but an expression-valued one
+     * reads a machine that does.
+     * <p>
+     * The draw comes from that seed rather than a {@link java.util.Random} held by the
+     * decorator: that field belonged to the recipe definition, so a re-ask could not return
+     * the same answer even in principle.
      */
     @Override
     public boolean producesOutput(ConditionContext context) {

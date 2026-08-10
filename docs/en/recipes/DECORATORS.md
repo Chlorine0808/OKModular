@@ -52,6 +52,16 @@ Omitting `rolls` on `weighted_random` draws once; omitting `weight` treats it as
 
 `chance` takes an expression as well as a number (`"chance": "0.1 + tier * 0.05"`).
 
+> [!NOTE]
+> **A recipe's `chance` is drawn once per run and the answer is kept.**
+> When the output ports are full the machine retries every tick until they clear, but it
+> does not draw again - and neither does it after a save and reload.
+>
+> Without that, a recipe written as `"chance": "energy_p"` - anything that **moves while the
+> machine waits** - could turn from a win into a loss mid-wait and take the whole payout with
+> it. The longer the output stayed blocked, the less likely the recipe was to pay at all,
+> which is not a rule anyone wrote.
+
 ## 3. How the draws work
 
 A decorator draws **from the machine's evaluation seed**, not from a random number generator

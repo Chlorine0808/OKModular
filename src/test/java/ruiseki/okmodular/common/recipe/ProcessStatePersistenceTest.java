@@ -64,6 +64,8 @@ public class ProcessStatePersistenceTest {
         PERSISTED.put("waitingForOutput", "waitingForOutput");
         PERSISTED.put("currentRecipeName", "recipeName");
         PERSISTED.put("workProgress", "workProgress");
+        PERSISTED.put("payoutDecided", "payoutDecided");
+        PERSISTED.put("payoutSucceeded", "payoutSucceeded");
         PERSISTED.put("cachedOutputs", "cachedOutputs");
         PERSISTED.put("perTickInputs", "perTickInputs");
         PERSISTED.put("perTickOutputs", "perTickOutputs");
