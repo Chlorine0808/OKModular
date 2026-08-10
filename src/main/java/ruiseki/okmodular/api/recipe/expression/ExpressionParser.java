@@ -71,7 +71,7 @@ public class ExpressionParser {
 
     public Object parse() {
         nextChar();
-        Object x = parseLogicalOr();
+        Object x = parseTernary();
         while (isSpace(ch)) nextChar();
         if (pos < input.length()) throw error("Unexpected token: '" + (char) ch + "'");
         return x;
@@ -96,6 +96,19 @@ public class ExpressionParser {
             };
         }
         throw error("Expected action or expression");
+    }
+
+    private Object parseTernary() {
+        Object condition = parseLogicalOr();
+        if (!eat('?')) return condition;
+
+        Object whenTrue = parseTernary();
+        if (!eat(':')) {
+            throw error("Expected ':' to give the '?' its other branch, as in 'tier >= 5 ? 2 : 1'");
+        }
+        Object whenFalse = parseTernary();
+
+        return new ConditionalExpression(asCondition(condition), asExpression(whenTrue), asExpression(whenFalse));
     }
 
     // 1. OR: x || y
@@ -384,7 +397,7 @@ public class ExpressionParser {
             // Parse array elements
             while (ch != ']' && ch != -1) {
                 // Parse element (can be string or expression)
-                Object element = parseLogicalOr();
+                Object element = parseTernary();
                 elements.add(asExpression(element));
 
                 while (isSpace(ch)) nextChar();
@@ -420,7 +433,7 @@ public class ExpressionParser {
             return new StringLiteralExpression(stringValue);
         } else if (eat('(') || eat('{')) { // parentheses or braces
             char close = (input.charAt(pos - 1) == '(') ? ')' : '}';
-            Object res = parseLogicalOr();
+            Object res = parseTernary();
             if (!eat(close)) throw error("Expected closing '" + close + "'");
             return res;
         } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
@@ -469,7 +482,7 @@ public class ExpressionParser {
                 List<IExpression> args = new ArrayList<>();
                 if (!eat(')')) {
                     while (true) {
-                        Object arg = parseLogicalOr();
+                        Object arg = parseTernary();
                         args.add(asExpression(arg));
                         if (eat(',')) {
                             continue;
