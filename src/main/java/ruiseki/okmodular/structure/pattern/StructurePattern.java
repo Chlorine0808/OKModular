@@ -65,15 +65,41 @@ public final class StructurePattern {
      */
     private final Map<String, List<Cell>> resolved = new HashMap<>();
 
+    private final boolean deterministic;
+
     StructurePattern(String name, char anchor, String[][] shape, Map<Character, CellMapping> mappings) {
         this.name = name;
         this.anchor = anchor;
         this.shape = shape;
         this.mappings = mappings;
+        this.deterministic = allCellsSettled(shape, mappings);
     }
 
     public String getName() {
         return name;
+    }
+
+    /**
+     * Whether this pattern is the same arrangement every time it is written.
+     * <p>
+     * A structure <i>input</i> may only use one that is: matching against blocks that are
+     * drawn fresh on each placement has nothing to compare to. Only the characters actually
+     * drawn count, so a pattern may declare a mapping it never uses without losing this.
+     */
+    public boolean isDeterministic() {
+        return deterministic;
+    }
+
+    private static boolean allCellsSettled(String[][] shape, Map<Character, CellMapping> mappings) {
+        for (String[] layer : shape) {
+            for (String row : layer) {
+                for (int col = 0; col < row.length(); col++) {
+                    CellMapping mapping = mappings.get(row.charAt(col));
+                    if (mapping != null && !mapping.isDeterministic()) return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**

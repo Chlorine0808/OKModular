@@ -297,11 +297,37 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
         // recipe that simply never fires, which reads to the author as their JSON being ignored.
         if (pattern == null) {
             Logger.error("A structure input has no 'pattern' - it can never match");
-        } else if (StructurePatternLoader.getInstance()
-            .get(pattern) == null) {
+        } else {
+            StructurePattern named = StructurePatternLoader.getInstance()
+                .get(pattern);
+            if (named == null) {
                 Logger.warn("Structure input references an unknown pattern: {}", pattern);
+            } else {
+                requireSettled(named);
             }
+        }
         return input;
+    }
+
+    /**
+     * Refuse a pattern whose blocks are drawn rather than written down.
+     * <p>
+     * A {@code chance} or a weight table exists so the arrangement comes out differently every
+     * time it is placed. An input asks the opposite question - "is <i>this</i> arrangement
+     * here" - and there is no arrangement to name.
+     * <p>
+     * This throws rather than logs because the recipe cannot be made to work: left alone it
+     * would load, never match, and read to its author as a structure that will not detect.
+     * Patterns are loaded before recipes precisely so this can be answered here - see
+     * {@code MachineryModule.postInit}.
+     */
+    private static void requireSettled(StructurePattern pattern) {
+        if (pattern.isDeterministic()) return;
+
+        throw new IllegalArgumentException(
+            "a structure input names the pattern \"" + pattern.getName()
+                + "\", which places a different arrangement every time it is written, so there is "
+                + "nothing for the input to match against. Patterns using 'chance' are output-only.");
     }
 
     @Override

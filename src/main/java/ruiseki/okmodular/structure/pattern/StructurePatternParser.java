@@ -134,22 +134,51 @@ public final class StructurePatternParser {
                         name,
                         "mapping keys must be single characters, got: \"" + entry.getKey() + "\"");
                 }
-                JsonElement value = entry.getValue();
-                if (!value.isJsonPrimitive()) {
-                    throw new StructureException(
-                        StructureException.ErrorType.INVALID_FORMAT,
-                        fileName,
-                        name,
-                        "mapping '" + entry.getKey()
-                            + "' must be a block ID string; the object and list forms a structure accepts are not supported here");
-                }
                 mappings.put(
                     entry.getKey()
                         .charAt(0),
-                    new CellMapping(value.getAsString()));
+                    readMapping(entry.getValue(), entry.getKey(), fileName, name));
             }
         }
         return mappings;
+    }
+
+    /**
+     * One entry of {@code mappings}: a block ID, or an object that says more about the cell.
+     * <p>
+     * The object form is <b>not</b> the one a structure definition accepts. A structure's
+     * object names a block and its metadata; this one names what goes in the cell and how
+     * often, and its keys are the pattern's own.
+     */
+    private static CellMapping readMapping(JsonElement value, String key, String fileName, String name) {
+        if (value.isJsonPrimitive()) return new CellMapping(value.getAsString());
+
+        if (!value.isJsonObject()) {
+            throw new StructureException(
+                StructureException.ErrorType.INVALID_FORMAT,
+                fileName,
+                name,
+                "mapping '" + key
+                    + "' must be a block ID string or an object; the list form a structure accepts is not supported here");
+        }
+
+        JsonObject mapping = value.getAsJsonObject();
+        if (!mapping.has("block")) {
+            throw new StructureException(
+                StructureException.ErrorType.INVALID_FORMAT,
+                fileName,
+                name,
+                "mapping '" + key + "' says how often to place something but not what to place; add 'block'");
+        }
+
+        String blockId = mapping.get("block")
+            .getAsString();
+        if (!mapping.has("chance")) return new CellMapping(blockId);
+
+        return new CellMapping(
+            blockId,
+            mapping.get("chance")
+                .getAsDouble());
     }
 
     /**

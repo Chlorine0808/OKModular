@@ -2,18 +2,28 @@ package ruiseki.okmodular.api.recipe.io;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import net.minecraft.nbt.NBTTagCompound;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import ruiseki.okmodular.api.recipe.parser.InputNBTRegistry;
 import ruiseki.okmodular.api.recipe.parser.InputParserRegistry;
+import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
 
 /**
  * 構造 IO の入力側の検証。
@@ -111,5 +121,80 @@ public class StructureInputTest {
         assertTrue(copy.isConsume());
         assertEquals(3, copy.getIndex(), "index が落ちている");
         assertEquals(5, copy.getInterval(), "interval が落ちている");
+    }
+
+    // ============================================
+    // 何が置かれるか決まらないパターンは入力に使えない
+    // ============================================
+    //
+    // `chance` や重み表を持つパターンは、**置くたびに違う形になる**のが目的です。
+    // それを照合に使うと「何と一致すればいいのか」が定義できません。
+    //
+    // 実行時に静かに一致しないだけだと、書いた人には「レシピが動かない」としか見えないので、
+    // レシピを読む時点で断ります。パターンはレシピより先に読まれるので、ここで判定できます
+    // （`MachineryModule.postInit` にその順序の理由が書いてあります）。
+
+    @TempDir
+    File patternDir;
+
+    @AfterEach
+    public void tearDown() {
+        // ローダは singleton。ここで読んだパターンを残すと他のテストから見えてしまう。
+        StructurePatternLoader.getInstance()
+            .clear();
+    }
+
+    private void loadPattern(String json) {
+        try {
+            Files.write(
+                new File(patternDir, "p.json").toPath(),
+                json.replace('\'', '"')
+                    .getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        StructurePatternLoader.getInstance()
+            .loadFrom(patternDir);
+    }
+
+    private static StructureInput parseNaming(String patternName) {
+        return (StructureInput) StructureInput.fromJson(
+            new JsonParser()
+                .parse(("{ 'type': 'structure', 'pattern': '" + patternName + "', 'symbol': 'S' }").replace('\'', '"'))
+                .getAsJsonObject());
+    }
+
+    @Test
+    @DisplayName("確率で欠けるパターンを入力に使えない")
+    public void test非決定なパターンは入力に使えない() {
+        loadPattern(
+            "{ 'name': 'speckled', 'mappings': { 'S': { 'block': 'minecraft:stone', 'chance': 0.5 } },"
+                + " 'layers': [ ['S'] ] }");
+
+        IllegalArgumentException refused = assertThrows(
+            IllegalArgumentException.class,
+            () -> parseNaming("speckled"),
+            "置くたびに形が変わるパターンを照合に使えてしまっている");
+
+        assertTrue(
+            refused.getMessage()
+                .contains("speckled"),
+            "どのパターンが問題なのか message に無い: " + refused.getMessage());
+    }
+
+    @Test
+    @DisplayName("形の決まったパターンは今までどおり使える")
+    public void test決定的なパターンは通る() {
+        loadPattern("{ 'name': 'solid', 'mappings': { 'S': 'minecraft:stone' }, 'layers': [ ['S'] ] }");
+
+        assertEquals("solid", parseNaming("solid").getPatternName());
+    }
+
+    @Test
+    @DisplayName("読めていないパターン名はここでは断らない")
+    public void test未知のパターンは断らない() {
+        // パターンの読み込みに失敗した場合、その報告は errors.txt の担当。
+        // ここで落とすと、原因（パターン側のエラー）ではなく結果（レシピが読めない）だけが出る。
+        assertEquals("never_loaded", parseNaming("never_loaded").getPatternName());
     }
 }

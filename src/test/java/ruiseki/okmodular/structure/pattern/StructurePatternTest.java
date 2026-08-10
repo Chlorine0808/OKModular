@@ -1,6 +1,7 @@
 package ruiseki.okmodular.structure.pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -63,6 +64,98 @@ public class StructurePatternTest {
             map.put(cell.a + "," + cell.b + "," + cell.c, cell.mapping.blockFor(0L, 0, 0, 0));
         }
         return map;
+    }
+
+    /** `mappings` の値 1 つぶんを取り出す。値の書き方そのものを見たいとき用。 */
+    private static CellMapping mappingOf(String value) {
+        return parse(("{ 'name': 'x', 'mappings': { 'S': " + value + " }, 'layers': [ ['S'] ] }").replace('\'', '"'))
+            .cellsFor(null)
+            .get(0).mapping;
+    }
+
+    /** 20x20 のマスに置いて、実際にブロックが入った数を数える。 */
+    private static int placedOf(CellMapping mapping, long seed) {
+        int placed = 0;
+        for (int x = 0; x < 20; x++) {
+            for (int z = 0; z < 20; z++) {
+                if (mapping.blockFor(seed, x, 64, z) != null) placed++;
+            }
+        }
+        return placed;
+    }
+
+    // ============================================
+    // chance — そのセルに何か置くか
+    // ============================================
+    //
+    // 「置くか」と「何を置くか」は直交した別の軸。ここは前者だけ。
+    //
+    // 一番の落とし穴は**全セルが同じ答えを出すこと**。評価の種はレシピ実行中は固定なので、
+    // 座標を混ぜ忘れると 400 マスが揃って当たるか揃って外れるかの二択に潰れる
+    // （`PerPositionProbabilityDecorator` が踏んだ穴と同じ）。
+
+    @Test
+    @DisplayName("chance を書いたセルは確率で欠ける")
+    public void testchanceでセルが欠ける() {
+        int placed = placedOf(mappingOf("{ 'block': 'minecraft:stone', 'chance': 0.5 }"), 4649L);
+
+        assertTrue(placed > 150 && placed < 250, "400 マス中 " + placed + " マス。0 や 400 に潰れているなら座標が混ざっていない");
+    }
+
+    @Test
+    @DisplayName("chance 1 は必ず置き、0 は決して置かない")
+    public void testchanceの両端() {
+        assertEquals(400, placedOf(mappingOf("{ 'block': 'minecraft:stone', 'chance': 1.0 }"), 1L));
+        assertEquals(0, placedOf(mappingOf("{ 'block': 'minecraft:stone', 'chance': 0.0 }"), 1L));
+    }
+
+    @Test
+    @DisplayName("同じ種・同じ座標なら何度聞いても同じ")
+    public void testchanceが決定的である() {
+        // 置く前に確かめる経路があるので、ここが揺れると「置けると答えたのに置かない」。
+        CellMapping mapping = mappingOf("{ 'block': 'minecraft:stone', 'chance': 0.5 }");
+
+        for (int x = 0; x < 30; x++) {
+            assertEquals(mapping.blockFor(99L, x, 64, 7), mapping.blockFor(99L, x, 64, 7), "x=" + x + " で答えが変わった");
+        }
+    }
+
+    @Test
+    @DisplayName("実行が変われば欠けるマスも変わる")
+    public void testchanceが実行ごとに変わる() {
+        CellMapping mapping = mappingOf("{ 'block': 'minecraft:stone', 'chance': 0.5 }");
+        StringBuilder first = new StringBuilder();
+        StringBuilder second = new StringBuilder();
+
+        for (int x = 0; x < 40; x++) {
+            first.append(mapping.blockFor(1L, x, 64, 0) == null ? '.' : '#');
+            second.append(mapping.blockFor(2L, x, 64, 0) == null ? '.' : '#');
+        }
+
+        assertNotEquals(first.toString(), second.toString(), "種を変えても同じ並びになった");
+    }
+
+    @Test
+    @DisplayName("chance を書かなければ今までどおり必ず置く")
+    public void testchance無しは据え置き() {
+        assertEquals(400, placedOf(mappingOf("'minecraft:stone'"), 1L), "文字列で書いた対応が欠けるようになっている");
+        assertEquals(400, placedOf(mappingOf("{ 'block': 'minecraft:stone' }"), 1L), "chance の無いオブジェクトが欠けている");
+    }
+
+    @Test
+    @DisplayName("何を置くか書いていない対応は読み込まない")
+    public void test中身の無い対応は断る() {
+        // 置くものを書かずに確率だけ書いても、何も起きないマスにしかならない。
+        // 実行時に静かに 0 マスで終わるより、書いた瞬間に落ちるほうがいい。
+        StructureException thrown = assertThrows(
+            StructureException.class,
+            () -> mappingOf("{ 'chance': 0.5 }"),
+            "block も weights も無い対応が通っている");
+
+        assertTrue(
+            thrown.getMessage() != null && !thrown.getMessage()
+                .isEmpty(),
+            "何が足りないのか message が言っていない");
     }
 
     @Test
