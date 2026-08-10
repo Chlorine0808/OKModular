@@ -45,6 +45,17 @@ public class OpAnd implements ICondition {
     }
 
     @Override
+    public String toString() {
+        StringBuilder text = new StringBuilder("(");
+        for (int i = 0; i < children.size(); i++) {
+            if (i > 0) text.append(" && ");
+            text.append(children.get(i));
+        }
+        return text.append(')')
+            .toString();
+    }
+
+    @Override
     public void write(JsonObject json) {
         json.addProperty("type", "and");
         JsonArray array = new JsonArray();

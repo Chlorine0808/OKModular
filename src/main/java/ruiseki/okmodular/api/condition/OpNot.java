@@ -26,6 +26,11 @@ public class OpNot implements ICondition {
     }
 
     @Override
+    public String toString() {
+        return "!(" + child + ")";
+    }
+
+    @Override
     public void write(JsonObject json) {
         json.addProperty("type", "not");
         JsonObject childJson = new JsonObject();
