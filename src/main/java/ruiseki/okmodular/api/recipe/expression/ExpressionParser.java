@@ -338,7 +338,17 @@ public class ExpressionParser {
     // the recipe would simply hold a different number than it says.
     private Object parseUnary() {
         if (eat('+')) return parseUnary(); // unary plus
-        if (eat('-')) return new ArithmeticExpression(new ConstantExpression(0), asExpression(parseUnary()), "-");
+        if (eat('-')) {
+            Object operand = parseUnary();
+            // A negated number stays a number. Callers branch on ConstantExpression to decide
+            // whether a value can be written down as a plain int and whether a written-down one is
+            // out of range - and to those, -8 read as (0 - 8) is an expression whose value is
+            // unknowable until a machine is present. noise(-8) got past its load-time check that way.
+            if (operand instanceof ConstantExpression constant) {
+                return new ConstantExpression(-constant.evaluateDouble(null));
+            }
+            return new ArithmeticExpression(new ConstantExpression(0), asExpression(operand), "-");
+        }
         if (eat('!')) {
             return new OpNot(asCondition(parseUnary()));
         }

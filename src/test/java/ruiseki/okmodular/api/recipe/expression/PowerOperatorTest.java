@@ -98,6 +98,22 @@ public class PowerOperatorTest {
     }
 
     @Test
+    @DisplayName("符号を付けた数は数のまま")
+    public void test負のリテラルは定数() {
+        // `-8` は単項マイナスなので、素直に組むと (0 - 8) という**式**になる。
+        // 呼ぶ側は `instanceof ConstantExpression` で「そのまま int として書き出せるか」
+        // 「書かれた値が範囲外か」を判定するので、そこから -8 が見えなくなる。
+        // noise(-8) のロード時検査がそれで素通りしていた。
+        assertInstanceOf(ConstantExpression.class, ExpressionParser.parseExpression("-8"), "-8 が式になっている");
+        assertInstanceOf(ConstantExpression.class, ExpressionParser.parseExpression("-0.5"));
+        assertEquals(-8.0, evaluate("-8"));
+
+        // 畳むのは数に付いた符号だけ。式に付いた符号は式のまま
+        assertEquals(-3.0, evaluate("-tier"), "tier 3 の符号反転");
+        assertEquals(-4.0, evaluate("-(1 + 3)"));
+    }
+
+    @Test
     @DisplayName("指数側に符号と括弧を書ける")
     public void test指数が単項を取れる() {
         assertEquals(0.5, evaluate("2 ^ -1"), "指数側を primary にすると負の指数が書けない");
