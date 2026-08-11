@@ -68,6 +68,9 @@ public final class SeedMixer {
     /** The stream deciding which entry of a weight table a pattern cell gets. */
     public static final long PATTERN_CELL_WEIGHT = 10L;
 
+    /** The stream {@code noise()} hashes its lattice corners from. */
+    public static final long NOISE = 11L;
+
     /** Odd 64-bit constant, so distinct streams land far apart. */
     private static final long STREAM_GAMMA = 0x9E3779B97F4A7C15L;
 
