@@ -215,7 +215,9 @@ Performance multipliers provided by the structure definition.
 - `tetrate(a, n)`: A tower of `n` copies of `a` (the same as `a ^^ n`)
 - `perm(n, r)` / `npr(n, r)` / `permu(n, r)` / `permutation(n, r)`: Permutations
 - `combi(n, r)` / `ncr(n, r)` / `combination(n, r)`: Combinations
-- `random()`: Random number between 0 and 1
+- `random()`: Random number between 0 and 1. **Unrelated at neighbouring positions** (salt and pepper)
+- `noise(scale)`: Between 0 and 1, but **near positions answer alike**. `scale` is how many blocks
+  across one blob is. This is the one that clumps. ⚠ **Not uniformly distributed** (piles up near 0.5)
 - `chance(x)`: Returns 1 or 0 based on probability `x` (0.0 - 1.0)
 
 > [!NOTE]

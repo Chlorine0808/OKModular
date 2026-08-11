@@ -22,6 +22,17 @@ public class ConditionContext {
     private final IRecipeContext recipeContext;
     private final long evaluationSeed;
 
+    /**
+     * The seed with no position mixed into it, so it is the same at every cell of one placement.
+     * <p>
+     * {@link #evaluationSeed} deliberately differs per cell - that is what makes {@code random()}
+     * scatter instead of flipping one coin for a whole pattern. A field that has to be
+     * <em>smooth</em> over positions needs the opposite: {@code noise()} hashes lattice corners, and
+     * hashing each of them under a different seed leaves white noise. So the unscattered value is
+     * kept alongside rather than derived, because {@code forPosition} cannot be undone.
+     */
+    private final long placementSeed;
+
     /** Offset from the anchor of the pattern cell being asked about, or null outside a pattern. */
     private final int[] cell;
 
@@ -30,17 +41,18 @@ public class ConditionContext {
     private NBTTagCompound workingNBT;
 
     public ConditionContext(World world, int x, int y, int z, IRecipeContext recipeContext, long evaluationSeed) {
-        this(world, x, y, z, recipeContext, evaluationSeed, null);
+        this(world, x, y, z, recipeContext, evaluationSeed, evaluationSeed, null);
     }
 
     private ConditionContext(World world, int x, int y, int z, IRecipeContext recipeContext, long evaluationSeed,
-        int[] cell) {
+        long placementSeed, int[] cell) {
         this.world = world;
         this.x = x;
         this.y = y;
         this.z = z;
         this.recipeContext = recipeContext;
         this.evaluationSeed = evaluationSeed;
+        this.placementSeed = placementSeed;
         this.cell = cell;
     }
 
@@ -77,6 +89,7 @@ public class ConditionContext {
             worldZ,
             recipeContext,
             seed,
+            runSeed,
             new int[] { cellX, cellY, cellZ });
     }
 
@@ -157,7 +170,15 @@ public class ConditionContext {
         if (index == 0) return this;
         // The cell is carried over: this says "the same question, a different draw", and dropping
         // it would make cell_y answer zero from the second draw on without raising anything.
-        return new ConditionContext(world, x, y, z, recipeContext, SeedMixer.forDraw(evaluationSeed, index), cell);
+        return new ConditionContext(
+            world,
+            x,
+            y,
+            z,
+            recipeContext,
+            SeedMixer.forDraw(evaluationSeed, index),
+            placementSeed,
+            cell);
     }
 
     /**
@@ -165,5 +186,13 @@ public class ConditionContext {
      */
     public long getEvaluationSeed() {
         return evaluationSeed;
+    }
+
+    /**
+     * The seed shared by every cell of one placement, for a field that has to be smooth across
+     * them. Outside a pattern this is {@link #getEvaluationSeed()}.
+     */
+    public long getPlacementSeed() {
+        return placementSeed;
     }
 }

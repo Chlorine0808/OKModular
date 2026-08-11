@@ -58,6 +58,7 @@ public class MathFunctionExpression implements IExpression {
                 "ceil",
                 "round",
                 "chance",
+                "noise",
                 "pow",
                 "tetrate",
                 "min",
@@ -209,6 +210,13 @@ public class MathFunctionExpression implements IExpression {
                     .evaluate(context)
                     .asDouble();
                 return new EvaluationValue(Math.pow(val, p));
+            }
+            case "noise": {
+                // The placement's seed, not this cell's: hashing each lattice corner under a
+                // different seed would leave white noise, which is what random() already is.
+                // The position is the one being asked about, which inside a pattern is the cell's.
+                return new EvaluationValue(
+                    ValueNoise.at(context.getPlacementSeed(), context.getX(), context.getY(), context.getZ(), val));
             }
             case "tetrate": {
                 if (arguments.size() < 2) return EvaluationValue.ZERO;

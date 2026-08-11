@@ -126,7 +126,7 @@ public class ExpressionRegistry {
         // Math Functions
         for (String mathFunc : MathFunctionExpression.SUPPORTED_FUNCTIONS) {
             registerFunction(mathFunc, (args, parser) -> {
-                validateMathArgs(mathFunc, args.size(), parser);
+                validateMathArgs(mathFunc, args, parser);
                 return new MathFunctionExpression(mathFunc, args);
             });
         }
@@ -257,7 +257,30 @@ public class ExpressionRegistry {
         FUNCTION_REGISTRY.put(name.toLowerCase(), factory);
     }
 
-    private static void validateMathArgs(String name, int argCount, ExpressionParser parser) {
+    /**
+     * Checks a math call's arguments.
+     * <p>
+     * Takes the arguments rather than their count so a value written down can be refused here too.
+     * Only a literal can be: an expression is whatever the machine makes it, and refusing that
+     * would have to happen mid-tick.
+     */
+    private static void validateMathArgs(String name, List<IExpression> args, ExpressionParser parser) {
+        int argCount = args.size();
+
+        if (name.equals("noise")) {
+            if (argCount != 1) {
+                throw parser.error("noise() requires 1 argument (how many blocks across one blob is)");
+            }
+            IExpression scale = args.get(0);
+            if (scale instanceof ConstantExpression && scale.evaluateDouble(null) < ValueNoise.MIN_SCALE) {
+                throw parser.error(
+                    "noise() was given a scale of " + scale
+                        + ", and a scale is a length in blocks. One block is the finest lattice there is - "
+                        + "that is random() - so anything at or below it has nothing further to mean");
+            }
+            return;
+        }
+
         if (name.equals("pow") || name.equals("tetrate")
             || name.equals("min")
             || name.equals("max")

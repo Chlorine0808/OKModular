@@ -197,11 +197,54 @@ The draw mixes in the cell's **world coordinates**, so:
 - within one run the answer never moves, across a save and reload included
 - the next run lays it out differently
 
+#### Making it clump - `noise(scale)`
+
+A `chance` is drawn **independently at every cell**, so a density that falls off by distance still
+leaves the inside evenly scattered. `noise(scale)` is a field where **near positions answer alike**.
+
+> [!IMPORTANT]
+> **Threshold the noise; do not hand it over as a probability.**
+>
+> ```json
+> "chance": "noise(8)"        ← does not clump
+> "chance": "noise(8) > 0.5"  ← clumps
+> ```
+>
+> A smooth `chance` still leaves **the placement itself an independent draw per cell**. Where the
+> field sits near 0.5 you get the same 50/50 scatter as before, so what you have made is an even
+> scatter whose density drifts smoothly.
+>
+> A comparison answers 1 or 0, which **skips the draw**, and the shape of the field comes through
+> as it is. Raise the threshold for smaller blobs, lower it for bigger ones.
+
+```json
+"mappings": {
+  "X": { "block": "minecraft:iron_ore",
+         "chance": "noise(6) > 0.45 ? 1 - sqrt(cell_x^2 + cell_y^2 + cell_z^2) / 8 : 0" }
+}
+```
+
+**Ore only inside blobs six blocks across, thinning toward the sphere's edge.** That is what a vein
+looks like; the distance draw inside each blob is what leaves its rim ragged. And with `shape`
+generating the sphere, without drawing a character of `layers`.
+
+`scale` is how many blocks across one blob is. Larger is smoother and broader; **taken down to 1 it
+is evenly scattered again**, because a lattice spacing of one block leaves nothing to interpolate.
+A literal of 0 or less is a load error; an expression that falls there at run time is treated as 1.
+
+> [!WARNING]
+> **`noise()` is not uniformly distributed.** Interpolating between lattice corners piles values up
+> around 0.5. `"chance": "noise(8)"` fills roughly half the cells, but **`noise(8) < 0.2` passes a
+> few percent rather than twenty.** If you are aiming at a fraction, check it in game.
+
 > [!NOTE]
-> **`cell_*` gives you the shape, but a shape alone is not a vein.** Even with the density
-> falling off by distance, *which* cells get written is still an independent draw per cell, so
-> the inside of that softened sphere is **evenly scattered** - salt and pepper. Clumping needs
-> noise with spatial correlation.
+> **Nothing guarantees one connected blob.** A threshold of the field may come out split, or with
+> holes. What `noise()` promises is that it looks like clumps.
+
+> [!NOTE]
+> **Within one run it is a single continuous field.** The field is a function of world position, so
+> two anchors produce arrangements that **join up** rather than two independent ones - unlike a
+> `chance`'s scatter, which differs per anchor. The next run is a different field.
 
 > [!NOTE]
 > **`cell_*` can only take away.** A cell that was not drawn does not appear. Getting something

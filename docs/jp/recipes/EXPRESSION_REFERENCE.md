@@ -212,7 +212,9 @@ fluid_f_out("lava")   item_f_in("minecraft:coal")
 - `tetrate(a, n)`: `a` を `n` 段積んだ冪（`a ^^ n` と同じ）
 - `perm(n, r)` / `npr(n, r)` / `permu(n, r)` / `permutation(n, r)`: 順列
 - `combi(n, r)` / `ncr(n, r)` / `combination(n, r)`: 組み合わせ
-- `random()`: 0 以上 1 未満の乱数
+- `random()`: 0 以上 1 未満の乱数。**隣り合う座標で無関係な値**になる（塩胡椒）
+- `noise(scale)`: 0 以上 1 未満で、**近い座標では近い値**になる場。`scale` は塊の大きさ（ブロック）。
+  塊で湧かせたいときはこちら。⚠ **一様分布ではありません**（0.5 付近に寄る）
 - `chance(x)`: 確率 `x` (0.0 - 1.0) に基づいて 1 または 0 を返す
 
 > [!NOTE]
