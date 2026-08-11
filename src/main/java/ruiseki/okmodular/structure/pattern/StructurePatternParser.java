@@ -38,7 +38,7 @@ public final class StructurePatternParser {
     static final String AIR = "minecraft:air";
 
     /** Excluded from the pattern entirely, as in a structure definition. */
-    private static final char SKIP = ' ';
+    static final char SKIP = ' ';
 
     private static final char DEFAULT_ANCHOR = 'Q';
 
@@ -52,9 +52,19 @@ public final class StructurePatternParser {
         String name = readName(json, fileName);
         String[][] shape = readShape(json, fileName, name);
 
+        boolean generated = json.has("shape");
+
         char anchor = DEFAULT_ANCHOR;
         boolean anchorDeclared = false;
         if (json.has("anchor")) {
+            if (generated) {
+                throw new StructureException(
+                    StructureException.ErrorType.INVALID_FORMAT,
+                    fileName,
+                    name,
+                    "has both 'shape' and 'anchor'. A generated shape is anchored at its centre and every "
+                        + "cell of it holds the same character, so there is nothing for 'anchor' to pick out");
+            }
             String declared = json.get("anchor")
                 .getAsString();
             if (declared.length() != 1) {
@@ -79,7 +89,18 @@ public final class StructurePatternParser {
                 "anchor '" + anchor + "' does not appear in 'layers'");
         }
 
-        return new StructurePattern(name, anchor, shape, mappings);
+        return new StructurePattern(name, anchor, shape, mappings, generated ? centreOf(shape) : null);
+    }
+
+    /**
+     * The middle of a generated shape, handed over rather than searched for.
+     * <p>
+     * Every cell of a generated shape holds the same character, so looking one up would find the
+     * topmost cell and measure every offset from there.
+     */
+    private static int[] centreOf(String[][] shape) {
+        int middle = (shape.length - 1) / 2;
+        return new int[] { middle, middle, middle };
     }
 
     private static String readName(JsonObject json, String fileName) {
@@ -94,9 +115,27 @@ public final class StructurePatternParser {
         return name;
     }
 
+    /**
+     * The cells, drawn by hand as {@code layers} or asked for as a {@code shape}.
+     * <p>
+     * A generated shape becomes the same {@code layers} array a hand-drawn one produces, so
+     * everything downstream - the facing transform, the anchor, the per-facing cache, the check
+     * that every character is mapped - is the code that already existed.
+     */
     private static String[][] readShape(JsonObject json, String fileName, String name) {
+        if (json.has("layers") && json.has("shape")) {
+            throw new StructureException(
+                StructureException.ErrorType.INVALID_FORMAT,
+                fileName,
+                name,
+                "has both 'layers' and 'shape', which say what the cells are twice; "
+                    + "draw them or generate them, not both");
+        }
+        if (json.has("shape")) {
+            return generate(json.get("shape"), fileName, name);
+        }
         if (!json.has("layers")) {
-            throw StructureException.missingField(fileName, name, "layers");
+            throw StructureException.missingField(fileName, name, "layers' or 'shape");
         }
         JsonArray layers = json.getAsJsonArray("layers");
         if (layers.size() == 0) {
@@ -118,6 +157,38 @@ public final class StructurePatternParser {
             shape[i] = collected.toArray(new String[0]);
         }
         return shape;
+    }
+
+    /**
+     * Reads one {@code shape} object through whichever generator its {@code type} names.
+     * <p>
+     * The known types come from {@link ShapePrimitives#types()} rather than being listed here, so
+     * the load error names exactly what the registry accepts.
+     */
+    private static String[][] generate(JsonElement value, String fileName, String name) {
+        if (!value.isJsonObject()) {
+            throw new StructureException(
+                StructureException.ErrorType.INVALID_FORMAT,
+                fileName,
+                name,
+                "'shape' must be an object, as in { \"type\": \"sphere\", \"radius\": 8, \"symbol\": \"X\" }");
+        }
+        JsonObject shape = value.getAsJsonObject();
+
+        String type = shape.has("type") ? shape.get("type")
+            .getAsString() : null;
+        ShapePrimitives.Generator generator = ShapePrimitives.get(type);
+
+        if (generator == null) {
+            throw new StructureException(
+                StructureException.ErrorType.INVALID_FORMAT,
+                fileName,
+                name,
+                "'shape' has type " + (type == null ? "nothing" : "\"" + type + "\"")
+                    + "; the known types are: "
+                    + String.join(", ", ShapePrimitives.types()));
+        }
+        return generator.draw(shape, fileName, name);
     }
 
     private static Map<Character, CellMapping> readMappings(JsonObject json, String fileName, String name) {

@@ -44,12 +44,16 @@ A file may hold a single pattern object, an array of them, or an object with a `
 | Property | Type | Description |
 | :--- | :--- | :--- |
 | `name` | String | Identifier a recipe refers to (required, must be unique) |
-| `layers` | Array | The shape, written exactly as in a structure definition (required) |
+| `layers` | Array | The shape, written exactly as in a structure definition (**exclusive** with `shape`; one of them is required) |
+| `shape` | Object | **Generates** the shape instead of `layers`. [See below](#generating-a-shape-instead-of-drawing-it) |
 | `mappings` | Object | Character → block ID, or [an object describing the cell](#writing-a-cell---chance-and-weights). The list form a structure accepts is not available here |
 | `anchor` | String | Single character marking the cell that lands on the block the recipe names. Defaults to `Q` |
 
 `layers` takes either a bare array of row strings or `{ "rows": [...] }`, the same two forms a
 structure definition takes.
+
+A shape as simple as a sphere need not be drawn at all - see
+[`shape`](#generating-a-shape-instead-of-drawing-it).
 
 > [!WARNING]
 > **Give every layer the same number of rows.** Row order is reversed within each layer, using
@@ -200,9 +204,51 @@ The draw mixes in the cell's **world coordinates**, so:
 > noise with spatial correlation.
 
 > [!NOTE]
-> **`cell_*` can only take away.** A cell that was not drawn does not appear. Getting a sphere
-> of radius eight means drawing 17×17×17 and carving it with an expression, so making the shape
-> itself from an expression needs a separate key.
+> **`cell_*` can only take away.** A cell that was not drawn does not appear. Getting something
+> to carve without drawing it is what `shape` in the next section is for.
+
+### Generating a shape instead of drawing it
+
+Write `shape` in place of `layers` and the cells are generated.
+
+```json
+{
+  "name": "vein",
+  "shape": { "type": "sphere", "radius": 8, "symbol": "X" },
+  "mappings": {
+    "X": { "block": "minecraft:iron_ore",
+           "chance": "1 - sqrt(cell_x^2 + cell_y^2 + cell_z^2) / 8" }
+  }
+}
+```
+
+A sphere of radius eight - **2109 cells** - without writing 17×17×17 = 4913 characters. With the
+`chance` above it is a vein with a softened outline.
+
+| Key | Type | Meaning |
+| :--- | :--- | :--- |
+| `type` | String | Which shape. `sphere` is the only one so far |
+| `radius` | Number | **Not an expression** (see below) |
+| `symbol` | String | The single character every cell gets; needs an entry in `mappings` |
+
+Membership is the integer test `dx² + dy² + dz² <= radius²`, so **the same radius always generates
+the same cells**. Radius 0 is 1 cell, 1 is 7, 2 is 33, 4 is 257, 8 is 2109, 16 is 17077.
+
+- **Writing `layers` as well is a load error** - that says what the cells are twice
+- **The anchor is the centre.** Writing `anchor` as well is a load error: every cell holds the
+  same character, so there is nothing for it to pick out
+- **The shape is solid.** For a shell, carve it with a `chance` -
+  `"chance": "sqrt(cell_x^2 + cell_y^2 + cell_z^2) > 7"` leaves the outer layer
+- **20000 cells per pattern** is the limit, because every cell is written in one go. Radius 16
+  fits; 17 does not
+
+> [!WARNING]
+> **`radius` cannot be an expression.** The shape is settled when the file is read and cached per
+> machine facing from then on - `cellsFor` is handed a facing and nothing else - so there is
+> nowhere for one to be evaluated.
+>
+> To have the tier decide the size, **generate the larger shape and carve it**:
+> `"chance": "sqrt(cell_x^2 + cell_y^2 + cell_z^2) <= tier"` makes the tier the radius.
 
 ### The anchor
 

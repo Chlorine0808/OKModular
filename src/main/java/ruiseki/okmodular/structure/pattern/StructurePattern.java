@@ -69,11 +69,27 @@ public final class StructurePattern {
 
     private final boolean deterministic;
 
+    /**
+     * Where the anchor sits, for a shape that was generated rather than drawn; null otherwise.
+     * <p>
+     * A generated shape holds one character in every cell, so searching for the anchor would find
+     * the topmost cell. The index is in the shape as authored, which is safe because a generated
+     * shape's bounding box is a cube and both transforms in {@link StructureShape#process} leave a
+     * cube's middle where it is - {@code PatternShapeTest} pins that.
+     */
+    private final int[] declaredOrigin;
+
     StructurePattern(String name, char anchor, String[][] shape, Map<Character, CellMapping> mappings) {
+        this(name, anchor, shape, mappings, null);
+    }
+
+    StructurePattern(String name, char anchor, String[][] shape, Map<Character, CellMapping> mappings,
+        int[] declaredOrigin) {
         this.name = name;
         this.anchor = anchor;
         this.shape = shape;
         this.mappings = mappings;
+        this.declaredOrigin = declaredOrigin;
         this.deterministic = allCellsSettled(shape, mappings);
     }
 
@@ -145,7 +161,7 @@ public final class StructurePattern {
         // The one other way to get here is a ragged vertical pattern: transformForVertical sizes
         // itself from the first layer, so rows past that length are dropped -- the same thing
         // happens to a machine's own structure, and the fix belongs there rather than here.
-        int[] found = StructureShape.findSymbolOffset(processed, anchor);
+        int[] found = declaredOrigin != null ? declaredOrigin : StructureShape.findSymbolOffset(processed, anchor);
         int[] origin = found != null ? found : new int[] { 0, 0, 0 };
 
         List<Cell> cells = new ArrayList<>();

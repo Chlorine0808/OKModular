@@ -16,8 +16,8 @@ import ruiseki.okmodular.api.recipe.expression.SeedMixer;
  * <p>
  * {@link #resolve} is the line between them, and where it falls depends on what was written.
  * A chance and a table of plain numbers are settled there, once, and no per-cell context is ever
- * built - a sphere of radius eight is 2145 cells, and asking a written-down number 2145 times
- * would be 2145 answers that cannot differ.
+ * built - a sphere of radius eight is 2109 cells, and asking a written-down number 2109 times
+ * would be 2109 answers that cannot differ.
  * <p>
  * An expression may read the cell it sits in - "denser toward the middle" - so its value is not
  * knowable at {@link #resolve} at all, and {@link Resolved} evaluates it per cell instead. That

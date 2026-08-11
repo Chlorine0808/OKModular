@@ -96,6 +96,16 @@ public class DocumentedJsonTypeTest {
         .resolve("ruiseki/okmodular/api/recipe/expression/ExpressionsParser.java");
 
     /**
+     * パターンの `shape` が名乗れる形の種類。
+     * <p>
+     * `sphere` は最初「パーサの中の `"sphere".equals(type)` 1 箇所」だったので、
+     * **どこにも列挙が無い型名**になっていた。このテストが「どのレジストリにも無い」と
+     * 報告したのは正しく、他の 6 つと同じ形のレジストリに直した結果がこれ。
+     */
+    private static final Path SHAPE_REGISTRY = SOURCE
+        .resolve("ruiseki/okmodular/structure/pattern/ShapePrimitives.java");
+
+    /**
      * `register("x", ...)` / `alias("x", ...)` の第 1 引数。
      * 名前が次の行に来る書き方（Conditions の comparison など）があるので改行をまたぐ。
      */
@@ -157,6 +167,7 @@ public class DocumentedJsonTypeTest {
         known.addAll(registered(CONDITION_REGISTRY));
         known.addAll(registered(REQUIREMENT_REGISTRY));
         known.addAll(registered(EXPRESSION_REGISTRY));
+        known.addAll(registered(SHAPE_REGISTRY));
 
         List<String> missing = missingFrom(known, documented);
 

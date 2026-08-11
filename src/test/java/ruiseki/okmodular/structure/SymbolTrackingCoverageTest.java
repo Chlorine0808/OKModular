@@ -75,6 +75,19 @@ public class SymbolTrackingCoverageTest {
         "api/recipe/decorator/RandomBlockOutputDecorator.java",
         "api/recipe/expression/NbtExpression.java");
 
+    /**
+     * `"symbol"` を読むが、**それは構造の記号ではない**場所。
+     *
+     * パターンの `shape.symbol` は `layers` を描く文字と同じもので、`mappings` が意味を与える。
+     * 構造体の走査が位置を記録するかどうかという話ではないので、`requireAddressable` に
+     * 言えることが無い（空白を断る理由も別で、「パターンに含まれない」＝形が空になるから）。
+     *
+     * **同じ JSON キー名で別の名前空間**なので、上の一覧に混ぜると
+     * 「構造の記号を素通ししている」という誤った報告になる。
+     */
+    private static final List<String> PATTERN_CHARACTER_READERS = Arrays
+        .asList("structure/pattern/ShapePrimitives.java");
+
     @Test
     @DisplayName("builder に足す記号はすべて位置を記録している")
     public void test記録されない記号が無い() {
@@ -132,10 +145,26 @@ public class SymbolTrackingCoverageTest {
             String label = JavaSource.MAIN.relativize(file)
                 .toString()
                 .replace('\\', '/');
-            if (!SYMBOL_READERS.contains(label)) missing.add(label);
+            if (SYMBOL_READERS.contains(label) || PATTERN_CHARACTER_READERS.contains(label)) continue;
+            missing.add(label);
         }
 
-        assertTrue(missing.isEmpty(), missing + " が \"symbol\" を読むのに SYMBOL_READERS に無い。足して requireAddressable を通すこと");
+        assertTrue(
+            missing.isEmpty(),
+            missing + " が \"symbol\" を読むのにどちらの一覧にも無い。構造の記号なら SYMBOL_READERS に足して "
+                + "requireAddressable を通し、パターンの文字なら PATTERN_CHARACTER_READERS に足すこと");
+    }
+
+    @Test
+    @DisplayName("パターンの文字の一覧が古くなっていない")
+    public void testパターン文字の一覧が生きている() {
+        for (String reader : PATTERN_CHARACTER_READERS) {
+            String source = JavaSource.stripComments(JavaSource.read(JavaSource.MAIN.resolve(reader)));
+
+            assertTrue(
+                source.contains(".get(\"symbol\")"),
+                reader + " はもう symbol を読んでいない。PATTERN_CHARACTER_READERS から消すこと");
+        }
     }
 
     @Test
