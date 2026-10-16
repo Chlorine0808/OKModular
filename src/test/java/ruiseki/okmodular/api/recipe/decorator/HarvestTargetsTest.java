@@ -44,6 +44,18 @@ class HarvestTargetsTest {
         assertTrue(check.contains("targets("), "BlockInput.check must act on targets(...)");
     }
 
+    /**
+     * The capacity check ran its own copy of the selection without the port index filter, so
+     * an output naming an index could be told there was room that apply would then skip.
+     */
+    @Test
+    void capacityCountsTheSameCells() {
+        String capacity = body(
+            "api/recipe/io/BlockOutput.java",
+            "public boolean checkCapacity(List<IModularPort> ports, int multiplier, ConditionContext context)");
+        assertTrue(capacity.contains("targets("), "BlockOutput.checkCapacity must count targets(...)");
+    }
+
     @Test
     void placingUsesTheSameSelection() {
         String apply = body("api/recipe/io/BlockOutput.java", "public void apply(IRecipeContext context");

@@ -96,36 +96,10 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
         IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : IRecipeContext.findIn(ports);
         if (recipeContext == null) return false;
 
-        List<ChunkCoordinates> positions = recipeContext.getSymbolPositions(symbol);
-        if (positions == null) return false;
+        if (recipeContext.getSymbolPositions(symbol) == null) return false;
 
-        World world = recipeContext.getWorld();
-        int available = 0;
-        int totalRequired = Amounts.toInt(getRequiredAmount(context) * multiplier);
-
-        // Condition check
-        for (ChunkCoordinates pos : positions) {
-            Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
-            int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
-            String blockId = getBlockId(currentBlock, meta);
-
-            boolean match = false;
-            if (replace != null) {
-                if (matchesBlockId(blockId, replace)) match = true;
-            } else if (block != null) {
-                // Creation mode: check if replaceable or air
-                if (currentBlock.isReplaceable(world, pos.posX, pos.posY, pos.posZ)
-                    || currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ)) match = true;
-            } else {
-                // Clear mode: check if non-air
-                if (!currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ)) match = true;
-            }
-
-            if (match) available++;
-            if (available >= totalRequired) return true;
-        }
-
-        return false;
+        return targets(recipeContext, multiplier, context).size()
+            >= Amounts.toInt(getRequiredAmount(context) * multiplier);
     }
 
     @Override
