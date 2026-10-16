@@ -15,6 +15,8 @@ public class MachineryOreDict {
                 .registerOre("ingot" + material.getOreName(), MachineryItems.INGOT.newItemStack(1, material.getMeta()));
             if (material.supportsForm("plate")) OreDictionary
                 .registerOre("plate" + material.getOreName(), MachineryItems.PLATE.newItemStack(1, material.getMeta()));
+            if (material.supportsForm("gear")) OreDictionary
+                .registerOre("gear" + material.getOreName(), MachineryItems.GEAR.newItemStack(1, material.getMeta()));
             if (material.supportsForm("dust")) OreDictionary
                 .registerOre("dust" + material.getOreName(), MachineryItems.DUST.newItemStack(1, material.getMeta()));
         }

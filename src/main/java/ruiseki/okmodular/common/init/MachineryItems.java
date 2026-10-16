@@ -18,7 +18,7 @@ public enum MachineryItems {
     MACHINE_BLUEPRINT(new ItemMachineBlueprint()),
     INGOT(new ItemMaterialPart("ingot")),
     PLATE(new ItemMaterialPart("plate")),
-    // GEAR(new ItemMaterialPart("gear")),
+    GEAR(new ItemMaterialPart("gear")),
     DUST(new ItemMaterialPart("dust")),
     WRENCH(new ItemWrench()),
     STRUCTURE_WAND(new ItemStructureWand()),
