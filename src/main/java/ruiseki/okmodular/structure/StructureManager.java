@@ -36,9 +36,7 @@ public class StructureManager {
 
     /**
      * Optional generator invoked before loading to create missing defaults.
-     *
-     * Unset: nothing ships default structure JSONs yet. Wire this up when sample machines are
-     * authored, so a fresh config directory gets them written on first launch.
+     * MachineryModule sets it to DefaultConfigWriter, which writes the bundled example machines.
      */
     private static Consumer<File> defaultStructureGenerator;
 

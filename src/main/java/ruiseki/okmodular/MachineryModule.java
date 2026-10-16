@@ -20,6 +20,7 @@ import ruiseki.okcore.init.ModModuleBase;
 import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okcore.proxy.ICommonProxy;
 import ruiseki.okmodular.api.condition.Conditions;
+import ruiseki.okmodular.common.config.DefaultConfigWriter;
 import ruiseki.okmodular.common.fluid.EnumFluidMaterial;
 import ruiseki.okmodular.common.fluid.ModFluidGases;
 import ruiseki.okmodular.common.init.MachineryBlocks;
@@ -120,6 +121,8 @@ public class MachineryModule extends ModModuleBase {
         // Structure engine wiring (formerly done by the parent mod's CoreModule).
         // The config root is this mod's ID, matching RecipeLoader and TierConfigLoader.
         StructureManager.setReloadCallback(CustomStructureRegistry::registerAll);
+        // Writes the example machines into a fresh config before anything reads it.
+        StructureManager.setDefaultStructureGenerator(DefaultConfigWriter::writeMissing);
         StructureManager.getInstance()
             .initialize(configDir);
 
