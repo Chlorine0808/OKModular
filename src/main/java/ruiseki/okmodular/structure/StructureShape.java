@@ -27,10 +27,41 @@ public final class StructureShape {
      * @param defaultFacing the structure's {@code defaultFacing}, or null for a horizontal machine
      */
     public static String[][] process(String[][] shape, String defaultFacing) {
-        if (defaultFacing != null && ("UP".equalsIgnoreCase(defaultFacing) || "DOWN".equalsIgnoreCase(defaultFacing))) {
+        if (isVertical(defaultFacing)) {
             return transformForVertical(shape, defaultFacing);
         }
         return rotate180(shape);
+    }
+
+    /**
+     * Where the cell drawn at {@code (col, layer, row)} lands in {@link #process}: {@code {A, B, C}}.
+     * Plain arithmetic, so it also answers for a position outside the drawn cells.
+     */
+    public static int[] toProcessed(String[][] shape, String defaultFacing, int col, int layer, int row) {
+        if (isVertical(defaultFacing)) {
+            int c = "DOWN".equalsIgnoreCase(defaultFacing) ? shape.length - 1 - layer : layer;
+            return new int[] { col, row, c };
+        }
+        return new int[] { col, layer, rowsIn(shape, layer) - 1 - row };
+    }
+
+    /** The inverse of {@link #toProcessed}: the drawn {@code {col, layer, row}} of a processed cell. */
+    public static int[] toAuthored(String[][] shape, String defaultFacing, int a, int b, int c) {
+        if (isVertical(defaultFacing)) {
+            int layer = "DOWN".equalsIgnoreCase(defaultFacing) ? shape.length - 1 - c : c;
+            return new int[] { a, layer, b };
+        }
+        return new int[] { a, b, rowsIn(shape, b) - 1 - c };
+    }
+
+    private static boolean isVertical(String defaultFacing) {
+        return "UP".equalsIgnoreCase(defaultFacing) || "DOWN".equalsIgnoreCase(defaultFacing);
+    }
+
+    /** Rows in one layer, as rotate180 counts them; past the drawn layers, the first layer's. */
+    private static int rowsIn(String[][] shape, int layer) {
+        if (shape.length == 0) return 0;
+        return layer >= 0 && layer < shape.length ? shape[layer].length : shape[0].length;
     }
 
     /** Reverses the row order within each layer. Returns a new array; the input is untouched. */
