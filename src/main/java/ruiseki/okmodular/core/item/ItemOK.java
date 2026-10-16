@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.common.init.OKModularCreativeTab;
 
 public class ItemOK extends Item implements IItem {
 
@@ -17,6 +18,7 @@ public class ItemOK extends Item implements IItem {
 
     public ItemOK() {
         setHasSubtypes(true);
+        setCreativeTab(OKModularCreativeTab.TAB);
     }
 
     public ItemOK(String name) {
