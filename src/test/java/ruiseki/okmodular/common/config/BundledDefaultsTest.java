@@ -379,6 +379,43 @@ class BundledDefaultsTest {
         }
     }
 
+    /**
+     * A block one recipe places in a cell must not be eaten by another recipe of the same group
+     * from that cell. The machine starts the next recipe at once, so the player never sees the
+     * block: the Ore Transformer turned its iron block straight into plates.
+     */
+    @Test
+    void noPlacedBlockIsEatenByASibling() {
+        Set<String> placed = new HashSet<>();
+        for (JsonObject recipe : recipeJsons()) {
+            if (!recipe.has("outputs")) continue;
+            for (JsonElement o : recipe.getAsJsonArray("outputs")) {
+                JsonObject out = o.getAsJsonObject();
+                if (out.has("symbol") && out.has("block")) placed.add(cellKey(recipe, out));
+            }
+        }
+        for (JsonObject recipe : recipeJsons()) {
+            for (JsonElement i : recipe.getAsJsonArray("inputs")) {
+                JsonObject in = i.getAsJsonObject();
+                boolean consumes = in.has("consume") && in.get("consume")
+                    .getAsBoolean();
+                if (!consumes || !in.has("symbol") || !in.has("block")) continue;
+                assertFalse(
+                    placed.contains(cellKey(recipe, in)),
+                    recipe.get("registryName") + " eats " + in.get("block") + " that a sibling just placed");
+            }
+        }
+    }
+
+    private static String cellKey(JsonObject recipe, JsonObject io) {
+        return group(recipe) + "/"
+            + io.get("symbol")
+                .getAsString()
+            + "/"
+            + io.get("block")
+                .getAsString();
+    }
+
     @Test
     void registryNamesAreUnique() {
         Set<String> seen = new HashSet<>();

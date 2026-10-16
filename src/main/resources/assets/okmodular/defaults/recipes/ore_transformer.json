@@ -76,29 +76,6 @@
       ]
     },
     {
-      "registryName": "ore_transformer_iron_block_to_plates",
-      "name": "Iron Block to Iron Plates",
-      "duration": 100,
-      "inputs": [
-        {
-          "symbol": "O",
-          "amount": 1,
-          "block": "minecraft:iron_block",
-          "consume": true
-        },
-        {
-          "energy": 32,
-          "perTick": true
-        }
-      ],
-      "outputs": [
-        {
-          "item": "okmodular:plate:26",
-          "amount": 9
-        }
-      ]
-    },
-    {
       "registryName": "ore_transformer_plates_to_iron_block",
       "name": "Iron Plates to Iron Block",
       "duration": 100,
