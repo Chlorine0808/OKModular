@@ -66,8 +66,8 @@ Retrieve information about the world where the machine is located.
 - `x` / `y` / `z`: Coordinates of **the position being asked about**. Usually the controller's;
   inside an `offset` condition it is the offset position, and inside a
   [structure IO pattern](../structures/STRUCTURE_IO.md)'s `mappings` it is **that cell's**
-- `cell_x` / `cell_y` / `cell_z`: **How far the cell sits from the anchor** (on the world's axes;
-  `cell_y` is up). Only meaningful inside a pattern's `mappings` - anywhere else it answers 0
+- `cell_x` / `cell_y` / `cell_z`: **How far the cell sits from the anchor** (on the pattern's axes,
+  turning with the machine; `cell_y` is up as drawn). Only meaningful inside a pattern's `mappings` - anywhere else it answers 0
 - `dimension`: Current dimension ID (Overworld = 0, Nether = -1, End = 1)
 
 #### Weather & Environment

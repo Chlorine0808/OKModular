@@ -140,9 +140,9 @@ be settled early" in exchange for a few thousand cheap evaluations.
 | Variable | What it is | Direction |
 | :--- | :--- | :--- |
 | `x` / `y` / `z` | **the cell's own world position** | as Minecraft's |
-| `cell_x` / `cell_y` / `cell_z` | **how far the cell sits from the anchor** | same axes; `cell_y` is up |
+| `cell_x` / `cell_y` / `cell_z` | **how far the cell sits from the anchor** | the pattern's axes; `cell_y` is up as drawn; turns with the machine |
 
-They relate as `y = the anchor's world y + cell_y`. One coordinate system, two origins.
+On a machine lying down, `y = the anchor's world y + cell_y`. On an upright machine it does not hold, because the pattern's up points sideways.
 
 ```json
 "mappings": {
@@ -158,16 +158,16 @@ several characters and draw each layer by hand.
 | What you want | Written as |
 | :--- | :--- |
 | A softened outline | `"chance": "1 - sqrt(cell_x^2 + cell_y^2 + cell_z^2) / 8"` |
-| Thinner above the anchor | `"chance": "1 + cell_y * 0.2"` (`cell_y` is up, so negative above) |
+| Thinner above the anchor | `"chance": "1 - cell_y * 0.2"` (`cell_y` is up) |
 | Better ore toward the middle | weights written in terms of the distance |
 | Only below a depth | `"chance": "y < 40 ? 1 : 0"` |
 | Stripes, chequerboard | `"chance": "cell_x % 2"` |
 
-> [!WARNING]
-> **`cell_*` is measured on the world's axes, so a shape does not turn with the machine.**
-> Spheres and strata do not care - geology should be level with the world rather than with the
-> machine, so this is the right way round for them. What it does affect is a stripe like
-> `cell_x % 2`: **turning the machine 90° leaves the stripes pointing the same way.**
+> [!NOTE]
+> **`cell_*` is measured on the pattern's axes, so it turns with the shape and the machine.**
+> An upright machine gets the shape and gradient as drawn. On a north-facing machine lying down
+> the values equal world offsets. For something that should stay level with the world, such as
+> strata, write it with the world `y` rather than `cell_y`.
 
 > [!NOTE]
 > **`cell_*` only means anything inside a pattern's `mappings`.** Written in a recipe's `amount`
