@@ -38,12 +38,14 @@ import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.api.condition.Conditions;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.decorator.RecipeDecorator;
+import ruiseki.okmodular.api.recipe.io.ItemInput;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.api.structure.io.StructureJsonReader;
 import ruiseki.okmodular.api.structure.visitor.StructureValidationVisitor;
 import ruiseki.okmodular.common.fluid.EnumFluidMaterial;
 import ruiseki.okmodular.common.item.EnumMaterial;
 import ruiseki.okmodular.common.recipe.MachineryRecipeLoader;
+import ruiseki.okmodular.config.MachineryConfig;
 import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
 
 /**
@@ -355,6 +357,26 @@ class BundledDefaultsTest {
             if (!found) return false;
         }
         return true;
+    }
+
+    /**
+     * The Assembler is the first machine a player builds, from tier 1 parts only. Each of its
+     * recipes must fit in one tier 1 item input port, or the player has to line up several
+     * ports before the machine runs at all.
+     */
+    @Test
+    void everyAssemblerRecipeFitsOneTierOneItemPort() {
+        int slots = MachineryConfig.getItemPortSlots(1);
+        for (IModularRecipe recipe : MachineryRecipeLoader.load(recipeJsons())) {
+            if (!"Assembler".equals(recipe.getRecipeGroup())) continue;
+            long items = recipe.getInputs()
+                .stream()
+                .filter(i -> i instanceof ItemInput)
+                .count();
+            assertTrue(
+                items <= slots,
+                recipe.getRegistryName() + " takes " + items + " item stacks, a tier 1 port holds " + slots);
+        }
     }
 
     @Test
