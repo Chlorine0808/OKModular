@@ -39,7 +39,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * `values()` を回して検証する形にすると、**定数が消えたことを検出できない**。
  * 列挙はその時点で存在するものを返すだけなので、消えれば検証対象からも消えて緑になる。
- * よってここには 90 件を**リテラルとして書き写す**。表が手書きであること自体が仕様。
+ * よってここには 92 件を**リテラルとして書き写す**。表が手書きであること自体が仕様。
  *
  * **追加は許す。変更と削除だけを禁止する。**
  *
@@ -84,6 +84,7 @@ public class EnumMaterialMetaFreezeTest {
         { "VANADIUM",         "23",   "vanadium",         "Vanadium",         "" },
         { "CHROMIUM",         "24",   "chromium",         "Chromium",         "" },
         { "MANGANESE",        "25",   "manganese",        "Manganese",        "" },
+        { "IRON",             "26",   "iron",             "Iron",             "plate,gear,dust" },
         { "COBALT",           "27",   "cobalt",           "Cobalt",           "" },
         { "NICKEL",           "28",   "nickel",           "Nickel",           "" },
         { "COPPER",           "29",   "copper",           "Copper",           "" },
@@ -109,6 +110,7 @@ public class EnumMaterialMetaFreezeTest {
         { "OSMIUM",           "76",   "osmium",           "Osmium",           "" },
         { "IRIDIUM",          "77",   "iridium",          "Iridium",          "" },
         { "PLATINUM",         "78",   "platinum",         "Platinum",         "" },
+        { "GOLD",             "79",   "gold",             "Gold",             "plate,gear,dust" },
         { "LEAD",             "82",   "lead",             "Lead",             "" },
         { "POLONIUM",         "84",   "polonium",         "Polonium",         "" },
         { "RADIUM",           "88",   "radium",           "Radium",           "" },
@@ -169,8 +171,8 @@ public class EnumMaterialMetaFreezeTest {
     };
     // spotless:on
 
-    /** コンストラクタが受け付ける形状。forms の検証はこの 3 つで回す。 */
-    private static final List<String> ALL_FORMS = Arrays.asList("ingot", "plate", "dust");
+    /** コンストラクタが受け付ける形状。forms の検証はこの 4 つで回す。 */
+    private static final List<String> ALL_FORMS = Arrays.asList("ingot", "plate", "gear", "dust");
 
     private static String[][] frozenRows() {
         return FROZEN;
