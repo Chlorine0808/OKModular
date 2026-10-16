@@ -21,6 +21,10 @@
       "registryName": "assembler_casing_reinforced",
       "name": "Reinforced Machine Casing",
       "parent": "assembler_base",
+      "tier": {
+        "casing": 1
+      },
+      "priority": 1,
       "inputs": [
         {
           "item": "okmodular:casing_plain:0",
@@ -46,6 +50,10 @@
       "registryName": "assembler_casing_vented",
       "name": "Vented Machine Casing",
       "parent": "assembler_base",
+      "tier": {
+        "casing": 1
+      },
+      "priority": 1,
       "inputs": [
         {
           "item": "okmodular:casing_plain:0",
@@ -67,6 +75,10 @@
       "registryName": "assembler_casing_circuitry",
       "name": "Circuitry Machine Casing",
       "parent": "assembler_base",
+      "tier": {
+        "casing": 1
+      },
+      "priority": 1,
       "inputs": [
         {
           "item": "okmodular:casing_plain:0",
@@ -92,6 +104,10 @@
       "registryName": "assembler_fluid_input_0",
       "name": "Fluid Input Port",
       "parent": "assembler_base",
+      "tier": {
+        "casing": 1
+      },
+      "priority": 1,
       "inputs": [
         {
           "item": "okmodular:casing_plain:0",
@@ -117,6 +133,10 @@
       "registryName": "assembler_fluid_output_0",
       "name": "Fluid Output Port",
       "parent": "assembler_base",
+      "tier": {
+        "casing": 1
+      },
+      "priority": 1,
       "inputs": [
         {
           "item": "okmodular:casing_plain:0",
@@ -927,8 +947,8 @@
       "duration": 200,
       "inputs": [
         {
-          "item": "okmodular:wrench",
-          "amount": 1
+          "ore": "ingotIron",
+          "amount": 3
         },
         {
           "item": "minecraft:diamond",
