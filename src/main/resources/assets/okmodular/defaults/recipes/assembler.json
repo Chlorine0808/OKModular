@@ -1,0 +1,954 @@
+{
+  "group": "Assembler",
+  "recipes": [
+    {
+      "registryName": "assembler_base",
+      "abstract": true,
+      "duration": 100,
+      "inputs": [
+        {
+          "item": "okmodular:wrench",
+          "amount": 1,
+          "consume": false
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_casing_reinforced",
+      "name": "Reinforced Machine Casing",
+      "parent": "assembler_base",
+      "inputs": [
+        {
+          "item": "okmodular:casing_plain:0",
+          "amount": 4
+        },
+        {
+          "item": "minecraft:obsidian",
+          "amount": 1
+        },
+        {
+          "ore": "ingotIron",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:casing_reinforced:0",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_casing_vented",
+      "name": "Vented Machine Casing",
+      "parent": "assembler_base",
+      "inputs": [
+        {
+          "item": "okmodular:casing_plain:0",
+          "amount": 4
+        },
+        {
+          "item": "minecraft:iron_bars",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:casing_vented:0",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_casing_circuitry",
+      "name": "Circuitry Machine Casing",
+      "parent": "assembler_base",
+      "inputs": [
+        {
+          "item": "okmodular:casing_plain:0",
+          "amount": 4
+        },
+        {
+          "item": "minecraft:redstone",
+          "amount": 4
+        },
+        {
+          "item": "minecraft:comparator",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:casing_circuitry:0",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_input_0",
+      "name": "Fluid Input Port",
+      "parent": "assembler_base",
+      "inputs": [
+        {
+          "item": "okmodular:casing_plain:0",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:bucket",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:glass",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_input:0",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_output_0",
+      "name": "Fluid Output Port",
+      "parent": "assembler_base",
+      "inputs": [
+        {
+          "item": "okmodular:casing_plain:0",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:bucket",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:hopper",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_output:0",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_casing_plain_1",
+      "name": "Machine Casing (Tier 1)",
+      "parent": "assembler_base",
+      "duration": 200,
+      "tier": {
+        "casing": 1
+      },
+      "inputs": [
+        {
+          "item": "okmodular:casing_plain:0",
+          "amount": 4
+        },
+        {
+          "item": "minecraft:redstone",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:casing_plain:1",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_item_input_1",
+      "name": "Item Input Port (Tier 1)",
+      "parent": "assembler_base",
+      "duration": 200,
+      "tier": {
+        "casing": 1
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_item_input:0",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:redstone",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_item_input:1",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_item_output_1",
+      "name": "Item Output Port (Tier 1)",
+      "parent": "assembler_base",
+      "duration": 200,
+      "tier": {
+        "casing": 1
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_item_output:0",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:redstone",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_item_output:1",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_energy_input_1",
+      "name": "Energy Input Port (Tier 1)",
+      "parent": "assembler_base",
+      "duration": 200,
+      "tier": {
+        "casing": 1
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_energy_input:0",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:redstone",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_energy_input:1",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_input_1",
+      "name": "Fluid Input Port (Tier 1)",
+      "parent": "assembler_base",
+      "duration": 200,
+      "tier": {
+        "casing": 1
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_fluid_input:0",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:redstone",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_input:1",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_output_1",
+      "name": "Fluid Output Port (Tier 1)",
+      "parent": "assembler_base",
+      "duration": 200,
+      "tier": {
+        "casing": 1
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_fluid_output:0",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:redstone",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_output:1",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_casing_plain_2",
+      "name": "Machine Casing (Tier 2)",
+      "parent": "assembler_base",
+      "duration": 300,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "item": "okmodular:casing_plain:1",
+          "amount": 4
+        },
+        {
+          "item": "minecraft:gold_ingot",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:casing_plain:2",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_item_input_2",
+      "name": "Item Input Port (Tier 2)",
+      "parent": "assembler_base",
+      "duration": 300,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_item_input:1",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:gold_ingot",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_item_input:2",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_item_output_2",
+      "name": "Item Output Port (Tier 2)",
+      "parent": "assembler_base",
+      "duration": 300,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_item_output:1",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:gold_ingot",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_item_output:2",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_energy_input_2",
+      "name": "Energy Input Port (Tier 2)",
+      "parent": "assembler_base",
+      "duration": 300,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_energy_input:1",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:gold_ingot",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_energy_input:2",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_input_2",
+      "name": "Fluid Input Port (Tier 2)",
+      "parent": "assembler_base",
+      "duration": 300,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_fluid_input:1",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:gold_ingot",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_input:2",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_output_2",
+      "name": "Fluid Output Port (Tier 2)",
+      "parent": "assembler_base",
+      "duration": 300,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_fluid_output:1",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:gold_ingot",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_output:2",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_casing_plain_3",
+      "name": "Machine Casing (Tier 3)",
+      "parent": "assembler_base",
+      "duration": 400,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "item": "okmodular:casing_plain:2",
+          "amount": 4
+        },
+        {
+          "item": "minecraft:diamond",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:casing_plain:3",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_item_input_3",
+      "name": "Item Input Port (Tier 3)",
+      "parent": "assembler_base",
+      "duration": 400,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_item_input:2",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:diamond",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_item_input:3",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_item_output_3",
+      "name": "Item Output Port (Tier 3)",
+      "parent": "assembler_base",
+      "duration": 400,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_item_output:2",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:diamond",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_item_output:3",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_energy_input_3",
+      "name": "Energy Input Port (Tier 3)",
+      "parent": "assembler_base",
+      "duration": 400,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_energy_input:2",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:diamond",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_energy_input:3",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_input_3",
+      "name": "Fluid Input Port (Tier 3)",
+      "parent": "assembler_base",
+      "duration": 400,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_fluid_input:2",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:diamond",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_input:3",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_output_3",
+      "name": "Fluid Output Port (Tier 3)",
+      "parent": "assembler_base",
+      "duration": 400,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_fluid_output:2",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:diamond",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_output:3",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_casing_plain_4",
+      "name": "Machine Casing (Tier 4)",
+      "parent": "assembler_base",
+      "duration": 500,
+      "tier": {
+        "casing": 4
+      },
+      "inputs": [
+        {
+          "item": "okmodular:casing_plain:3",
+          "amount": 4
+        },
+        {
+          "item": "minecraft:ender_pearl",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:casing_plain:4",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_item_input_4",
+      "name": "Item Input Port (Tier 4)",
+      "parent": "assembler_base",
+      "duration": 500,
+      "tier": {
+        "casing": 4
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_item_input:3",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:ender_pearl",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_item_input:4",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_item_output_4",
+      "name": "Item Output Port (Tier 4)",
+      "parent": "assembler_base",
+      "duration": 500,
+      "tier": {
+        "casing": 4
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_item_output:3",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:ender_pearl",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_item_output:4",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_energy_input_4",
+      "name": "Energy Input Port (Tier 4)",
+      "parent": "assembler_base",
+      "duration": 500,
+      "tier": {
+        "casing": 4
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_energy_input:3",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:ender_pearl",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_energy_input:4",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_input_4",
+      "name": "Fluid Input Port (Tier 4)",
+      "parent": "assembler_base",
+      "duration": 500,
+      "tier": {
+        "casing": 4
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_fluid_input:3",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:ender_pearl",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_input:4",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_output_4",
+      "name": "Fluid Output Port (Tier 4)",
+      "parent": "assembler_base",
+      "duration": 500,
+      "tier": {
+        "casing": 4
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_fluid_output:3",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:ender_pearl",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_output:4",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_casing_plain_5",
+      "name": "Machine Casing (Tier 5)",
+      "parent": "assembler_base",
+      "duration": 600,
+      "tier": {
+        "casing": 5
+      },
+      "inputs": [
+        {
+          "item": "okmodular:casing_plain:4",
+          "amount": 4
+        },
+        {
+          "item": "minecraft:nether_star",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:casing_plain:5",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_item_input_5",
+      "name": "Item Input Port (Tier 5)",
+      "parent": "assembler_base",
+      "duration": 600,
+      "tier": {
+        "casing": 5
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_item_input:4",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:nether_star",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_item_input:5",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_item_output_5",
+      "name": "Item Output Port (Tier 5)",
+      "parent": "assembler_base",
+      "duration": 600,
+      "tier": {
+        "casing": 5
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_item_output:4",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:nether_star",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_item_output:5",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_energy_input_5",
+      "name": "Energy Input Port (Tier 5)",
+      "parent": "assembler_base",
+      "duration": 600,
+      "tier": {
+        "casing": 5
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_energy_input:4",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:nether_star",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_energy_input:5",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_input_5",
+      "name": "Fluid Input Port (Tier 5)",
+      "parent": "assembler_base",
+      "duration": 600,
+      "tier": {
+        "casing": 5
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_fluid_input:4",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:nether_star",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_input:5",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_fluid_output_5",
+      "name": "Fluid Output Port (Tier 5)",
+      "parent": "assembler_base",
+      "duration": 600,
+      "tier": {
+        "casing": 5
+      },
+      "inputs": [
+        {
+          "item": "okmodular:modular_fluid_output:4",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:nether_star",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:modular_fluid_output:5",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_casing_circuitry_enchanted",
+      "name": "Circuitry Machine Casing (from an Efficiency book)",
+      "parent": "assembler_base",
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "item": "okmodular:casing_plain:0",
+          "amount": 8
+        },
+        {
+          "item": "minecraft:enchanted_book",
+          "amount": 1,
+          "nbtlist": {
+            "path": "StoredEnchantments",
+            "ops": [
+              {
+                "id": 32,
+                "lvl": ">=1"
+              }
+            ]
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:casing_circuitry:0",
+          "amount": 8
+        }
+      ]
+    },
+    {
+      "registryName": "assembler_tuned_wrench",
+      "name": "Tuned Wrench",
+      "duration": 200,
+      "inputs": [
+        {
+          "item": "okmodular:wrench",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:diamond",
+          "amount": 1
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:wrench",
+          "amount": 1,
+          "nbt": [
+            "nbt('display.Name') = 'Tuned Wrench'",
+            "nbt('customData.tunedAtTier') = tier"
+          ]
+        }
+      ]
+    }
+  ]
+}

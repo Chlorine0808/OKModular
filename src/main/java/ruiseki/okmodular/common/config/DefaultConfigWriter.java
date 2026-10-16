@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,8 +27,8 @@ public final class DefaultConfigWriter {
 
     static {
         Map<String, List<String>> manifest = new LinkedHashMap<>();
-        manifest.put(STRUCTURES, Collections.emptyList());
-        manifest.put(RECIPES, Collections.emptyList());
+        manifest.put(STRUCTURES, Arrays.asList("assembler.json"));
+        manifest.put(RECIPES, Arrays.asList("assembler.json"));
         manifest.put(STRUCTURE_IO, Collections.emptyList());
         MANIFEST = Collections.unmodifiableMap(manifest);
     }
