@@ -1,0 +1,282 @@
+{
+  "group": "PressurizedCrusher",
+  "recipes": [
+    {
+      "registryName": "crusher_cobblestone",
+      "name": "Cobblestone to Gravel",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_gravel",
+      "name": "Gravel to Sand",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_iron_ore",
+      "name": "Iron Ore to Dust",
+      "duration": 80,
+      "inputs": [
+        {
+          "item": "minecraft:iron_ore",
+          "amount": 1
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:dust:26",
+          "amount": 2
+        }
+      ],
+      "decorators": [
+        {
+          "bonus": {
+            "chance": 0.25,
+            "outputs": [
+              {
+                "item": "okmodular:dust:26",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_gold_ore",
+      "name": "Gold Ore to Dust",
+      "duration": 80,
+      "inputs": [
+        {
+          "item": "minecraft:gold_ore",
+          "amount": 1
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:dust:79",
+          "amount": 2
+        }
+      ],
+      "decorators": [
+        {
+          "bonus": {
+            "chance": 0.25,
+            "outputs": [
+              {
+                "item": "okmodular:dust:79",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_iron_ore_byproduct",
+      "name": "Iron Ore to Dust (with byproduct)",
+      "duration": 80,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "item": "minecraft:iron_ore",
+          "amount": 1
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:dust:26",
+          "amount": 2
+        }
+      ],
+      "decorators": [
+        {
+          "bonus": {
+            "chance": 0.25,
+            "outputs": [
+              {
+                "item": "okmodular:dust:26",
+                "amount": 1
+              }
+            ]
+          }
+        },
+        {
+          "type": "weighted_random",
+          "outputs": [
+            {
+              "item": "minecraft:gravel",
+              "amount": 1,
+              "weight": 70
+            },
+            {
+              "item": "okmodular:dust:28",
+              "amount": 1,
+              "weight": 25
+            },
+            {
+              "item": "okmodular:dust:78",
+              "amount": 1,
+              "weight": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_gold_ore_byproduct",
+      "name": "Gold Ore to Dust (with byproduct)",
+      "duration": 80,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "item": "minecraft:gold_ore",
+          "amount": 1
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:dust:79",
+          "amount": 2
+        }
+      ],
+      "decorators": [
+        {
+          "bonus": {
+            "chance": 0.25,
+            "outputs": [
+              {
+                "item": "okmodular:dust:79",
+                "amount": 1
+              }
+            ]
+          }
+        },
+        {
+          "type": "weighted_random",
+          "outputs": [
+            {
+              "item": "minecraft:gravel",
+              "amount": 1,
+              "weight": 70
+            },
+            {
+              "item": "okmodular:dust:47",
+              "amount": 1,
+              "weight": 25
+            },
+            {
+              "item": "okmodular:dust:78",
+              "amount": 1,
+              "weight": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_obsidian",
+      "name": "Obsidian to Dust",
+      "duration": 200,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "item": "minecraft:obsidian",
+          "amount": 1
+        },
+        {
+          "energy": 128,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:dust:132",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_coal_block",
+      "name": "Coal Block to Diamond",
+      "duration": 400,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "item": "minecraft:coal_block",
+          "amount": 8
+        },
+        {
+          "energy": 256,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:diamond",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "chance": "0.25 + tier * 0.05"
+        }
+      ]
+    }
+  ]
+}
