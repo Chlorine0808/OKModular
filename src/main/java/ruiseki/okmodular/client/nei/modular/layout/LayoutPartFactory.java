@@ -22,6 +22,8 @@ import ruiseki.okmodular.api.recipe.io.ItemInput;
 import ruiseki.okmodular.api.recipe.io.ItemOutput;
 import ruiseki.okmodular.api.recipe.io.ManaInput;
 import ruiseki.okmodular.api.recipe.io.ManaOutput;
+import ruiseki.okmodular.api.recipe.io.StructureInput;
+import ruiseki.okmodular.api.recipe.io.StructureOutput;
 import ruiseki.okmodular.api.recipe.io.VisInput;
 import ruiseki.okmodular.api.recipe.io.VisOutput;
 import ruiseki.okmodular.client.nei.modular.renderer.INEIPositionedRenderer;
@@ -48,6 +50,10 @@ public class LayoutPartFactory {
         // --- Blocks in structure cells ---
         register(BlockInput.class, LayoutPartBlock::of);
         register(BlockOutput.class, LayoutPartBlock::of);
+
+        // --- Structure patterns ---
+        register(StructureInput.class, LayoutPartStructure::of);
+        register(StructureOutput.class, LayoutPartStructure::of);
 
         // --- Fluids ---
         register(FluidInput.class, in -> {

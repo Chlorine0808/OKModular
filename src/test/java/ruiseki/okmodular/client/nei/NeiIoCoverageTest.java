@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -31,15 +31,8 @@ import ruiseki.okmodular.testsupport.JavaSource;
  * 1 回目を直したとき 2 回目が残った。手書きの一覧は、消すか、
  * **一覧から漏れたことが分かる仕組みを付ける**かのどちらかしかない。
  *
- * ============================================
- * 今わかっていること
- * ============================================
- *
- * `structure` の入出力が**描かれていない**。
- * 構造そのものを入力に取るレシピは NEI 上で「材料の無いレシピ」に見え、
- * 何を建てればいいのかが表示から分からない。
- *
- * 実装を待っているだけなので消すわけにはいかない。**名指しで残す**。
+ * `block` と `structure` の入出力は 2026-10-17 まで描かれておらず、
+ * 構造を入力に取るレシピは「材料の無いレシピ」に見えていた。
  */
 @DisplayName("NEI が描く入出力型")
 public class NeiIoCoverageTest {
@@ -47,15 +40,8 @@ public class NeiIoCoverageTest {
     private static final Path IO = JavaSource.MAIN.resolve("api/recipe/io");
     private static final Path FACTORY = JavaSource.MAIN.resolve("client/nei/modular/layout/LayoutPartFactory.java");
 
-    /**
-     * まだ NEI に描き方が無い型。**空にするのが目標**。
-     *
-     * 構造 IO は「機械の中に何を建てるか」を入出力として扱う仕組みで、
-     * アイテムやタンクのように 1 枠で描ける形ではない。プレビューの口
-     * （`NEIConfig.registerStructurePreviews`）とどう繋ぐかが決まっていない。
-     * 決まるまでは、**描かれていないことがここに書いてある**状態を保つ。
-     */
-    private static final List<String> NOT_DRAWN = Arrays.asList("StructureInput", "StructureOutput");
+    /** まだ NEI に描き方が無い型。**空に保つ**。足すなら描かない理由を書くこと。 */
+    private static final List<String> NOT_DRAWN = Collections.emptyList();
 
     @Test
     @DisplayName("入出力型はすべて描かれるか、描かれないと書いてある")

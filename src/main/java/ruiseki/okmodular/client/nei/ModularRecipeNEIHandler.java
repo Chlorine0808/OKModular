@@ -594,7 +594,8 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
                 for (LayoutPartRenderer text : textParts) {
                     text.setPosition(startX, maxY);
                     allParts.add(text);
-                    maxY += text.getHeight();
+                    INEIPositionedRenderer r = text.getRenderer();
+                    maxY += r instanceof PositionedText ? ((PositionedText) r).getRenderedHeight() : text.getHeight();
                 }
             }
 
