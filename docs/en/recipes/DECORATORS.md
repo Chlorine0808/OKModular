@@ -135,6 +135,9 @@ answering differently.
 Blocks a structure IO recipe removes come back as drops rather than simply vanishing. Both
 the blocks a consuming input takes and the ones an output overwrites are collected.
 
+> [!NOTE]
+> Only the cells the input or output actually removes or writes (up to its `amount`) are collected, not every cell of the symbol.
+
 ```json
 "decorators": [
   { "type": "harvest_block", "harvestLevel": 2, "fortune": 3 }

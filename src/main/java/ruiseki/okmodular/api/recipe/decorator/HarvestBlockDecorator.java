@@ -100,8 +100,8 @@ public class HarvestBlockDecorator extends RecipeDecorator {
         if (recipe == null || recipe.getWorld() == null) return true;
 
         int allowed = (int) harvestLevelExpr.evaluateDouble(context);
-        return levelAllows(recipe, positionsFrom(recipe, true), allowed)
-            && levelAllows(recipe, positionsFrom(recipe, false), allowed);
+        return levelAllows(recipe, positionsFrom(recipe, context, true), allowed)
+            && levelAllows(recipe, positionsFrom(recipe, context, false), allowed);
     }
 
     @Override
@@ -117,26 +117,27 @@ public class HarvestBlockDecorator extends RecipeDecorator {
     }
 
     /**
-     * The blocks this recipe is about to remove on one side.
+     * The blocks this recipe is about to remove on one side: exactly the cells the block input
+     * consumes or the block output overwrites, never the rest of the symbol.
      *
      * @param fromInputs true for the blocks a consuming {@code BlockInput} takes, false for
      *                   the ones a {@code BlockOutput} overwrites
      */
-    private List<ChunkCoordinates> positionsFrom(IRecipeContext context, boolean fromInputs) {
+    private List<ChunkCoordinates> positionsFrom(IRecipeContext context, ConditionContext condContext,
+        boolean fromInputs) {
         List<ChunkCoordinates> targetPositions = new ArrayList<>();
+        int batch = batchSizeOf(condContext);
 
         if (fromInputs) {
             for (IRecipeInput input : internal.getInputs()) {
                 if (input instanceof BlockInput bi && bi.isConsume()) {
-                    // Was bi.toJson().get("symbol"), which serialised the whole input - NBT
-                    // expressions and all - to read one char, at every harvest.
-                    targetPositions.addAll(context.getSymbolPositions(bi.getSymbol()));
+                    targetPositions.addAll(bi.targets(context, batch, condContext));
                 }
             }
         } else {
             for (IRecipeOutput output : internal.getOutputs()) {
                 if (output instanceof BlockOutput bo) {
-                    targetPositions.addAll(bo.getPositions(context));
+                    targetPositions.addAll(bo.targets(context, batch, condContext));
                 }
             }
         }
@@ -168,7 +169,7 @@ public class HarvestBlockDecorator extends RecipeDecorator {
         IRecipeContext recipe = context != null ? context.getRecipeContext() : null;
         if (recipe == null || recipe.getWorld() == null) return;
 
-        for (ChunkCoordinates pos : positionsFrom(recipe, fromInputs)) {
+        for (ChunkCoordinates pos : positionsFrom(recipe, context, fromInputs)) {
             harvestAt(recipe.getWorld(), pos, ports);
         }
     }

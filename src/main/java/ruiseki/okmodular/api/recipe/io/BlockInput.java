@@ -114,57 +114,46 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
      */
     public boolean check(IRecipeContext context, int multiplier, boolean simulate, ConditionContext condContext) {
         if (optional && simulate) return true; // Always start if optional
-
-        List<ChunkCoordinates> positions = context.getSymbolPositions(symbol);
-        if (positions == null) return optional;
+        if (context.getSymbolPositions(symbol) == null) return optional;
 
         World world = context.getWorld();
-        int totalRequired = Amounts.toInt(getRequiredAmount(condContext) * multiplier);
-        int found = 0;
-        int processed = 0;
+        List<ChunkCoordinates> chosen = targets(context, multiplier, condContext);
+        if (!simulate) {
+            for (ChunkCoordinates pos : chosen) {
+                // Apply NBT modifications before block manipulation
+                applyNBTModifications(world, pos, context);
 
-        // Condition block: if replace is specified, we look for it. Otherwise we look
-        // for block.
-        String condition = (replace != null) ? replace : block;
-
-        for (ChunkCoordinates pos : positions) {
-            if (processed >= totalRequired) break;
-
-            if (index != -1) {
-                TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
-                if (te instanceof IModularPort mp && mp.getAssignedIndex() != index) {
-                    continue;
-                }
-            }
-
-            Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
-            int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
-            String blockId = getBlockId(currentBlock, meta);
-
-            if (matchesBlockId(blockId, condition)) {
-                // Check NBT conditions if present
-                if (!checkNBTConditions(world, pos, context)) {
-                    continue; // NBT conditions not met, skip this position
-                }
-
-                found++;
-                if (!simulate) {
-                    // Apply NBT modifications before block manipulation
-                    applyNBTModifications(world, pos, context);
-
-                    // Actual block manipulation
-                    if (consume) {
-                        world.setBlockToAir(pos.posX, pos.posY, pos.posZ);
-                    } else if (replace != null && block != null) {
-                        // In-place replacement: A -> B
-                        setBlockById(world, pos, block);
-                    }
-                    processed++;
+                if (consume) {
+                    world.setBlockToAir(pos.posX, pos.posY, pos.posZ);
+                } else if (replace != null && block != null) {
+                    // In-place replacement: A -> B
+                    setBlockById(world, pos, block);
                 }
             }
         }
 
-        return optional || (found >= totalRequired);
+        return optional || chosen.size() >= Amounts.toInt(getRequiredAmount(condContext) * multiplier);
+    }
+
+    /**
+     * The cells this input acts on: the first ones holding the block it asks for (and its NBT),
+     * up to its amount times {@code multiplier}. Consuming and harvesting both read this, so a
+     * decorator never takes from a cell the input leaves alone.
+     */
+    public List<ChunkCoordinates> targets(IRecipeContext context, int multiplier, ConditionContext condContext) {
+        World world = context.getWorld();
+        // Condition block: if replace is specified, we look for it. Otherwise we look for block.
+        String condition = (replace != null) ? replace : block;
+
+        return CellSelection.firstMatching(context.getSymbolPositions(symbol), pos -> {
+            if (index != -1) {
+                TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
+                if (te instanceof IModularPort mp && mp.getAssignedIndex() != index) return false;
+            }
+            Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
+            int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
+            return matchesBlockId(getBlockId(currentBlock, meta), condition) && checkNBTConditions(world, pos, context);
+        }, Amounts.toInt(getRequiredAmount(condContext) * multiplier));
     }
 
     /**

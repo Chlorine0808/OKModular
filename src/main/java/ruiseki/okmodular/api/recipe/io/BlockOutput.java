@@ -152,45 +152,13 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
      */
     public void apply(IRecipeContext context, int multiplier, ConditionContext condContext) {
         World world = context.getWorld();
-        List<ChunkCoordinates> positions = context.getSymbolPositions(symbol);
-        if (positions == null) return;
+        if (context.getSymbolPositions(symbol) == null) return;
 
-        int totalRequired = Amounts.toInt(getRequiredAmount(condContext) * multiplier);
-        String block = getBlock();
-        String replace = getReplace();
         NBTTagCompound nbtResult = getNbt(context, condContext);
-
         List<ChunkCoordinates> changedPositions = new ArrayList<>();
-        int remaining = totalRequired;
-        for (ChunkCoordinates pos : positions) {
-            if (remaining <= 0) break;
-
-            if (index != -1) {
-                TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
-                if (te instanceof IModularPort mp && mp.getAssignedIndex() != index) {
-                    continue;
-                }
-            }
-
-            Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
-            int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
-            String blockId = getBlockId(currentBlock, meta);
-
-            boolean match = false;
-            if (replace != null) {
-                if (matchesBlockId(blockId, replace)) match = true;
-            } else if (block != null) {
-                if (currentBlock.isReplaceable(world, pos.posX, pos.posY, pos.posZ)
-                    || currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ)) match = true;
-            } else {
-                if (!currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ)) match = true;
-            }
-
-            if (match) {
-                if (setBlockAt(world, pos, block, nbtResult)) {
-                    changedPositions.add(new ChunkCoordinates(pos.posX, pos.posY, pos.posZ));
-                    remaining--;
-                }
+        for (ChunkCoordinates pos : targets(context, multiplier, condContext)) {
+            if (setBlockAt(world, pos, getBlock(), nbtResult)) {
+                changedPositions.add(new ChunkCoordinates(pos.posX, pos.posY, pos.posZ));
             }
         }
 
@@ -200,6 +168,33 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
             Block b = world.getBlock(pos.posX, pos.posY, pos.posZ);
             world.func_147453_f(pos.posX, pos.posY, pos.posZ, b);
         }
+    }
+
+    /**
+     * The cells this output writes: up to its amount times {@code multiplier}, taking cells
+     * that hold {@code replace}, or with no replace, empty cells to place into (or, with no
+     * block either, filled cells to clear). Placing and harvesting both read this.
+     */
+    public List<ChunkCoordinates> targets(IRecipeContext context, int multiplier, ConditionContext condContext) {
+        World world = context.getWorld();
+        String block = getBlock();
+        String replace = getReplace();
+
+        return CellSelection.firstMatching(context.getSymbolPositions(symbol), pos -> {
+            if (index != -1) {
+                TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
+                if (te instanceof IModularPort mp && mp.getAssignedIndex() != index) return false;
+            }
+            Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
+            if (replace != null) {
+                return matchesBlockId(
+                    getBlockId(currentBlock, world.getBlockMetadata(pos.posX, pos.posY, pos.posZ)),
+                    replace);
+            }
+            boolean empty = currentBlock.isReplaceable(world, pos.posX, pos.posY, pos.posZ)
+                || currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ);
+            return block != null ? empty : !currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ);
+        }, Amounts.toInt(getRequiredAmount(condContext) * multiplier));
     }
 
     /**
