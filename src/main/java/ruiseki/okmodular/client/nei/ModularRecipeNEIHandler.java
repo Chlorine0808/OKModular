@@ -28,6 +28,7 @@ import codechicken.nei.recipe.TemplateRecipeHandler;
 import ruiseki.okcore.addon.nei.PositionedFluidTank;
 import ruiseki.okcore.addon.nei.RecipeHandlerBase;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.io.FluidInput;
@@ -433,6 +434,28 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
                         false);
                     allParts.add(new LayoutPartRenderer(tierText));
                     currentY += 10;
+                }
+            }
+
+            // Layout Conditions
+            List<ICondition> conditions = recipe.getConditions();
+            if (conditions != null && !conditions.isEmpty()) {
+                currentY += 4;
+                PositionedText conditionHeaderText = new PositionedText(
+                    StatCollector.translateToLocal("okmodular.nei.conditions"),
+                    0x444444,
+                    new Rectangle(0, currentY, 166, 10));
+                allParts.add(new LayoutPartRenderer(conditionHeaderText));
+                currentY += 12;
+
+                for (ICondition condition : conditions) {
+                    PositionedText conditionText = new PositionedText(
+                        " - " + condition.getDescription(),
+                        0x222222,
+                        new Rectangle(10, currentY, 156, 10),
+                        false);
+                    allParts.add(new LayoutPartRenderer(conditionText));
+                    currentY += conditionText.getRenderedHeight();
                 }
             }
 

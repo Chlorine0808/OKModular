@@ -27,6 +27,7 @@ okmodular.nei.block.replaces=Replaces %s
 okmodular.nei.structure.input=Needs structure %s at cell %s
 okmodular.nei.structure.output=Builds structure %s at cell %s
 okmodular.nei.optional=(optional)
+okmodular.nei.conditions=Conditions:
 tile.modular_machine_controller.name=Machine Controller
 tile.vis_bridge.name=Vis Bridge
 machinery.casing.format=%s %s

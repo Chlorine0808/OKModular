@@ -27,6 +27,7 @@ okmodular.nei.block.replaces=%s を置き換える
 okmodular.nei.structure.input=マス %2$s に構造 %1$s が要る
 okmodular.nei.structure.output=マス %2$s に構造 %1$s を建てる
 okmodular.nei.optional=（任意）
+okmodular.nei.conditions=条件:
 tile.modular_machine_controller.name=モジュラーマシンコントローラー
 tile.vis_bridge.name=ビスブリッジ
 machinery.casing.format=%s%s
