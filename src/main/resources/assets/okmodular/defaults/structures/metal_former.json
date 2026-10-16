@@ -1,0 +1,72 @@
+[
+  {
+    "name": "MetalFormer",
+    "displayName": "Metal Former",
+    "recipeGroup": [
+      "MetalFormer"
+    ],
+    "tintColor": "#7A8B99",
+    "layers": [
+      {
+        "name": "top",
+        "rows": [
+          "CCC",
+          "CCC",
+          "CCC"
+        ]
+      },
+      {
+        "name": "middle",
+        "rows": [
+          "PPP",
+          "P P",
+          "PQP"
+        ]
+      },
+      {
+        "name": "bottom",
+        "rows": [
+          "CCC",
+          "CCC",
+          "CCC"
+        ]
+      }
+    ],
+    "mappings": {
+      "C": {
+        "component": "casing",
+        "tiers": {
+          "okmodular:casing_plain:0": 1,
+          "okmodular:casing_plain:1": 2,
+          "okmodular:casing_plain:2": 3,
+          "okmodular:casing_plain:3": 4,
+          "okmodular:casing_plain:4": 5,
+          "okmodular:casing_plain:5": 6
+        }
+      },
+      "P": {
+        "blocks": [
+          "okmodular:casing_plain:*",
+          "okmodular:modular_item_input:*",
+          "okmodular:modular_item_output:*",
+          "okmodular:modular_energy_input:*"
+        ]
+      }
+    },
+    "requirements": [
+      {
+        "type": "itemInput",
+        "min": 1
+      },
+      {
+        "type": "itemOutput",
+        "min": 1
+      },
+      {
+        "type": "energyInput",
+        "min": 1
+      }
+    ],
+    "speedMultiplier": "tier"
+  }
+]
