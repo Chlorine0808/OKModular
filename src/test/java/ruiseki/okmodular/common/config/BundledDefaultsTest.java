@@ -36,6 +36,8 @@ import com.google.gson.JsonParser;
 
 import ruiseki.okmodular.OKMObjects;
 import ruiseki.okmodular.api.condition.Conditions;
+import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.decorator.RecipeDecorator;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.api.structure.io.StructureJsonReader;
 import ruiseki.okmodular.api.structure.visitor.StructureValidationVisitor;
@@ -185,6 +187,31 @@ class BundledDefaultsTest {
             MachineryRecipeLoader.load(recipes)
                 .size(),
             "the loader dropped a recipe; see the log");
+    }
+
+    /** An unrecognised decorator is skipped with a log line while its recipe still loads. */
+    @Test
+    void everyDecoratorIsApplied() throws ReflectiveOperationException {
+        List<JsonObject> concrete = recipeJsons().stream()
+            .filter(r -> !isAbstract(r))
+            .collect(Collectors.toList());
+        List<IModularRecipe> loaded = MachineryRecipeLoader.load(recipeJsons());
+        assertEquals(concrete.size(), loaded.size());
+
+        java.lang.reflect.Field internal = RecipeDecorator.class.getDeclaredField("internal");
+        internal.setAccessible(true);
+        for (int i = 0; i < concrete.size(); i++) {
+            JsonObject json = concrete.get(i);
+            int written = json.has("decorators") ? json.getAsJsonArray("decorators")
+                .size() : 0;
+            int applied = 0;
+            Object recipe = loaded.get(i);
+            while (recipe instanceof RecipeDecorator) {
+                applied++;
+                recipe = internal.get(recipe);
+            }
+            assertEquals(written, applied, json.get("registryName") + " lost a decorator");
+        }
     }
 
     @Test
