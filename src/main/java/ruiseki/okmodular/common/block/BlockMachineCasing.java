@@ -32,7 +32,7 @@ import ruiseki.okmodular.core.item.ItemBlockOK;
 /**
  * Machine Casing block.
  * Block ID corresponds to Design (Plain, Reinforced, etc.)
- * Metadata corresponds to Tier (0: Basic, 1: Advanced, 2: Elite, 3: Ultimate)
+ * Metadata is the tier, 0-15; the first enabledTierCount (modular.cfg) appear in creative and NEI.
  * Plain tier 0 is crafted (MachineryRecipes); every other design and tier comes from the example Assembler.
  */
 public class BlockMachineCasing extends BlockOK implements IModularBlockTint, IBlockColor {
