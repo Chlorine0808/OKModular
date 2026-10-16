@@ -1,0 +1,127 @@
+{
+  "group": "PhasedAlloyForge",
+  "recipes": [
+    {
+      "registryName": "alloy_forge_bronze",
+      "name": "Bronze",
+      "duration": 160,
+      "inputs": [
+        {
+          "ore": "ingotCopper",
+          "amount": 3
+        },
+        {
+          "ore": "ingotTin",
+          "amount": 1
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:ingot:140",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "registryName": "alloy_forge_steel",
+      "name": "Steel",
+      "duration": 200,
+      "inputs": [
+        {
+          "ore": "ingotIron",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:coal",
+          "amount": 1
+        },
+        {
+          "fluid": "oxygen",
+          "amount": 250
+        },
+        {
+          "energy": 64,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:ingot:143",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "alloy_forge_chromium_chloride",
+      "name": "Chromium Chloride",
+      "duration": 240,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "ore": "dustChromium",
+          "amount": 1
+        },
+        {
+          "fluid": "chlorine",
+          "amount": 500
+        },
+        {
+          "energy": 128,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:dust:200",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "alloy_forge_stainless_steel",
+      "name": "Stainless Steel",
+      "duration": 400,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "ore": "ingotSteel",
+          "amount": 2
+        },
+        {
+          "ore": "dustChromium",
+          "amount": 1
+        },
+        {
+          "ore": "dustNickel",
+          "amount": 1
+        },
+        {
+          "fluid": "argon",
+          "amount": 500
+        },
+        {
+          "fluid": "oxygen",
+          "amount": 250
+        },
+        {
+          "energy": 256,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:ingot:160",
+          "amount": 4
+        }
+      ]
+    }
+  ]
+}

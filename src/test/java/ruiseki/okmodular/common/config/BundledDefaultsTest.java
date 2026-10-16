@@ -41,6 +41,7 @@ import ruiseki.okmodular.api.recipe.decorator.RecipeDecorator;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.api.structure.io.StructureJsonReader;
 import ruiseki.okmodular.api.structure.visitor.StructureValidationVisitor;
+import ruiseki.okmodular.common.fluid.EnumFluidMaterial;
 import ruiseki.okmodular.common.item.EnumMaterial;
 import ruiseki.okmodular.common.recipe.MachineryRecipeLoader;
 import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
@@ -319,6 +320,25 @@ class BundledDefaultsTest {
                 }
             }
         });
+    }
+
+    /** Fluids resolve only in game too; this mod's own and vanilla's are the ones allowed. */
+    @Test
+    void fluidsExist() {
+        Set<String> known = new HashSet<>(java.util.Arrays.asList("water", "lava"));
+        for (EnumFluidMaterial fluid : EnumFluidMaterial.values()) known.add(fluid.getName());
+        for (JsonObject recipe : recipeJsons()) {
+            for (String key : new String[] { "inputs", "outputs" }) {
+                if (!recipe.has(key)) continue;
+                for (JsonElement io : recipe.getAsJsonArray(key)) {
+                    JsonObject o = io.getAsJsonObject();
+                    if (!o.has("fluid")) continue;
+                    String fluid = o.get("fluid")
+                        .getAsString();
+                    assertTrue(known.contains(fluid), recipe.get("registryName") + " uses unknown fluid " + fluid);
+                }
+            }
+        }
     }
 
     @Test
