@@ -26,6 +26,7 @@ import ruiseki.okmodular.common.fluid.ModFluidGases;
 import ruiseki.okmodular.common.init.MachineryBlocks;
 import ruiseki.okmodular.common.init.MachineryItems;
 import ruiseki.okmodular.common.init.MachineryOreDict;
+import ruiseki.okmodular.common.init.MachineryRecipes;
 import ruiseki.okmodular.common.integration.MachineryIntegration;
 import ruiseki.okmodular.common.integration.structurelib.MachineControllerInfoContainer;
 import ruiseki.okmodular.common.item.ItemFluidCanister;
@@ -161,7 +162,8 @@ public class MachineryModule extends ModModuleBase {
 
     @Override
     public void init(FMLInitializationEvent event) {
-
+        // Blocks, items and ore names all exist by now; they are registered in preInit.
+        MachineryRecipes.init();
     }
 
     @Override
