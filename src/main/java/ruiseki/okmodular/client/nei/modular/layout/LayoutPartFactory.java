@@ -8,6 +8,8 @@ import java.util.function.Function;
 import net.minecraft.item.ItemStack;
 
 import ruiseki.okcore.addon.nei.PositionedFluidTank;
+import ruiseki.okmodular.api.recipe.io.BlockInput;
+import ruiseki.okmodular.api.recipe.io.BlockOutput;
 import ruiseki.okmodular.api.recipe.io.EnergyInput;
 import ruiseki.okmodular.api.recipe.io.EnergyOutput;
 import ruiseki.okmodular.api.recipe.io.EssentiaInput;
@@ -42,6 +44,10 @@ public class LayoutPartFactory {
             return itemOut.getItems()
                 .isEmpty() ? null : new LayoutPartItem(itemOut.getItems());
         });
+
+        // --- Blocks in structure cells ---
+        register(BlockInput.class, LayoutPartBlock::of);
+        register(BlockOutput.class, LayoutPartBlock::of);
 
         // --- Fluids ---
         register(FluidInput.class, in -> {

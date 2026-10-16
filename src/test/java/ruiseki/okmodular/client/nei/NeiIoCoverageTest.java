@@ -35,7 +35,7 @@ import ruiseki.okmodular.testsupport.JavaSource;
  * 今わかっていること
  * ============================================
  *
- * `block` と `structure` の入出力が**どちらも描かれていない**。
+ * `structure` の入出力が**描かれていない**。
  * 構造そのものを入力に取るレシピは NEI 上で「材料の無いレシピ」に見え、
  * 何を建てればいいのかが表示から分からない。
  *
@@ -55,8 +55,7 @@ public class NeiIoCoverageTest {
      * （`NEIConfig.registerStructurePreviews`）とどう繋ぐかが決まっていない。
      * 決まるまでは、**描かれていないことがここに書いてある**状態を保つ。
      */
-    private static final List<String> NOT_DRAWN = Arrays
-        .asList("BlockInput", "BlockOutput", "StructureInput", "StructureOutput");
+    private static final List<String> NOT_DRAWN = Arrays.asList("StructureInput", "StructureOutput");
 
     @Test
     @DisplayName("入出力型はすべて描かれるか、描かれないと書いてある")

@@ -510,6 +510,7 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
             List<LayoutPartVis> visParts = new ArrayList<>();
             List<LayoutPartFluid> fluidParts = new ArrayList<>();
             List<LayoutPartGas> gasParts = new ArrayList<>();
+            List<LayoutPartRenderer> textParts = new ArrayList<>();
 
             for (RecipeLayoutPart<?> part : parts) {
                 if (part instanceof LayoutPartMana) manaParts.add((LayoutPartMana) part);
@@ -519,6 +520,7 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
                 else if (part instanceof LayoutPartVis) visParts.add((LayoutPartVis) part);
                 else if (part instanceof LayoutPartFluid) fluidParts.add((LayoutPartFluid) part);
                 else if (part instanceof LayoutPartGas) gasParts.add((LayoutPartGas) part);
+                else if (part instanceof LayoutPartRenderer) textParts.add((LayoutPartRenderer) part);
             }
 
             int currentX = startX;
@@ -584,6 +586,16 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
                 mana.setPosition(startX, maxY + 8);
                 allParts.add(mana);
                 maxY += mana.getHeight() + 12;
+            }
+
+            // 8. Text lines (structure IO, blocks with no item to draw)
+            if (!textParts.isEmpty()) {
+                maxY += 2;
+                for (LayoutPartRenderer text : textParts) {
+                    text.setPosition(startX, maxY);
+                    allParts.add(text);
+                    maxY += text.getHeight();
+                }
             }
 
             for (RecipeLayoutPart<?> part : itemParts) allParts.add(part);

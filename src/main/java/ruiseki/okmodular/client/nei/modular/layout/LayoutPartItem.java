@@ -25,6 +25,11 @@ public class LayoutPartItem extends RecipeLayoutPart<ItemStack> {
         this.stack = new PositionedStack(item, 0, 0); // Position is updated later
     }
 
+    protected LayoutPartItem(PositionedStack stack) {
+        super(0, 0);
+        this.stack = stack;
+    }
+
     @Override
     public void setPosition(int x, int y) {
         super.setPosition(x, y);
