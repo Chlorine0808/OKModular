@@ -1,0 +1,151 @@
+{
+  "group": "SpatialShifter",
+  "recipes": [
+    {
+      "registryName": "spatial_shifter_build_core",
+      "name": "Build a Core",
+      "duration": 200,
+      "inputs": [
+        {
+          "type": "structure",
+          "pattern": "shifter_empty",
+          "symbol": "D"
+        },
+        {
+          "item": "minecraft:obsidian",
+          "amount": 4
+        },
+        {
+          "item": "minecraft:iron_block",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:glowstone",
+          "amount": 1
+        },
+        {
+          "energy": 128,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "shifter_core",
+          "symbol": "D"
+        }
+      ]
+    },
+    {
+      "registryName": "spatial_shifter_charge_core",
+      "name": "Charge the Core",
+      "duration": 400,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "type": "structure",
+          "pattern": "shifter_core",
+          "symbol": "D"
+        },
+        {
+          "energy": 512,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "shifter_core_charged",
+          "symbol": "D"
+        }
+      ]
+    },
+    {
+      "registryName": "spatial_shifter_harvest_core",
+      "name": "Harvest the Charged Core",
+      "duration": 600,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "type": "structure",
+          "pattern": "shifter_core_charged",
+          "symbol": "D",
+          "consume": true
+        },
+        {
+          "energy": 1024,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:nether_star",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "spatial_shifter_press_iron_bed",
+      "name": "Press an Iron Bed",
+      "duration": 300,
+      "inputs": [
+        {
+          "type": "structure",
+          "pattern": "shifter_iron_bed",
+          "symbol": "D",
+          "consume": true
+        },
+        {
+          "energy": 128,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:plate:26",
+          "amount": 81
+        }
+      ]
+    },
+    {
+      "registryName": "spatial_shifter_ender_eyes",
+      "name": "Ender Eyes on a Stone Floor",
+      "duration": 200,
+      "inputs": [
+        {
+          "symbol": "D",
+          "block": "minecraft:stone",
+          "amount": 9
+        },
+        {
+          "item": "minecraft:ender_pearl",
+          "amount": 1
+        },
+        {
+          "item": "minecraft:blaze_powder",
+          "amount": 1
+        },
+        {
+          "energy": 64,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:ender_eye",
+          "amount": 2
+        },
+        {
+          "symbol": "D",
+          "replace": "minecraft:stone",
+          "block": "minecraft:cobblestone",
+          "amount": 9
+        }
+      ]
+    }
+  ]
+}

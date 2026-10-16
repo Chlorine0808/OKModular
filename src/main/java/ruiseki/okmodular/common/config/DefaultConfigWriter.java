@@ -34,7 +34,8 @@ public final class DefaultConfigWriter {
                 "metal_former.json",
                 "pressurized_crusher.json",
                 "ore_transformer.json",
-                "phased_alloy_forge.json"));
+                "phased_alloy_forge.json",
+                "spatial_shifter.json"));
         manifest.put(
             RECIPES,
             Arrays.asList(
@@ -42,8 +43,9 @@ public final class DefaultConfigWriter {
                 "metal_former.json",
                 "pressurized_crusher.json",
                 "ore_transformer.json",
-                "phased_alloy_forge.json"));
-        manifest.put(STRUCTURE_IO, Collections.emptyList());
+                "phased_alloy_forge.json",
+                "spatial_shifter.json"));
+        manifest.put(STRUCTURE_IO, Arrays.asList("spatial_shifter.json"));
         MANIFEST = Collections.unmodifiableMap(manifest);
     }
 

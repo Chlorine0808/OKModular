@@ -1,0 +1,104 @@
+[
+  {
+    "name": "SpatialShifter",
+    "displayName": "Spatial Shifter",
+    "recipeGroup": [
+      "SpatialShifter"
+    ],
+    "tintColor": "#5B3F8C",
+    "layers": [
+      {
+        "name": "roof",
+        "rows": [
+          "CCCCC",
+          "CCCCC",
+          "CCCCC",
+          "CCCCC",
+          "CCCCC"
+        ]
+      },
+      {
+        "name": "upper",
+        "rows": [
+          "CGGGC",
+          "G   G",
+          "G   G",
+          "G   G",
+          "CGGGC"
+        ]
+      },
+      {
+        "name": "middle",
+        "rows": [
+          "CGGGC",
+          "G   G",
+          "G   G",
+          "G   G",
+          "CPQPC"
+        ]
+      },
+      {
+        "name": "lower",
+        "rows": [
+          "CGGGC",
+          "G   G",
+          "G   G",
+          "G   G",
+          "CPPPC"
+        ]
+      },
+      {
+        "name": "floor",
+        "rows": [
+          "CCCCC",
+          "CDDDC",
+          "CDDDC",
+          "CDDDC",
+          "CCCCC"
+        ]
+      }
+    ],
+    "mappings": {
+      "C": {
+        "component": "casing",
+        "tiers": {
+          "okmodular:casing_plain:0": 1,
+          "okmodular:casing_plain:1": 2,
+          "okmodular:casing_plain:2": 3,
+          "okmodular:casing_plain:3": 4,
+          "okmodular:casing_plain:4": 5,
+          "okmodular:casing_plain:5": 6
+        }
+      },
+      "G": "minecraft:glass",
+      "P": {
+        "blocks": [
+          "okmodular:casing_plain:*",
+          "okmodular:modular_item_input:*",
+          "okmodular:modular_item_output:*",
+          "okmodular:modular_energy_input:*"
+        ]
+      },
+      "D": {
+        "blocks": [
+          "minecraft:stone",
+          "minecraft:cobblestone"
+        ]
+      }
+    },
+    "requirements": [
+      {
+        "type": "itemInput",
+        "min": 1
+      },
+      {
+        "type": "itemOutput",
+        "min": 1
+      },
+      {
+        "type": "energyInput",
+        "min": 1
+      }
+    ]
+  }
+]
