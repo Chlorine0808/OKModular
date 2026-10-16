@@ -102,6 +102,7 @@
       "registryName": "ore_transformer_plates_to_iron_block",
       "name": "Iron Plates to Iron Block",
       "duration": 100,
+      "priority": -1,
       "inputs": [
         {
           "ore": "plateIron",
