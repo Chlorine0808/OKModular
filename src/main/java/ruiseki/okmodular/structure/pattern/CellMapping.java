@@ -158,7 +158,7 @@ public final class CellMapping {
          *
          * @param worldX where the cell landed in the world; the draw is mixed from this, so one
          *               pattern written at two anchors comes out as two arrangements
-         * @param cellX  how far the cell sits from its anchor, on the world's axes. This is what
+         * @param cellX  how far the cell sits from its anchor, in the pattern's frame. This is what
          *               {@code cell_x} reads, and it is the <b>same</b> at every anchor, which is
          *               why a shape written with it repeats while the scatter does not
          * @return {@code modid:name}, {@code modid:name:meta}, or null when this draw leaves

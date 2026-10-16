@@ -70,7 +70,7 @@ public class ConditionContext {
      * depth, the light or the biome at each cell rather than at the machine.
      *
      * @param machine the machine's context, or null where there is none (a load-time check, NEI)
-     * @param cellX   offset from the anchor, on the world's axes - so {@code cellY} is up
+     * @param cellX   offset from the anchor in the pattern's own frame, where {@code cellY} is up
      */
     public static ConditionContext forCell(ConditionContext machine, int worldX, int worldY, int worldZ, int cellX,
         int cellY, int cellZ) {

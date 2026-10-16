@@ -146,9 +146,7 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
         List<int[]> written = new ArrayList<>();
 
         for (int[] anchorCell : anchors(context, Amounts.toInt(getRequiredAmount(condContext) * multiplier))) {
-            // Where the anchor itself landed, so each cell can say how far it sits from it. Measured
-            // in world coordinates rather than the structure's own, because that is the frame a
-            // pattern's expressions read -- see CellPropertyExpression.
+            // An anchor that does not resolve to a block has nowhere to put the pattern.
             int[] anchorPos = context.getCellPosition(anchorCell[0], anchorCell[1], anchorCell[2]);
             if (anchorPos == null) continue;
 
@@ -159,13 +157,7 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
 
                 // Asked here rather than read off the cell: a mapping may answer per position.
                 String blockId = settled.get(cell.mapping)
-                    .blockFor(
-                        pos[0],
-                        pos[1],
-                        pos[2],
-                        pos[0] - anchorPos[0],
-                        pos[1] - anchorPos[1],
-                        pos[2] - anchorPos[2]);
+                    .blockFor(pos[0], pos[1], pos[2], cell.cellX, cell.cellY, cell.cellZ);
                 if (blockId != null && setBlockAt(world, pos, blockId)) written.add(pos);
             }
         }

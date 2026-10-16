@@ -7,8 +7,8 @@ import java.util.Set;
 import ruiseki.okmodular.api.condition.ConditionContext;
 
 /**
- * How far a pattern cell sits from the anchor it was placed at, measured on the world's axes:
- * {@code cell_x} / {@code cell_y} / {@code cell_z}.
+ * How far a pattern cell sits from the anchor it was placed at, in the pattern's own frame (y up,
+ * turning with the machine): {@code cell_x} / {@code cell_y} / {@code cell_z}.
  */
 public class CellPropertyExpression implements IExpression {
 

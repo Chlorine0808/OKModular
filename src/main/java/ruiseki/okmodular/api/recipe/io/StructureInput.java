@@ -160,7 +160,7 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
             // An input only ever sees mappings that answer the same everywhere - the parser
             // refuses the rest - so neither the position nor the cell can change the answer.
             String expected = settled.get(cell.mapping)
-                .blockFor(pos[0], pos[1], pos[2], pos[0] - anchorPos[0], pos[1] - anchorPos[1], pos[2] - anchorPos[2]);
+                .blockFor(pos[0], pos[1], pos[2], cell.cellX, cell.cellY, cell.cellZ);
             if (!BlockIdMatcher.matches(id, expected)) return false;
         }
         return true;

@@ -7,7 +7,10 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.gtnewhorizon.structurelib.alignment.enumerable.ExtendedFacing;
+
 import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.structure.StructureCellLocator;
 import ruiseki.okmodular.structure.StructureShape;
 
 /**
@@ -35,15 +38,26 @@ public final class StructurePattern {
         public final int a;
         public final int b;
         public final int c;
+        /**
+         * Offset from the anchor in the pattern's own frame, which is what {@code cell_x} /
+         * {@code cell_y} / {@code cell_z} read. It turns with the shape, so the same drawn cell
+         * has the same offsets whichever way the machine faces.
+         */
+        public final int cellX;
+        public final int cellY;
+        public final int cellZ;
         /** The character this cell was drawn with, kept for error messages. */
         public final char symbol;
         /** What goes here. Ask it with {@link CellMapping#blockFor}; it need not be constant. */
         public final CellMapping mapping;
 
-        Cell(int a, int b, int c, char symbol, CellMapping mapping) {
+        Cell(int a, int b, int c, int[] cellOffset, char symbol, CellMapping mapping) {
             this.a = a;
             this.b = b;
             this.c = c;
+            this.cellX = cellOffset[0];
+            this.cellY = cellOffset[1];
+            this.cellZ = cellOffset[2];
             this.symbol = symbol;
             this.mapping = mapping;
         }
@@ -73,9 +87,9 @@ public final class StructurePattern {
      * Where the anchor sits, for a shape that was generated rather than drawn; null otherwise.
      * <p>
      * A generated shape holds one character in every cell, so searching for the anchor would find
-     * the topmost cell. The index is in the shape as authored, which is safe because a generated
-     * shape's bounding box is a cube and both transforms in {@link StructureShape#process} leave a
-     * cube's middle where it is - {@code PatternShapeTest} pins that.
+     * the topmost cell. The index is in the shape as authored, {@code {col, layer, row}}, and may
+     * lie outside it when the shape was offset; {@link StructureShape#toProcessed} carries it into
+     * the machine's facing.
      */
     private final int[] declaredOrigin;
 
@@ -161,8 +175,12 @@ public final class StructurePattern {
         // The one other way to get here is a ragged vertical pattern: transformForVertical sizes
         // itself from the first layer, so rows past that length are dropped -- the same thing
         // happens to a machine's own structure, and the fix belongs there rather than here.
-        int[] found = declaredOrigin != null ? declaredOrigin : StructureShape.findSymbolOffset(processed, anchor);
+        int[] found = declaredOrigin != null
+            ? StructureShape
+                .toProcessed(shape, machineDefaultFacing, declaredOrigin[0], declaredOrigin[1], declaredOrigin[2])
+            : StructureShape.findSymbolOffset(processed, anchor);
         int[] origin = found != null ? found : new int[] { 0, 0, 0 };
+        int[] originInFrame = inFrame(machineDefaultFacing, origin[0], origin[1], origin[2]);
 
         List<Cell> cells = new ArrayList<>();
         for (int layer = 0; layer < processed.length; layer++) {
@@ -172,10 +190,25 @@ public final class StructurePattern {
                     char symbol = rowStr.charAt(col);
                     CellMapping mapping = mappings.get(symbol);
                     if (mapping == null) continue; // space, and an anchor used only as a marker
-                    cells.add(new Cell(col - origin[0], layer - origin[1], row - origin[2], symbol, mapping));
+                    int[] here = inFrame(machineDefaultFacing, col, layer, row);
+                    int[] offset = { here[0] - originInFrame[0], here[1] - originInFrame[1],
+                        here[2] - originInFrame[2] };
+                    cells.add(new Cell(col - origin[0], layer - origin[1], row - origin[2], offset, symbol, mapping));
                 }
             }
         }
         return Collections.unmodifiableList(cells);
+    }
+
+    /**
+     * A processed cell's position in the pattern's own frame: where it would land, in world
+     * axes, if the same pattern sat in a north-facing machine lying down. That is the frame
+     * cell_* always had for such a machine, so patterns written for one read the same numbers.
+     */
+    private int[] inFrame(String machineDefaultFacing, int a, int b, int c) {
+        int[] drawn = StructureShape.toAuthored(shape, machineDefaultFacing, a, b, c);
+        int[] lyingDown = StructureShape.toProcessed(shape, null, drawn[0], drawn[1], drawn[2]);
+        return StructureCellLocator
+            .toWorld(ExtendedFacing.NORTH_NORMAL_NONE, 0, 0, 0, null, lyingDown[0], lyingDown[1], lyingDown[2]);
     }
 }
