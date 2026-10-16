@@ -72,9 +72,11 @@ public final class DefaultConfigWriter {
 
     /**
      * @param patternDir where structure IO patterns live; its leaf is a config value
+     * @return files written, per directory that was created
      */
-    public static void writeMissing(File configDir, File patternDir, Map<String, List<String>> manifest,
+    public static Map<String, Integer> writeMissing(File configDir, File patternDir, Map<String, List<String>> manifest,
         ResourceOpener opener) {
+        Map<String, Integer> written = new LinkedHashMap<>();
         for (Map.Entry<String, List<String>> entry : manifest.entrySet()) {
             File target = STRUCTURE_IO.equals(entry.getKey()) ? patternDir : new File(configDir, entry.getKey());
             if (target.exists()) continue;
@@ -82,24 +84,40 @@ public final class DefaultConfigWriter {
                 Logger.warn("Could not create " + target + "; example machines not written there");
                 continue;
             }
+            int count = 0;
             for (String file : entry.getValue()) {
-                copy(opener, resourcePath(entry.getKey(), file), new File(target, file));
+                if (copy(opener, resourcePath(entry.getKey(), file), new File(target, file))) count++;
             }
-            Logger.info(
-                "Wrote " + entry.getValue()
-                    .size() + " example file(s) to " + target);
+            written.put(entry.getKey(), count);
+            int listed = entry.getValue()
+                .size();
+            if (count == listed) {
+                Logger.info("Wrote " + count + " example file(s) to " + target);
+            } else {
+                // The directory now exists, so nothing retries this on the next launch.
+                Logger.warn(
+                    "Wrote only " + count
+                        + " of "
+                        + listed
+                        + " example file(s) to "
+                        + target
+                        + "; delete the directory to try again");
+            }
         }
+        return written;
     }
 
-    private static void copy(ResourceOpener opener, String path, File destination) {
+    private static boolean copy(ResourceOpener opener, String path, File destination) {
         try (InputStream in = opener.open(path)) {
             if (in == null) {
                 Logger.warn("Bundled example missing from the jar: " + path);
-                return;
+                return false;
             }
             Files.copy(in, destination.toPath());
+            return true;
         } catch (IOException e) {
             Logger.error("Failed to write example " + destination, e);
+            return false;
         }
     }
 }

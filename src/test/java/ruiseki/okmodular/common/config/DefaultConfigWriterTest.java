@@ -79,6 +79,34 @@ class DefaultConfigWriterTest {
     }
 
     @Test
+    void leavesAFileInTheWayUntouched() throws IOException {
+        File recipes = new File(configDir, "recipes");
+        Files.write(recipes.toPath(), "mine".getBytes(StandardCharsets.UTF_8));
+
+        write(new File(configDir, "structure_io"));
+
+        assertTrue(recipes.isFile(), "a file where recipes/ would go must be left as it is");
+        assertEquals("mine", new String(Files.readAllBytes(recipes.toPath()), StandardCharsets.UTF_8));
+    }
+
+    /** A directory written only in part is never retried, so the count must say so. */
+    @Test
+    void reportsHowManyFilesItActuallyWrote() {
+        resources.clear();
+        Map<String, List<String>> manifest = manifest();
+        resources.remove(DefaultConfigWriter.resourcePath(DefaultConfigWriter.STRUCTURES, "a.json"));
+
+        Map<String, Integer> written = DefaultConfigWriter
+            .writeMissing(configDir, new File(configDir, "structure_io"), manifest, path -> {
+                byte[] bytes = resources.get(path);
+                return bytes == null ? null : new ByteArrayInputStream(bytes);
+            });
+
+        assertEquals(Integer.valueOf(1), written.get(DefaultConfigWriter.STRUCTURES));
+        assertEquals(Integer.valueOf(1), written.get(DefaultConfigWriter.RECIPES));
+    }
+
+    @Test
     void writesPatternsToConfiguredDirectory() {
         write(new File(configDir, "custom_io"));
 
