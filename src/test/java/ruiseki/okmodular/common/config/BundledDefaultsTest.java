@@ -215,6 +215,148 @@ class BundledDefaultsTest {
         }
     }
 
+    /**
+     * Pairs where the earlier recipe is meant to win: a higher tier replacing a lower one.
+     */
+    private static final Set<String> INTENDED_OVERRIDES = new HashSet<>(
+        java.util.Arrays
+            .asList("crusher_iron_ore_byproduct > crusher_iron_ore", "crusher_gold_ore_byproduct > crusher_gold_ore"));
+
+    /**
+     * A machine runs the first recipe, in sort order, whose inputs are there; it does not fall
+     * back to a later one. So when an earlier recipe needs nothing the later one does not also
+     * supply, the later one can never run - or, when only the amounts differ, runs only while
+     * the port holds less than the earlier one wants. Review found two examples like that: the basic
+     * circuitry casing lost to the tier 1 plain casing, and Metal Former plates lost to gears.
+     */
+    @Test
+    void noRecipeIsShadowed() {
+        List<JsonObject> concrete = recipeJsons().stream()
+            .filter(r -> !isAbstract(r))
+            .collect(Collectors.toList());
+        List<IModularRecipe> loaded = MachineryRecipeLoader.load(recipeJsons());
+        assertEquals(concrete.size(), loaded.size());
+
+        List<String> shadowed = new ArrayList<>();
+        for (int s = 0; s < concrete.size(); s++) {
+            for (int r = 0; r < concrete.size(); r++) {
+                if (s == r || !group(concrete.get(s)).equals(group(concrete.get(r)))) continue;
+                if (loaded.get(s)
+                    .compareTo(loaded.get(r)) >= 0) continue;
+                if (!suppliedBy(inputsOf(loaded.get(s), concrete.get(s)), inputsOf(loaded.get(r), concrete.get(r))))
+                    continue;
+                String pair = concrete.get(s)
+                    .get("registryName")
+                    .getAsString() + " > "
+                    + concrete.get(r)
+                        .get("registryName")
+                        .getAsString();
+                if (!INTENDED_OVERRIDES.contains(pair)) shadowed.add(pair);
+            }
+        }
+        assertEquals(new ArrayList<String>(), shadowed, "the right-hand recipe can never run");
+    }
+
+    /**
+     * An item held as a catalyst (consume false) must not be eaten by another recipe of the
+     * same machine. The Tuned Wrench recipe used to take a wrench: once nothing else matched it
+     * ran, moved the catalyst to the output port, and every assembly after it stopped.
+     */
+    @Test
+    void noRecipeConsumesACatalyst() {
+        List<JsonObject> recipes = recipeJsons();
+        for (JsonObject holder : recipes) {
+            for (JsonElement i : holder.getAsJsonArray("inputs")) {
+                JsonObject catalyst = i.getAsJsonObject();
+                if (!catalyst.has("item") || !catalyst.has("consume")
+                    || catalyst.get("consume")
+                        .getAsBoolean())
+                    continue;
+                for (JsonObject other : recipes) {
+                    if (!group(other).equals(group(holder))) continue;
+                    for (JsonElement j : other.getAsJsonArray("inputs")) {
+                        JsonObject eaten = j.getAsJsonObject();
+                        boolean consumes = !eaten.has("consume") || eaten.get("consume")
+                            .getAsBoolean();
+                        assertFalse(
+                            consumes && catalyst.get("item")
+                                .equals(eaten.get("item")),
+                            other.get("registryName") + " eats the catalyst " + catalyst.get("item"));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * A recipe that only places a block (no replace) needs an empty cell, and a machine does
+     * not fall back when the chosen recipe has nowhere to put its output: it reports output full.
+     * So such a recipe must sort after the recipes that work on what is already in the cells,
+     * or a filled cell plus the placing recipe's items stalls the machine.
+     */
+    @Test
+    void placingRecipesSortAfterCellRecipes() {
+        List<JsonObject> concrete = recipeJsons().stream()
+            .filter(r -> !isAbstract(r))
+            .collect(Collectors.toList());
+        List<IModularRecipe> loaded = MachineryRecipeLoader.load(recipeJsons());
+        for (int p = 0; p < concrete.size(); p++) {
+            if (!placesWithoutReplacing(concrete.get(p))) continue;
+            for (int c = 0; c < concrete.size(); c++) {
+                if (c == p || !group(concrete.get(c)).equals(group(concrete.get(p)))) continue;
+                if (!readsCells(concrete.get(c))) continue;
+                assertTrue(
+                    loaded.get(c)
+                        .compareTo(loaded.get(p)) < 0,
+                    concrete.get(p)
+                        .get("registryName") + " is tried before "
+                        + concrete.get(c)
+                            .get("registryName"));
+            }
+        }
+    }
+
+    private static boolean placesWithoutReplacing(JsonObject recipe) {
+        for (JsonElement o : recipe.getAsJsonArray("outputs")) {
+            JsonObject out = o.getAsJsonObject();
+            if (out.has("symbol") && out.has("block") && !out.has("replace")) return true;
+        }
+        return false;
+    }
+
+    private static boolean readsCells(JsonObject recipe) {
+        for (JsonElement i : recipe.getAsJsonArray("inputs")) {
+            if (i.getAsJsonObject()
+                .has("symbol")) return true;
+        }
+        return false;
+    }
+
+    /** Inputs after inheritance: the loader has merged the parent's into the child's JSON. */
+    private static JsonArray inputsOf(IModularRecipe recipe, JsonObject json) {
+        return json.getAsJsonArray("inputs");
+    }
+
+    private static boolean suppliedBy(JsonArray needs, JsonArray has) {
+        for (JsonElement n : needs) {
+            JsonObject need = n.getAsJsonObject();
+            if (need.has("energy")) continue;
+            boolean found = false;
+            for (JsonElement h : has) {
+                JsonObject have = h.getAsJsonObject();
+                for (String key : new String[] { "item", "ore", "fluid" }) {
+                    if (need.has(key) && have.has(key)
+                        && need.get(key)
+                            .equals(have.get(key)))
+                        found = true;
+                }
+                if (!need.has("item") && !need.has("ore") && !need.has("fluid") && need.equals(have)) found = true;
+            }
+            if (!found) return false;
+        }
+        return true;
+    }
+
     @Test
     void registryNamesAreUnique() {
         Set<String> seen = new HashSet<>();
