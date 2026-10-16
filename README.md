@@ -27,7 +27,17 @@ NEI, Waila, BlockRenderer6343, Thaumcraft, AE2, ThaumicEnergistics, Mekanism, En
 config/okmodular/
   modular.cfg      worldgen.cfg      tiers.json
   recipes/         structures/       ← errors.txt is written here too
+  structure_io/
 ```
+
+### Example machines
+
+On first launch, each of `structures/`, `recipes/` and `structure_io/` that does not exist yet is created and filled with six example machines: Assembler, Metal Former, Pressurized Crusher, Ore Transformer, Phased Alloy Forge and Spatial Shifter.
+They are there to be read, changed or deleted.
+
+- A directory that already exists is left alone, so a deleted example stays deleted. Delete the directory to get its examples back.
+- The Assembler's own blocks (controller, plain casing, item ports, energy port) and the wrench are made at a crafting table. Every other casing and port is made in the Assembler.
+- The machines run on RF from another mod; OK Modular adds no generator.
 
 ## Documentation
 
@@ -84,7 +94,17 @@ NEI, Waila, BlockRenderer6343, Thaumcraft, AE2, ThaumicEnergistics, Mekanism, En
 config/okmodular/
   modular.cfg      worldgen.cfg      tiers.json
   recipes/         structures/       ← errors.txt もここに書かれます
+  structure_io/
 ```
+
+### お手本の機械
+
+初回起動時，`structures/`・`recipes/`・`structure_io/` のうち存在しないものが作られ，お手本の機械 6 台（Assembler，Metal Former，Pressurized Crusher，Ore Transformer，Phased Alloy Forge，Spatial Shifter）が書き出される．
+読んで書き換えるか，消して使う．
+
+- 既にあるディレクトリには何も書かない．消したお手本は戻らない．戻すにはディレクトリごと消す
+- クラフト台で作れるのは Assembler の部品（コントローラ，Plain ケーシング，アイテムポート，エネルギーポート）と Wrench だけ．ほかのケーシングとポートは Assembler で作る
+- 電力は他 mod の RF を使う．OK Modular は発電機を追加しない
 
 ## ドキュメント
 
