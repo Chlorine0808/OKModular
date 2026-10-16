@@ -89,7 +89,12 @@ public final class StructurePatternParser {
                 "anchor '" + anchor + "' does not appear in 'layers'");
         }
 
-        return new StructurePattern(name, anchor, shape, mappings, generated ? centreOf(shape) : null);
+        return new StructurePattern(
+            name,
+            anchor,
+            shape,
+            mappings,
+            generated ? originOf(shape, json.getAsJsonObject("shape"), fileName, name) : null);
     }
 
     /**
@@ -101,6 +106,38 @@ public final class StructurePatternParser {
     private static int[] centreOf(String[][] shape) {
         int middle = (shape.length - 1) / 2;
         return new int[] { middle, middle, middle };
+    }
+
+    /**
+     * Where a generated shape is anchored: its centre, or with {@code offset}, the cell that puts
+     * the centre at that offset. A centre on the anchor is a centre on the machine's own block,
+     * which an output can never write, so a shape meant as an output has to be moved off it.
+     */
+    private static int[] originOf(String[][] shape, JsonObject shapeJson, String fileName, String name) {
+        int[] centre = centreOf(shape);
+        if (!shapeJson.has("offset")) return centre;
+        return StructurePattern.anchorFor(shape, centre, readOffset(shapeJson.get("offset"), fileName, name));
+    }
+
+    private static int[] readOffset(JsonElement value, String fileName, String name) {
+        boolean ok = value.isJsonArray() && value.getAsJsonArray()
+            .size() == 3;
+        int[] offset = new int[3];
+        for (int i = 0; ok && i < 3; i++) {
+            JsonElement e = value.getAsJsonArray()
+                .get(i);
+            ok = e.isJsonPrimitive() && e.getAsJsonPrimitive()
+                .isNumber() && e.getAsDouble() == Math.rint(e.getAsDouble());
+            if (ok) offset[i] = e.getAsInt();
+        }
+        if (!ok) {
+            throw new StructureException(
+                StructureException.ErrorType.INVALID_FORMAT,
+                fileName,
+                name,
+                "'shape.offset' must be three whole numbers [x, y, z], got: " + value);
+        }
+        return offset;
     }
 
     private static String readName(JsonObject json, String fileName) {

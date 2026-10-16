@@ -207,8 +207,33 @@ public final class StructurePattern {
      */
     private int[] inFrame(String machineDefaultFacing, int a, int b, int c) {
         int[] drawn = StructureShape.toAuthored(shape, machineDefaultFacing, a, b, c);
-        int[] lyingDown = StructureShape.toProcessed(shape, null, drawn[0], drawn[1], drawn[2]);
+        return frameOf(shape, drawn[0], drawn[1], drawn[2]);
+    }
+
+    /** A drawn cell {@code (col, layer, row)} in the pattern's frame; see {@link #inFrame}. */
+    private static int[] frameOf(String[][] shape, int col, int layer, int row) {
+        int[] lyingDown = StructureShape.toProcessed(shape, null, col, layer, row);
         return StructureCellLocator
             .toWorld(ExtendedFacing.NORTH_NORMAL_NONE, 0, 0, 0, null, lyingDown[0], lyingDown[1], lyingDown[2]);
+    }
+
+    /**
+     * The drawn index to anchor at so that the drawn cell {@code centre} reads {@code offset} as
+     * its cell_*. The frame is the drawn axes up to sign and order, so the step along each frame
+     * axis is found by trying one drawn step along each drawn axis.
+     */
+    static int[] anchorFor(String[][] shape, int[] centre, int[] offset) {
+        int[] zero = frameOf(shape, 0, 0, 0);
+        int[] anchor = centre.clone();
+        for (int drawnAxis = 0; drawnAxis < 3; drawnAxis++) {
+            int[] step = new int[3];
+            step[drawnAxis] = 1;
+            int[] moved = frameOf(shape, step[0], step[1], step[2]);
+            for (int frameAxis = 0; frameAxis < 3; frameAxis++) {
+                int sign = moved[frameAxis] - zero[frameAxis];
+                if (sign != 0) anchor[drawnAxis] -= sign * offset[frameAxis];
+            }
+        }
+        return anchor;
     }
 }
