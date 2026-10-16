@@ -131,7 +131,7 @@
       "parent": "metal_former_gear",
       "inputs": [
         {
-          "ore": "ingotIron",
+          "ore": "plateIron",
           "amount": 4
         }
       ],
@@ -148,7 +148,7 @@
       "parent": "metal_former_gear",
       "inputs": [
         {
-          "ore": "ingotGold",
+          "ore": "plateGold",
           "amount": 4
         }
       ],
@@ -165,7 +165,7 @@
       "parent": "metal_former_gear",
       "inputs": [
         {
-          "ore": "ingotCopper",
+          "ore": "plateCopper",
           "amount": 4
         }
       ],
@@ -182,7 +182,7 @@
       "parent": "metal_former_gear",
       "inputs": [
         {
-          "ore": "ingotTin",
+          "ore": "plateTin",
           "amount": 4
         }
       ],
@@ -199,7 +199,7 @@
       "parent": "metal_former_gear",
       "inputs": [
         {
-          "ore": "ingotBronze",
+          "ore": "plateBronze",
           "amount": 4
         }
       ],
@@ -216,7 +216,7 @@
       "parent": "metal_former_gear",
       "inputs": [
         {
-          "ore": "ingotSteel",
+          "ore": "plateSteel",
           "amount": 4
         }
       ],
