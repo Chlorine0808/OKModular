@@ -273,17 +273,32 @@ A sphere of radius eight - **2109 cells** - without writing 17×17×17 = 4913 ch
 | `type` | String | Which shape. `sphere` is the only one so far |
 | `radius` | Number | **Not an expression** (see below) |
 | `symbol` | String | The single character every cell gets; needs an entry in `mappings` |
+| `offset` | `[x, y, z]` | Where the shape's centre sits from the anchor, on the cell_* axes. Optional; the centre is on the anchor without it |
 
 Membership is the integer test `dx² + dy² + dz² <= radius²`, so **the same radius always generates
 the same cells**. Radius 0 is 1 cell, 1 is 7, 2 is 33, 4 is 257, 8 is 2109, 16 is 17077.
 
 - **Writing `layers` as well is a load error** - that says what the cells are twice
-- **The anchor is the centre.** Writing `anchor` as well is a load error: every cell holds the
-  same character, so there is nothing for it to pick out
+- **The anchor is the centre**, or with `offset`, the cell that puts the centre at that offset.
+  Writing `anchor` as well is a load error: every cell holds the same character, so there is
+  nothing for it to pick out
 - **The shape is solid.** For a shell, carve it with a `chance` -
   `"chance": "sqrt(cell_x^2 + cell_y^2 + cell_z^2) > 7"` leaves the outer layer
 - **20000 cells per pattern** is the limit, because every cell is written in one go. Radius 16
   fits; 17 does not
+
+> [!IMPORTANT]
+> **A shape used as an output needs an `offset`.** Without one its centre sits on the block the
+> recipe names, which is part of the machine, and an output never writes over the machine - so
+> no anchor qualifies and the recipe does not start. Move the shape clear of the machine:
+>
+> ```json
+> "shape": { "type": "sphere", "radius": 3, "symbol": "X", "offset": [0, 5, 0] },
+> "mappings": { "X": { "block": "minecraft:iron_ore",
+>                      "chance": "1 - sqrt(cell_x^2 + (cell_y - 5)^2 + cell_z^2) / 3" } }
+> ```
+>
+> `cell_*` still measure from the anchor, so a distance from the centre subtracts the offset.
 
 > [!WARNING]
 > **`radius` cannot be an expression.** The shape is settled when the file is read and cached per
