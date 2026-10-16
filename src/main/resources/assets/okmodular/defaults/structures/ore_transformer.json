@@ -1,0 +1,81 @@
+[
+  {
+    "name": "OreTransformer",
+    "displayName": "Ore Transformer",
+    "recipeGroup": [
+      "OreTransformer"
+    ],
+    "tintColor": "#5E7D4F",
+    "layers": [
+      {
+        "name": "top",
+        "rows": [
+          "COC",
+          "COC",
+          "COC"
+        ]
+      },
+      {
+        "name": "middle",
+        "rows": [
+          "PPP",
+          "P P",
+          "PQP"
+        ]
+      },
+      {
+        "name": "bottom",
+        "rows": [
+          "CCC",
+          "CCC",
+          "CCC"
+        ]
+      }
+    ],
+    "mappings": {
+      "C": {
+        "component": "casing",
+        "tiers": {
+          "okmodular:casing_plain:0": 1,
+          "okmodular:casing_plain:1": 2,
+          "okmodular:casing_plain:2": 3,
+          "okmodular:casing_plain:3": 4,
+          "okmodular:casing_plain:4": 5,
+          "okmodular:casing_plain:5": 6
+        }
+      },
+      "P": {
+        "blocks": [
+          "okmodular:casing_plain:*",
+          "okmodular:modular_item_input:*",
+          "okmodular:modular_item_output:*",
+          "okmodular:modular_energy_input:*"
+        ]
+      },
+      "O": {
+        "blocks": [
+          "air",
+          "minecraft:iron_ore",
+          "minecraft:iron_block",
+          "minecraft:gold_ore",
+          "minecraft:gold_block"
+        ]
+      }
+    },
+    "requirements": [
+      {
+        "type": "itemInput",
+        "min": 1
+      },
+      {
+        "type": "itemOutput",
+        "min": 1
+      },
+      {
+        "type": "energyInput",
+        "min": 1
+      }
+    ],
+    "speedMultiplier": "tier"
+  }
+]

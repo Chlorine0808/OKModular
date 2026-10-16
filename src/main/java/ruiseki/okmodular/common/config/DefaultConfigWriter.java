@@ -27,8 +27,12 @@ public final class DefaultConfigWriter {
 
     static {
         Map<String, List<String>> manifest = new LinkedHashMap<>();
-        manifest.put(STRUCTURES, Arrays.asList("assembler.json", "metal_former.json", "pressurized_crusher.json"));
-        manifest.put(RECIPES, Arrays.asList("assembler.json", "metal_former.json", "pressurized_crusher.json"));
+        manifest.put(
+            STRUCTURES,
+            Arrays.asList("assembler.json", "metal_former.json", "pressurized_crusher.json", "ore_transformer.json"));
+        manifest.put(
+            RECIPES,
+            Arrays.asList("assembler.json", "metal_former.json", "pressurized_crusher.json", "ore_transformer.json"));
         manifest.put(STRUCTURE_IO, Collections.emptyList());
         MANIFEST = Collections.unmodifiableMap(manifest);
     }

@@ -1,0 +1,124 @@
+{
+  "group": "OreTransformer",
+  "recipes": [
+    {
+      "registryName": "ore_transformer_iron_ore_to_block",
+      "name": "Iron Ore to Iron Block (in place)",
+      "duration": 200,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:iron_ore"
+        },
+        {
+          "ore": "ingotIron",
+          "amount": 4
+        },
+        {
+          "energy": 64,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "replace": "minecraft:iron_ore",
+          "block": "minecraft:iron_block"
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_iron_ore_to_ingots",
+      "name": "Iron Ore to Iron Ingots",
+      "duration": 100,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:iron_ore",
+          "consume": true
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:iron_ingot",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_gold_ore_to_ingots",
+      "name": "Gold Ore to Gold Ingots",
+      "duration": 100,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:gold_ore",
+          "consume": true
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:gold_ingot",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_iron_block_to_plates",
+      "name": "Iron Block to Iron Plates",
+      "duration": 100,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:iron_block",
+          "consume": true
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:plate:26",
+          "amount": 9
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_plates_to_iron_block",
+      "name": "Iron Plates to Iron Block",
+      "duration": 100,
+      "inputs": [
+        {
+          "ore": "plateIron",
+          "amount": 9
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:iron_block"
+        }
+      ]
+    }
+  ]
+}
