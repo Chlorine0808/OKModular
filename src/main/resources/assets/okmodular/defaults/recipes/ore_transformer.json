@@ -97,6 +97,128 @@
           "block": "minecraft:iron_block"
         }
       ]
+    },
+    {
+      "registryName": "ore_transformer_crack_stone",
+      "name": "Crack Stone (some cells turn to gravel)",
+      "duration": 60,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "replace": "minecraft:stone",
+          "block": "minecraft:cobblestone"
+        }
+      ],
+      "decorators": [
+        {
+          "type": "per_position_probability",
+          "chance": 0.25,
+          "symbol": "O",
+          "output": {
+            "symbol": "O",
+            "replace": "minecraft:cobblestone",
+            "block": "minecraft:gravel"
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_mine_coal_ore",
+      "name": "Mine Coal Ore (Fortune II)",
+      "duration": 80,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:coal_ore",
+          "consume": true
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [],
+      "decorators": [
+        {
+          "type": "harvest_block",
+          "harvestLevel": 1,
+          "fortune": 2
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_sand_to_glass",
+      "name": "Sand to Glass (sometimes coloured or glowstone)",
+      "duration": 100,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:sand"
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "replace": "minecraft:sand",
+          "block": "minecraft:glass"
+        }
+      ],
+      "decorators": [
+        {
+          "type": "random_block_output",
+          "count": 1,
+          "selections": [
+            {
+              "symbol": "O",
+              "output": {
+                "symbol": "O",
+                "replace": "minecraft:glass",
+                "block": "minecraft:stained_glass:14"
+              }
+            },
+            {
+              "symbol": "O",
+              "output": {
+                "symbol": "O",
+                "replace": "minecraft:glass",
+                "block": "minecraft:stained_glass:11"
+              }
+            }
+          ]
+        },
+        {
+          "type": "bonus_block_output",
+          "chance": 0.1,
+          "outputs": [
+            {
+              "type": "block",
+              "symbol": "O",
+              "amount": 1,
+              "replace": "minecraft:glass",
+              "block": "minecraft:glowstone"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

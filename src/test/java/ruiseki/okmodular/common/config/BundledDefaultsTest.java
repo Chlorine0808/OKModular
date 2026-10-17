@@ -47,6 +47,7 @@ import ruiseki.okmodular.common.item.EnumMaterial;
 import ruiseki.okmodular.common.recipe.MachineryRecipeLoader;
 import ruiseki.okmodular.config.MachineryConfig;
 import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
+import ruiseki.okmodular.testsupport.JavaSource;
 
 /**
  * Every bundled example goes through the parser that will read it in game.
@@ -65,6 +66,7 @@ import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
 class BundledDefaultsTest {
 
     private static final Path RESOURCE_ROOT = Paths.get("src/main/resources/assets/okmodular/defaults");
+    private static final Path DECORATOR_SOURCES = JavaSource.MAIN.resolve("api/recipe/decorator");
     private static final Pattern NAMESPACED = Pattern.compile("\"([A-Za-z0-9_]+):[A-Za-z_]");
 
     @TempDir
@@ -430,6 +432,100 @@ class BundledDefaultsTest {
             + "/"
             + io.get("block")
                 .getAsString();
+    }
+
+    /**
+     * Condition types with no bundled example, each with the reason. {@code block_below} is
+     * kept only for old packs, and under every bundled controller sits the machine's own
+     * casing, so an example would always pass. {@code nand} / {@code nor} / {@code xor} are
+     * {@code and} / {@code or} / {@code not} written another way.
+     */
+    private static final Set<String> CONDITIONS_WITHOUT_EXAMPLE = new HashSet<>(
+        java.util.Arrays.asList("block_below", "nand", "nor", "xor"));
+
+    /**
+     * The examples are where a pack author copies from. A decorator or a condition type with
+     * no example has to be written from the docs alone, so every one is used at least once.
+     */
+    @Test
+    void everyDecoratorKindHasAnExample() throws ReflectiveOperationException {
+        Set<String> kinds = new TreeSet<>();
+        try (Stream<Path> files = Files.list(DECORATOR_SOURCES)) {
+            files.map(
+                f -> f.getFileName()
+                    .toString()
+                    .replace(".java", ""))
+                .filter(n -> n.endsWith("Decorator") && !n.equals("RecipeDecorator"))
+                .forEach(kinds::add);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        assertTrue(kinds.size() >= 8, "the decorator scan found too few: " + kinds);
+
+        java.lang.reflect.Field internal = RecipeDecorator.class.getDeclaredField("internal");
+        internal.setAccessible(true);
+        for (IModularRecipe loaded : MachineryRecipeLoader.load(recipeJsons())) {
+            Object recipe = loaded;
+            while (recipe instanceof RecipeDecorator) {
+                kinds.remove(
+                    recipe.getClass()
+                        .getSimpleName());
+                recipe = internal.get(recipe);
+            }
+        }
+        assertEquals(new TreeSet<String>(), kinds, "no bundled recipe uses these decorators");
+    }
+
+    @Test
+    void everyConditionTypeHasAnExample() {
+        Matcher m = Pattern.compile("register\\(\\s*\"(\\w+)\"")
+            .matcher(
+                JavaSource.stripComments(JavaSource.read(JavaSource.MAIN.resolve("api/condition/Conditions.java"))));
+        Set<String> types = new TreeSet<>();
+        while (m.find()) types.add(m.group(1));
+        assertTrue(types.size() >= 15, "the condition scan found too few: " + types);
+        types.removeAll(CONDITIONS_WITHOUT_EXAMPLE);
+
+        for (JsonObject recipe : recipeJsons()) {
+            if (recipe.has("conditions")) removeUsed(recipe.get("conditions"), types);
+        }
+        assertEquals(new TreeSet<String>(), types, "no bundled recipe uses these conditions");
+    }
+
+    /** Mirrors the inference in {@code Conditions}, walking into nested conditions. */
+    private static void removeUsed(JsonElement element, Set<String> types) {
+        if (element.isJsonArray()) {
+            for (JsonElement e : element.getAsJsonArray()) removeUsed(e, types);
+            return;
+        }
+        if (!element.isJsonObject()) return;
+        JsonObject c = element.getAsJsonObject();
+        for (String op : new String[] { "and", "or", "not", "nand", "nor", "xor", "comparison", "condition" }) {
+            if (c.has(op) && !c.get(op)
+                .isJsonPrimitive()) {
+                if (!op.equals("condition")) types.remove(op);
+                removeUsed(c.get(op), types);
+            }
+        }
+        if (c.has("type")) types.remove(
+            c.get("type")
+                .getAsString());
+        if (c.has("dx") || c.has("dy") || c.has("dz")) types.remove("offset");
+        if (c.has("pattern")) {
+            types.remove("pattern");
+            for (Map.Entry<String, JsonElement> key : c.getAsJsonObject("keys")
+                .entrySet()) removeUsed(key.getValue(), types);
+        }
+        if (c.has("left") && c.has("right") && c.has("operator")) types.remove("comparison");
+        if (c.has("expression")) types.remove("expression");
+        if (c.has("weather")) types.remove("weather");
+        if (c.has("block_below")) types.remove("block_below");
+        else if (c.has("block")) types.remove("block");
+        if (c.has("ids") || c.has("dimension")) types.remove("dimension");
+        for (String k : new String[] { "biome", "biomes", "tag", "tags", "minTemp", "maxTemp", "minHumid",
+            "maxHumid" }) {
+            if (c.has(k)) types.remove("biome");
+        }
     }
 
     @Test

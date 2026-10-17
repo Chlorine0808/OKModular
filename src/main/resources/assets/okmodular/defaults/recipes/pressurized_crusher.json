@@ -277,6 +277,194 @@
           "chance": "0.25 + tier * 0.05"
         }
       ]
+    },
+    {
+      "registryName": "crusher_gravel_in_rain",
+      "name": "Gravel to Flint (while raining)",
+      "duration": 40,
+      "priority": 1,
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:flint",
+          "amount": 2
+        }
+      ],
+      "conditions": [
+        {
+          "weather": "rain"
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_cobblestone_over_lava",
+      "name": "Cobblestone to Netherrack (lava two blocks below the controller)",
+      "duration": 40,
+      "priority": 1,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 4
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:netherrack",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "dx": 0,
+          "dy": -2,
+          "dz": 0,
+          "condition": {
+            "block": "minecraft:lava"
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_netherrack",
+      "name": "Netherrack to Glowstone Dust (in the Nether)",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:netherrack",
+          "amount": 4
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:glowstone_dust",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "or": [
+            {
+              "dimension": -1
+            },
+            {
+              "biome": "Hell"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_sandstone_in_desert",
+      "name": "Sandstone to Sand (sandy biome, no thunder)",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:sandstone",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 4
+        }
+      ],
+      "conditions": [
+        {
+          "and": [
+            {
+              "tag": "SANDY"
+            },
+            {
+              "not": {
+                "weather": "thunder"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_dirt_in_swamp",
+      "name": "Dirt to Clay (in the middle of a swamp)",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:dirt",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:clay_ball",
+          "amount": 2
+        }
+      ],
+      "conditions": [
+        {
+          "pattern": [
+            "SSS",
+            "SSS",
+            "SSS"
+          ],
+          "keys": {
+            "S": {
+              "tag": "SWAMP"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_bone_at_night",
+      "name": "Bone to Bone Meal x5 (at night)",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:bone",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:dye:15",
+          "amount": 5
+        }
+      ],
+      "conditions": [
+        {
+          "expression": "is_night == 1"
+        }
+      ]
     }
   ]
 }

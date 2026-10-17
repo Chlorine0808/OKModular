@@ -41,6 +41,44 @@
       ]
     },
     {
+      "registryName": "metal_former_plate_iron_on_anvil",
+      "name": "Iron Plate on an Anvil (tier 2+)",
+      "parent": "metal_former_plate",
+      "priority": 1,
+      "inputs": [
+        {
+          "ore": "ingotIron",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:plate:26",
+          "amount": 3
+        }
+      ],
+      "conditions": [
+        {
+          "comparison": {
+            "left": "tier",
+            "operator": ">=",
+            "right": 2
+          }
+        }
+      ],
+      "decorators": [
+        {
+          "type": "requirement",
+          "requirements": [
+            {
+              "item": "minecraft:anvil",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
       "registryName": "metal_former_plate_gold",
       "name": "Gold Plate",
       "parent": "metal_former_plate",

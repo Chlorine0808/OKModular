@@ -58,7 +58,15 @@
           "minecraft:iron_ore",
           "minecraft:iron_block",
           "minecraft:gold_ore",
-          "minecraft:gold_block"
+          "minecraft:gold_block",
+          "minecraft:stone",
+          "minecraft:cobblestone",
+          "minecraft:gravel",
+          "minecraft:coal_ore",
+          "minecraft:sand",
+          "minecraft:glass",
+          "minecraft:stained_glass:*",
+          "minecraft:glowstone"
         ]
       }
     },
