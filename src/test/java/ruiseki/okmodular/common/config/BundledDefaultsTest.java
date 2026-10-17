@@ -243,6 +243,8 @@ class BundledDefaultsTest {
         for (int s = 0; s < concrete.size(); s++) {
             for (int r = 0; r < concrete.size(); r++) {
                 if (s == r || !group(concrete.get(s)).equals(group(concrete.get(r)))) continue;
+                // An earlier recipe that can refuse to start leaves the later one to run
+                if (canRefuse(concrete.get(s))) continue;
                 if (loaded.get(s)
                     .compareTo(loaded.get(r)) >= 0) continue;
                 if (!suppliedBy(inputsOf(loaded.get(s), concrete.get(s)), inputsOf(loaded.get(r), concrete.get(r))))
@@ -316,6 +318,20 @@ class BundledDefaultsTest {
                             .get("registryName"));
             }
         }
+    }
+
+    /** Whether a recipe whose inputs are all there can still decline to start. */
+    private static boolean canRefuse(JsonObject recipe) {
+        if (recipe.has("conditions")) return true;
+        if (!recipe.has("decorators")) return false;
+        for (JsonElement d : recipe.getAsJsonArray("decorators")) {
+            JsonObject decorator = d.getAsJsonObject();
+            if (decorator.has("type") && "requirement".equals(
+                decorator.get("type")
+                    .getAsString()))
+                return true;
+        }
+        return false;
     }
 
     private static boolean placesWithoutReplacing(JsonObject recipe) {
