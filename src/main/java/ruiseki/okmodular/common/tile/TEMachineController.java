@@ -77,8 +77,8 @@ import ruiseki.okmodular.util.Logger;
  * and validates the surrounding blocks against that structure definition.
  * TODO: Improve holo indicator
  */
-public class TEMachineController extends AbstractTE
-    implements IAlignment, IGuiHolder<PosGuiData>, IRecipeContext, IVisitablePort, ITieredMachine, IMachineController {
+public class TEMachineController extends AbstractTE implements IAlignment, IGuiHolder<PosGuiData>, IRecipeContext,
+    IVisitablePort, ITieredMachine, IMachineController, MachineStateAgent.Host {
 
     /** Whether the structure around the controller currently matches its blueprint. */
     @NBTPersist
