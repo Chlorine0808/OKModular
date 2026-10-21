@@ -66,6 +66,7 @@ public class ProcessStatePersistenceTest {
         PERSISTED.put("workProgress", "workProgress");
         PERSISTED.put("payoutDecided", "payoutDecided");
         PERSISTED.put("payoutSucceeded", "payoutSucceeded");
+        PERSISTED.put("startedWith", "startedWith");
         PERSISTED.put("cachedOutputs", "cachedOutputs");
         PERSISTED.put("perTickInputs", "perTickInputs");
         PERSISTED.put("perTickOutputs", "perTickOutputs");

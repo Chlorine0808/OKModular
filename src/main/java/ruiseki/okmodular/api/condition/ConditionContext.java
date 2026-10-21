@@ -7,6 +7,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
+import ruiseki.okmodular.api.recipe.core.MachinePerformance;
 import ruiseki.okmodular.api.recipe.expression.EvaluationValue;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 
@@ -36,16 +37,19 @@ public class ConditionContext {
     /** Offset from the anchor of the pattern cell being asked about, or null outside a pattern. */
     private final int[] cell;
 
+    /** What the machine's performance was when the recipe started, or null to read it live. */
+    private final MachinePerformance performance;
+
     // Cache for evaluation results during a single evaluation session
     private final Map<String, EvaluationValue> resultCache = new HashMap<>();
     private NBTTagCompound workingNBT;
 
     public ConditionContext(World world, int x, int y, int z, IRecipeContext recipeContext, long evaluationSeed) {
-        this(world, x, y, z, recipeContext, evaluationSeed, evaluationSeed, null);
+        this(world, x, y, z, recipeContext, evaluationSeed, evaluationSeed, null, null);
     }
 
     private ConditionContext(World world, int x, int y, int z, IRecipeContext recipeContext, long evaluationSeed,
-        long placementSeed, int[] cell) {
+        long placementSeed, int[] cell, MachinePerformance performance) {
         this.world = world;
         this.x = x;
         this.y = y;
@@ -54,6 +58,7 @@ public class ConditionContext {
         this.evaluationSeed = evaluationSeed;
         this.placementSeed = placementSeed;
         this.cell = cell;
+        this.performance = performance;
     }
 
     /**
@@ -76,6 +81,7 @@ public class ConditionContext {
         int cellY, int cellZ) {
         World world = machine != null ? machine.world : null;
         IRecipeContext recipeContext = machine != null ? machine.recipeContext : null;
+        MachinePerformance performance = machine != null ? machine.performance : null;
         long runSeed = machine != null ? machine.evaluationSeed : 0L;
 
         // Mixed per position, or random() inside a chance would answer the same at every cell and
@@ -90,7 +96,22 @@ public class ConditionContext {
             recipeContext,
             seed,
             runSeed,
-            new int[] { cellX, cellY, cellZ });
+            new int[] { cellX, cellY, cellZ },
+            performance);
+    }
+
+    /**
+     * The same context, answering the machine's performance from what it was at recipe start.
+     * <p>
+     * Stored resources are still read live. Passing null reads everything live.
+     */
+    public ConditionContext withPerformance(MachinePerformance performance) {
+        return new ConditionContext(world, x, y, z, recipeContext, evaluationSeed, placementSeed, cell, performance);
+    }
+
+    /** The performance captured at recipe start, or null when the machine is read live. */
+    public MachinePerformance getPerformance() {
+        return performance;
     }
 
     /** Whether this context is being asked about a particular pattern cell. */
@@ -178,7 +199,8 @@ public class ConditionContext {
             recipeContext,
             SeedMixer.forDraw(evaluationSeed, index),
             placementSeed,
-            cell);
+            cell,
+            performance);
     }
 
     /**

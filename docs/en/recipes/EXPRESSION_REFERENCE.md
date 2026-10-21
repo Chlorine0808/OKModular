@@ -312,21 +312,29 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 | **`amount` on an output produced on completion** | **When the recipe starts.** See the note below |
 | `amount` on a `perTick` output | Every tick |
 | Resource amounts such as `energy` and `mana` | As above, by whether they are input or output and `perTick` |
-| A recipe's `chance` decorator | Once per run (settled on completion) |
-| An output decorator's `chance` | When it is rolled |
+| `nbt` expressions on an output item | When the output is produced, with performance as it was at the start (see the note below) |
+| A recipe's `chance` decorator | Once per run (settled on completion), with performance as it was at the start |
+| An output decorator's `chance` | When it is rolled, with performance as it was at the start |
 | `condition` / `conditions` | When the recipe starts, and every tick while it runs |
 | The structure's `speedMultiplier` | Every tick while running |
 | The structure's `batchMin` / `batchMax` | When a recipe starts |
 | The structure's `energyMultiplier` | When a recipe reads `energy_multi` |
 
 > [!NOTE]
-> **How much a recipe pays out is settled when it starts.** Change the machine's tier
-> mid-run and the recipe still hands back what it was worth when it began. Its inputs were
-> taken at the start, so anything else would let you begin at a low tier and finish at a
-> high one.
+> **What a recipe pays out is decided by the machine's performance when the recipe started.**
+> Performance means `tier`, `tier.<component>`, `speed_multi` and `energy_multi`.
+> Rebuild the structure to a higher tier mid-run and the recipe still pays out at the tier it
+> began with. Its inputs were taken at the start, so reading the performance at completion
+> would let you begin at a low tier and finish at a high one.
 >
-> Only the amount is settled. An output item's `nbt` expressions and the decorators
-> (`chance`, `bonus`) are still evaluated when the output is produced.
+> This covers every expression evaluated on completion: output amounts and `nbt`
+> expressions, the recipe's `chance`, and the decorators (a `bonus`'s `chance` and outputs,
+> a `random_block_output`'s `count`, and so on). The starting performance survives a save
+> and reload.
+>
+> Stored resources (`energy`, `energy_p` and the like) are not copied at the start; an
+> expression reads their current amount. `perTick` resources, `condition` and the
+> structure's `speedMultiplier` are evaluated every tick and fall outside this rule.
 
 A structure's performance modifiers see the machine just as a recipe does, so
 `"speedMultiplier": "1 + tier * 0.25"` works. **A modifier cannot read itself**, though —

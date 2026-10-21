@@ -23,6 +23,11 @@ public class ComponentTierExpression implements IExpression {
     @Override
     public EvaluationValue evaluate(ConditionContext context) {
         if (context == null) return EvaluationValue.ZERO;
+        if (context.getPerformance() != null) {
+            return new EvaluationValue(
+                (double) context.getPerformance()
+                    .getComponentTier(componentName));
+        }
         IRecipeContext recipeContext = context.getRecipeContext();
         if (recipeContext == null || !(recipeContext instanceof ITieredMachine)) return EvaluationValue.ZERO;
 

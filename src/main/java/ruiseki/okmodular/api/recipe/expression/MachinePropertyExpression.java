@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.core.IMachineState;
+import ruiseki.okmodular.api.recipe.core.MachinePerformance;
 
 /**
  * Expression that evaluates to a property of the machine (e.g., energy,
@@ -117,6 +118,10 @@ public class MachinePropertyExpression implements IExpression {
             .getMachineState();
     }
 
+    private static MachinePerformance started(ConditionContext ctx) {
+        return ctx.getPerformance();
+    }
+
     private static EvaluationValue amount(ConditionContext ctx, IPortType.Type kind, IPortType.Direction dir) {
         return new EvaluationValue(machine(ctx).getAmount(kind, dir, null));
     }
@@ -193,7 +198,11 @@ public class MachinePropertyExpression implements IExpression {
         alias("progress_percent", "progress");
 
         // --- structure ---
-        register("tier", ctx -> new EvaluationValue(machine(ctx).getTier()));
+        // Performance is read from the start-of-recipe copy when the context carries one,
+        // so a structure rebuilt mid-run cannot raise what the run pays out.
+        register(
+            "tier",
+            ctx -> new EvaluationValue(started(ctx) != null ? started(ctx).getTier() : machine(ctx).getTier()));
         // The null check is not decoration. WorldPropertyExpression carried a second, dead
         // copy of this property that guarded getFacing(), and the guard is the only part of
         // it worth keeping: evaluate() proves the recipe context and the machine state are
@@ -206,8 +215,14 @@ public class MachinePropertyExpression implements IExpression {
 
         // --- recipe modifiers ---
         register("batch", ctx -> new EvaluationValue(machine(ctx).getBatchSize()));
-        register("speed_multi", ctx -> new EvaluationValue(machine(ctx).getSpeedMultiplier()));
-        register("energy_multi", ctx -> new EvaluationValue(machine(ctx).getEnergyMultiplier()));
+        register(
+            "speed_multi",
+            ctx -> new EvaluationValue(
+                started(ctx) != null ? started(ctx).getSpeedMultiplier() : machine(ctx).getSpeedMultiplier()));
+        register(
+            "energy_multi",
+            ctx -> new EvaluationValue(
+                started(ctx) != null ? started(ctx).getEnergyMultiplier() : machine(ctx).getEnergyMultiplier()));
         alias("batch_size", "batch");
         alias("current_batch", "batch");
         alias("speed_multiplier", "speed_multi");

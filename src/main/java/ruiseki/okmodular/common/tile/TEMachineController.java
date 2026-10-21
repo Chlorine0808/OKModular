@@ -318,6 +318,11 @@ public class TEMachineController extends AbstractMBModifierTE
         return structureAgent.getComponentTier(componentName);
     }
 
+    @Override
+    public Map<String, Integer> getComponentTiers() {
+        return structureAgent.getComponentTiers();
+    }
+
     public StructureAgent getStructureAgent() {
         return structureAgent;
     }

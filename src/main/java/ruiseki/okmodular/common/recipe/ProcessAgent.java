@@ -16,6 +16,7 @@ import ruiseki.okmodular.api.recipe.core.AbstractRecipeProcess;
 import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.core.ITieredMachine;
+import ruiseki.okmodular.api.recipe.core.MachinePerformance;
 import ruiseki.okmodular.api.recipe.core.RecipeTickResult;
 import ruiseki.okmodular.api.recipe.io.BlockInput;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeInput;
@@ -57,6 +58,9 @@ public class ProcessAgent extends AbstractRecipeProcess {
     /** This run's success draw: whether it has been made, and what it said. See {@link #payoutSucceeds}. */
     private boolean payoutDecided;
     private boolean payoutSucceeded;
+
+    /** The machine's performance when this run started. The payout reads it; see {@link #produceOutputs}. */
+    private MachinePerformance startedWith;
 
     public ProcessAgent(IRecipeContext context) {
         this.context = context;
@@ -127,6 +131,7 @@ public class ProcessAgent extends AbstractRecipeProcess {
         if (selectedBatch == -1) return false;
 
         this.currentBatchSize = selectedBatch;
+        this.startedWith = MachinePerformance.capture(context);
 
         // Initialize state via base start logic
         super.start(recipe, inputPorts);
@@ -440,7 +445,13 @@ public class ProcessAgent extends AbstractRecipeProcess {
     }
 
     @Override
-    protected boolean produceOutputs(List<IModularPort> outputPorts, ConditionContext context) {
+    protected boolean produceOutputs(List<IModularPort> outputPorts, ConditionContext live) {
+        // Everything below - the success draw, the outputs, the decorators - reads the
+        // machine's performance as it stood at the start. Read live, a structure rebuilt to a
+        // higher tier just before completion would pay out at that tier for inputs taken at
+        // the lower one.
+        ConditionContext context = live != null ? live.withPerformance(startedWith) : null;
+
         // A lost success draw ends the run with nothing to hand over. Reporting success is
         // right: the run did finish, and answering false would leave the machine waiting for
         // output space it does not need, forever. See IRecipe#producesOutput.
@@ -492,6 +503,7 @@ public class ProcessAgent extends AbstractRecipeProcess {
         this.plannedSpeed = Double.NaN;
         this.payoutDecided = false;
         this.payoutSucceeded = false;
+        this.startedWith = null;
         clearCaches();
     }
 
@@ -687,6 +699,11 @@ public class ProcessAgent extends AbstractRecipeProcess {
             nbt.setDouble("workProgress", workProgress);
             nbt.setBoolean("payoutDecided", payoutDecided);
             nbt.setBoolean("payoutSucceeded", payoutSucceeded);
+            if (startedWith != null) {
+                NBTTagCompound tag = new NBTTagCompound();
+                startedWith.writeToNBT(tag);
+                nbt.setTag("startedWith", tag);
+            }
 
             NBTTagList outputList = new NBTTagList();
             for (IRecipeOutput output : cachedOutputs) {
@@ -730,6 +747,8 @@ public class ProcessAgent extends AbstractRecipeProcess {
             workProgress = nbt.getDouble("workProgress");
             payoutDecided = nbt.getBoolean("payoutDecided");
             payoutSucceeded = nbt.getBoolean("payoutSucceeded");
+            startedWith = nbt.hasKey("startedWith") ? MachinePerformance.readFromNBT(nbt.getCompoundTag("startedWith"))
+                : null;
 
             if (currentRecipeName != null && !currentRecipeName.isEmpty()) {
                 this.currentRecipe = RecipeLoader.getInstance()
