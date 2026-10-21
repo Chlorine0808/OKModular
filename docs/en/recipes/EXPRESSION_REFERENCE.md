@@ -208,6 +208,7 @@ Performance multipliers provided by the structure definition.
 - `clamp(val, min, max)`
 - `sign(x)`: Sign of the value (-1 / 0 / 1)
 - `exp(x)`, `log(x)` / `ln(x)` (natural log), `log10(x)`
+- `log(x, base)`: Logarithm to any base (`log(8, 2)` = 3). Answers **0** when `x <= 0`, `base <= 0` or `base == 1`
 - `fact(n)`: Factorial
 - `fact(n, k)`: Multifactorial. `n(n-k)(n-2k)…` for as long as the terms stay positive (`fact(10, 2)` = 10·8·6·4·2 = 3840)
 - `tetrate(a, n)`: A tower of `n` copies of `a` (the same as `a ^^ n`)

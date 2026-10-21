@@ -206,6 +206,7 @@ fluid_f_out("lava")   item_f_in("minecraft:coal")
 - `clamp(val, min, max)`
 - `sign(x)`: 符号 (-1 / 0 / 1)
 - `exp(x)`, `log(x)` / `ln(x)` (自然対数), `log10(x)`
+- `log(x, base)`: 任意の底の対数（`log(8, 2)` = 3）。`x <= 0`、`base <= 0`、`base == 1` のときは **0** を返します
 - `fact(n)`: 階乗
 - `fact(n, k)`: k 重階乗。`n(n-k)(n-2k)…` を、項が正である限り掛ける（`fact(10, 2)` = 10·8·6·4·2 = 3840）
 - `tetrate(a, n)`: `a` を `n` 段積んだ冪（`a ^^ n` と同じ）
