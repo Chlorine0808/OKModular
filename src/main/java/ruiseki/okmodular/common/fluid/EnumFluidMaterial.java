@@ -60,7 +60,7 @@ public enum EnumFluidMaterial {
     FUEL("fuel", 0xEEEE00, 740, 300, false, 1500, 4, 0.50f),
     BIOFUEL("biofuel", 0x44AA44, 850, 300, false, 2500, 4, 0.55f),
     ETHANOL("ethanol", 0xAA6600, 790, 300, false, 700, 8, 0.40f),
-    MANA("mana", 0x44FFFF, 500, 300, false, 800, 6, 0.25f),
+    MAGICAL_LIQUID("magical_liquid", 0x44FFFF, 500, 300, false, 800, 6, 0.25f),
 
     ;
 
