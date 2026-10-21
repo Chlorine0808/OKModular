@@ -38,8 +38,6 @@ import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.okmodular.core.capabilities.energy.CapabilityEnergy;
 import ruiseki.okmodular.core.capabilities.fluid.CapabilityFluidHandler;
 import ruiseki.okmodular.core.capabilities.item.CapabilityItemHandler;
-import ruiseki.okmodular.core.capabilities.light.CapabilityLight;
-import ruiseki.okmodular.core.capabilities.redstone.CapabilityRedstone;
 import ruiseki.okmodular.core.event.MemoryEventHandler;
 import ruiseki.okmodular.structure.BlockResolver;
 import ruiseki.okmodular.structure.CustomStructureRegistry;
@@ -132,8 +130,6 @@ public class MachineryModule extends ModModuleBase {
         CapabilityItemHandler.register();
         CapabilityEnergy.register();
         CapabilityFluidHandler.register();
-        CapabilityRedstone.register();
-        CapabilityLight.register();
 
         ModFluidGases.preInit();
         MachineryIntegration.preInit();
