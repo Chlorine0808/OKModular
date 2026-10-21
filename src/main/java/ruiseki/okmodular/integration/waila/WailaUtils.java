@@ -19,23 +19,10 @@ import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.core.energy.IOKEnergyTile;
 import ruiseki.okmodular.core.gas.GasTankInfo;
 import ruiseki.okmodular.core.gas.IGasHandler;
-import ruiseki.okmodular.core.tileentity.ICraftingTile;
-import ruiseki.okmodular.core.tileentity.IProgressTile;
 import ruiseki.okmodular.core.tileentity.ISidedIO;
 import vazkii.botania.api.mana.IManaBlock;
 
 public class WailaUtils {
-
-    public static String getProgress(IProgressTile handler) {
-        float progress = handler.getProgress();
-        return LangHelpers.localize("gui.progress", Math.max(0, progress * 100));
-    }
-
-    public static String getCraftingState(ICraftingTile handler) {
-        return LangHelpers.localize(
-            "gui.craftingState." + handler.getCraftingState()
-                .getName());
-    }
 
     public static String getEnergyTransfer(IOKEnergyTile handler) {
         return LangHelpers.localize("gui.energy_transfer", handler.getEnergyTransfer());

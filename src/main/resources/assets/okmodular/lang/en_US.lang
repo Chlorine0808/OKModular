@@ -262,7 +262,6 @@ gui.status.missing_definition=Structure definition missing
 gui.status.invalid_definition=Invalid structure definition
 gui.status.requirements_not_met=Requirement not met
 gui.status.unknown=Unknown error
-gui.progress=Progress: %.1f%%
 gui.energy_transfer=§7Transfer: §b%s §7RF/t
 gui.mana_info=%d Mana
 gui.redstone_mode.always_on=Always on
@@ -294,9 +293,6 @@ gui.io.none=None
 gui.io.input=Input
 gui.io.output=Output
 gui.io.both=Both
-gui.craftingState.idle=Idle
-gui.craftingState.running=Running
-gui.craftingState.error=Error
 
 # --- Recipe conditions ---
 okmodular.condition.biome.base=Biome condition

@@ -76,7 +76,6 @@ public class LangKeyCoverageTest {
         Map<String, String> map = new LinkedHashMap<>();
         map.put("gui.port_type.", "PortLangCoverageTest が IPortType.Type を回して覆っている");
         map.put("okmodular.condition.weather.", "ConditionLangCoverageTest が WeatherCondition.Weather を回して覆っている");
-        map.put("gui.craftingState.", "覆うテストは無い");
         map.put("machinery.design.", "覆うテストは無い。ケーシングのデザイン名は JSON 由来で、集合が静的に決まらない");
         map.put("okmodular.component.", "覆うテストは無い。コンポーネント名は構造 JSON 由来");
         map.put("structure.", "覆うテストは無い。構造名は JSON 由来");

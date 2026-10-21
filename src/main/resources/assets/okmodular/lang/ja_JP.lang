@@ -260,7 +260,6 @@ gui.status.missing_definition=構造定義が見つかりません
 gui.status.invalid_definition=無効な構造定義です
 gui.status.requirements_not_met=構造体の要件を満たしていません
 gui.status.unknown=不明なエラー
-gui.progress=進捗: %.1f%%
 gui.energy_transfer=§7転送量: §b%s §7RF/t
 gui.mana_info=%d マナ
 gui.redstone_mode.always_on=常にオン
@@ -292,9 +291,6 @@ gui.io.none=なし
 gui.io.input=入力
 gui.io.output=出力
 gui.io.both=入出力
-gui.craftingState.idle=待機中
-gui.craftingState.running=稼働中
-gui.craftingState.error=エラー
 
 # --- Recipe conditions ---
 okmodular.condition.biome.base=バイオーム条件
