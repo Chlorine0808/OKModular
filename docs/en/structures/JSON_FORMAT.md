@@ -2,6 +2,17 @@
 
 This reference describes the JSON format used to define multiblock structures. Files should be placed in `config/okmodular/structures/`.
 
+## Related Documentation
+
+- [Structure IO](./STRUCTURE_IO.md) — the same `layers` / `mappings` vocabulary used to make a
+  whole arrangement of blocks one recipe input or output. Files live in
+  `config/okmodular/structure_io/`. **The reserved symbols differ slightly**: `Q` there is the
+  default anchor rather than a fixed controller.
+- [Expression Reference](../recipes/EXPRESSION_REFERENCE.md) — the names a performance modifier expression can use
+- [Machine Conditions](../machinery/MACHINE_CONDITIONS.md) — how to write `conditions`
+
+---
+
 ## 1. File Structure
 A file can contain a single object or an array of objects.
 A special object named `default` can be used to define shared mappings.
@@ -22,30 +33,19 @@ A special object named `default` can be used to define shared mappings.
 | `batchMin` | Integer / expression | Minimum batch size for recipes (default: 1) |
 | `batchMax` | Integer / expression | Maximum batch size for recipes (default: 1) |
 | `tier` | Integer | Machine tier (default: 0) |
-| `tierMap` | Object | The tiers each part of the structure provides |
+| `controllerOffset` | Array `[a, b, c]` | Where the controller stands in the structure. → [§7](#controlleroffset--where-the-controller-stands) |
+| `externalPorts` | Array of symbols | Which port symbols may connect to the outside. → [§7](#externalports--ports-that-reach-outside) |
+| `inputOnly` / `outputOnly` / `bothOnly` | Array of symbols | Fix a symbol's side IO. → [§7](#externalports--ports-that-reach-outside) |
+| `tierStructures` | Array | Sub-structures that raise a tier or a count when built. → [§7](#tierstructures--building-more-raises-a-tier) |
+| `modVersion` | String | Migration stamp, **written automatically**. Do not write it by hand |
 | `defaultFacing` | String | The structure's default facing (`UP`, `DOWN`). **Specifies the controller's facing.** Horizontal when omitted |
 | `durationPolicy` | String | When an expression-valued recipe `duration` is evaluated (`onStart` / `perTick`, default: `onStart`) |
 | `conditions` | Array/Object | [Machine Conditions](../machinery/MACHINE_CONDITIONS.md) |
 | `conditionPolicy` | String | What happens to a running recipe when `conditions` stop holding (`pause` / `abort`, default: `pause`) |
 
-### durationPolicy
+## 3. Performance Modifiers
 
-Decides when a recipe's `duration` is evaluated, for durations written as expressions. It has no effect on durations written as plain numbers.
-
-| Value | Behaviour |
-|----|------|
-| `onStart` (default) | Evaluated once when the recipe starts and fixed for that run |
-| `perTick` | Re-evaluated every tick, for reflecting things that change mid-run such as weather or moon phase |
-
-> [!CAUTION]
-> `perTick` moves the denominator of the progress bar. The bar jumps when the value drops,
-> and the recipe completes the moment the duration falls below the work already done.
-
-This is separate from the `dynamic` flag, which re-evaluates every tick when
-`speedMultiplier` and the like are written as expressions. `dynamic` governs the
-performance multipliers; `durationPolicy` governs the recipe's work amount.
-
-### Performance modifiers as expressions
+### Writing the modifiers as expressions
 
 `speedMultiplier`, `energyMultiplier`, `batchMin` and `batchMax` accept an expression in
 place of a number. Those expressions **can see the machine's own state** (`tier`, `energy`,
@@ -70,24 +70,24 @@ for the available names).
 > once in `logs/latest.log`.
 > **Reading a different modifier is fine** - `"speedMultiplier": "energy_multi"` works.
 
-### 2.2 Tier Map Details
-`tierMap` assigns a specific tier to part of the machine according to the material (block) used.
-```json
-"tierMap": {
-  "glass": {
-    "okmodular:glass:1": 1,
-    "okmodular:glass:2": 2
-  },
-  "casing": {
-    "okmodular:modularMachineCasing:0": 1,
-    "okmodular:modularMachineCasing:1": 2,
-    "okmodular:modularMachineCasing:2": 3
-  }
-}
-```
-When a recipe specifies `"tier": { "glass": 2 }`, with the settings above that recipe is only valid on structures built with `glass:2` or better.
+### durationPolicy
 
-## 3. Mappings
+Decides when a recipe's `duration` is evaluated, for durations written as expressions. It has no effect on durations written as plain numbers.
+
+| Value | Behaviour |
+|----|------|
+| `onStart` (default) | Evaluated once when the recipe starts and fixed for that run |
+| `perTick` | Re-evaluated every tick, for reflecting things that change mid-run such as weather or moon phase |
+
+> [!CAUTION]
+> `perTick` moves the denominator of the progress bar. The bar jumps when the value drops,
+> and the recipe completes the moment the duration falls below the work already done.
+
+This is separate from the `dynamic` flag, which re-evaluates every tick when
+`speedMultiplier` and the like are written as expressions. `dynamic` governs the
+performance multipliers; `durationPolicy` governs the recipe's work amount.
+
+## 4. Mappings
 Mappings link the characters in `layers` to block IDs.
 
 ### String Format
@@ -96,7 +96,7 @@ Mappings link the characters in `layers` to block IDs.
 ### Object Format (partly planned)
 ```json
 "S": {
-  "block": "okmodular:modularMachineCasing:0",
+  "block": "okmodular:casing_plain:0",
   "max": 1
 }
 ```
@@ -105,13 +105,63 @@ Mappings link the characters in `layers` to block IDs.
 ```json
 "A": {
   "blocks": [
-    "omoshiroikamo:modifierNull:0",
-    "omoshiroikamo:modifierSpeed:0"
+    "okmodular:casing_plain:0",
+    "okmodular:casing_reinforced:0"
   ]
 }
 ```
 
-## 4. Requirements
+A `blocks` entry may also be an object, with the block ID under `id`.
+
+```json
+"A": {
+  "blocks": [
+    { "id": "okmodular:casing_plain:0" },
+    { "id": "okmodular:casing_reinforced:0" }
+  ]
+}
+```
+
+> [!WARNING]
+> An object entry with no `id` **disappears silently**. The structure still forms on the
+> remaining choices, so it shows up as "this one block is not accepted for some reason".
+
+### Per-part tiers
+
+A part of the machine can carry a tier that depends on the material it was built from.
+**This goes in the mapping**, not at the top level.
+
+```json
+"mappings": {
+  "G": {
+    "component": "glass",
+    "tiers": {
+      "okmodular:glass:1": 1,
+      "okmodular:glass:2": 2
+    }
+  },
+  "C": {
+    "component": "casing",
+    "tiers": {
+      "okmodular:casing_reinforced:0": 1,
+      "okmodular:casing_reinforced:1": 2,
+      "okmodular:casing_reinforced:2": 3
+    }
+  }
+}
+```
+
+`component` names the part and `tiers` says which tier each block counts as.
+When a recipe asks for `"tier": { "glass": 2 }`, the settings above make it valid only on
+structures built with `okmodular:glass:2`.
+
+> [!WARNING]
+> This used to be described as a top-level `tierMap`. No such field exists and nothing reads
+> it, so writing one is **ignored without an error or a log line** - it shows up only as
+> "I set the tier and the recipe still will not run". Put `component` and `tiers` inside
+> `mappings`.
+
+## 5. Requirements
 Requirements define the internal components (ports) the machine must have.
 
 Available types: `itemInput`, `itemOutput`, `fluidInput`, `fluidOutput`, `energyInput`, `energyOutput`, `manaInput`, `manaOutput`, `gasInput`, `gasOutput`, `essentiaInput`, `essentiaOutput`, `visInput`, `visOutput`
@@ -135,18 +185,108 @@ Since 1.5.1.4, an object format using each type as a key is also supported.
 ```
 * If the value is a number, it is treated as `min`.
 
-## 5. Reserved Symbols
+## 6. Reserved Symbols
 
 The following symbols have special meanings in the structure system.
 
-### 5.1 System Reserved Symbols (Mandatory)
+### System Reserved Symbols (Mandatory)
 **These symbols cannot be overridden in `mappings`.**
 
-| Symbol | Meaning | Description |
-| :--- | :--- | :--- |
-| `Q` | Controller | **Exactly one is required per structure** |
-| `_` | Air | Treated as a forced air block |
-| (Space) | Any | Space excluded from validation |
+| Symbol | Meaning | Description | Can a recipe point at it |
+| :--- | :--- | :--- | :--- |
+| `Q` | Controller | **Exactly one is required per structure** | ✅ |
+| `_` | Air | Treated as a forced air block | ✅ |
+| (Space) | Any | Space excluded from validation | ❌ **load error** |
 
-## 6. Commands
+### What "point at" means - that the positions are recorded
+
+`"symbol"` is the only way a recipe reaches a structure's cells (`block` and `structure`
+inputs and outputs, `per_position_probability`, `random_block_output`, `harvest_block`, and
+the `nbt` expression). Only symbols whose positions are recorded can be pointed at.
+
+**A space cannot be recorded.** It is excluded from validation, so the engine never visits
+those coordinates and there is nothing to record. Writing one is a **load error** - better to
+fail where it was written than to succeed at run time having acted on nothing.
+
+> [!WARNING]
+> **Placing a block at `_` un-forms the machine.**
+> `_` does not mean "air", it means **"this has to be empty for the machine to stand"**, so
+> naming it in a block output breaks the structure on the next check.
+> Being able to take its positions is still right - particles and checks want them - so this
+> is **not refused at load**. The consequence of placing there is immediate and visible.
+
+## 7. Placement and Outside Connections
+
+### `controllerOffset` — where the controller stands
+
+Says where the controller (`Q`) sits within `layers`, as an offset from the anchor.
+
+```json
+"controllerOffset": [2, 0, 2]
+```
+
+The order matches `layers`: `[a, b, c]` (across, height, depth). Fewer than three entries is
+**ignored silently**. Left out, the position where `Q` was drawn is used as-is.
+
+### `externalPorts` — ports that reach outside
+
+By default the ports inside a structure only face the machine. Symbols that outside pipes and
+cables may connect to are listed here.
+
+```json
+"externalPorts": ["E", "I"],
+"inputOnly":  ["I"],
+"outputOnly": ["O"]
+```
+
+| Key | Meaning |
+|---|---|
+| `externalPorts` | Symbols **allowed** to connect outwards. Per-side IO stays wrench-adjustable |
+| `inputOnly` | Pins that symbol to **input**. The wrench cannot change it |
+| `outputOnly` | Pins it to **output** |
+| `bothOnly` | Pins it to **both** |
+
+Values are arrays of strings, and **only the first character** is read as the symbol (`"EE"`
+means `E`). Empty strings are skipped.
+
+> [!NOTE]
+> `inputOnly` and its siblings are a **separate list** from `externalPorts`. A symbol that
+> should be both reachable and pinned has to appear in both.
+
+### `tierStructures` — building more raises a tier
+
+Sub-structures built around the machine raise a component's tier, or count towards one.
+
+```json
+"tierStructures": [
+  {
+    "name": "coolant_tower",
+    "tier": 2,
+    "component": "cooling",
+    "mode": "tier",
+    "offsets": [
+      [3, 0, 0],
+      { "target": [-3, 0, 0], "anchor": [0, 1, 0] }
+    ]
+  }
+]
+```
+
+| Key | Default | Meaning |
+|---|---|---|
+| `name` | **required** | The sub-structure's name. Entries without one are skipped silently |
+| `tier` | `1` | Tier granted when it stands (the unit counted when `mode` is `"count"`) |
+| `component` | `"structure"` | Which component's tier this raises |
+| `mode` | `"tier"` | `"tier"` raises a tier, `"count"` counts instances |
+| `offsets` | none | Where it may be built, relative to the machine. Several entries mean several places |
+
+An `offsets` entry may be written two ways.
+
+- **Array** `[a, b, c]` — where the sub-structure sits relative to the machine
+- **Object** `{ "target": [...], "anchor": [...] }` — also says which point of the
+  sub-structure lines up
+
+Either form with fewer than three entries is **skipped silently, that entry only**.
+
+## 8. Commands
 - `/okmodular reload`: Reloads structure definitions, recipe definitions and tier definitions.

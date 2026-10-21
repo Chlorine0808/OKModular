@@ -53,6 +53,7 @@ import ruiseki.okmodular.api.recipe.core.IMachineState;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.core.ITieredMachine;
 import ruiseki.okmodular.api.recipe.error.ErrorReason;
+import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.api.structure.core.ConditionPolicy;
@@ -66,6 +67,7 @@ import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 import ruiseki.okmodular.core.tileentity.AbstractMBModifierTE;
+import ruiseki.okmodular.structure.StructureCellLocator;
 import ruiseki.okmodular.structure.StructureManager;
 import ruiseki.okmodular.util.Logger;
 
@@ -135,8 +137,16 @@ public class TEMachineController extends AbstractMBModifierTE
     private long timePlacedCount = 0;
     @NBTPersist
     private long timeContinuousCount = 0;
-    @NBTPersist
-    private long currentRecipeSeed = 0;
+    /**
+     * The tick the running recipe started on, or zero when the machine has never run one.
+     * <p>
+     * There used to be a {@code currentRecipeSeed} beside this, persisted too, holding the
+     * same tick XORed with the world seed and the position. Both were set from the same
+     * {@code getTotalWorldTime()} on the same line, and the evaluation seed XORed the world
+     * seed and the position back in - so the extra field carried <b>no fact this one does
+     * not</b>, and its XOR chain cancelled the world seed out. See
+     * {@link SeedMixer#forEvaluation}.
+     */
     @NBTPersist
     private long currentRecipeStartTick = 0;
 
@@ -327,13 +337,52 @@ public class TEMachineController extends AbstractMBModifierTE
     private final Map<Character, List<ChunkCoordinates>> symbolPositions = new HashMap<>();
     private final Map<ChunkCoordinates, Character> posToSymbol = new HashMap<>();
 
+    /**
+     * Which pattern cell each tracked position occupies, in structure-local (ABC) coordinates.
+     * <p>
+     * Derived state, rebuilt by every structure check alongside {@link #symbolPositions}. It is not
+     * persisted for the same reason that map is not restored: the check repopulates both.
+     */
+    private final Map<ChunkCoordinates, int[]> symbolCells = new HashMap<>();
+
+    /**
+     * The controller's own cell in the pattern, as handed to the last structure check.
+     * <p>
+     * {@link #structureCheck} is the only place this arrives, and the scan runs underneath it, so
+     * it has to be parked somewhere {@link #finalizeSymbolPosition} can read.
+     */
+    private final int[] structureOriginOffset = new int[3];
+
     public Map<Character, List<ChunkCoordinates>> getSymbolPositionsMap() {
         return symbolPositions;
+    }
+
+    /**
+     * @return the {@code {a, b, c}} pattern cell at that position, or null if the position is not
+     *         part of the currently formed structure. The array belongs to the caller.
+     */
+    @Override
+    public int[] getSymbolCell(int x, int y, int z) {
+        int[] cell = symbolCells.get(new ChunkCoordinates(x, y, z));
+        return cell == null ? null : cell.clone();
+    }
+
+    /**
+     * The inverse of {@link #getSymbolCell}, and the reason structure IO can reach past the
+     * machine: this resolves any cell, not only the ones the scan reported.
+     * <p>
+     * The same three values the scan was given -- facing, controller position, controller offset --
+     * are all here, which is why the arithmetic is done on this side rather than handed out.
+     */
+    @Override
+    public int[] getCellPosition(int a, int b, int c) {
+        return StructureCellLocator.toWorld(extendedFacing, xCoord, yCoord, zCoord, structureOriginOffset, a, b, c);
     }
 
     public void clearSymbolPositions() {
         symbolPositions.clear();
         posToSymbol.clear();
+        symbolCells.clear();
     }
 
     @Override
@@ -347,6 +396,9 @@ public class TEMachineController extends AbstractMBModifierTE
         ChunkCoordinates coord = new ChunkCoordinates(x, y, z);
         symbolPositions.computeIfAbsent(symbol, k -> new ArrayList<>())
             .add(coord);
+        symbolCells.put(
+            coord,
+            StructureCellLocator.locate(extendedFacing, xCoord, yCoord, zCoord, structureOriginOffset, x, y, z));
     }
 
     @Override
@@ -414,6 +466,11 @@ public class TEMachineController extends AbstractMBModifierTE
 
     @Override
     protected boolean structureCheck(String piece, int ox, int oy, int oz) {
+        // The scan runs inside this call and reports world coordinates only, so park the offset
+        // where finalizeSymbolPosition can reach it before starting.
+        structureOriginOffset[0] = ox;
+        structureOriginOffset[1] = oy;
+        structureOriginOffset[2] = oz;
         return structureAgent.structureCheck(piece, ox, oy, oz);
     }
 
@@ -693,8 +750,12 @@ public class TEMachineController extends AbstractMBModifierTE
 
             // Look-ahead: search for next recipe while processing (only once)
             if (nextRecipe == null) {
+                ConditionContext lookAheadContext = getConditionContext();
                 nextRecipe = RecipeLoader.getInstance()
-                    .findMatch(recipeGroups.toArray(new String[0]), getContextualInputPorts());
+                    .findMatch(
+                        recipeGroups.toArray(new String[0]),
+                        getContextualInputPorts(),
+                        r -> r.canStart(lookAheadContext));
                 cachedRecipeVersion = RecipeLoader.getInstance()
                     .getRecipeVersion();
             }
@@ -735,6 +796,7 @@ public class TEMachineController extends AbstractMBModifierTE
         final IModularRecipe lookAhead = nextRecipe;
         nextRecipe = null; // Clear cache
         final String[] groupNames = recipeGroups.toArray(new String[0]);
+        final ConditionContext searchContext = getConditionContext();
 
         // Each colour group is offered the look-ahead result first, since checking one
         // recipe against a port list is far cheaper than searching every candidate.
@@ -742,15 +804,19 @@ public class TEMachineController extends AbstractMBModifierTE
         // to the group being considered.
         ColoredRecipeSearch.Selection selection = ColoredRecipeSearch
             .search(PortColorGrouping.group(getContextualInputPorts(), getContextualOutputPorts()), inputs -> {
-                if (lookAhead != null && lookAhead.matchesInput(inputs)) return lookAhead;
+                if (lookAhead != null && lookAhead.matchesInput(inputs) && lookAhead.canStart(searchContext)) {
+                    return lookAhead;
+                }
                 return RecipeLoader.getInstance()
-                    .findMatch(groupNames, inputs);
+                    .findMatch(groupNames, inputs, r -> r.canStart(searchContext));
             });
 
         if (selection.isRunnable()) {
             activeRecipeColor = selection.getColor();
-            currentRecipeSeed = worldObj.getTotalWorldTime() ^ worldObj.getSeed()
-                ^ ((long) xCoord << 32 | (zCoord & 0xFFFFFFFFL));
+            // What makes this run's draws differ from the last run's at this machine. The
+            // rest of the evaluation seed - the world, the position, the recipe count - is
+            // mixed in by SeedMixer.forEvaluation at the moment of evaluation, so there is
+            // nothing to persist here beyond the tick itself.
             currentRecipeStartTick = worldObj.getTotalWorldTime();
             ConditionContext context = getConditionContext();
             if (processAgent
@@ -1355,10 +1421,13 @@ public class TEMachineController extends AbstractMBModifierTE
 
     @Override
     public ConditionContext getConditionContext() {
-        long seed = (long) xCoord ^ ((long) zCoord << 32)
-            ^ worldObj.getSeed()
-            ^ ((long) machineStateAgent.getRecipeProcessedCount() << 16)
-            ^ currentRecipeSeed;
+        long seed = SeedMixer.forEvaluation(
+            worldObj.getSeed(),
+            xCoord,
+            yCoord,
+            zCoord,
+            machineStateAgent.getRecipeProcessedCount(),
+            currentRecipeStartTick);
         return new ConditionContext(worldObj, xCoord, yCoord, zCoord, this, seed);
     }
 

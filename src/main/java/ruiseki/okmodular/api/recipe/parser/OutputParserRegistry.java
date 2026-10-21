@@ -14,6 +14,7 @@ import ruiseki.okmodular.api.recipe.io.GasOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.ItemOutput;
 import ruiseki.okmodular.api.recipe.io.ManaOutput;
+import ruiseki.okmodular.api.recipe.io.StructureOutput;
 import ruiseki.okmodular.api.recipe.io.VisOutput;
 
 public class OutputParserRegistry {
@@ -29,6 +30,9 @@ public class OutputParserRegistry {
         register("vis", VisOutput::fromJson);
         register("energy", EnergyOutput::fromJson);
         register("symbol", BlockOutput::fromJson);
+        // Registered under the word it writes as its "type". BlockOutput above writes "block" and
+        // only resolves through the identifying-key fallback further down; do not copy that.
+        register(StructureOutput.TYPE, StructureOutput::fromJson);
     }
 
     /**

@@ -1,0 +1,216 @@
+{
+  "group": "OreTransformer",
+  "recipes": [
+    {
+      "registryName": "ore_transformer_iron_ore_to_block",
+      "name": "Iron Ore to Iron Block (in place)",
+      "duration": 200,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:iron_ore"
+        },
+        {
+          "ore": "ingotIron",
+          "amount": 4
+        },
+        {
+          "energy": 64,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "replace": "minecraft:iron_ore",
+          "block": "minecraft:iron_block"
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_iron_ore_to_ingots",
+      "name": "Iron Ore to Iron Ingots",
+      "duration": 100,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:iron_ore",
+          "consume": true
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:iron_ingot",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_gold_ore_to_ingots",
+      "name": "Gold Ore to Gold Ingots",
+      "duration": 100,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:gold_ore",
+          "consume": true
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:gold_ingot",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_plates_to_iron_block",
+      "name": "Iron Plates to Iron Block",
+      "duration": 100,
+      "priority": -1,
+      "inputs": [
+        {
+          "ore": "plateIron",
+          "amount": 9
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:iron_block"
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_crack_stone",
+      "name": "Crack Stone (all three cells, some turn to gravel)",
+      "duration": 60,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "symbol": "O",
+          "amount": 3,
+          "replace": "minecraft:stone",
+          "block": "minecraft:cobblestone"
+        }
+      ],
+      "decorators": [
+        {
+          "type": "per_position_probability",
+          "chance": 0.25,
+          "symbol": "O",
+          "output": {
+            "symbol": "O",
+            "replace": "minecraft:cobblestone",
+            "block": "minecraft:gravel"
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_mine_coal_ore",
+      "name": "Mine Coal Ore (Fortune II)",
+      "duration": 80,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 1,
+          "block": "minecraft:coal_ore",
+          "consume": true
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [],
+      "decorators": [
+        {
+          "type": "harvest_block",
+          "harvestLevel": 1,
+          "fortune": 2
+        }
+      ]
+    },
+    {
+      "registryName": "ore_transformer_sand_to_glass",
+      "name": "Sand to Glass (all three cells, one coloured, sometimes glowstone)",
+      "duration": 100,
+      "inputs": [
+        {
+          "symbol": "O",
+          "amount": 3,
+          "block": "minecraft:sand"
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "symbol": "O",
+          "amount": 3,
+          "replace": "minecraft:sand",
+          "block": "minecraft:glass"
+        }
+      ],
+      "decorators": [
+        {
+          "type": "random_block_output",
+          "count": 1,
+          "selections": [
+            {
+              "symbol": "O",
+              "output": {
+                "symbol": "O",
+                "replace": "minecraft:glass",
+                "block": "minecraft:stained_glass:14"
+              }
+            }
+          ]
+        },
+        {
+          "type": "bonus_block_output",
+          "chance": 0.1,
+          "outputs": [
+            {
+              "type": "block",
+              "symbol": "O",
+              "amount": 1,
+              "replace": "minecraft:glass",
+              "block": "minecraft:glowstone"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

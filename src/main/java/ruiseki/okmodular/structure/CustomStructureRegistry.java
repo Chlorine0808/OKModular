@@ -26,6 +26,7 @@ import ruiseki.okmodular.api.structure.core.BlockMapping;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.api.structure.core.IStructureLayer;
 import ruiseki.okmodular.api.structure.core.ISymbolMapping;
+import ruiseki.okmodular.api.structure.core.StructureSymbols;
 import ruiseki.okmodular.api.structure.core.TieredBlockMapping;
 import ruiseki.okmodular.util.Logger;
 
@@ -87,21 +88,12 @@ public class CustomStructureRegistry {
                     .toArray(new String[0]);
             }
 
-            // Apply rotation based on defaultFacing
-            // SOUTH/NORTH etc: standard 180 rotation to align with StructureLib
-            // UP/DOWN: transform layers (Y) to depth (Z) so it builds upright
-            String[][] processedShape;
-            String defaultFacing = entry.getDefaultFacing();
-            if (defaultFacing != null
-                && (defaultFacing.equalsIgnoreCase("UP") || defaultFacing.equalsIgnoreCase("DOWN"))) {
-                processedShape = transformForVertical(shape, defaultFacing);
-            } else {
-                processedShape = rotate180(shape);
-            }
+            // Orientation lives in StructureShape so structure IO patterns, which reuse this
+            // same layers/rows vocabulary, land the same way up.
+            String[][] processedShape = StructureShape.process(shape, entry.getDefaultFacing());
 
-            // Find controller 'Q' position in the PROCESSED shape
-            // returns {col, layer, row} -> maps to {A, B, C}
-            int[] offset = findControllerOffset(processedShape);
+            // {col, layer, row} -> {A, B, C} of the PROCESSED shape
+            int[] offset = StructureShape.findControllerOffset(processedShape);
             controllerOffsets.put(entry.getName(), offset);
 
             StructureDefinition.Builder<IMachineController> builder = StructureDefinition.builder();
@@ -111,9 +103,14 @@ public class CustomStructureRegistry {
                 Logger.warn(
                     "CustomStructureRegistry: no controller block registered — call registerControllerBlock() in preInit");
             } else {
-                builder.addElement('Q', ofBlock(controllerBlock, 0));
+                builder.addElement(
+                    StructureSymbols.CONTROLLER,
+                    wrapTracking(StructureSymbols.CONTROLLER, ofBlock(controllerBlock, 0)));
             }
-            builder.addElement('_', isAir());
+            // The controller's cell and the empty ones are wrapped like any other symbol.
+            // Neither holds a block worth taking, which is why they were left bare, but an
+            // effect placed at a cell wants the position whatever the cell holds.
+            builder.addElement(StructureSymbols.AIR, wrapTracking(StructureSymbols.AIR, isAir()));
 
             if (!entry.getMappings()
                 .containsKey('F')) {
@@ -129,7 +126,7 @@ public class CustomStructureRegistry {
             for (Map.Entry<Character, ISymbolMapping> mapEntry : entry.getMappings()
                 .entrySet()) {
                 char symbol = mapEntry.getKey();
-                if (symbol == 'Q' || symbol == '_' || symbol == ' ') continue;
+                if (StructureSymbols.isReserved(symbol)) continue;
 
                 IStructureElement<IMachineController> element = createElementFromMapping(mapEntry.getValue());
                 if (element != null) {
@@ -218,58 +215,6 @@ public class CustomStructureRegistry {
                         .keySet()));
         }
         return null;
-    }
-
-    private static String[][] transformForVertical(String[][] shape, String facing) {
-        int originalLayers = shape.length;
-        if (originalLayers == 0) return shape;
-
-        int originalRows = shape[0].length;
-        boolean isDown = "DOWN".equalsIgnoreCase(facing);
-
-        // Transform layers (Y) to rows (Z) to build the structure vertically
-        String[][] transformed = new String[originalRows][originalLayers];
-
-        for (int originalZ = 0; originalZ < originalRows; originalZ++) {
-            for (int originalY = 0; originalY < originalLayers; originalY++) {
-                int targetLayerIndex = originalZ;
-                int targetRowIndex = isDown ? (originalLayers - 1 - originalY) : originalY;
-
-                if (shape[originalY].length > originalZ) {
-                    transformed[targetLayerIndex][targetRowIndex] = shape[originalY][originalZ];
-                } else {
-                    transformed[targetLayerIndex][targetRowIndex] = "";
-                }
-            }
-        }
-        return transformed;
-    }
-
-    private static String[][] rotate180(String[][] shape) {
-        String[][] rotated = new String[shape.length][];
-        for (int layer = 0; layer < shape.length; layer++) {
-            int numRows = shape[layer].length;
-            rotated[layer] = new String[numRows];
-            for (int row = 0; row < numRows; row++) {
-                int srcRow = numRows - 1 - row;
-                rotated[layer][row] = shape[layer][srcRow];
-            }
-        }
-        return rotated;
-    }
-
-    private static int[] findControllerOffset(String[][] shape) {
-        for (int layer = 0; layer < shape.length; layer++) {
-            for (int row = 0; row < shape[layer].length; row++) {
-                String rowStr = shape[layer][row];
-                for (int col = 0; col < rowStr.length(); col++) {
-                    if (rowStr.charAt(col) == 'Q') {
-                        return new int[] { col, layer, row };
-                    }
-                }
-            }
-        }
-        return new int[] { 0, 0, 0 };
     }
 
     public static Set<String> getRegisteredNames() {

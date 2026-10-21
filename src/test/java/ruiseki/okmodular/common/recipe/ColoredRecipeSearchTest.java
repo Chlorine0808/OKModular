@@ -304,16 +304,6 @@ public class ColoredRecipeSearchTest {
         }
 
         @Override
-        public boolean processInputs(List<IModularPort> inputPorts, boolean simulate) {
-            return true;
-        }
-
-        @Override
-        public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
-            return true;
-        }
-
-        @Override
         public String getRegistryName() {
             return name;
         }

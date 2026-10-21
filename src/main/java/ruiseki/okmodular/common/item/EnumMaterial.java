@@ -42,7 +42,7 @@ public enum EnumMaterial {
     VANADIUM(23, "vanadium", "Vanadium"),
     CHROMIUM(24, "chromium", "Chromium"),
     MANGANESE(25, "manganese", "Manganese"),
-    // IRON(26, "iron", "Iron"),
+    IRON(26, "iron", "Iron", "plate", "gear", "dust"),
     COBALT(27, "cobalt", "Cobalt"),
     NICKEL(28, "nickel", "Nickel"),
     COPPER(29, "copper", "Copper"),
@@ -95,7 +95,7 @@ public enum EnumMaterial {
     OSMIUM(76, "osmium", "Osmium"),
     IRIDIUM(77, "iridium", "Iridium"),
     PLATINUM(78, "platinum", "Platinum"),
-    // GOLD(79, "gold", "Gold"),
+    GOLD(79, "gold", "Gold", "plate", "gear", "dust"),
     // MERCURY(80, "mercury", "Mercury"),
     // THALLIUM(81, "thallium", "Thallium"),
     LEAD(82, "lead", "Lead"),
@@ -211,7 +211,7 @@ public enum EnumMaterial {
     private final Set<String> forms; // empty = all forms supported
 
     /**
-     * @param forms part types this material supports ("ingot", "plate", "dust").
+     * @param forms part types this material supports ("ingot", "plate", "gear", "dust").
      *              Omit to support all forms.
      */
     EnumMaterial(int meta, String name, String oreName, String... forms) {

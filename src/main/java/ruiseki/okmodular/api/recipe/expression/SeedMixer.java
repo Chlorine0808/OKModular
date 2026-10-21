@@ -33,8 +33,51 @@ public final class SeedMixer {
     /** The stream a recipe's {@code chance} decorator draws from. */
     public static final long RECIPE_CHANCE = 2L;
 
+    /**
+     * Reserved by {@link #forPosition}. Not a {@link #toUnitInterval} stream - it is listed
+     * here so a later stream does not claim the same slot and track position-derived seeds.
+     */
+    public static final long POSITION = 3L;
+
+    // One stream per decorator that draws, so two decorators on the same recipe do not fire
+    // and skip together. They all see the same evaluation seed; without separate streams a
+    // recipe carrying both a bonus and a weighted pick would have them agree every time.
+
+    /** The stream {@code bonus_output} draws from. */
+    public static final long BONUS_OUTPUT = 4L;
+
+    /** The stream {@code bonus_block_output} draws from. */
+    public static final long BONUS_BLOCK_OUTPUT = 5L;
+
+    /** The stream {@code weighted_random} draws from. */
+    public static final long WEIGHTED_OUTPUT = 6L;
+
+    /** The stream {@code random_block_output} draws from. */
+    public static final long RANDOM_BLOCK_OUTPUT = 7L;
+
+    /** The stream {@code per_position_probability} draws from. */
+    public static final long PER_POSITION = 8L;
+
+    // A pattern mapping with a weight table asks two questions of every cell, and they have to
+    // be independent: sharing a stream would mean the cells that get written are exactly the
+    // cells that drew the same entry, so the table would collapse to one block.
+
+    /** The stream deciding whether a pattern cell is written at all. */
+    public static final long PATTERN_CELL_CHANCE = 9L;
+
+    /** The stream deciding which entry of a weight table a pattern cell gets. */
+    public static final long PATTERN_CELL_WEIGHT = 10L;
+
+    /** The stream {@code noise()} hashes its lattice corners from. */
+    public static final long NOISE = 11L;
+
     /** Odd 64-bit constant, so distinct streams land far apart. */
     private static final long STREAM_GAMMA = 0x9E3779B97F4A7C15L;
+
+    /** Per-axis odd constants, so swapping two coordinates does not land on the same seed. */
+    private static final long X_GAMMA = 0xFF51AFD7ED558CCDL;
+    private static final long Y_GAMMA = 0xC2B2AE3D27D4EB4FL;
+    private static final long Z_GAMMA = 0x165667B19E3779F9L;
 
     private static final double UNIT = 1.0 / (double) (1L << 53);
 
@@ -56,11 +99,79 @@ public final class SeedMixer {
      * drawn n times rather than once and multiplied - otherwise a batch of three can only
      * ever pay out multiples of three.
      *
+     * <b>The offset is not decoration.</b> Draw indices share {@link #STREAM_GAMMA} with the
+     * stream constants above, so without it draw 1 would sit on top of stream 1. The two
+     * still share one number line - a stream and a draw index only stay apart because the
+     * streams start at zero and the draws start past them. The day a third axis wants
+     * numbering (a decorator's position in the chain, for one - two {@code bonus} entries on
+     * one recipe currently fire together for want of it), give the axes separate gammas the
+     * way the coordinates already have, rather than widening this offset again.
+     *
      * @param index which draw, from zero; index zero returns the seed unchanged so a batch
      *              of one is bit-for-bit what it was
      */
     public static long forDraw(long seed, int index) {
         return index == 0 ? seed : mix(seed + (index + 8L) * STREAM_GAMMA);
+    }
+
+    /**
+     * A seed for one position, from a seed that is fixed for the whole run.
+     * <p>
+     * A machine's evaluation seed is settled when the recipe starts and persisted in NBT, so
+     * every evaluation inside one run answers the same number. That is the property that
+     * makes a run survive a save and reload - but it also means anything drawn <em>per
+     * position</em> draws the same number at every position. A decorator that walks fifty
+     * cells asking "does this one appear?" got fifty identical answers, so it placed all of
+     * them or none of them.
+     * <p>
+     * Mixing the coordinates in keeps the run reproducible while letting neighbours disagree.
+     * Coordinates may be world positions or structure-local {@code (a, b, c)} cells, and
+     * either may be negative - a structure's cells are anchor-relative, so about half of them
+     * are.
+     * <p>
+     * Unlike {@link #forDraw}, no argument is passed through unchanged: the cell at the
+     * origin has to differ from a draw that mixed in no position at all.
+     *
+     * @return a seed to hand to {@link #toUnitInterval}, stable for the same seed and position
+     */
+    public static long forPosition(long seed, int x, int y, int z) {
+        long h = seed + POSITION * STREAM_GAMMA;
+        h += x * X_GAMMA;
+        h += y * Y_GAMMA;
+        h += z * Z_GAMMA;
+        return mix(h);
+    }
+
+    /**
+     * The evaluation seed a machine hands to every expression it evaluates.
+     *
+     * <h2>This used to be a chain of XORs, and they cancelled</h2>
+     *
+     * The run seed was {@code startTick ^ worldSeed ^ position} and the evaluation seed was
+     * {@code position ^ worldSeed ^ processed ^ runSeed}, so <b>the world seed appeared twice
+     * and XORed itself away</b>. Two worlds with different seeds drew identically at the same
+     * coordinates, the same tick and the same recipe count - except while the machine was idle
+     * and the run seed was zero, where only one copy was present and the world seed survived.
+     * Whether the world seed mattered depended on whether the machine was busy.
+     * <p>
+     * The {@code y} coordinate was in neither term, so <b>two machines stacked at the same x
+     * and z drew the same numbers</b>. Building a column of them is an ordinary thing to do.
+     * <p>
+     * Adding through the finalizer instead of XORing means no component can remove another,
+     * and {@link #forPosition} already gives each axis its own gamma.
+     *
+     * @param worldSeed the world's seed, so two worlds differ
+     * @param x         the controller's position; {@code y} included, unlike the old chain
+     * @param processed how many recipes this machine has finished, so successive runs differ
+     *                  even when nothing else does
+     * @param startTick the tick the running recipe started on, or zero when idle. Fixed for
+     *                  the whole run and persisted, which is what keeps a run's draws stable
+     *                  across a save and reload
+     */
+    public static long forEvaluation(long worldSeed, int x, int y, int z, long processed, long startTick) {
+        long h = forPosition(worldSeed, x, y, z);
+        h = mix(h + processed * STREAM_GAMMA);
+        return mix(h + startTick * STREAM_GAMMA);
     }
 
     /** SplitMix64's finalizer. Every input bit reaches every output bit. */

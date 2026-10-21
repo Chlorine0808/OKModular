@@ -18,7 +18,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
@@ -32,6 +31,7 @@ import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.INBTWriteExpression;
 import ruiseki.okmodular.api.recipe.expression.NBTListOperation;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.api.structure.core.StructureSymbols;
 import ruiseki.okmodular.util.Logger;
 
 /**
@@ -93,45 +93,19 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
     public boolean checkCapacity(List<IModularPort> ports, int multiplier, ConditionContext context) {
         if (optional) return true;
 
-        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : findRecipeContext(ports);
+        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : IRecipeContext.findIn(ports);
         if (recipeContext == null) return false;
 
-        List<ChunkCoordinates> positions = recipeContext.getSymbolPositions(symbol);
-        if (positions == null) return false;
+        if (recipeContext.getSymbolPositions(symbol) == null) return false;
 
-        World world = recipeContext.getWorld();
-        int available = 0;
-        int totalRequired = (int) (getRequiredAmount(context) * multiplier);
-
-        // Condition check
-        for (ChunkCoordinates pos : positions) {
-            Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
-            int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
-            String blockId = getBlockId(currentBlock, meta);
-
-            boolean match = false;
-            if (replace != null) {
-                if (matchesBlockId(blockId, replace)) match = true;
-            } else if (block != null) {
-                // Creation mode: check if replaceable or air
-                if (currentBlock.isReplaceable(world, pos.posX, pos.posY, pos.posZ)
-                    || currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ)) match = true;
-            } else {
-                // Clear mode: check if non-air
-                if (!currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ)) match = true;
-            }
-
-            if (match) available++;
-            if (available >= totalRequired) return true;
-        }
-
-        return false;
+        return targets(recipeContext, multiplier, context).size()
+            >= Amounts.toInt(getRequiredAmount(context) * multiplier);
     }
 
     @Override
     public void apply(List<IModularPort> ports, int multiplier, ConditionContext context) {
         // Find IRecipeContext from ports
-        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : findRecipeContext(ports);
+        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : IRecipeContext.findIn(ports);
         if (recipeContext == null) {
             return;
         }
@@ -152,45 +126,13 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
      */
     public void apply(IRecipeContext context, int multiplier, ConditionContext condContext) {
         World world = context.getWorld();
-        List<ChunkCoordinates> positions = context.getSymbolPositions(symbol);
-        if (positions == null) return;
+        if (context.getSymbolPositions(symbol) == null) return;
 
-        int totalRequired = (int) (getRequiredAmount(condContext) * multiplier);
-        String block = getBlock();
-        String replace = getReplace();
         NBTTagCompound nbtResult = getNbt(context, condContext);
-
         List<ChunkCoordinates> changedPositions = new ArrayList<>();
-        int remaining = totalRequired;
-        for (ChunkCoordinates pos : positions) {
-            if (remaining <= 0) break;
-
-            if (index != -1) {
-                TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
-                if (te instanceof IModularPort mp && mp.getAssignedIndex() != index) {
-                    continue;
-                }
-            }
-
-            Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
-            int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
-            String blockId = getBlockId(currentBlock, meta);
-
-            boolean match = false;
-            if (replace != null) {
-                if (matchesBlockId(blockId, replace)) match = true;
-            } else if (block != null) {
-                if (currentBlock.isReplaceable(world, pos.posX, pos.posY, pos.posZ)
-                    || currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ)) match = true;
-            } else {
-                if (!currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ)) match = true;
-            }
-
-            if (match) {
-                if (setBlockAt(world, pos, block, nbtResult)) {
-                    changedPositions.add(new ChunkCoordinates(pos.posX, pos.posY, pos.posZ));
-                    remaining--;
-                }
+        for (ChunkCoordinates pos : targets(context, multiplier, condContext)) {
+            if (setBlockAt(world, pos, getBlock(), nbtResult)) {
+                changedPositions.add(new ChunkCoordinates(pos.posX, pos.posY, pos.posZ));
             }
         }
 
@@ -200,6 +142,40 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
             Block b = world.getBlock(pos.posX, pos.posY, pos.posZ);
             world.func_147453_f(pos.posX, pos.posY, pos.posZ, b);
         }
+    }
+
+    /**
+     * The cells this output writes: up to its amount times {@code multiplier}, taking cells
+     * that hold {@code replace}, or with no replace, empty cells to place into (or, with no
+     * block either, filled cells to clear). Placing and harvesting both read this.
+     */
+    public List<ChunkCoordinates> targets(IRecipeContext context, int multiplier, ConditionContext condContext) {
+        return CellSelection.firstMatching(
+            context.getSymbolPositions(symbol),
+            pos -> acceptsAt(context, pos),
+            Amounts.toInt(getRequiredAmount(condContext) * multiplier));
+    }
+
+    /**
+     * Whether this output may write the cell: it holds {@code replace}, or with no replace it
+     * is empty (or, with no block either, filled).
+     */
+    public boolean acceptsAt(IRecipeContext context, ChunkCoordinates pos) {
+        World world = context.getWorld();
+        if (index != -1) {
+            TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
+            if (te instanceof IModularPort mp && mp.getAssignedIndex() != index) return false;
+        }
+        Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
+        String replace = getReplace();
+        if (replace != null) {
+            return matchesBlockId(
+                getBlockId(currentBlock, world.getBlockMetadata(pos.posX, pos.posY, pos.posZ)),
+                replace);
+        }
+        boolean empty = currentBlock.isReplaceable(world, pos.posX, pos.posY, pos.posZ)
+            || currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ);
+        return getBlock() != null ? empty : !currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ);
     }
 
     /**
@@ -344,7 +320,7 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
         for (int i = 0; i < draws; i++) {
             total += getRequiredAmount(context.forDraw(i));
         }
-        this.amount = (int) total;
+        this.amount = Amounts.toInt(total);
         this.amountExpr = new ConstantExpression(amount);
     }
 
@@ -423,9 +399,11 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
      * Create BlockOutput from JSON.
      */
     public static BlockOutput fromJson(JsonObject json) {
-        char symbol = json.get("symbol")
-            .getAsString()
-            .charAt(0);
+        char symbol = StructureSymbols.requireAddressable(
+            json.get("symbol")
+                .getAsString()
+                .charAt(0),
+            "a block output");
         String block = json.has("block") ? json.get("block")
             .getAsString() : null;
         String replace = json.has("replace") ? json.get("replace")
@@ -492,18 +470,6 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
         output.nbtExpressions = nbtExpressions;
         output.nbtListOp = nbtListOp;
         return output;
-    }
-
-    /**
-     * Find IRecipeContext from port list.
-     */
-    private IRecipeContext findRecipeContext(List<IModularPort> ports) {
-        for (IModularPort port : ports) {
-            if (port instanceof IRecipeContext) {
-                return (IRecipeContext) port;
-            }
-        }
-        return null;
     }
 
     /**
@@ -640,31 +606,10 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
     }
 
     private String getBlockId(Block block, int meta) {
-        UniqueIdentifier id = GameRegistry.findUniqueIdentifierFor(block);
-        if (id == null) return "minecraft:air:0";
-        return id.modId + ":" + id.name + ":" + meta;
+        return BlockIdMatcher.idOf(block, meta);
     }
 
     private boolean matchesBlockId(String blockId, String pattern) {
-        if (pattern.equals("*")) return true;
-
-        String[] blockParts = blockId.split(":");
-        String[] patternParts = pattern.split(":");
-
-        if (patternParts.length == 2) {
-            // Pattern: "modid:blockname" - match any meta
-            return blockParts.length >= 2 && blockParts[0].equals(patternParts[0])
-                && blockParts[1].equals(patternParts[1]);
-        } else if (patternParts.length == 3) {
-            // Pattern: "modid:blockname:meta" or "modid:blockname:*"
-            if (blockParts.length < 3) return false;
-
-            if (!blockParts[0].equals(patternParts[0]) || !blockParts[1].equals(patternParts[1])) {
-                return false;
-            }
-
-            return patternParts[2].equals("*") || blockParts[2].equals(patternParts[2]);
-        }
-        return blockId.equals(pattern);
+        return BlockIdMatcher.matches(blockId, pattern);
     }
 }

@@ -35,6 +35,10 @@ public class MachineryConfig {
     @Config.DefaultInt(2)
     public static int ic2SourceTier = 2;
 
+    @Config.Comment("Directory structure IO patterns are read from, relative to this mod's config directory")
+    @Config.DefaultString("structure_io")
+    public static String structureIoDirectory = "structure_io";
+
     @Config.Comment("Default tint color for machine blocks (hex color code)")
     @Config.DefaultString("#FFFFFF")
     public static String defaultTintColor;
@@ -45,8 +49,8 @@ public class MachineryConfig {
     public static int enabledTierCount = 6;
 
     @Config.Comment("Item Input/Output Port Slots (Tier 1-16)")
-    @Config.DefaultString("1,4,9,12,16,27,36,45,54,63,72,81,81,81,81,81")
-    public static String itemPortSlots = "1,4,9,12,16,27,36,45,54,63,72,81,81,81,81,81";
+    @Config.DefaultString("4,9,12,16,27,36,45,54,63,72,81,81,81,81,81,81")
+    public static String itemPortSlots = "4,9,12,16,27,36,45,54,63,72,81,81,81,81,81,81";
 
     @Config.Comment("Fluid Input/Output Port Capacity in mB (Tier 1-16)")
     @Config.DefaultString("1000,4000,16000,64000,256000,1024000,4096000,16384000,65536000,262144000,1048576000,1048576000,1048576000,1048576000,1048576000,1048576000")

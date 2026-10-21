@@ -1,0 +1,269 @@
+{
+  "group": "MetalFormer",
+  "recipes": [
+    {
+      "registryName": "metal_former_plate",
+      "abstract": true,
+      "duration": 60,
+      "inputs": [
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_gear",
+      "abstract": true,
+      "duration": 120,
+      "inputs": [
+        {
+          "energy": 24,
+          "perTick": true
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_plate_iron",
+      "name": "Iron Plate",
+      "parent": "metal_former_plate",
+      "inputs": [
+        {
+          "ore": "ingotIron",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:plate:26",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_plate_iron_on_anvil",
+      "name": "Iron Plate on an Anvil (tier 2+)",
+      "parent": "metal_former_plate",
+      "priority": 1,
+      "inputs": [
+        {
+          "ore": "ingotIron",
+          "amount": 2
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:plate:26",
+          "amount": 3
+        }
+      ],
+      "conditions": [
+        {
+          "comparison": {
+            "left": "tier",
+            "operator": ">=",
+            "right": 2
+          }
+        }
+      ],
+      "decorators": [
+        {
+          "type": "requirement",
+          "requirements": [
+            {
+              "item": "minecraft:anvil",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_plate_gold",
+      "name": "Gold Plate",
+      "parent": "metal_former_plate",
+      "inputs": [
+        {
+          "ore": "ingotGold",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:plate:79",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_plate_copper",
+      "name": "Copper Plate",
+      "parent": "metal_former_plate",
+      "inputs": [
+        {
+          "ore": "ingotCopper",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:plate:29",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_plate_tin",
+      "name": "Tin Plate",
+      "parent": "metal_former_plate",
+      "inputs": [
+        {
+          "ore": "ingotTin",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:plate:50",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_plate_bronze",
+      "name": "Bronze Plate",
+      "parent": "metal_former_plate",
+      "inputs": [
+        {
+          "ore": "ingotBronze",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:plate:140",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_plate_steel",
+      "name": "Steel Plate",
+      "parent": "metal_former_plate",
+      "inputs": [
+        {
+          "ore": "ingotSteel",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:plate:143",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_gear_iron",
+      "name": "Iron Gear",
+      "parent": "metal_former_gear",
+      "inputs": [
+        {
+          "ore": "plateIron",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:gear:26",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_gear_gold",
+      "name": "Gold Gear",
+      "parent": "metal_former_gear",
+      "inputs": [
+        {
+          "ore": "plateGold",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:gear:79",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_gear_copper",
+      "name": "Copper Gear",
+      "parent": "metal_former_gear",
+      "inputs": [
+        {
+          "ore": "plateCopper",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:gear:29",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_gear_tin",
+      "name": "Tin Gear",
+      "parent": "metal_former_gear",
+      "inputs": [
+        {
+          "ore": "plateTin",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:gear:50",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_gear_bronze",
+      "name": "Bronze Gear",
+      "parent": "metal_former_gear",
+      "inputs": [
+        {
+          "ore": "plateBronze",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:gear:140",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "metal_former_gear_steel",
+      "name": "Steel Gear",
+      "parent": "metal_former_gear",
+      "inputs": [
+        {
+          "ore": "plateSteel",
+          "amount": 4
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:gear:143",
+          "amount": 1
+        }
+      ]
+    }
+  ]
+}

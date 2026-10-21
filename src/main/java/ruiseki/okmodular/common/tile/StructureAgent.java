@@ -625,23 +625,9 @@ public class StructureAgent {
         }
         nbt.setTag("structureBlocks", list);
 
-        NBTTagList symbolsList = new NBTTagList();
-        for (Map.Entry<Character, List<ChunkCoordinates>> entry : controller.getSymbolPositionsMap()
-            .entrySet()) {
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setString("sym", String.valueOf(entry.getKey()));
-            NBTTagList posList = new NBTTagList();
-            for (ChunkCoordinates pos : entry.getValue()) {
-                NBTTagCompound ptag = new NBTTagCompound();
-                ptag.setInteger("x", pos.posX);
-                ptag.setInteger("y", pos.posY);
-                ptag.setInteger("z", pos.posZ);
-                posList.appendTag(ptag);
-            }
-            tag.setTag("posList", posList);
-            symbolsList.appendTag(tag);
-        }
-        nbt.setTag("symbolPositions", symbolsList);
+        // Symbol positions are deliberately not written. They are rebuilt by every structure
+        // check, and restoring them would mean trusting coordinates recorded before the chunk
+        // unloaded -- blocks can have been broken since, and only the check looks at the world.
     }
 
     public boolean readFromNBT(NBTTagCompound nbt) {
@@ -673,21 +659,12 @@ public class StructureAgent {
             loadedBlocks = !structureBlockPositions.isEmpty();
         }
 
+        // Left empty for the structure check to fill. The old restore here only reached
+        // posToSymbol, whose one consumer -- the port index lookup in BlockResolver -- runs inside
+        // the element check, and trackSymbolPosition fires immediately before that same element.
+        // Every check re-resolves it, so nothing was gained by carrying stale coordinates across a
+        // reload.
         controller.clearSymbolPositions();
-        if (nbt.hasKey("symbolPositions")) {
-            NBTTagList symbolsList = nbt.getTagList("symbolPositions", 10);
-            for (int i = 0; i < symbolsList.tagCount(); i++) {
-                NBTTagCompound tag = symbolsList.getCompoundTagAt(i);
-                char sym = tag.getString("sym")
-                    .charAt(0);
-                NBTTagList posList = tag.getTagList("posList", 10);
-                for (int j = 0; j < posList.tagCount(); j++) {
-                    NBTTagCompound ptag = posList.getCompoundTagAt(j);
-                    controller
-                        .trackSymbolPosition(sym, ptag.getInteger("x"), ptag.getInteger("y"), ptag.getInteger("z"));
-                }
-            }
-        }
 
         // Restore color cache from loaded structure name
         if (loadedBlocks && customStructureName != null) {

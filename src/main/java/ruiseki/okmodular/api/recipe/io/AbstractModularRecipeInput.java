@@ -2,12 +2,9 @@ package ruiseki.okmodular.api.recipe.io;
 
 import java.util.List;
 
-import com.google.gson.JsonObject;
-
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
-import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 
 /**
@@ -97,34 +94,12 @@ public abstract class AbstractModularRecipeInput extends AbstractRecipeInput imp
         return amount > 0 || amountExpr != null;
     }
 
-    /**
-     * Reads common amount fields from JSON.
-     * Subclasses should call this before reading their specific fields.
-     *
-     * @param json The JSON object to read from
+    /*
+     * There were readCommonAmountFields / writeCommonAmountFields here, offering an
+     * "amountExpr" key alongside "amount". Nothing ever called them, so the key was
+     * unreachable: writing "amountExpr" in a recipe did nothing at all.
+     * The working form was always to put the expression in the ordinary key's own value -
+     * "amount": "tier * 10 + 5", "energy": "1000 * tier" - which every subclass reads for
+     * itself. Two spellings for one idea, and the documented-looking one was the dead one.
      */
-    protected void readCommonAmountFields(JsonObject json) {
-        if (json.has("amount")) {
-            this.amount = json.get("amount")
-                .getAsInt();
-        }
-        if (json.has("amountExpr")) {
-            String exprStr = json.get("amountExpr")
-                .getAsString();
-            this.amountExpr = ExpressionParser.parseExpression(exprStr);
-        }
-    }
-
-    /**
-     * Writes common amount fields to JSON.
-     * Subclasses should call this after writing their specific fields.
-     *
-     * @param json The JSON object to write to
-     */
-    protected void writeCommonAmountFields(JsonObject json) {
-        json.addProperty("amount", amount);
-        if (amountExpr != null) {
-            json.addProperty("amountExpr", amountExpr.toString());
-        }
-    }
 }

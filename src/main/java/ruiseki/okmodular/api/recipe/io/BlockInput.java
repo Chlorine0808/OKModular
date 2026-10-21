@@ -17,7 +17,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
@@ -31,6 +30,7 @@ import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.INBTWriteExpression;
 import ruiseki.okmodular.api.recipe.expression.NBTListOperation;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
+import ruiseki.okmodular.api.structure.core.StructureSymbols;
 import ruiseki.okmodular.util.Logger;
 
 /**
@@ -91,9 +91,14 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
         return IPortType.Type.BLOCK;
     }
 
+    /** Which structure symbol this input reads, as {@code BlockOutput.getSymbol} does. */
+    public char getSymbol() {
+        return symbol;
+    }
+
     @Override
     public boolean process(List<IModularPort> ports, int multiplier, boolean simulate, ConditionContext context) {
-        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : findRecipeContext(ports);
+        IRecipeContext recipeContext = (context != null) ? context.getRecipeContext() : IRecipeContext.findIn(ports);
         if (recipeContext == null) return false;
 
         return check(recipeContext, multiplier, simulate, context);
@@ -109,57 +114,46 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
      */
     public boolean check(IRecipeContext context, int multiplier, boolean simulate, ConditionContext condContext) {
         if (optional && simulate) return true; // Always start if optional
-
-        List<ChunkCoordinates> positions = context.getSymbolPositions(symbol);
-        if (positions == null) return optional;
+        if (context.getSymbolPositions(symbol) == null) return optional;
 
         World world = context.getWorld();
-        int totalRequired = (int) (getRequiredAmount(condContext) * multiplier);
-        int found = 0;
-        int processed = 0;
+        List<ChunkCoordinates> chosen = targets(context, multiplier, condContext);
+        if (!simulate) {
+            for (ChunkCoordinates pos : chosen) {
+                // Apply NBT modifications before block manipulation
+                applyNBTModifications(world, pos, context);
 
-        // Condition block: if replace is specified, we look for it. Otherwise we look
-        // for block.
-        String condition = (replace != null) ? replace : block;
-
-        for (ChunkCoordinates pos : positions) {
-            if (processed >= totalRequired) break;
-
-            if (index != -1) {
-                TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
-                if (te instanceof IModularPort mp && mp.getAssignedIndex() != index) {
-                    continue;
-                }
-            }
-
-            Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
-            int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
-            String blockId = getBlockId(currentBlock, meta);
-
-            if (matchesBlockId(blockId, condition)) {
-                // Check NBT conditions if present
-                if (!checkNBTConditions(world, pos, context)) {
-                    continue; // NBT conditions not met, skip this position
-                }
-
-                found++;
-                if (!simulate) {
-                    // Apply NBT modifications before block manipulation
-                    applyNBTModifications(world, pos, context);
-
-                    // Actual block manipulation
-                    if (consume) {
-                        world.setBlockToAir(pos.posX, pos.posY, pos.posZ);
-                    } else if (replace != null && block != null) {
-                        // In-place replacement: A -> B
-                        setBlockById(world, pos, block);
-                    }
-                    processed++;
+                if (consume) {
+                    world.setBlockToAir(pos.posX, pos.posY, pos.posZ);
+                } else if (replace != null && block != null) {
+                    // In-place replacement: A -> B
+                    setBlockById(world, pos, block);
                 }
             }
         }
 
-        return optional || (found >= totalRequired);
+        return optional || chosen.size() >= Amounts.toInt(getRequiredAmount(condContext) * multiplier);
+    }
+
+    /**
+     * The cells this input acts on: the first ones holding the block it asks for (and its NBT),
+     * up to its amount times {@code multiplier}. Consuming and harvesting both read this, so a
+     * decorator never takes from a cell the input leaves alone.
+     */
+    public List<ChunkCoordinates> targets(IRecipeContext context, int multiplier, ConditionContext condContext) {
+        World world = context.getWorld();
+        // Condition block: if replace is specified, we look for it. Otherwise we look for block.
+        String condition = (replace != null) ? replace : block;
+
+        return CellSelection.firstMatching(context.getSymbolPositions(symbol), pos -> {
+            if (index != -1) {
+                TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
+                if (te instanceof IModularPort mp && mp.getAssignedIndex() != index) return false;
+            }
+            Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
+            int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
+            return matchesBlockId(getBlockId(currentBlock, meta), condition) && checkNBTConditions(world, pos, context);
+        }, Amounts.toInt(getRequiredAmount(condContext) * multiplier));
     }
 
     /**
@@ -523,9 +517,11 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
     }
 
     public static BlockInput fromJson(JsonObject json) {
-        char symbol = json.get("symbol")
-            .getAsString()
-            .charAt(0);
+        char symbol = StructureSymbols.requireAddressable(
+            json.get("symbol")
+                .getAsString()
+                .charAt(0),
+            "a block input");
         String block = json.has("block") ? json.get("block")
             .getAsString() : null;
         String replace = json.has("replace") ? json.get("replace")
@@ -583,19 +579,6 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
         return input;
     }
 
-    /**
-     * Find IRecipeContext from port list.
-     * TEMachineController implements both IModularPort and IRecipeContext.
-     */
-    private IRecipeContext findRecipeContext(List<IModularPort> ports) {
-        for (IModularPort port : ports) {
-            if (port instanceof IRecipeContext) {
-                return (IRecipeContext) port;
-            }
-        }
-        return null;
-    }
-
     @Override
     public void accept(IRecipeVisitor visitor) {
         visitor.visit(this);
@@ -606,50 +589,12 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
         return RecipeTickResult.BLOCK_MISSING;
     }
 
-    /**
-     * Get block ID string in format "modid:blockname:meta"
-     */
     private String getBlockId(Block block, int meta) {
-        UniqueIdentifier ui = GameRegistry.findUniqueIdentifierFor(block);
-        if (ui == null) {
-            return "minecraft:air:0";
-        }
-        return ui.modId + ":" + ui.name + ":" + meta;
+        return BlockIdMatcher.idOf(block, meta);
     }
 
-    /**
-     * Check if block ID matches the pattern.
-     * Supports wildcards like "modid:blockname:*" for any meta.
-     */
     private boolean matchesBlockId(String blockId, String pattern) {
-        if (pattern == null || blockId == null) return false;
-        if (pattern.equals("*")) return true;
-
-        String[] blockParts = blockId.split(":");
-        String[] patternParts = pattern.split(":");
-
-        // Handle different formats
-        if (patternParts.length == 2) {
-            // Pattern: "modid:blockname" - match any meta
-            return blockParts.length >= 2 && blockParts[0].equals(patternParts[0])
-                && blockParts[1].equals(patternParts[1]);
-        } else if (patternParts.length == 3) {
-            // Pattern: "modid:blockname:meta" or "modid:blockname:*"
-            if (blockParts.length < 3) return false;
-
-            if (!blockParts[0].equals(patternParts[0]) || !blockParts[1].equals(patternParts[1])) {
-                return false;
-            }
-
-            // Check meta
-            if (patternParts[2].equals("*")) {
-                return true;
-            }
-
-            return blockParts[2].equals(patternParts[2]);
-        }
-
-        return blockId.equals(pattern);
+        return BlockIdMatcher.matches(blockId, pattern);
     }
 
     // Getters

@@ -85,12 +85,45 @@ public class DocumentedJsonTypeTest {
     private static final Path CONDITION_REGISTRY = SOURCE.resolve("ruiseki/okmodular/api/condition/Conditions.java");
     private static final Path REQUIREMENT_REGISTRY = SOURCE
         .resolve("ruiseki/okmodular/api/structure/io/RequirementRegistry.java");
+    /**
+     * 式の構造化形式（`{"type": "arithmetic", ...}`）を受けるレジストリ。
+     * <p>
+     * ここが抜けていた間、docs に式の構造化形式を書くと
+     * 「どのレジストリにも無い」と報告された。**型は登録されていて、この一覧が足りていなかった。**
+     * 「知っている型」の集合が実装より狭いと、正しい docs を間違いだと言う。
+     */
+    private static final Path EXPRESSION_REGISTRY = SOURCE
+        .resolve("ruiseki/okmodular/api/recipe/expression/ExpressionsParser.java");
+
+    /**
+     * パターンの `shape` が名乗れる形の種類。
+     * <p>
+     * `sphere` は最初「パーサの中の `"sphere".equals(type)` 1 箇所」だったので、
+     * **どこにも列挙が無い型名**になっていた。このテストが「どのレジストリにも無い」と
+     * 報告したのは正しく、他の 6 つと同じ形のレジストリに直した結果がこれ。
+     */
+    private static final Path SHAPE_REGISTRY = SOURCE
+        .resolve("ruiseki/okmodular/structure/pattern/ShapePrimitives.java");
 
     /**
      * `register("x", ...)` / `alias("x", ...)` の第 1 引数。
      * 名前が次の行に来る書き方（Conditions の comparison など）があるので改行をまたぐ。
      */
     private static final Pattern REGISTRATION = Pattern.compile("(?:register|alias)\\(\\s*\"([^\"]+)\"");
+
+    /**
+     * `register(SomeClass.TYPE, ...)` のように**定数で**登録している形。
+     *
+     * 型名を「JSON の type・NBT の id・レジストリのキー」の 3 箇所へ書くとき、
+     * 綴りを 1 箇所に持たせるのが正しい。**ここが文字列リテラルしか読めないと、
+     * 正しく書いたほうがテストに落とされる**ので、定数を辿れるようにしてある。
+     */
+    private static final Pattern CONSTANT_REGISTRATION = Pattern
+        .compile("(?:register|alias)\\(\\s*([A-Z][A-Za-z0-9_]*)\\.([A-Z][A-Z0-9_]*)\\s*,");
+
+    /** 定数の宣言。`public static final String TYPE = "structure";` */
+    private static final Pattern CONSTANT_DECLARATION = Pattern
+        .compile("static\\s+final\\s+String\\s+%s\\s*=\\s*\"([^\"]+)\"");
 
     /** `"type": "x"` と、表のセルに出てくる `type: "x"` の両方。 */
     private static final Pattern DOCUMENTED_TYPE = Pattern.compile("\"?type\"?\\s*:\\s*\"([A-Za-z_][A-Za-z0-9_]*)\"");
@@ -133,6 +166,8 @@ public class DocumentedJsonTypeTest {
         known.addAll(registered(DECORATOR_REGISTRY));
         known.addAll(registered(CONDITION_REGISTRY));
         known.addAll(registered(REQUIREMENT_REGISTRY));
+        known.addAll(registered(EXPRESSION_REGISTRY));
+        known.addAll(registered(SHAPE_REGISTRY));
 
         List<String> missing = missingFrom(known, documented);
 
@@ -242,16 +277,44 @@ public class DocumentedJsonTypeTest {
         return (end < 0 ? body : body.substring(0, end)).trim();
     }
 
-    /** レジストリのソースに書かれている登録名。 */
+    /** レジストリのソースに書かれている登録名。定数で書かれているものは辿って解決する。 */
     private static Set<String> registered(Path registrySource) {
         assertTrue(Files.exists(registrySource), "レジストリのソースが見つからない: " + registrySource + " — 移動したならこのテストの参照も直すこと");
 
+        String source = read(registrySource);
         Set<String> names = new LinkedHashSet<>();
-        Matcher matcher = REGISTRATION.matcher(read(registrySource));
-        while (matcher.find()) names.add(matcher.group(1));
+
+        Matcher literal = REGISTRATION.matcher(source);
+        while (literal.find()) names.add(literal.group(1));
+
+        Matcher constant = CONSTANT_REGISTRATION.matcher(source);
+        while (constant.find()) {
+            names.add(resolveConstant(source, constant.group(1), constant.group(2), registrySource));
+        }
 
         assertFalse(names.isEmpty(), "登録名が 1 件も読み取れない: " + registrySource + " — 登録の書き方が変わった可能性がある");
         return names;
+    }
+
+    /**
+     * `ClassName.CONSTANT` を、そのクラスのソースを読んで値に解決する。
+     * import 行から場所を引くので、パッケージを移動しても追従する。
+     */
+    private static String resolveConstant(String registrySource, String className, String constantName, Path from) {
+        Matcher importLine = Pattern.compile("import\\s+([\\w.]+\\." + className + ")\\s*;")
+            .matcher(registrySource);
+        assertTrue(importLine.find(), className + " の import が " + from + " に見つからない");
+
+        Path classSource = SOURCE.resolve(
+            importLine.group(1)
+                .replace('.', '/') + ".java");
+        assertTrue(Files.exists(classSource), "定数の宣言元が読めない: " + classSource);
+
+        Matcher declaration = Pattern.compile(String.format(CONSTANT_DECLARATION.pattern(), constantName))
+            .matcher(read(classSource));
+        assertTrue(declaration.find(), className + "." + constantName + " の宣言が見つからない — 文字列定数でなくなったなら走査を直すこと");
+
+        return declaration.group(1);
     }
 
     private static List<String> missingFrom(Set<String> known, Set<String> documented) {

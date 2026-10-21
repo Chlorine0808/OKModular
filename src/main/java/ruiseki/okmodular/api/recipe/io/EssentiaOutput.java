@@ -46,8 +46,7 @@ public class EssentiaOutput extends AbstractModularRecipeOutput {
         Aspect aspect = Aspect.getAspect(aspectTag);
         if (aspect == null) return;
 
-        int req = amountExpr != null ? (int) amountExpr.evaluateDouble(context) : amount;
-        int remaining = req * multiplier;
+        long remaining = getRequiredAmount(context) * multiplier;
 
         for (IModularPort port : ports) {
             if (port.getPortType() != IPortType.Type.ESSENTIA) continue;
@@ -58,7 +57,8 @@ public class EssentiaOutput extends AbstractModularRecipeOutput {
             if (!(port instanceof IAspectContainer)) continue;
 
             IAspectContainer essentiaPort = (IAspectContainer) port;
-            int accepted = (int) remaining - essentiaPort.addToContainer(aspect, (int) remaining);
+            int offered = Amounts.toInt(remaining);
+            int accepted = offered - essentiaPort.addToContainer(aspect, offered);
             remaining -= accepted;
             if (remaining <= 0) break;
         }

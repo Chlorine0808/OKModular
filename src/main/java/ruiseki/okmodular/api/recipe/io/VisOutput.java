@@ -46,8 +46,7 @@ public class VisOutput extends AbstractModularRecipeOutput {
         Aspect aspect = Aspect.getAspect(aspectTag);
         if (aspect == null) return;
 
-        int req = amountExpr != null ? (int) amountExpr.evaluateDouble(context) : amount;
-        int remaining = req * multiplier;
+        long remaining = getRequiredAmount(context) * multiplier;
 
         for (IModularPort port : ports) {
             if (port.getPortType() != IPortType.Type.VIS) continue;
@@ -59,7 +58,8 @@ public class VisOutput extends AbstractModularRecipeOutput {
             if (!(port instanceof IAspectContainer)) continue;
 
             IAspectContainer visPort = (IAspectContainer) port;
-            int accepted = (int) remaining - visPort.addToContainer(aspect, (int) remaining);
+            int offered = Amounts.toInt(remaining);
+            int accepted = offered - visPort.addToContainer(aspect, offered);
             remaining -= accepted;
             if (remaining <= 0) break;
         }

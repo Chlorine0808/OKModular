@@ -68,6 +68,13 @@ public class ExpressionRegistry {
             registerMachineProperty(property);
         }
 
+        // --- Cell Properties ---
+        // Where a pattern cell sits relative to its anchor. Driven off the same enum that
+        // defines them, for the reason the machine properties are.
+        for (String property : CellPropertyExpression.propertyNames()) {
+            registerCellProperty(property);
+        }
+
         // --- Constants ---
         registerVariable("pi", name -> ConstantExpression.PI);
         registerVariable("e", name -> ConstantExpression.E);
@@ -119,7 +126,7 @@ public class ExpressionRegistry {
         // Math Functions
         for (String mathFunc : MathFunctionExpression.SUPPORTED_FUNCTIONS) {
             registerFunction(mathFunc, (args, parser) -> {
-                validateMathArgs(mathFunc, args.size(), parser);
+                validateMathArgs(mathFunc, args, parser);
                 return new MathFunctionExpression(mathFunc, args);
             });
         }
@@ -242,12 +249,40 @@ public class ExpressionRegistry {
         registerVariable(name, MachinePropertyExpression::new);
     }
 
+    public static void registerCellProperty(String name) {
+        registerVariable(name, CellPropertyExpression::new);
+    }
+
     public static void registerFunction(String name, IFunctionFactory factory) {
         FUNCTION_REGISTRY.put(name.toLowerCase(), factory);
     }
 
-    private static void validateMathArgs(String name, int argCount, ExpressionParser parser) {
-        if (name.equals("pow") || name.equals("min")
+    /**
+     * Checks a math call's arguments.
+     * <p>
+     * Takes the arguments rather than their count so a value written down can be refused here too.
+     * Only a literal can be: an expression is whatever the machine makes it, and refusing that
+     * would have to happen mid-tick.
+     */
+    private static void validateMathArgs(String name, List<IExpression> args, ExpressionParser parser) {
+        int argCount = args.size();
+
+        if (name.equals("noise")) {
+            if (argCount != 1) {
+                throw parser.error("noise() requires 1 argument (how many blocks across one blob is)");
+            }
+            IExpression scale = args.get(0);
+            if (scale instanceof ConstantExpression && scale.evaluateDouble(null) < ValueNoise.MIN_SCALE) {
+                throw parser.error(
+                    "noise() was given a scale of " + scale
+                        + ", and a scale is a length in blocks. One block is the finest lattice there is - "
+                        + "that is random() - so anything at or below it has nothing further to mean");
+            }
+            return;
+        }
+
+        if (name.equals("pow") || name.equals("tetrate")
+            || name.equals("min")
             || name.equals("max")
             || name.equals("atan2")
             || name.equals("npr")
@@ -258,8 +293,11 @@ public class ExpressionRegistry {
             || name.equals("combi")
             || name.equals("combination")) {
             if (argCount < 2) throw parser.error(name + "() requires at least 2 arguments");
-        } else if (name.equals("log")) {
-            if (argCount < 1 || argCount > 2) throw parser.error("log() requires 1 or 2 arguments");
+        } else if (name.equals("log") || name.equals("fact")) {
+            // fact(n) is n!, fact(n, k) the n-tuple factorial - the same optional-second-argument
+            // shape log() already has, rather than a second name that would make fact(n, 1) and
+            // fact(n) two spellings of one thing.
+            if (argCount < 1 || argCount > 2) throw parser.error(name + "() requires 1 or 2 arguments");
         } else if (name.equals("clamp")) {
             if (argCount < 3) throw parser.error(name + "() requires at least 3 arguments");
         } else if (name.equals("random")) {

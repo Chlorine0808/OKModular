@@ -1,13 +1,15 @@
 # Machine Conditions
 
-## 📚 Related Documentation
+Conditions in a structure definition that stop the machine itself, whatever recipe it was going to run.
+This document covers how to write them and what happens when they stop holding mid-recipe.
+
+## Related Documentation
 
 - [Modular Machinery Documentation](./INDEX.md)
 - [Structure JSON Format](../structures/JSON_FORMAT.md)
 - [Expression Reference](../recipes/EXPRESSION_REFERENCE.md)
 
 ---
-
 
 ## 1. Writing them
 
@@ -31,7 +33,7 @@ A single condition needs no array.
 
 The conditions available are the same ones a recipe's `conditions` accepts (weather, biome,
 dimension, block, expressions, logical operators).
-See the [Recipe JSON Format](../recipes/JSON_FORMAT.md) for details.
+See [Recipe Conditions](../recipes/CONDITIONS.md) for details.
 
 ### The machine's own state counts too
 
@@ -68,7 +70,6 @@ You can choose what happens when the conditions stop holding while a recipe is r
   "conditionPolicy": "abort"
 }
 ```
-
 
 ## 3. Tips
 

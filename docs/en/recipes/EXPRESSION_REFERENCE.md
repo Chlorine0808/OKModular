@@ -1,9 +1,9 @@
 # Expression Parser Variable & Function Reference
 
-A comprehensive reference for variables, functions, and advanced queries available in OmoshiroiKamo's `ExpressionParser`.
+A comprehensive reference for variables, functions, and advanced queries available in OKModular's `ExpressionParser`.
 These can be used in the `amount` field of JSON recipes, the `expression` key in `Condition` objects, and machine property configurations.
 
-## 📚 Related Documentation
+## Related Documentation
 
 - [JSON Format](./JSON_FORMAT.md) - Basic JSON syntax
 - [Conditions](./CONDITIONS.md) - writing an `expression` condition
@@ -17,9 +17,35 @@ These can be used in the `amount` field of JSON recipes, the `expression` key in
 Standard arithmetic and logical operations are supported.
 
 - **Arithmetic**: `+`, `-`, `*`, `/`, `%` (modulo)
+- **Power**: `^` / `**` (the same operator, and the same thing as writing `pow(a, b)`)
+- **Power tower**: `^^` (`a ^^ 3` is `a ^ (a ^ a)`, the same as writing `tetrate(a, n)`)
 - **Comparison**: `==`, `!=`, `>`, `<`, `>=`, `<=`
 - **Logical**: `&&` (AND), `||` (OR), `!` (NOT)
 - **Grouping**: `()`, `{}`
+
+### How the power binds
+
+Tighter than `*` and `/`, looser than a leading minus, and **right-associative**.
+
+| Written | Read as | Value |
+| :--- | :--- | :--- |
+| `2 * 3 ^ 2` | `2 * (3 ^ 2)` | 18 |
+| `2 ^ 3 ^ 2` | `2 ^ (3 ^ 2)` | 512 |
+| `-2 ^ 2` | `-(2 ^ 2)` | -4 |
+| `2 ^ -1` | the exponent may carry a sign | 0.5 |
+
+`^^` sits at the same level and is right-associative in the same way.
+
+> [!WARNING]
+> **`^^` has an extremely small usable range.** With a base of 2 a double holds four levels;
+> `2 ^^ 5` (2 to the 65536th) is Infinity, and so are `3 ^^ 4` and `10 ^^ 3`. That is the
+> notation's nature, not a limitation of the implementation.
+>
+> The tower stops at **64 levels**. Not to rein in big numbers, but to **stop an expression
+> that would not finish**. A base above e^(1/e) ≈ 1.4447 reaches Infinity within a few levels
+> and stops on its own; at or below it the tower *converges* (`1.4 ^^ n` settles near 1.887,
+> `1 ^^ n` is 1 forever) and the value never says stop. The dangerous expression is
+> `"1.4 ^^ 1000000000"`, not `"2 ^^ 1000000000"`.
 
 > [!TIP]
 > Conditional expressions (e.g., `1 == 1`) are treated as `1` (true) or `0` (false) in numerical calculations.
@@ -37,7 +63,11 @@ Retrieve information about the world where the machine is located.
 - `moon` / `moon_phase`: Current moon phase (0 - 7; 0 = Full Moon, 4 = New Moon)
 
 #### Coordinates & Dimension
-- `x` / `y` / `z`: Coordinates of the machine controller
+- `x` / `y` / `z`: Coordinates of **the position being asked about**. Usually the controller's;
+  inside an `offset` condition it is the offset position, and inside a
+  [structure IO pattern](../structures/STRUCTURE_IO.md)'s `mappings` it is **that cell's**
+- `cell_x` / `cell_y` / `cell_z`: **How far the cell sits from the anchor** (on the pattern's axes,
+  turning with the machine; `cell_y` is up as drawn). Only meaningful inside a pattern's `mappings` - anywhere else it answers 0
 - `dimension`: Current dimension ID (Overworld = 0, Nether = -1, End = 1)
 
 #### Weather & Environment
@@ -138,10 +168,12 @@ means something where the kind holds more than one:
 > for the input tanks only. `fluid_f`, with no direction, is capacity minus held.
 
 ### Statistics & State
-- `recipe_count`: Cumulative number of recipes processed by the machine
+- `recipe_count` / `count_recipe`: Cumulative number of recipes processed by the machine
+- `recipe_types_count` / `count_recipe_type`: Number of distinct recipes processed
 - `progress` / `progress_percent`: Current recipe progress (0.0 ~ 1.0)
 - `tier`: Current machine Tier
 - `is_running`: Whether the machine is running (1 or 0)
+- `is_waiting`: Whether the machine is held up waiting for output room (1 or 0)
 - `timeplaced`: Cumulative time since the machine was placed (ticks)
 - `timecontinue`: Continuous uptime of the machine (ticks)
 
@@ -159,41 +191,75 @@ Performance multipliers provided by the structure definition.
 > **An output produced on completion draws once per item of the batch.** `"1 + floor(random() * 3)"`
 > at a batch of three yields anything from 3 to 9, not only multiples of three: a batch of n
 > is n runs of the recipe.
-
----
+>
+> **The `bonus` and `weighted_random` decorators follow the same rule** - a batch of three
+> rolls three times. See [Decorators](./DECORATORS.md#batches).
 
 ## 4. Function Reference
 
 ### Math Functions
-- `abs(x)`, `sqrt(x)`, `pow(base, exp)`
+- `abs(x)`, `sqrt(x)`, `cbrt(x)`, `pow(base, exp)`
 - `min(a, b...)`, `max(a, b...)`
 - `sin(x)`, `cos(x)`, `tan(x)` (Input in **radians**)
 - `asin(x)`, `acos(x)`, `atan(x)` (Output in radians)
+- `atan2(y, x)`: Arc tangent that keeps the quadrant
 - `rad(deg)`, `deg(rad)` (Convert degrees/radians)
-- `floor(x)`, `ceil(x)`, `round(x)`
+- `floor(x)`, `ceil(x)` / `ceiling(x)`, `round(x)`
 - `clamp(val, min, max)`
-- `random()`: Random number between 0 and 1
-- `chance(x)`: Returns 1 or 0 based on probability `x` (0.0 - 1.0)
-
-### Advanced Functions
-- `can_see_sky(filter...)`: Check sky visibility. Specify IDs to treat blocks like glass as transparent
-- `can_see_void(filter...)`: Check if there is void directly below
+- `sign(x)`: Sign of the value (-1 / 0 / 1)
+- `exp(x)`, `log(x)` / `ln(x)` (natural log), `log10(x)`
+- `fact(n)`: Factorial
+- `fact(n, k)`: Multifactorial. `n(n-k)(n-2k)…` for as long as the terms stay positive (`fact(10, 2)` = 10·8·6·4·2 = 3840)
+- `tetrate(a, n)`: A tower of `n` copies of `a` (the same as `a ^^ n`)
+- `perm(n, r)` / `npr(n, r)` / `permu(n, r)` / `permutation(n, r)`: Permutations
+- `combi(n, r)` / `ncr(n, r)` / `combination(n, r)`: Combinations
 
 > [!NOTE]
-> **Both also work without the brackets**, as the world properties listed above -
+> `log(x)` is the **natural** logarithm, the same as `ln`. For base 10 use `log10(x)`.
+> All three answer **0** rather than throwing when `x <= 0`.
+
+### Random Numbers
+
+- `random()`: Random number between 0 and 1. **Unrelated at neighbouring positions** (salt and pepper)
+- `noise(scale)`: Between 0 and 1, but **near positions answer alike**. `scale` is how many blocks
+  across one blob is. This is the one that clumps. ⚠ **Not uniformly distributed** (piles up near 0.5)
+- `chance(x)`: Returns 1 or 0 based on probability `x` (0.0 - 1.0)
+
+> [!IMPORTANT]
+> **`random()` and `chance()` are not a stream that advances on each call.** They are computed from the machine's
+> evaluation seed (`random_seed`), so **within one run they return the same value however
+> many times they are evaluated**, including across a save and reload. A different run gives
+> a different value.
+>
+> So `"1 + floor(random() * 3)"` evaluated every tick does not move. To make it move, mix
+> `progress_tick` or `tick` into the expression.
+>
+> There are two exceptions, both for drawing n times inside one run: **batches** (the note
+> above) and **decorators that draw per position**
+> ([Decorators](./DECORATORS.md#3-how-the-draws-work)). Those shift the seed and draw again.
+
+### Functions That Inspect the Surroundings
+
+- `can_see_sky(filter...)`: Check sky visibility. Specify IDs to treat blocks like glass as transparent
+- `can_see_void(filter...)`: Check if there is void directly below
+- `count_blocks(distance, filter...)`: Count specific blocks within a range
+    - Example: `count_blocks(1, "minecraft:iron_block")`
+
+> [!NOTE]
+> **`can_see_sky` and `can_see_void` also work without the brackets**, as the world properties listed above -
 > `can_see_sky == 1`. The bare form is the plain test; reach for the function form only when
 > you need to name blocks to see through.
 > **Either spelling counts from the block above the controller** (below it, for
 > `can_see_void`). The controller itself is a solid cube, so including its own position
 > would make the answer always false.
-- `count_blocks(distance, filter...)`: Count specific blocks within a range
-    - Example: `count_blocks(1, "minecraft:iron_block")`
+
+### NBT Access
+
 - `nbt('key')`: Retrieve NBT from the machine itself
 - `nbt('symbol', 'key')`: Retrieve NBT from a block at a specific symbol position
 - `has_nbt('key')` / `has_nbt('symbol', 'key')`: Whether the NBT key exists
 
-### All NBT access goes through `nbt(...)`
-
+All NBT access goes through `nbt(...)`.
 **The target is always an argument.** Nested paths go inside the argument string,
 separated by dots.
 
@@ -236,11 +302,7 @@ double.
 
 Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 
----
-
-## 5. Design Tips
-
-### Where expressions are accepted
+## 5. Where Expressions Are Accepted and When They Are Evaluated
 
 | Field | Evaluated |
 |-------|-----------|
@@ -252,6 +314,9 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 | A recipe's `chance` decorator | Once per run (settled on completion) |
 | An output decorator's `chance` | When it is rolled |
 | `condition` / `conditions` | When the recipe starts, and every tick while it runs |
+| The structure's `speedMultiplier` | Every tick while running |
+| The structure's `batchMin` / `batchMax` | When a recipe starts |
+| The structure's `energyMultiplier` | When a recipe reads `energy_multi` |
 
 > [!NOTE]
 > **How much a recipe pays out is settled when it starts.** Change the machine's tier
@@ -261,13 +326,64 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 >
 > Only the amount is settled. An output item's `nbt` expressions and the decorators
 > (`chance`, `bonus`) are still evaluated when the output is produced.
-| The structure's `speedMultiplier` | Every tick while running |
-| The structure's `batchMin` / `batchMax` | When a recipe starts |
-| The structure's `energyMultiplier` | When a recipe reads `energy_multi` |
 
 A structure's performance modifiers see the machine just as a recipe does, so
 `"speedMultiplier": "1 + tier * 0.25"` works. **A modifier cannot read itself**, though —
 see [the structure JSON format](../structures/JSON_FORMAT.md).
+
+## 6. Structured form — an object instead of a string
+
+An expression can be written as an **object** as well as a string (`"tier * 2"`). The places
+it is accepted are the same; only the reader differs.
+
+```json
+"amount": { "type": "arithmetic", "operation": "*",
+            "left":  { "type": "machine_property", "property": "tier" },
+            "right": { "type": "constant", "value": 2 } }
+```
+
+That means the same as `"amount": "tier * 2"`. **Write the string form normally** - it is
+shorter and there is no reason to keep two spellings of one thing. The object form is for
+expressions a program builds, or for anything a string cannot carry.
+
+| `type` | Required keys | Meaning |
+|---|---|---|
+| `constant` | `value` (number) | A constant |
+| `string_literal` | `value` (string) | A string, for functions like `item('...')` |
+| `machine_property` | `property` | One machine property (`tier`, `energy`, ...) |
+| `world_property` | `property` | One world property (`tick`, `moon_phase`, ...) |
+| `component_tier` | `component` | A component's tier (`"glass"` and so on) |
+| `arithmetic` | `operation`, `left`, `right` | Arithmetic; `left` and `right` are expressions too |
+| `map_range` | `input`, `minIn`, `maxIn`, `minOut`, `maxOut` (plus optional `clamp`) | Maps one range onto another |
+| `nbt` | `key` (plus optional `default`, `symbol`) | An NBT value; `default` is used when it cannot be read |
+| `nbt_assignment` | `key`, `value` (plus optional `op`) | Writes to NBT; see below |
+
+### `map_range` — mapping one range onto another
+
+```json
+{ "type": "map_range", "input": { "type": "machine_property", "property": "energy_p" },
+  "minIn": 0, "maxIn": 1, "minOut": 100, "maxOut": 20, "clamp": true }
+```
+
+`minIn`..`maxIn` is mapped linearly onto `minOut`..`maxOut`. Above, that reads "100 when
+empty, 20 when full" - **faster the more is stored**.
+
+`minOut` may be greater than `maxOut`, which **runs the mapping backwards**. With `clamp`
+(default `false`) set to `true`, an input outside the range still produces an output inside
+`minOut`..`maxOut`.
+
+### `op` on `nbt_assignment`
+
+The operator used when writing. The default is `"="`.
+
+```json
+{ "type": "nbt_assignment", "key": "stored_power", "op": "+=",
+  "value": { "type": "constant", "value": 1000 } }
+```
+
+That is the same as `nbt('stored_power') += 1000` in the string form.
+
+## 7. Caveats
 
 ### Common Pitfalls
 - **Quotes in JSON**: Expressions themselves must be strings in JSON, e.g., `"amount": "tier * 2"`.

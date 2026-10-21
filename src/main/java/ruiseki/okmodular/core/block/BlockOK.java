@@ -30,6 +30,7 @@ import ruiseki.okcore.helper.InventoryHelpers;
 import ruiseki.okcore.helper.TileHelpers;
 import ruiseki.okmodular.OKModular;
 import ruiseki.okmodular.Reference;
+import ruiseki.okmodular.common.init.OKModularCreativeTab;
 import ruiseki.okmodular.core.block.orientable.IOrientableBlock;
 import ruiseki.okmodular.core.block.property.BlockPropertyProviderComponent;
 import ruiseki.okmodular.core.block.property.IBlockPropertyProvider;
@@ -78,6 +79,7 @@ public class BlockOK extends Block implements IBlockPropertyProvider, IBlock {
         setHarvestLevel("pickaxe", 0);
         this.setStepSound(getSoundForMaterial(mat));
         setLightOpacity(SOLID);
+        setCreativeTab(OKModularCreativeTab.TAB);
     }
 
     /**

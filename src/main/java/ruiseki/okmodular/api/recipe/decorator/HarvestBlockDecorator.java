@@ -4,157 +4,217 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
+import net.minecraftforge.common.IShearable;
 
 import com.google.gson.JsonObject;
 
+import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
+import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
+import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.io.BlockInput;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
+import ruiseki.okmodular.api.recipe.io.ItemOutput;
 import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
 import ruiseki.okmodular.core.item.ItemUtils;
+import ruiseki.okmodular.util.Logger;
 
 /**
  * Decorator that harvests blocks affected by the recipe's BlockInputs and
  * BlockOutputs.
  * Supports Fortune, Silk Touch, Shears, and Harvest Level requirements.
+ *
+ * <h2>Three moments, not one</h2>
+ *
+ * The other five decorators all fit on {@link RecipeDecorator#produceExtraOutputs}, which runs
+ * after the cached outputs land. This one cannot: by then a {@code BlockOutput} has already
+ * replaced the block it was supposed to collect. It needs three separate moments, and getting
+ * them wrong is what left it dead for so long.
+ *
+ * <pre>
+ * canStart              レシピが始まる前   硬すぎるブロックがあれば断る
+ * beforeInputsConsumed  入力を消す直前     BlockInput が持っていくブロックを採る
+ * beforeOutputsApplied  出力を書く直前     BlockOutput が上書きするブロックを採る
+ * </pre>
+ *
+ * <h2>Why the gate is at the start and only at the start</h2>
+ *
+ * The harvest-level check has to be able to refuse, and start is the only moment where
+ * refusing is honest. Refusing while consuming would take the inputs and stop; refusing while
+ * producing would take the inputs, finish the work, and hand back nothing while the machine
+ * waits forever for output room it does not need.
+ *
+ * So {@link #canStart} looks at <em>both</em> sets of positions - the ones an input will
+ * consume and the ones an output will overwrite - and answers once. Both are resolvable at
+ * start, so nothing is guessed. The two harvest hooks after it never refuse.
+ *
+ * <h2>What {@code harvestLevel} is</h2>
+ *
+ * An expression, defaulting to <b>0</b> - what a wooden pick manages - so a recipe that leaves
+ * it out refuses to start the moment its structure contains iron ore. Writing
+ * {@code "harvestLevel": "tier"} lets a better machine mine harder blocks; it is evaluated
+ * once in {@link #canStart}, so both sides are judged against the same number.
  */
 public class HarvestBlockDecorator extends RecipeDecorator {
 
+    /** What {@link IShearable} is handed as the tool. Nothing reads its damage or enchants. */
+    private static final ItemStack SHEARS = new ItemStack(Items.shears);
+
     private final int fortune;
     private final boolean silkTouch;
-    @SuppressWarnings("unused")
     private final boolean shear;
-    private final int harvestLevel;
+    private final IExpression harvestLevelExpr;
 
     public HarvestBlockDecorator(IModularRecipe internal, int fortune, boolean silkTouch, boolean shear,
-        int harvestLevel) {
+        IExpression harvestLevelExpr) {
         super(internal);
         this.fortune = fortune;
         this.silkTouch = silkTouch;
         this.shear = shear;
-        this.harvestLevel = harvestLevel;
-    }
-
-    @Override
-    public boolean processInputs(List<IModularPort> inputPorts, boolean simulate) {
-        if (!simulate) {
-            IRecipeContext context = findRecipeContext(inputPorts);
-            if (context != null) {
-                if (!checkAndHarvest(context, inputPorts, true)) {
-                    return false;
-                }
-            }
-        }
-        return internal.processInputs(inputPorts, simulate);
-    }
-
-    @Override
-    public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
-        if (!simulate) {
-            IRecipeContext context = findRecipeContext(outputPorts);
-            if (context != null) {
-                if (!checkAndHarvest(context, outputPorts, false)) {
-                    return false;
-                }
-            }
-        }
-        return internal.processOutputs(outputPorts, simulate);
+        this.harvestLevelExpr = harvestLevelExpr;
     }
 
     /**
-     * Harvest blocks from either inputs or outputs.
-     * 
-     * @param context    Recipe context
-     * @param ports      Available ports (for item insertion)
-     * @param fromInputs True if checking inputs, false for outputs
-     * @return true if all harvest level requirements are met
+     * Refuses the run when any block it would collect is too hard for {@code harvestLevel}.
+     * <p>
+     * Both sides are checked here because this is the only moment refusing costs nothing.
+     * See the class javadoc.
      */
-    private boolean checkAndHarvest(IRecipeContext context, List<IModularPort> ports, boolean fromInputs) {
-        List<ChunkCoordinates> targetPositions = new ArrayList<>();
-        World world = context.getWorld();
+    @Override
+    public boolean canStart(ConditionContext context) {
+        if (!super.canStart(context)) return false;
 
-        // 1. Identify all affected positions
+        IRecipeContext recipe = context != null ? context.getRecipeContext() : null;
+        // No machine means no world to look at - validation and NEI take this path. Refusing
+        // here would make the recipe look impossible everywhere it is merely unevaluated.
+        if (recipe == null || recipe.getWorld() == null) return true;
+
+        int allowed = (int) harvestLevelExpr.evaluateDouble(context);
+        return levelAllows(recipe, positionsFrom(recipe, context, true), allowed)
+            && levelAllows(recipe, positionsFrom(recipe, context, false), allowed);
+    }
+
+    /**
+     * Collects the blocks a consuming input is about to take. The drops are held with the
+     * run's outputs and paid out at completion, never put in the input ports.
+     */
+    @Override
+    public List<IRecipeOutput> beforeInputsConsumed(ConditionContext context) {
+        List<IRecipeOutput> held = new ArrayList<>(super.beforeInputsConsumed(context));
+        IRecipeContext recipe = context != null ? context.getRecipeContext() : null;
+        if (recipe == null || recipe.getWorld() == null) return held;
+
+        for (ChunkCoordinates pos : positionsFrom(recipe, context, true)) {
+            for (ItemStack drop : dropsAt(recipe.getWorld(), pos)) {
+                held.add(new ItemOutput(drop));
+            }
+        }
+        return held;
+    }
+
+    @Override
+    public void beforeOutputsApplied(List<IModularPort> outputPorts, ConditionContext context) {
+        super.beforeOutputsApplied(outputPorts, context);
+        IRecipeContext recipe = context != null ? context.getRecipeContext() : null;
+        if (recipe == null || recipe.getWorld() == null) return;
+
+        for (ChunkCoordinates pos : positionsFrom(recipe, context, false)) {
+            insertOrDrop(recipe.getWorld(), pos, dropsAt(recipe.getWorld(), pos), outputPorts);
+        }
+    }
+
+    /**
+     * The blocks this recipe is about to remove on one side: exactly the cells the block input
+     * consumes or the block output overwrites, never the rest of the symbol.
+     *
+     * @param fromInputs true for the blocks a consuming {@code BlockInput} takes, false for
+     *                   the ones a {@code BlockOutput} overwrites
+     */
+    private List<ChunkCoordinates> positionsFrom(IRecipeContext context, ConditionContext condContext,
+        boolean fromInputs) {
+        List<ChunkCoordinates> targetPositions = new ArrayList<>();
+        int batch = batchSizeOf(condContext);
+
         if (fromInputs) {
             for (IRecipeInput input : internal.getInputs()) {
-                if (input instanceof BlockInput) {
-                    BlockInput bi = (BlockInput) input;
-                    if (bi.isConsume()) {
-                        targetPositions.addAll(
-                            context.getSymbolPositions(
-                                bi.toJson()
-                                    .get("symbol")
-                                    .getAsString()
-                                    .charAt(0)));
-                    }
+                if (input instanceof BlockInput bi && bi.isConsume()) {
+                    targetPositions.addAll(bi.targets(context, batch, condContext));
                 }
             }
         } else {
             for (IRecipeOutput output : internal.getOutputs()) {
-                if (output instanceof BlockOutput) {
-                    BlockOutput bo = (BlockOutput) output;
-                    targetPositions.addAll(bo.getPositions(context));
+                if (output instanceof BlockOutput bo) {
+                    targetPositions.addAll(bo.targets(context, batch, condContext));
                 }
             }
         }
+        return targetPositions;
+    }
 
-        // 2. Validate harvest level for all positions first
-        for (ChunkCoordinates pos : targetPositions) {
+    /**
+     * Whether every block at these positions is soft enough. Air and toolless blocks pass.
+     *
+     * @param allowed the evaluated {@code harvestLevel}, settled once by the caller so both
+     *                sides are judged against the same number
+     */
+    private boolean levelAllows(IRecipeContext context, List<ChunkCoordinates> positions, int allowed) {
+        World world = context.getWorld();
+
+        for (ChunkCoordinates pos : positions) {
             Block block = world.getBlock(pos.posX, pos.posY, pos.posZ);
             if (block.isAir(world, pos.posX, pos.posY, pos.posZ)) continue;
 
-            String harvestTool = block.getHarvestTool(world.getBlockMetadata(pos.posX, pos.posY, pos.posZ));
-            if (harvestTool != null) {
-                int level = block.getHarvestLevel(world.getBlockMetadata(pos.posX, pos.posY, pos.posZ));
-                if (level > harvestLevel) {
-                    return false; // Requirement not met, abort recipe
-                }
-            }
+            int meta = world.getBlockMetadata(pos.posX, pos.posY, pos.posZ);
+            if (block.getHarvestTool(meta) == null) continue;
+            if (block.getHarvestLevel(meta) > allowed) return false;
         }
-
-        // 3. Perform harvesting
-        for (ChunkCoordinates pos : targetPositions) {
-            harvestAt(world, pos, ports);
-        }
-
         return true;
     }
 
-    private void harvestAt(World world, ChunkCoordinates pos, List<IModularPort> ports) {
+    /** What the block at {@code pos} drops. {@link #canStart} already allowed it. */
+    private List<ItemStack> dropsAt(World world, ChunkCoordinates pos) {
         int x = pos.posX;
         int y = pos.posY;
         int z = pos.posZ;
         Block block = world.getBlock(x, y, z);
         int meta = world.getBlockMetadata(x, y, z);
 
-        if (block.isAir(world, x, y, z)) return;
+        if (block.isAir(world, x, y, z)) return new ArrayList<>();
 
         List<ItemStack> drops = new ArrayList<>();
 
+        // Silk touch first when both are set: it promises the block itself for anything that
+        // allows it, while shears only speak for blocks that implement IShearable. For leaves
+        // the two agree anyway.
         if (silkTouch && block.canSilkHarvest(world, null, x, y, z, meta)) {
             drops.add(new ItemStack(block, 1, meta));
+        } else if (shear && block instanceof IShearable shearable && shearable.isShearable(SHEARS, world, x, y, z)) {
+            drops.addAll(shearable.onSheared(SHEARS, world, x, y, z, fortune));
         } else {
             // Standard drop with fortune
             drops.addAll(block.getDrops(world, x, y, z, meta, fortune));
         }
+        return drops;
+    }
 
-        if (drops.isEmpty()) return;
-
-        // Try to insert into item ports
+    private void insertOrDrop(World world, ChunkCoordinates pos, List<ItemStack> drops, List<IModularPort> ports) {
         List<IModularPort> itemPorts = filterByType(ports, IPortType.Type.ITEM);
         for (ItemStack drop : drops) {
             ItemStack remaining = insertIntoPorts(itemPorts, drop);
             if (remaining != null && remaining.stackSize > 0) {
                 // Drop into world if port full
-                ItemStackHandlerBase.dropStack(world, x, y, z, remaining);
+                ItemStackHandlerBase.dropStack(world, pos.posX, pos.posY, pos.posZ, remaining);
             }
         }
     }
@@ -191,15 +251,6 @@ public class HarvestBlockDecorator extends RecipeDecorator {
         return filtered;
     }
 
-    private IRecipeContext findRecipeContext(List<IModularPort> ports) {
-        for (IModularPort port : ports) {
-            if (port instanceof IRecipeContext) {
-                return (IRecipeContext) port;
-            }
-        }
-        return null;
-    }
-
     public static IModularRecipe fromJson(IModularRecipe recipe, JsonObject json) {
         int fortune = json.has("fortune") ? json.get("fortune")
             .getAsInt() : 0;
@@ -207,8 +258,16 @@ public class HarvestBlockDecorator extends RecipeDecorator {
             .getAsBoolean();
         boolean shear = json.has("shear") && json.get("shear")
             .getAsBoolean();
-        int harvestLevel = json.has("harvestLevel") ? json.get("harvestLevel")
-            .getAsInt() : 0;
+        IExpression harvestLevel = json.has("harvestLevel") ? ExpressionsParser.parse(json.get("harvestLevel"))
+            : new ConstantExpression(0);
+
+        if (!json.has("harvestLevel")) {
+            Logger.warn(
+                "harvest_block with no harvestLevel defaults to 0, which is what a wooden pick "
+                    + "manages. Any block in the structure that needs better - iron ore needs 1 - "
+                    + "stops the recipe from starting at all. Write \"harvestLevel\": \"tier\" to "
+                    + "let the machine decide instead of a fixed number.");
+        }
 
         return new HarvestBlockDecorator(recipe, fortune, silkTouch, shear, harvestLevel);
     }

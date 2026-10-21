@@ -57,8 +57,7 @@ public class EnergyOutput extends AbstractModularRecipeOutput {
             if (!(port instanceof IOKEnergySink)) continue;
 
             IOKEnergySink energyPort = (IOKEnergySink) port;
-            int accepted = energyPort
-                .receiveEnergy(ForgeDirection.UNKNOWN, (int) Math.min(remaining, (long) Integer.MAX_VALUE), false);
+            int accepted = energyPort.receiveEnergy(ForgeDirection.UNKNOWN, Amounts.toInt(remaining), false);
             remaining -= accepted;
 
             if (remaining <= 0) break;

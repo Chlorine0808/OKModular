@@ -69,7 +69,7 @@ public class ItemOutput extends AbstractModularRecipeOutput {
     @Override
     public void apply(List<IModularPort> ports, int multiplier, ConditionContext context) {
         if (output == null) return;
-        int remaining = (int) (getRequiredAmount(context) * multiplier);
+        int remaining = Amounts.toInt(getRequiredAmount(context) * multiplier);
         for (IModularPort port : ports) {
             if (port.getPortType() != IPortType.Type.ITEM) continue;
             if (port.getPortDirection() != IPortType.Direction.OUTPUT
@@ -246,8 +246,8 @@ public class ItemOutput extends AbstractModularRecipeOutput {
             }
             this.amountExpr = null;
         }
-        this.count = (int) total;
-        if (output != null) output.stackSize = (int) total;
+        this.count = Amounts.toInt(total);
+        if (output != null) output.stackSize = this.count;
     }
 
     @Override

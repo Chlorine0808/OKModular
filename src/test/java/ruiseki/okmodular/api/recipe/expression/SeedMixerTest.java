@@ -2,13 +2,20 @@ package ruiseki.okmodular.api.recipe.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import ruiseki.okmodular.testsupport.JavaSource;
 
 /**
  * 評価の種から乱数を作る部分。
@@ -176,5 +183,276 @@ public class SeedMixerTest {
 
         assertTrue(value >= 0.0 && value < 1.0);
         assertNotEquals(value, SeedMixer.toUnitInterval(1L, SeedMixer.RANDOM));
+    }
+
+    // ============================================
+    // 位置由来の種（forPosition）
+    // ============================================
+    //
+    // 1 レシピの実行中、評価の種は固定される（開始 tick が開始時に 1 回だけ決まり、
+    // NBT で永続化される）。**それが欲しい性質**で、セーブ・ロードを跨いでも判定が揺れない。
+    //
+    // しかしそのせいで、**位置ごとに引きたいものが全部同じ値になる**。
+    // `PerPositionProbabilityDecorator` は座標を回して 1 個ずつ確率判定するが、
+    // 種が固定なら 50 マス全部が同じ数を引く ＝「全部置く」か「全部置かない」の二択に潰れる。
+    // 構造体 IO の重みテーブルも同じ穴を踏む。
+    //
+    // 位置を種に混ぜる口をここに置く。ここで縛るのは
+    // **「隣どうしが違う値になる」**ことと **「同じ位置なら何度でも同じ」**ことの両立。
+
+    @Test
+    @DisplayName("同じ位置・同じ種なら同じ値")
+    public void test位置由来_決定的である() {
+        // checkCapacity で引いた値と apply で引いた値が一致しないと、
+        // 「置けると答えたのに置かない」が起きる。
+        assertEquals(SeedMixer.forPosition(12345L, 4, -7, 92), SeedMixer.forPosition(12345L, 4, -7, 92));
+    }
+
+    @Test
+    @DisplayName("隣り合う位置が違う値になる")
+    public void test位置由来_隣が違う() {
+        long base = SeedMixer.forPosition(12345L, 0, 0, 0);
+
+        assertNotEquals(base, SeedMixer.forPosition(12345L, 1, 0, 0));
+        assertNotEquals(base, SeedMixer.forPosition(12345L, 0, 1, 0));
+        assertNotEquals(base, SeedMixer.forPosition(12345L, 0, 0, 1));
+    }
+
+    @Test
+    @DisplayName("軸を取り違えない")
+    public void test位置由来_軸ごとに違う() {
+        // 座標を足して混ぜるだけの実装（x + y + z）はここで落ちる。
+        // 構造体のセルは (a, b, c) が小さい整数なので、和が衝突する組が大量にある。
+        assertNotEquals(SeedMixer.forPosition(1L, 1, 0, 0), SeedMixer.forPosition(1L, 0, 1, 0));
+        assertNotEquals(SeedMixer.forPosition(1L, 0, 1, 0), SeedMixer.forPosition(1L, 0, 0, 1));
+        assertNotEquals(SeedMixer.forPosition(1L, 1, 2, 3), SeedMixer.forPosition(1L, 3, 2, 1));
+        assertNotEquals(SeedMixer.forPosition(1L, 2, 0, 0), SeedMixer.forPosition(1L, 1, 1, 0));
+    }
+
+    @Test
+    @DisplayName("原点でも素の種をそのまま返さない")
+    public void test位置由来_原点() {
+        // forDraw は index 0 を素通しする（バッチ 1 を従来どおりにするため）。
+        // forPosition は素通ししてはいけない。アンカーセルの (0,0,0) が
+        // 「位置を混ぜない draw」と同じ値になると、そのセルだけ他の判定と連動する。
+        assertNotEquals(12345L, SeedMixer.forPosition(12345L, 0, 0, 0));
+    }
+
+    @Test
+    @DisplayName("種が違えば同じ位置でも違う")
+    public void test位置由来_種が違えば違う() {
+        // 実行ごとに隕石の形が変わるのはここが担う。
+        assertNotEquals(SeedMixer.forPosition(1L, 3, 3, 3), SeedMixer.forPosition(2L, 3, 3, 3));
+    }
+
+    @Test
+    @DisplayName("負の座標でも散る")
+    public void test位置由来_負の座標() {
+        // 構造体のセルはアンカー相対なので **半分が負**。A/C は [-2, 2]、B は下向きに負。
+        // 座標を非負前提で詰める実装（シフトして OR するなど）はここで潰れる。
+        Set<Long> seen = new HashSet<>();
+        for (int a = -2; a <= 2; a++) {
+            for (int b = -2; b <= -1; b++) {
+                for (int c = -2; c <= 2; c++) {
+                    seen.add(SeedMixer.forPosition(777L, a, b, c));
+                }
+            }
+        }
+
+        assertEquals(50, seen.size(), "5x5x2 の 50 セルで重複が出た");
+    }
+
+    @Test
+    @DisplayName("50 セルの確率判定が全部同じ答えに潰れない")
+    public void test位置由来_セルごとの確率判定が潰れない() {
+        // PerPositionProbabilityDecorator が壊れていた形そのもの。
+        // 種を固定したまま位置を混ぜずに引くと、この数は 0 か 50 にしかならない。
+        int hits = 0;
+        for (int a = -2; a <= 2; a++) {
+            for (int b = -2; b <= -1; b++) {
+                for (int c = -2; c <= 2; c++) {
+                    if (SeedMixer.toUnitInterval(SeedMixer.forPosition(20260802L, a, b, c), SeedMixer.CHANCE) < 0.5) {
+                        hits++;
+                    }
+                }
+            }
+        }
+
+        assertTrue(hits > 10 && hits < 40, "50 セル中 " + hits + " 個が当たった（0 や 50 に潰れている）");
+    }
+
+    @Test
+    @DisplayName("位置を振ると区間に散る")
+    public void test位置由来_一様に散る() {
+        // 落ちるべきときに確実に落ちる粗い下限。期待値 200 に対して 100 で縛る。
+        int[] buckets = new int[10];
+        for (int x = 0; x < 20; x++) {
+            for (int y = 0; y < 5; y++) {
+                for (int z = 0; z < 20; z++) {
+                    double value = SeedMixer.toUnitInterval(SeedMixer.forPosition(0L, x, y, z), SeedMixer.RANDOM);
+                    buckets[(int) (value * 10)]++;
+                }
+            }
+        }
+
+        for (int i = 0; i < buckets.length; i++) {
+            assertTrue(buckets[i] >= 100, "位置由来の区間 " + i + " が " + buckets[i] + " 個");
+        }
+    }
+
+    // ============================================
+    // 機械が渡す評価の種（forEvaluation）
+    // ============================================
+    //
+    // 旧実装は XOR の連鎖で、**ワールドシードが 2 回入って打ち消し合っていた**:
+    //
+    // 実行の種 = 開始tick ^ ワールドシード ^ 位置
+    // 評価の種 = 位置 ^ ワールドシード ^ 処理回数 ^ 実行の種
+    // = 位置 ^ 位置 ^ 処理回数 ^ 開始tick ← ワールドシードが消える
+    //
+    // しかも待機中は実行の種が 0 なのでワールドシードが 1 個だけ残る。
+    // **稼働中か待機中かでワールドシード依存が入れ替わる**という一貫性の無さがあった。
+    //
+    // `y` はどちらの式にも入っていなかったので、**同じ x,z に積んだ 2 台が同じ目を出す**。
+    // 機械を縦に積むのは普通の建て方。
+    //
+    // ここで縛るのは 5 つ: ワールド・位置（y を含む）・処理回数・実行が変われば変わること、
+    // そして 1 回の実行の中では変わらないこと。
+
+    @Test
+    @DisplayName("同じ状況なら何度でも同じ種")
+    public void test評価_決定的である() {
+        // 「1 回の実行の中では固定」がこれ。確認したときと適用するときで違う値が出ると、
+        // 「置けると答えたのに置かない」が起きる。
+        assertEquals(
+            SeedMixer.forEvaluation(4649L, 10, 64, -20, 7, 1234L),
+            SeedMixer.forEvaluation(4649L, 10, 64, -20, 7, 1234L));
+    }
+
+    @Test
+    @DisplayName("ワールドシードが違えば違う種")
+    public void test評価_ワールドシードが効く() {
+        // ここが旧実装で打ち消し合っていた。同じ座標・同じ tick・同じ回数なら、
+        // **別のワールドでも同じ目**が出ていた。
+        assertNotEquals(
+            SeedMixer.forEvaluation(1L, 10, 64, -20, 7, 1234L),
+            SeedMixer.forEvaluation(2L, 10, 64, -20, 7, 1234L));
+    }
+
+    @Test
+    @DisplayName("待機中でもワールドシードが効く")
+    public void test評価_待機中もワールドシードが効く() {
+        // 開始 tick 0 = 一度もレシピを回していない機械。旧実装ではここだけ
+        // ワールドシードが残っていたので、稼働中と待機中で挙動が入れ替わっていた。
+        assertNotEquals(
+            SeedMixer.forEvaluation(1L, 10, 64, -20, 0, 0L),
+            SeedMixer.forEvaluation(2L, 10, 64, -20, 0, 0L));
+    }
+
+    @Test
+    @DisplayName("縦に積んだ 2 台が違う種を持つ")
+    public void test評価_高さが効く() {
+        // y はどちらの式にも入っていなかった。同じ x,z の 2 台が、同 tick・同回数なら
+        // 完全に同じ抽選をしていた。
+        assertNotEquals(
+            SeedMixer.forEvaluation(4649L, 10, 64, -20, 7, 1234L),
+            SeedMixer.forEvaluation(4649L, 10, 65, -20, 7, 1234L));
+    }
+
+    @Test
+    @DisplayName("処理回数と実行が変われば種も変わる")
+    public void test評価_実行ごとに変わる() {
+        long base = SeedMixer.forEvaluation(4649L, 10, 64, -20, 7, 1234L);
+
+        assertNotEquals(base, SeedMixer.forEvaluation(4649L, 10, 64, -20, 8, 1234L), "処理回数が効いていない");
+        assertNotEquals(base, SeedMixer.forEvaluation(4649L, 10, 64, -20, 7, 1235L), "開始 tick が効いていない");
+    }
+
+    @Test
+    @DisplayName("成分が打ち消し合わない")
+    public void test評価_打ち消し合わない() {
+        // XOR の連鎖だと、同じ値が 2 回入ったところが消える。足して混ぜる形なら消えない。
+        // 「x と処理回数を入れ替えた」「位置とシードを入れ替えた」で衝突しないことを見る。
+        // j は 1 から。0 だと 3 本とも「全部 0」の同じ呼び出しになって、
+        // 数が合わないのが実装のせいなのかテストのせいなのか分からなくなる。
+        Set<Long> seen = new HashSet<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                seen.add(SeedMixer.forEvaluation(i, j, 0, 0, 0, 0L));
+                seen.add(SeedMixer.forEvaluation(i, 0, 0, 0, j, 0L));
+                seen.add(SeedMixer.forEvaluation(i, 0, 0, 0, 0, j));
+            }
+        }
+
+        assertEquals(3 * 8 * 8, seen.size(), "成分の入れ替えで同じ種になった組がある");
+    }
+
+    // ============================================
+    // 系統の番号がぶつかっていないこと
+    // ============================================
+    //
+    // 系統を分ける目的は「同じ種から引いた 2 つが連動しないこと」だけなので、
+    // **番号が重複したら黙って連動します**。P（`bonus` を 2 つ書くと必ず同じ答え）が
+    // まさにそれで、あちらは番号ではなく軸が足りていない版。
+    //
+    // 番号は手で振るので、足すたびに 1 つずつ目で確かめる作業になります。それをやめる。
+
+    @Test
+    @DisplayName("宣言された系統の番号が重複していない")
+    public void test系統の番号が重複していない() throws Exception {
+        Map<Long, String> byValue = new LinkedHashMap<>();
+
+        for (Field field : SeedMixer.class.getDeclaredFields()) {
+            if (!Modifier.isPublic(field.getModifiers())) continue;
+            if (!Modifier.isStatic(field.getModifiers())) continue;
+            if (field.getType() != long.class) continue;
+
+            String clash = byValue.put(field.getLong(null), field.getName());
+            assertNull(clash, clash + " と " + field.getName() + " が同じ番号。この 2 つは必ず連動する");
+        }
+
+        assertTrue(byValue.size() >= 11, "系統が 11 個未満。走査が壊れているか、宣言が消えた（" + byValue.size() + " 個）");
+    }
+
+    @Test
+    @DisplayName("パターンのセル用に 2 系統ある")
+    public void testパターンのセル系統() {
+        // 重み表つき mappings は 1 セルにつき 2 回引く ——「何か置くか」と「何を置くか」。
+        // 同じ系統だと**置くと決めたセルが必ず同じブロックを引く**ので、重み表が death する。
+        assertNotEquals(SeedMixer.PATTERN_CELL_CHANCE, SeedMixer.PATTERN_CELL_WEIGHT, "置くかどうかと何を置くかが同じ系統になっている");
+    }
+
+    @Test
+    @DisplayName("同じセルで 2 系統が別々の答えを返す")
+    public void testセルの2系統が連動しない() {
+        // 番号が違うだけでは足りない。実際に値が割れることを見る。
+        int agreed = 0;
+        for (int x = 0; x < 20; x++) {
+            for (int z = 0; z < 20; z++) {
+                long cell = SeedMixer.forPosition(4649L, x, 64, z);
+                boolean gate = SeedMixer.toUnitInterval(cell, SeedMixer.PATTERN_CELL_CHANCE) < 0.5;
+                boolean pick = SeedMixer.toUnitInterval(cell, SeedMixer.PATTERN_CELL_WEIGHT) < 0.5;
+                if (gate == pick) agreed++;
+            }
+        }
+
+        // 独立なら 400 回中 200 前後。連動していれば 0 か 400 になる。
+        assertTrue(agreed > 150 && agreed < 250, "2 系統が連動している（400 セル中 " + agreed + " 回一致）");
+    }
+
+    @Test
+    @DisplayName("機械が forEvaluation を通っている")
+    public void test機械が自前で組み立てていない() {
+        // 種の組み立てが TE 側に散ると、また片方だけ古くなる。
+        // 旧実装は「実行の種」と「評価の種」の 2 箇所に別々の綴りで書かれていて、
+        // その 2 つが XOR で打ち消し合っていた。
+        String source = JavaSource
+            .stripComments(JavaSource.read(JavaSource.MAIN.resolve("common/tile/TEMachineController.java")));
+
+        assertTrue(source.contains("SeedMixer.forEvaluation("), "TEMachineController が forEvaluation を通っていない");
+        assertTrue(!source.contains("currentRecipeSeed"), "currentRecipeSeed が戻っている。開始 tick と同じ事実を 2 つ持つことになる");
+        assertTrue(
+            !source.contains("worldObj.getSeed()\n") && !source.contains("^ worldObj.getSeed()"),
+            "ワールドシードを TE 側で XOR している。打ち消し合いが戻る");
     }
 }

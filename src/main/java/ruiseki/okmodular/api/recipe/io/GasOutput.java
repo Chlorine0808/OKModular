@@ -49,8 +49,7 @@ public class GasOutput extends AbstractModularRecipeOutput {
         Gas gas = GasRegistry.getGas(gasName);
         if (gas == null) return;
 
-        int req = amountExpr != null ? (int) amountExpr.evaluateDouble(context) : amount;
-        int remaining = req * multiplier;
+        long remaining = getRequiredAmount(context) * multiplier;
 
         for (IModularPort port : ports) {
             if (port.getPortType() != IPortType.Type.GAS) continue;
@@ -62,7 +61,7 @@ public class GasOutput extends AbstractModularRecipeOutput {
             if (!(port instanceof IGasHandler)) continue;
 
             IGasHandler gasPort = (IGasHandler) port;
-            GasStack insertStack = new GasStack(gas, remaining);
+            GasStack insertStack = new GasStack(gas, Amounts.toInt(remaining));
             int accepted = gasPort.receiveGas(ForgeDirection.UNKNOWN, insertStack, true);
             remaining -= accepted;
             if (remaining <= 0) break;

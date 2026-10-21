@@ -1,0 +1,470 @@
+{
+  "group": "PressurizedCrusher",
+  "recipes": [
+    {
+      "registryName": "crusher_cobblestone",
+      "name": "Cobblestone to Gravel",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_gravel",
+      "name": "Gravel to Sand",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_iron_ore",
+      "name": "Iron Ore to Dust",
+      "duration": 80,
+      "inputs": [
+        {
+          "item": "minecraft:iron_ore",
+          "amount": 1
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:dust:26",
+          "amount": 2
+        }
+      ],
+      "decorators": [
+        {
+          "bonus": {
+            "chance": 0.25,
+            "outputs": [
+              {
+                "item": "okmodular:dust:26",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_gold_ore",
+      "name": "Gold Ore to Dust",
+      "duration": 80,
+      "inputs": [
+        {
+          "item": "minecraft:gold_ore",
+          "amount": 1
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:dust:79",
+          "amount": 2
+        }
+      ],
+      "decorators": [
+        {
+          "bonus": {
+            "chance": 0.25,
+            "outputs": [
+              {
+                "item": "okmodular:dust:79",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_iron_ore_byproduct",
+      "name": "Iron Ore to Dust (with byproduct)",
+      "duration": 80,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "item": "minecraft:iron_ore",
+          "amount": 1
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:dust:26",
+          "amount": 2
+        }
+      ],
+      "decorators": [
+        {
+          "bonus": {
+            "chance": 0.25,
+            "outputs": [
+              {
+                "item": "okmodular:dust:26",
+                "amount": 1
+              }
+            ]
+          }
+        },
+        {
+          "type": "weighted_random",
+          "outputs": [
+            {
+              "item": "minecraft:gravel",
+              "amount": 1,
+              "weight": 70
+            },
+            {
+              "item": "okmodular:dust:28",
+              "amount": 1,
+              "weight": 25
+            },
+            {
+              "item": "okmodular:dust:78",
+              "amount": 1,
+              "weight": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_gold_ore_byproduct",
+      "name": "Gold Ore to Dust (with byproduct)",
+      "duration": 80,
+      "tier": {
+        "casing": 2
+      },
+      "inputs": [
+        {
+          "item": "minecraft:gold_ore",
+          "amount": 1
+        },
+        {
+          "energy": 32,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:dust:79",
+          "amount": 2
+        }
+      ],
+      "decorators": [
+        {
+          "bonus": {
+            "chance": 0.25,
+            "outputs": [
+              {
+                "item": "okmodular:dust:79",
+                "amount": 1
+              }
+            ]
+          }
+        },
+        {
+          "type": "weighted_random",
+          "outputs": [
+            {
+              "item": "minecraft:gravel",
+              "amount": 1,
+              "weight": 70
+            },
+            {
+              "item": "okmodular:dust:47",
+              "amount": 1,
+              "weight": 25
+            },
+            {
+              "item": "okmodular:dust:78",
+              "amount": 1,
+              "weight": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_obsidian",
+      "name": "Obsidian to Dust",
+      "duration": 200,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "item": "minecraft:obsidian",
+          "amount": 1
+        },
+        {
+          "energy": 128,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "okmodular:dust:132",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_coal_block",
+      "name": "Coal Block to Diamond",
+      "duration": 400,
+      "tier": {
+        "casing": 3
+      },
+      "inputs": [
+        {
+          "item": "minecraft:coal_block",
+          "amount": 8
+        },
+        {
+          "energy": 256,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:diamond",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "chance": "0.25 + tier * 0.05"
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_gravel_in_rain",
+      "name": "Gravel to Flint (while raining)",
+      "duration": 40,
+      "priority": 1,
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:flint",
+          "amount": 2
+        }
+      ],
+      "conditions": [
+        {
+          "weather": "rain"
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_cobblestone_over_lava",
+      "name": "Cobblestone to Netherrack (lava two blocks below the controller)",
+      "duration": 40,
+      "priority": 1,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 4
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:netherrack",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "dx": 0,
+          "dy": -2,
+          "dz": 0,
+          "condition": {
+            "block": "minecraft:lava"
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_netherrack",
+      "name": "Netherrack to Glowstone Dust (in the Nether)",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:netherrack",
+          "amount": 4
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:glowstone_dust",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "or": [
+            {
+              "dimension": -1
+            },
+            {
+              "biome": "Hell"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_sandstone_in_desert",
+      "name": "Sandstone to Sand (sandy biome, no thunder)",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:sandstone",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 4
+        }
+      ],
+      "conditions": [
+        {
+          "and": [
+            {
+              "tag": "SANDY"
+            },
+            {
+              "not": {
+                "weather": "thunder"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_dirt_in_swamp",
+      "name": "Dirt to Clay (in the middle of a swamp)",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:dirt",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:clay_ball",
+          "amount": 2
+        }
+      ],
+      "conditions": [
+        {
+          "pattern": [
+            "SSS",
+            "SSS",
+            "SSS"
+          ],
+          "keys": {
+            "S": {
+              "tag": "SWAMP"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "crusher_bone_at_night",
+      "name": "Bone to Bone Meal x5 (at night)",
+      "duration": 40,
+      "inputs": [
+        {
+          "item": "minecraft:bone",
+          "amount": 1
+        },
+        {
+          "energy": 16,
+          "perTick": true
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:dye:15",
+          "amount": 5
+        }
+      ],
+      "conditions": [
+        {
+          "expression": "is_night == 1"
+        }
+      ]
+    }
+  ]
+}

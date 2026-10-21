@@ -1,0 +1,143 @@
+package ruiseki.okmodular.structure;
+
+/**
+ * Turns the {@code layers} / {@code rows} written in JSON into the orientation StructureLib
+ * expects.
+ * <p>
+ * The authored shape is not used as-is: rows are reversed within each layer, or, for a machine that
+ * builds upright, layers and rows swap roles. Only afterwards does
+ * {@code StructureUtility.transpose} run and the result reach {@code addShape}.
+ * <p>
+ * <b>In the processed shape, {@code (col, layer, row)} is {@code (A, B, C)}.</b>
+ * {@link #findControllerOffset} returns that triple, and it is handed straight to
+ * {@code IStructureDefinition.check} as {@code basePositionA/B/C}.
+ * <p>
+ * This lives apart from {@code CustomStructureRegistry} because structure IO patterns reuse the same
+ * authoring vocabulary and have to land in the same orientation. Copying the arithmetic into a
+ * second place would let the two drift apart, silently rotating patterns relative to the machine
+ * they sit in.
+ */
+public final class StructureShape {
+
+    private StructureShape() {}
+
+    /**
+     * Applies whichever transform the machine's facing calls for.
+     *
+     * @param defaultFacing the structure's {@code defaultFacing}, or null for a horizontal machine
+     */
+    public static String[][] process(String[][] shape, String defaultFacing) {
+        if (isVertical(defaultFacing)) {
+            return transformForVertical(shape, defaultFacing);
+        }
+        return rotate180(shape);
+    }
+
+    /**
+     * Where the cell drawn at {@code (col, layer, row)} lands in {@link #process}: {@code {A, B, C}}.
+     * Plain arithmetic, so it also answers for a position outside the drawn cells.
+     */
+    public static int[] toProcessed(String[][] shape, String defaultFacing, int col, int layer, int row) {
+        if (isVertical(defaultFacing)) {
+            int c = "DOWN".equalsIgnoreCase(defaultFacing) ? shape.length - 1 - layer : layer;
+            return new int[] { col, row, c };
+        }
+        return new int[] { col, layer, rowsIn(shape, layer) - 1 - row };
+    }
+
+    /** The inverse of {@link #toProcessed}: the drawn {@code {col, layer, row}} of a processed cell. */
+    public static int[] toAuthored(String[][] shape, String defaultFacing, int a, int b, int c) {
+        if (isVertical(defaultFacing)) {
+            int layer = "DOWN".equalsIgnoreCase(defaultFacing) ? shape.length - 1 - c : c;
+            return new int[] { a, layer, b };
+        }
+        return new int[] { a, b, rowsIn(shape, b) - 1 - c };
+    }
+
+    private static boolean isVertical(String defaultFacing) {
+        return "UP".equalsIgnoreCase(defaultFacing) || "DOWN".equalsIgnoreCase(defaultFacing);
+    }
+
+    /** Rows in one layer, as rotate180 counts them; past the drawn layers, the first layer's. */
+    private static int rowsIn(String[][] shape, int layer) {
+        if (shape.length == 0) return 0;
+        return layer >= 0 && layer < shape.length ? shape[layer].length : shape[0].length;
+    }
+
+    /** Reverses the row order within each layer. Returns a new array; the input is untouched. */
+    public static String[][] rotate180(String[][] shape) {
+        String[][] rotated = new String[shape.length][];
+        for (int layer = 0; layer < shape.length; layer++) {
+            int numRows = shape[layer].length;
+            rotated[layer] = new String[numRows];
+            for (int row = 0; row < numRows; row++) {
+                rotated[layer][row] = shape[layer][numRows - 1 - row];
+            }
+        }
+        return rotated;
+    }
+
+    /**
+     * Moves layers (Y) into rows (Z) so the structure builds upright.
+     * <p>
+     * {@code DOWN} additionally reverses the resulting rows, so the shape reads the same way from
+     * either side.
+     */
+    public static String[][] transformForVertical(String[][] shape, String facing) {
+        int originalLayers = shape.length;
+        if (originalLayers == 0) return shape;
+
+        int originalRows = shape[0].length;
+        boolean isDown = "DOWN".equalsIgnoreCase(facing);
+
+        String[][] transformed = new String[originalRows][originalLayers];
+
+        for (int originalZ = 0; originalZ < originalRows; originalZ++) {
+            for (int originalY = 0; originalY < originalLayers; originalY++) {
+                int targetRowIndex = isDown ? (originalLayers - 1 - originalY) : originalY;
+
+                transformed[originalZ][targetRowIndex] = shape[originalY].length > originalZ
+                    ? shape[originalY][originalZ]
+                    : "";
+            }
+        }
+        return transformed;
+    }
+
+    /**
+     * Locates the controller symbol {@code 'Q'} in an already-processed shape.
+     *
+     * @return {@code {col, layer, row}} = {@code {A, B, C}}, or the origin when there is no
+     *         controller in the shape
+     */
+    public static int[] findControllerOffset(String[][] shape) {
+        int[] found = findSymbolOffset(shape, 'Q');
+        return found != null ? found : new int[] { 0, 0, 0 };
+    }
+
+    /**
+     * Locates an arbitrary symbol in an already-processed shape.
+     * <p>
+     * A machine has exactly one anchor and it is always {@code 'Q'}, but a structure IO pattern
+     * picks its own -- which cell of the pattern lands on the block the recipe names. Both searches
+     * live here so they cannot drift apart.
+     *
+     * @return {@code {col, layer, row}} = {@code {A, B, C}} of the first occurrence, scanning layers
+     *         then rows then columns, or <b>null</b> when the symbol is absent. Null rather than the
+     *         origin, so a pattern that forgot to draw its anchor is a reportable error instead of
+     *         a silent corner anchor.
+     */
+    public static int[] findSymbolOffset(String[][] shape, char symbol) {
+        for (int layer = 0; layer < shape.length; layer++) {
+            for (int row = 0; row < shape[layer].length; row++) {
+                String rowStr = shape[layer][row];
+                for (int col = 0; col < rowStr.length(); col++) {
+                    if (rowStr.charAt(col) == symbol) {
+                        return new int[] { col, layer, row };
+                    }
+                }
+            }
+        }
+        return null;
+    }
+}

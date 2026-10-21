@@ -20,11 +20,13 @@ import ruiseki.okcore.init.ModModuleBase;
 import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okcore.proxy.ICommonProxy;
 import ruiseki.okmodular.api.condition.Conditions;
+import ruiseki.okmodular.common.config.DefaultConfigWriter;
 import ruiseki.okmodular.common.fluid.EnumFluidMaterial;
 import ruiseki.okmodular.common.fluid.ModFluidGases;
 import ruiseki.okmodular.common.init.MachineryBlocks;
 import ruiseki.okmodular.common.init.MachineryItems;
 import ruiseki.okmodular.common.init.MachineryOreDict;
+import ruiseki.okmodular.common.init.MachineryRecipes;
 import ruiseki.okmodular.common.integration.MachineryIntegration;
 import ruiseki.okmodular.common.integration.structurelib.MachineControllerInfoContainer;
 import ruiseki.okmodular.common.item.ItemFluidCanister;
@@ -42,6 +44,7 @@ import ruiseki.okmodular.core.event.MemoryEventHandler;
 import ruiseki.okmodular.structure.BlockResolver;
 import ruiseki.okmodular.structure.CustomStructureRegistry;
 import ruiseki.okmodular.structure.StructureManager;
+import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
 
 public class MachineryModule extends ModModuleBase {
 
@@ -119,6 +122,8 @@ public class MachineryModule extends ModModuleBase {
         // Structure engine wiring (formerly done by the parent mod's CoreModule).
         // The config root is this mod's ID, matching RecipeLoader and TierConfigLoader.
         StructureManager.setReloadCallback(CustomStructureRegistry::registerAll);
+        // Writes the example machines into a fresh config before anything reads it.
+        StructureManager.setDefaultStructureGenerator(DefaultConfigWriter::writeMissing);
         StructureManager.getInstance()
             .initialize(configDir);
 
@@ -157,12 +162,17 @@ public class MachineryModule extends ModModuleBase {
 
     @Override
     public void init(FMLInitializationEvent event) {
-
+        // Blocks, items and ore names all exist by now; they are registered in preInit.
+        MachineryRecipes.init();
     }
 
     @Override
     public void postInit(FMLPostInitializationEvent event) {
         TierConfigLoader.INSTANCE.load(configDir);
+        // Before the recipes: a `structure` input names a pattern, and resolving that name
+        // against an empty registry would report every recipe as pointing at nothing.
+        StructurePatternLoader.getInstance()
+            .loadAll(configDir);
         RecipeLoader.getInstance()
             .loadAll(configDir);
     }
@@ -203,6 +213,19 @@ public class MachineryModule extends ModModuleBase {
             hasErrors = true;
         }
 
+        try {
+            StructurePatternLoader.getInstance()
+                .loadAll(configDir);
+            sender.addChatMessage(
+                new ChatComponentText(EnumChatFormatting.GREEN + "  [Modular] Structure IO patterns reloaded"));
+        } catch (Exception e) {
+            sender.addChatMessage(
+                new ChatComponentText(
+                    EnumChatFormatting.RED + "  [Modular] Structure IO patterns failed: " + e.getMessage()));
+            hasErrors = true;
+        }
+
+        // After the patterns, for the reason postInit loads them in that order.
         try {
             RecipeLoader.getInstance()
                 .reload(configDir);

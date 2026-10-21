@@ -3,14 +3,14 @@
 Paint a machine's ports and **only ports of the same colour are treated as one group**.
 One machine can then hold several lines that take material independently.
 
-## 📚 Related Documentation
+## Related Documentation
 
 - [Modular Machinery Documentation](./INDEX.md)
 - [Recipe JSON Format](../recipes/JSON_FORMAT.md)
 
 ---
 
-## 1. Summary
+## 1. Overview
 
 For managing several kinds of recipe through one machine.
 
@@ -34,10 +34,10 @@ Painting a port the colour it already is consumes no dye.
 The colour also shows in the WAILA tooltip.
 
 > [!NOTE]
-External block ports cannot be painted yet.
-They count as unpainted, so by the rules below every colour shares them.
+> External block ports cannot be painted yet.
+> They count as unpainted, so by the rules below every colour shares them.
 
-## 3. The order recipes run in
+## 3. How ports are grouped, and the order groups are checked
 
 | # | Rule |
 |---|---|
@@ -59,7 +59,6 @@ unpainted:  one energy input
 ```
 
 Material in an unpainted input port is visible to every colour.
-
 
 ## 4. How a recipe is chosen
 

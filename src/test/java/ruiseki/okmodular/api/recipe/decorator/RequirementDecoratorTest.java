@@ -204,4 +204,21 @@ public class RequirementDecoratorTest {
             base.getInputs()
                 .size());
     }
+
+    @Test
+    @DisplayName("【回帰防止】requirements が無ければレシピは選ばれない")
+    public void testRequirementsが無ければ一致しない() {
+        // matchesInput が internal に丸投げしていたため，金床が無くても金床つきの
+        // レシピが選ばれ，開始で断られて後ろの普通のレシピを塞いでいた
+        IModularRecipe base = ModularRecipe.builder()
+            .registryName("no_inputs")
+            .recipeGroup("test")
+            .build();
+        IModularRecipe recipe = DecoratorParser.parse(
+            base,
+            new JsonParser().parse("{ \"type\": \"requirement\", \"requirements\": [ { \"energy\": 10000 } ] }"));
+
+        assertTrue(base.matchesInput(java.util.Collections.emptyList()), "前提: 入力の無いレシピは一致する");
+        assertFalse(recipe.matchesInput(java.util.Collections.emptyList()), "requirement の分がそろっていない");
+    }
 }

@@ -13,6 +13,7 @@ import net.minecraft.util.ChunkCoordinates;
 import com.google.gson.JsonObject;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.structure.core.StructureSymbols;
 
 /**
  * Reads a value out of a TileEntity's NBT.
@@ -159,9 +160,11 @@ public class NbtExpression implements IExpression {
             json.get("default")
                 .getAsDouble())
             : EvaluationValue.ZERO;
-        char sym = json.has("symbol") ? json.get("symbol")
-            .getAsString()
-            .charAt(0) : '\0';
+        char sym = json.has("symbol") ? StructureSymbols.requireAddressable(
+            json.get("symbol")
+                .getAsString()
+                .charAt(0),
+            "an nbt expression") : '\0';
         return new NbtExpression(key, def, sym);
     }
 }

@@ -107,14 +107,16 @@ public class ModularRecipe implements IModularRecipe {
     }
 
     /**
-     * Check if all input requirements are met by the given ports.
-     *
-     * @param inputPorts List of input ports
-     * @param simulate   If true, only check. If false, consume inputs.
-     * @return true if all inputs are satisfied
+     * Whether every input can be drawn from the given ports.
+     * <p>
+     * This used to be {@code processInputs(ports, simulate)}, and the {@code !simulate} half
+     * consumed. Nothing ever passed false: consumption moved to {@link
+     * ruiseki.okmodular.api.recipe.visitor.RecipeExecutionVisitor} when the engine grew a
+     * visitor, and the old half stayed behind looking like the execution path. Six decorator
+     * types were written into that lie and none of them ran. Checking is all this does now,
+     * and the name says so.
      */
-    public boolean processInputs(List<IModularPort> inputPorts, boolean simulate) {
-
+    private boolean inputsAvailable(List<IModularPort> inputPorts) {
         for (IRecipeInput input : inputs) {
             if (input instanceof IModularRecipeInput modularInput) {
                 List<IModularPort> filtered = filterByType(inputPorts, modularInput.getPortType());
@@ -123,49 +125,11 @@ public class ModularRecipe implements IModularRecipe {
                 }
             }
         }
-
-        if (!simulate) {
-            for (IRecipeInput input : inputs) {
-                if (input instanceof IModularRecipeInput modularInput) {
-                    List<IModularPort> filtered = filterByType(inputPorts, modularInput.getPortType());
-                    modularInput.process(filtered, false);
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Check if all outputs can be inserted into the given ports.
-     *
-     * @param outputPorts List of output ports
-     * @param simulate    If true, only check. If false, produce outputs.
-     * @return true if all outputs can be inserted
-     */
-    public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
-
-        for (IRecipeOutput output : outputs) {
-            if (output instanceof IModularRecipeOutput modularOutput) {
-                List<IModularPort> filtered = filterByType(outputPorts, modularOutput.getPortType());
-                if (!modularOutput.checkCapacity(filtered)) {
-                    return false;
-                }
-            }
-        }
-
-        if (!simulate) {
-            for (IRecipeOutput output : outputs) {
-                if (output instanceof IModularRecipeOutput modularOutput) {
-                    List<IModularPort> filtered = filterByType(outputPorts, modularOutput.getPortType());
-                    modularOutput.apply(filtered);
-                }
-            }
-        }
         return true;
     }
 
     public boolean matchesInput(List<IModularPort> inputPorts) {
-        if (!processInputs(inputPorts, true)) {
+        if (!inputsAvailable(inputPorts)) {
             return false;
         }
 
@@ -193,8 +157,24 @@ public class ModularRecipe implements IModularRecipe {
         return true;
     }
 
+    /**
+     * Whether every output has somewhere to go.
+     * <p>
+     * The other half of the old {@code processOutputs(ports, simulate)}. Completion hands over
+     * {@code ProcessAgent.cachedOutputs} rather than asking the recipe, so the applying half
+     * had no caller; what a decorator adds on top now goes through
+     * {@link IModularRecipe#produceExtraOutputs}.
+     */
     public boolean canOutput(List<IModularPort> outputPorts) {
-        return processOutputs(outputPorts, true);
+        for (IRecipeOutput output : outputs) {
+            if (output instanceof IModularRecipeOutput modularOutput) {
+                List<IModularPort> filtered = filterByType(outputPorts, modularOutput.getPortType());
+                if (!modularOutput.checkCapacity(filtered)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override

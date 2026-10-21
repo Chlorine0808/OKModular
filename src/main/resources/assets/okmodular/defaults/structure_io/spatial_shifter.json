@@ -1,0 +1,121 @@
+{
+  "patterns": [
+    {
+      "name": "shifter_empty",
+      "anchor": "X",
+      "layers": [
+        [
+          "___",
+          "___",
+          "___"
+        ],
+        [
+          "___",
+          "___",
+          "___"
+        ],
+        [
+          "___",
+          "___",
+          "___"
+        ],
+        [
+          "   ",
+          " X ",
+          "   "
+        ]
+      ]
+    },
+    {
+      "name": "shifter_core",
+      "anchor": "X",
+      "mappings": {
+        "O": "minecraft:obsidian",
+        "I": "minecraft:iron_block",
+        "L": "minecraft:glowstone"
+      },
+      "layers": [
+        [
+          "   ",
+          " L ",
+          "   "
+        ],
+        [
+          "   ",
+          " I ",
+          "   "
+        ],
+        [
+          "O O",
+          "   ",
+          "O O"
+        ],
+        [
+          "   ",
+          " X ",
+          "   "
+        ]
+      ]
+    },
+    {
+      "name": "shifter_core_charged",
+      "anchor": "X",
+      "mappings": {
+        "O": "minecraft:obsidian",
+        "G": "minecraft:gold_block",
+        "L": "minecraft:glowstone"
+      },
+      "layers": [
+        [
+          "   ",
+          " L ",
+          "   "
+        ],
+        [
+          "   ",
+          " G ",
+          "   "
+        ],
+        [
+          "O O",
+          "   ",
+          "O O"
+        ],
+        [
+          "   ",
+          " X ",
+          "   "
+        ]
+      ]
+    },
+    {
+      "name": "shifter_iron_bed",
+      "anchor": "X",
+      "mappings": {
+        "I": "minecraft:iron_block"
+      },
+      "layers": [
+        [
+          "___",
+          "___",
+          "___"
+        ],
+        [
+          "___",
+          "___",
+          "___"
+        ],
+        [
+          "III",
+          "III",
+          "III"
+        ],
+        [
+          "   ",
+          " X ",
+          "   "
+        ]
+      ]
+    }
+  ]
+}

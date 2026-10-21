@@ -15,6 +15,7 @@ import ruiseki.okmodular.api.recipe.io.GasOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.ItemOutput;
 import ruiseki.okmodular.api.recipe.io.ManaOutput;
+import ruiseki.okmodular.api.recipe.io.StructureOutput;
 import ruiseki.okmodular.api.recipe.io.VisOutput;
 import ruiseki.okmodular.util.Logger;
 
@@ -34,6 +35,7 @@ public class OutputNBTRegistry {
         register("essentia", () -> new EssentiaOutput("", 0));
         register("vis", () -> new VisOutput("", 0));
         register("block", () -> new BlockOutput());
+        register(StructureOutput.TYPE, () -> new StructureOutput());
         // Add more integrations here as needed
     }
 

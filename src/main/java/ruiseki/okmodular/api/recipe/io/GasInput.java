@@ -57,7 +57,7 @@ public class GasInput extends AbstractModularRecipeInput {
     @Override
     protected long consume(IModularPort port, long remaining, boolean simulate, ConditionContext context) {
         IGasHandler gasPort = (IGasHandler) port;
-        GasStack drawn = gasPort.drawGas(ForgeDirection.UNKNOWN, (int) remaining, false);
+        GasStack drawn = gasPort.drawGas(ForgeDirection.UNKNOWN, Amounts.toInt(remaining), false);
         if (drawn != null && drawn.amount > 0) {
             if (gasName == null || gasName.isEmpty()
                 || drawn.getGas()

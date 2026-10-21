@@ -2,7 +2,6 @@ package ruiseki.okmodular.api.recipe.decorator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -10,10 +9,10 @@ import com.google.gson.JsonObject;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
-import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
+import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 
 /**
@@ -24,7 +23,6 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
 
     private final IExpression chanceExpr;
     private final List<BlockOutput> bonusOutputs;
-    private final Random rand = new Random();
 
     public BonusBlockOutputDecorator(IModularRecipe internal, IExpression chanceExpr, List<BlockOutput> bonusOutputs) {
         super(internal);
@@ -33,44 +31,42 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
     }
 
     @Override
-    public boolean processOutputs(List<IModularPort> outputPorts, boolean simulate) {
-        // 1. Process base recipe outputs
-        if (!internal.processOutputs(outputPorts, simulate)) {
-            return false;
-        }
+    public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
+        super.produceExtraOutputs(outputPorts, context);
 
-        // 2. Apply probability check and bonus BlockOutputs
-        if (!simulate) {
-            // Find IRecipeContext to get ConditionContext for evaluation
-            IRecipeContext context = findRecipeContext(outputPorts);
-            ConditionContext condContext = context != null ? context.getConditionContext() : null;
-
-            double chance = chanceExpr.evaluateDouble(condContext);
-
-            if (rand.nextDouble() < chance) {
-                if (context != null) {
-                    // Apply all bonus BlockOutputs
-                    for (BlockOutput output : bonusOutputs) {
-                        output.apply(outputPorts, 1, condContext);
-                    }
-                }
+        int times = timesFiring(context);
+        for (int fired = 0; fired < times; fired++) {
+            for (BlockOutput output : bonusOutputs) {
+                output.apply(outputPorts, 1, context);
             }
         }
-
-        return true;
     }
 
     /**
-     * Find IRecipeContext from outputPorts.
-     * TEMachineController implements both IModularPort and IRecipeContext.
+     * Whether the bonus fires.
+     * <p>
+     * See {@link BonusOutputDecorator#rolls} for why a shared {@link java.util.Random} field
+     * had to go. This draws from its own stream rather than that one's: a recipe may carry
+     * both decorators, and sharing a stream would make them fire and skip in lockstep.
      */
-    private IRecipeContext findRecipeContext(List<IModularPort> outputPorts) {
-        for (IModularPort port : outputPorts) {
-            if (port instanceof IRecipeContext) {
-                return (IRecipeContext) port;
-            }
+    boolean rolls(ConditionContext context) {
+        double chance = chanceExpr.evaluateDouble(context);
+        long seed = context != null ? context.getEvaluationSeed() : 0L;
+        return SeedMixer.toUnitInterval(seed, SeedMixer.BONUS_BLOCK_OUTPUT) < chance;
+    }
+
+    /** How many times the bonus fires. See {@link BonusOutputDecorator#timesFiring}. */
+    int timesFiring(ConditionContext context) {
+        return timesFiring(context, batchSizeOf(context));
+    }
+
+    /** The same, with the batch size supplied rather than read from the machine. */
+    int timesFiring(ConditionContext context, int batch) {
+        int fired = 0;
+        for (int draw = 0; draw < batch; draw++) {
+            if (rolls(context != null ? context.forDraw(draw) : null)) fired++;
         }
-        return null;
+        return fired;
     }
 
     /**
