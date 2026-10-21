@@ -161,6 +161,10 @@ for worked examples see the [Expression Examples](./EXPRESSION_EXAMPLES.md).
 
 An item input can **match** on NBT, and an item input or output can **rewrite** it.
 
+> [!TIP]
+> `/okmodular hand` prints the held item's id, meta and NBT. Use it to see what an `nbt`
+> expression actually wrote.
+
 ### `nbtmatch` — how strict the match is
 
 | Value | Meaning |

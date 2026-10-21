@@ -245,6 +245,11 @@ command.okmodular.scan_success=%s
 command.okmodular.scan_file=Saved as: %s
 command.okmodular.scan_failed=Scan failed: %s
 
+# --- Held item command ---
+command.okmodular.hand_player_only=This command must be run by a player.
+command.okmodular.hand_empty=Hold an item to inspect it.
+command.okmodular.hand_no_nbt=No NBT.
+
 # --- Machine GUI status and controls ---
 gui.status.idle=Idle
 gui.status.processing=Processing: %d%%

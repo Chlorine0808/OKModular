@@ -28,6 +28,7 @@ import ruiseki.okcore.helper.MinecraftHelpers;
 import ruiseki.okcore.init.ModBase;
 import ruiseki.okcore.proxy.ICommonProxy;
 import ruiseki.okmodular.client.nei.NEIConfig;
+import ruiseki.okmodular.common.command.CommandModularHand;
 import ruiseki.okmodular.common.command.CommandModularList;
 import ruiseki.okmodular.common.command.CommandModularReload;
 import ruiseki.okmodular.common.command.CommandModularWand;
@@ -85,7 +86,8 @@ public class OKModular extends ModBase {
     protected LiteralArgumentBuilder<ICommandSender> constructBaseCommand(MinecraftServer server) {
         return super.constructBaseCommand(server).then(new CommandModularReload(this).make())
             .then(new CommandModularList(this).make())
-            .then(new CommandModularWand(this).make());
+            .then(new CommandModularWand(this).make())
+            .then(new CommandModularHand(this).make());
     }
 
     @Override
