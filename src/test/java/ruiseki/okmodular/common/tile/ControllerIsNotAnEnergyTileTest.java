@@ -23,7 +23,8 @@ public class ControllerIsNotAnEnergyTileTest {
     @ValueSource(
         strings = { "ic2.api.energy.tile.IEnergySink", "ic2.api.energy.tile.IEnergySource",
             "cofh.api.energy.IEnergyReceiver", "cofh.api.energy.IEnergyProvider",
-            "ruiseki.okmodular.core.energy.IOKEnergyTile", "ruiseki.okmodular.core.tileentity.AbstractEnergyTE" })
+            "ruiseki.okmodular.core.energy.IOKEnergyTile",
+            "ruiseki.okmodular.common.tile.energy.AbstractEnergyIOPortTE" })
     @DisplayName("エネルギーの型を継承しない")
     public void testHasNoEnergyType(String type) throws Exception {
         Class<?> controller = Class.forName(CONTROLLER, false, getClass().getClassLoader());

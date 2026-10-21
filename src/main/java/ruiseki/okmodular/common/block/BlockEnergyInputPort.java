@@ -23,9 +23,9 @@ import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.client.util.IconRegistry;
 import ruiseki.okmodular.common.item.AbstractPortItemBlock;
 import ruiseki.okmodular.common.tier.TierManager;
+import ruiseki.okmodular.common.tile.energy.AbstractEnergyIOPortTE;
 import ruiseki.okmodular.common.tile.energy.input.TEEnergyInputPort;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.okmodular.core.tileentity.AbstractEnergyTE;
 import ruiseki.okmodular.integration.waila.WailaUtils;
 
 /**
@@ -113,7 +113,7 @@ public class BlockEnergyInputPort extends AbstractPortBlock<TEEnergyInputPort> {
         super.getWailaInfo(tooltip, itemStack, accessor, config);
 
         TileEntity te = accessor.getTileEntity();
-        if (te instanceof AbstractEnergyTE energyTE) {
+        if (te instanceof AbstractEnergyIOPortTE energyTE) {
             tooltip.add(WailaUtils.getEnergyTransfer(energyTE));
         }
     }

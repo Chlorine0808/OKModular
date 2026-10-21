@@ -5,7 +5,9 @@ import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import com.cleanroommc.modularui.api.IGuiHolder;
@@ -25,10 +27,17 @@ import com.cleanroommc.modularui.widgets.ProgressWidget;
 import com.cleanroommc.modularui.widgets.layout.Flow;
 import com.google.common.collect.ImmutableList;
 
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
+import ic2.api.energy.event.EnergyTileLoadEvent;
+import ic2.api.energy.event.EnergyTileUnloadEvent;
+import ic2.api.energy.tile.IEnergySink;
+import ic2.api.energy.tile.IEnergySource;
 import lombok.Getter;
 import lombok.Setter;
 import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okcore.helper.LangHelpers;
+import ruiseki.okmodular.OKModular;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.modular.IPortType;
@@ -39,17 +48,30 @@ import ruiseki.okmodular.client.gui.widget.CyclicVariantButtonWidget;
 import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
 import ruiseki.okmodular.client.gui.widget.TileWidget;
 import ruiseki.okmodular.client.gui.widget.ToggleWidget;
+import ruiseki.okmodular.common.network.PacketEnergy;
 import ruiseki.okmodular.config.MachineryConfig;
+import ruiseki.okmodular.core.energy.EnergyStorage;
+import ruiseki.okmodular.core.energy.IOKEnergyIO;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
-import ruiseki.okmodular.core.tileentity.AbstractEnergyTE;
+import ruiseki.okmodular.core.tileentity.AbstractTE;
 
 /**
- * Extends AbstractEnergyTE to leverage existing energy management system.
+ * Energy port: an RF buffer that also speaks IC2 when {@link #useIC2Compat} is on.
  * TODO: add RF-only, EU-only, or both ports
  * TODO: add ???-energy only ports and universal port if needed
  */
-public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE
-    implements IVisitablePort, IGuiHolder<PosGuiData> {
+@Optional.InterfaceList({ @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "IC2"),
+    @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "IC2") })
+public abstract class AbstractEnergyIOPortTE extends AbstractTE
+    implements IOKEnergyIO, IEnergySink, IEnergySource, IVisitablePort, IGuiHolder<PosGuiData> {
+
+    /** Last known energy stored, used for periodic client synchronization. */
+    private int lastSyncPowerStored;
+
+    @NBTPersist
+    protected EnergyStorage energyStorage;
+
+    public boolean ic2Registered = false;
 
     @NBTPersist
     protected final EnumIO[] sides = new EnumIO[6];
@@ -65,7 +87,14 @@ public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE
     public boolean useIC2Compat = false;
 
     public AbstractEnergyIOPortTE(int energyCapacity, int energyMaxReceive) {
-        super(energyCapacity, energyMaxReceive);
+        energyStorage = new EnergyStorage(energyCapacity, energyMaxReceive) {
+
+            @Override
+            public void onEnergyChanged() {
+                super.onEnergyChanged();
+                markDirty();
+            }
+        };
         Arrays.fill(sides, EnumIO.NONE);
         // Default IO is NONE, handled by Block.onBlockPlacedBy
     }
@@ -94,6 +123,46 @@ public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE
         return false;
     }
 
+    /** Sends the stored amount to nearby clients when it changes. */
+    @Override
+    public boolean processTasks(boolean redstoneCheckPassed) {
+        boolean powerChanged = (lastSyncPowerStored != getEnergyStored() && shouldDoWorkThisTick(5));
+        if (powerChanged) {
+            lastSyncPowerStored = getEnergyStored();
+            OKModular.instance.getPacketHandler()
+                .sendToAllAround(new PacketEnergy(this), this);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canConnectEnergy(ForgeDirection from) {
+        return true;
+    }
+
+    @Override
+    public int getEnergyStored() {
+        return energyStorage == null ? 0 : energyStorage.getEnergyStored();
+    }
+
+    @Override
+    public void setEnergyStored(int storedEnergy) {
+        if (energyStorage == null) {
+            return;
+        }
+        energyStorage.setEnergyStored(storedEnergy);
+    }
+
+    @Override
+    public int getMaxEnergyStored() {
+        return energyStorage == null ? 0 : energyStorage.getMaxEnergyStored();
+    }
+
+    @Override
+    public int getEnergyTransfer() {
+        return energyStorage == null ? 0 : energyStorage.getMaxReceive();
+    }
+
     /**
      * Extract energy for machine processing.
      *
@@ -114,7 +183,7 @@ public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE
         if (side == ForgeDirection.UNKNOWN) {
             return internalReceiveEnergy(amount, simulate);
         }
-        return super.receiveEnergy(side, amount, simulate);
+        return energyStorage == null ? 0 : energyStorage.receiveEnergy(amount, simulate);
     }
 
     private int internalReceiveEnergy(int amount, boolean simulate) {
@@ -137,7 +206,7 @@ public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE
         if (side == ForgeDirection.UNKNOWN) {
             return extractEnergy(amount);
         }
-        return super.extractEnergy(side, amount, simulate);
+        return energyStorage == null ? 0 : energyStorage.extractEnergy(amount, simulate);
     }
 
     @Override
@@ -169,35 +238,7 @@ public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE
         } else if (ic2Registered && !useIC2Compat) {
             deregister();
         }
-
-        if (worldObj.isRemote) {
-            updateEntityClient();
-            return;
-        }
-
-        boolean requiresClientSync = forceClientUpdate;
-        boolean prevRedCheck = redstoneCheckPassed;
-
-        if (redstoneStateDirty) {
-            redstoneCheckPassed = RedstoneMode.isActive(redstoneMode, redstonePowered);
-            redstoneStateDirty = false;
-        }
-
-        requiresClientSync |= prevRedCheck != isRedstoneActive();
-        requiresClientSync |= processTasks(redstoneCheckPassed);
-
-        if (requiresClientSync) {
-            requestRenderUpdate();
-            markDirty();
-        }
-
-        if (notifyNeighbours) {
-            worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, getBlockType());
-            notifyNeighbours = false;
-        }
-
-        // Process throttled render updates
-        processRenderUpdates();
+        super.doUpdate();
     }
 
     @Override
@@ -210,9 +251,86 @@ public abstract class AbstractEnergyIOPortTE extends AbstractEnergyTE
     @Override
     public void invalidate() {
         super.invalidate();
-        if (useIC2Compat) {
-            deregister();
+        deregister();
+    }
+
+    @Override
+    public void register() {
+        if (!worldObj.isRemote && Loader.isModLoaded("IC2") && MachineryConfig.ic2Capability) {
+            registerIC2();
         }
+    }
+
+    @Override
+    public void deregister() {
+        if (!worldObj.isRemote && Loader.isModLoaded("IC2") && ic2Registered) {
+            deregisterIC2();
+        }
+    }
+
+    @Optional.Method(modid = "IC2")
+    private void registerIC2() {
+        if (ic2Registered) return;
+        MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+        ic2Registered = true;
+    }
+
+    @Optional.Method(modid = "IC2")
+    private void deregisterIC2() {
+        MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+        ic2Registered = false;
+    }
+
+    @Override
+    @Optional.Method(modid = "IC2")
+    public double getDemandedEnergy() {
+        int missing = getMaxEnergyStored() - getEnergyStored();
+        return Math.max(0, (double) missing / MachineryConfig.rftToEU);
+    }
+
+    @Override
+    @Optional.Method(modid = "IC2")
+    public int getSinkTier() {
+        return MachineryConfig.ic2SinkTier;
+    }
+
+    @Override
+    @Optional.Method(modid = "IC2")
+    public double injectEnergy(ForgeDirection direction, double amount, double voltage) {
+        int rf = (int) (amount * MachineryConfig.rftToEU);
+        int accepted = energyStorage.receiveEnergy(rf, false);
+        return amount - ((double) accepted / MachineryConfig.rftToEU);
+    }
+
+    @Override
+    @Optional.Method(modid = "IC2")
+    public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection direction) {
+        return canConnectEnergy(direction);
+    }
+
+    @Override
+    @Optional.Method(modid = "IC2")
+    public double getOfferedEnergy() {
+        return (double) getEnergyStored() / MachineryConfig.rftToEU;
+    }
+
+    @Override
+    @Optional.Method(modid = "IC2")
+    public void drawEnergy(double amount) {
+        int rf = (int) (amount * MachineryConfig.rftToEU);
+        energyStorage.extractEnergy(rf, false);
+    }
+
+    @Override
+    @Optional.Method(modid = "IC2")
+    public int getSourceTier() {
+        return MachineryConfig.ic2SourceTier;
+    }
+
+    @Override
+    @Optional.Method(modid = "IC2")
+    public boolean emitsEnergyTo(TileEntity receiver, ForgeDirection direction) {
+        return canConnectEnergy(direction);
     }
 
     @Override
