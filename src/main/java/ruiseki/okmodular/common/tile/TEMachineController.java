@@ -39,7 +39,6 @@ import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.condition.ConditionContext;
-import ruiseki.okmodular.api.enums.CraftingState;
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.modular.IMachineController;
 import ruiseki.okmodular.api.modular.IModularPort;
@@ -442,25 +441,6 @@ public class TEMachineController extends AbstractMBModifierTE
         structureAgent.addStructurePosition(x, y, z);
     }
 
-    // ========== Crafting Configuration ==========
-    // We disable AbstractMachineTE's built-in crafting logic to rely solely on
-    // ProcessAgent.
-
-    @Override
-    public boolean canStartCrafting() {
-        return false;
-    }
-
-    @Override
-    protected boolean canContinueCrafting() {
-        return false;
-    }
-
-    @Override
-    protected CraftingState updateCraftingState() {
-        return CraftingState.IDLE;
-    }
-
     // Last process error reason for GUI display
     private ErrorReason lastProcessErrorReason = ErrorReason.NONE;
     private String lastProcessErrorDetail = null;
@@ -477,21 +457,6 @@ public class TEMachineController extends AbstractMBModifierTE
         structureOriginOffset[1] = oy;
         structureOriginOffset[2] = oz;
         return structureAgent.structureCheck(piece, ox, oy, oz);
-    }
-
-    @Override
-    public int getBaseDuration() {
-        return 100;
-    }
-
-    @Override
-    public int getMinDuration() {
-        return 20;
-    }
-
-    @Override
-    public int getMaxDuration() {
-        return 1200;
     }
 
     /**
@@ -857,16 +822,6 @@ public class TEMachineController extends AbstractMBModifierTE
         if (processAgent.diagnoseIdle(getContextualInputPorts()) == ProcessAgent.TickResult.NO_INPUT) {
             lastProcessErrorReason = ErrorReason.INPUT_MISSING;
         }
-    }
-
-    @Override
-    protected void finishCrafting() {
-        resetCrafting();
-    }
-
-    @Override
-    public int getCraftingEnergyCost() {
-        return 0; // Energy is managed by ProcessAgent
     }
 
     @Override

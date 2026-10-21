@@ -13,7 +13,6 @@ import com.mojang.authlib.GameProfile;
 
 import lombok.Getter;
 import ruiseki.okcore.helper.PlayerHelpers;
-import ruiseki.okmodular.api.enums.CraftingState;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 
 /**
@@ -23,10 +22,9 @@ import ruiseki.okmodular.core.persist.nbt.NBTPersist;
  * <ul>
  * <li>Multiblock structure formation and validation</li>
  * <li>Player ownership via GameProfile</li>
- * <li>Crafting process integration</li>
  * </ul>
  */
-public abstract class AbstractMBModifierTE extends AbstractMachineTE {
+public abstract class AbstractMBModifierTE extends AbstractEnergyTE {
 
     /** Owner of the multiblock machine. */
     @NBTPersist
@@ -167,99 +165,9 @@ public abstract class AbstractMBModifierTE extends AbstractMachineTE {
     }
 
     /**
-     * Determines if crafting can start.
-     * Crafting requires the multiblock to be formed.
-     */
-    @Override
-    public boolean canStartCrafting() {
-        return isFormed && super.canStartCrafting();
-    }
-
-    @Override
-    protected void onCrafting() {
-        // NO OP
-    }
-
-    @Override
-    protected void finishCrafting() {
-        resetCrafting();
-    }
-
-    @Override
-    public int getCraftingEnergyCost() {
-        return 0;
-    }
-
-    @Override
-    protected CraftingState updateCraftingState() {
-        if (!isFormed) {
-            return CraftingState.ERROR;
-        }
-
-        if (!isRedstoneActive()) {
-            return CraftingState.IDLE;
-        }
-
-        if (isCrafting()) {
-            if (!canContinueCrafting()) {
-                return CraftingState.ERROR;
-            }
-            return CraftingState.RUNNING;
-        }
-
-        if (!canStartCrafting()) {
-            return CraftingState.ERROR;
-        }
-
-        return CraftingState.IDLE;
-    }
-
-    /**
-     * Returns base crafting duration.
-     *
-     * @return base duration in ticks
-     */
-    public abstract int getBaseDuration();
-
-    /**
-     * Returns minimum allowed crafting duration.
-     *
-     * @return minimum duration
-     */
-    public abstract int getMinDuration();
-
-    /**
-     * Returns maximum allowed crafting duration.
-     *
-     * @return maximum duration
-     */
-    public abstract int getMaxDuration();
-
-    /**
-     * Returns speed multiplier applied to base duration.
-     *
-     * @return speed multiplier
-     */
-    public abstract double getSpeedMultiplier();
-
-    /**
      * Called when the multiblock structure is successfully formed.
      */
     public abstract void onFormed();
-
-    @Override
-    protected int getCraftingDuration() {
-        double speedMultiplier = getSpeedMultiplier();
-        int baseDuration = getBaseDuration();
-
-        if (speedMultiplier <= 0) {
-            return baseDuration;
-        }
-
-        int duration = (int) Math.round(baseDuration / speedMultiplier);
-
-        return Math.max(getMinDuration(), Math.min(duration, getMaxDuration()));
-    }
 
     /**
      * Sets the owner of the machine from a player.
@@ -305,12 +213,7 @@ public abstract class AbstractMBModifierTE extends AbstractMachineTE {
 
     @Override
     public boolean isActive() {
-        return isCrafting();
-    }
-
-    @Override
-    protected boolean canContinueCrafting() {
-        return isFormed && super.canContinueCrafting();
+        return false;
     }
 
     /**
@@ -326,7 +229,6 @@ public abstract class AbstractMBModifierTE extends AbstractMachineTE {
         }
 
         if (!isFormed) {
-            syncCraftingState();
             return false;
         }
 
