@@ -100,12 +100,12 @@
     },
     {
       "registryName": "ore_transformer_crack_stone",
-      "name": "Crack Stone (some cells turn to gravel)",
+      "name": "Crack Stone (all three cells, some turn to gravel)",
       "duration": 60,
       "inputs": [
         {
           "symbol": "O",
-          "amount": 1,
+          "amount": 3,
           "block": "minecraft:stone"
         },
         {
@@ -116,7 +116,7 @@
       "outputs": [
         {
           "symbol": "O",
-          "amount": 1,
+          "amount": 3,
           "replace": "minecraft:stone",
           "block": "minecraft:cobblestone"
         }
@@ -161,12 +161,12 @@
     },
     {
       "registryName": "ore_transformer_sand_to_glass",
-      "name": "Sand to Glass (sometimes coloured or glowstone)",
+      "name": "Sand to Glass (all three cells, one coloured, sometimes glowstone)",
       "duration": 100,
       "inputs": [
         {
           "symbol": "O",
-          "amount": 1,
+          "amount": 3,
           "block": "minecraft:sand"
         },
         {
@@ -177,7 +177,7 @@
       "outputs": [
         {
           "symbol": "O",
-          "amount": 1,
+          "amount": 3,
           "replace": "minecraft:sand",
           "block": "minecraft:glass"
         }
@@ -193,14 +193,6 @@
                 "symbol": "O",
                 "replace": "minecraft:glass",
                 "block": "minecraft:stained_glass:14"
-              }
-            },
-            {
-              "symbol": "O",
-              "output": {
-                "symbol": "O",
-                "replace": "minecraft:glass",
-                "block": "minecraft:stained_glass:11"
               }
             }
           ]
