@@ -14,13 +14,11 @@ import ruiseki.okmodular.config.MachineryConfig;
 import ruiseki.okmodular.core.energy.capability.EnergyIO;
 import ruiseki.okmodular.core.energy.capability.EnergySink;
 import ruiseki.okmodular.core.energy.capability.EnergySource;
-import ruiseki.okmodular.core.energy.capability.WrappedEnergyIO;
 import ruiseki.okmodular.core.energy.capability.cofh.CoFHEnergyHandler;
 import ruiseki.okmodular.core.energy.capability.cofh.CoFHEnergyProvider;
 import ruiseki.okmodular.core.energy.capability.cofh.CoFHEnergyReceiver;
 import ruiseki.okmodular.core.energy.capability.ic2.IC2EnergySink;
 import ruiseki.okmodular.core.energy.capability.ic2.IC2EnergySource;
-import ruiseki.okmodular.core.energy.capability.ok.OKEnergyIO;
 import ruiseki.okmodular.core.energy.capability.ok.OKEnergySink;
 import ruiseki.okmodular.core.energy.capability.ok.OKEnergySource;
 
@@ -126,52 +124,6 @@ public class EnergyUtils {
         }
 
         return null;
-    }
-
-    public static EnergyIO getEnergyIO(Object obj, ForgeDirection side) {
-        return getEnergyIO(obj, side, DEFAULT);
-    }
-
-    public static EnergyIO getEnergyIO(Object obj, ForgeDirection side,
-        @MagicConstant(flagsFromClass = EnergyUtils.class) int usage) {
-        if (obj instanceof EnergyIO energyIO) {
-            return energyIO;
-        }
-
-        if (obj instanceof IOKEnergyIO ioHandler) {
-            return new OKEnergyIO(ioHandler, side);
-        }
-
-        if (obj instanceof CapabilityProvider capabilityProvider) {
-            EnergyIO energyIO = capabilityProvider.getCapability(EnergyIO.class, side);
-
-            if (energyIO != null) {
-                return energyIO;
-            }
-        }
-
-        if ((usage & WRAP_COFH) != 0) {
-            EnergyIO cofh = wrapCoFHEnergy(obj, side);
-            if (cofh != null) {
-                return cofh;
-            }
-        }
-
-        if ((usage & WRAP_IC2) != 0 && MachineryConfig.ic2Capability) {
-            EnergyIO ic2 = wrapIC2Energy(obj, side);
-            if (ic2 != null) {
-                return ic2;
-            }
-        }
-
-        EnergySource source = getEnergySource(obj, side, usage);
-        EnergySink sink = getEnergySink(obj, side, usage);
-
-        if (source == null && sink == null) {
-            return null;
-        }
-
-        return new WrappedEnergyIO(source, sink);
     }
 
     public static EnergyIO wrapCoFHEnergy(Object obj, ForgeDirection side) {
