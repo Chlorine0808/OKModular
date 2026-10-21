@@ -39,7 +39,7 @@ public class TileEntityNbtKeysTest {
     private static Map<String, String> expected() {
         Map<String, String> map = new LinkedHashMap<>();
         // spotless:off
-        map.put("TEMachineController", "activeRecipeColor:PortColor, currentRecipeStartTick:long, isFormed:boolean, player:GameProfile, timeContinuousCount:long, timePlacedCount:long");
+        map.put("TEMachineController", "activeRecipeColor:PortColor, currentRecipeStartTick:long, isFormed:boolean, timeContinuousCount:long, timePlacedCount:long");
         map.put("energy.input.TEEnergyInputPort", "energyMode:EnergyMode, energyStorage:EnergyStorage, sides:EnumIO[], tier:int, useIC2Compat:boolean");
         map.put("energy.output.TEEnergyOutputPort", "energyMode:EnergyMode, energyStorage:EnergyStorage, sides:EnumIO[], tier:int, useIC2Compat:boolean");
         map.put("essentia.input.TEEssentiaInputPort", "maxCapacityPerAspect:int, sides:EnumIO[], tier:int");

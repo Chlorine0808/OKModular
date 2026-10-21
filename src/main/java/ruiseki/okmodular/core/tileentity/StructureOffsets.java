@@ -3,7 +3,7 @@ package ruiseki.okmodular.core.tileentity;
 /**
  * Picks the offset a structure check starts from.
  * <p>
- * {@link AbstractMBModifierTE#getOffSet()} returns {@code int[][]} - one row per tier, from
+ * {@code TEMachineController.getOffSet()} returns {@code int[][]} - one row per tier, from
  * the fixed multiblocks this hierarchy grew out of. Its only implementation today,
  * {@code StructureAgent}, always returns exactly one row: the structure JSON carries one
  * controller offset, or none and the origin stands in.

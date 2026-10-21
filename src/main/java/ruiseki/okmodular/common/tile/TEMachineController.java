@@ -65,7 +65,8 @@ import ruiseki.okmodular.common.recipe.ProcessAgent;
 import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
-import ruiseki.okmodular.core.tileentity.AbstractMBModifierTE;
+import ruiseki.okmodular.core.tileentity.AbstractTE;
+import ruiseki.okmodular.core.tileentity.StructureOffsets;
 import ruiseki.okmodular.structure.StructureCellLocator;
 import ruiseki.okmodular.structure.StructureManager;
 import ruiseki.okmodular.util.Logger;
@@ -76,8 +77,13 @@ import ruiseki.okmodular.util.Logger;
  * and validates the surrounding blocks against that structure definition.
  * TODO: Improve holo indicator
  */
-public class TEMachineController extends AbstractMBModifierTE
+public class TEMachineController extends AbstractTE
     implements IAlignment, IGuiHolder<PosGuiData>, IRecipeContext, IVisitablePort, ITieredMachine, IMachineController {
+
+    /** Whether the structure around the controller currently matches its blueprint. */
+    @NBTPersist
+    protected boolean isFormed = false;
+    private transient boolean lastIsFormed = false;
 
     // ========== Blueprint Inventory ==========
     public static final int BLUEPRINT_SLOT = 0;
@@ -275,7 +281,6 @@ public class TEMachineController extends AbstractMBModifierTE
 
     // ========== Structure Definition ==========
 
-    @Override
     @SuppressWarnings("unchecked")
     public IStructureDefinition<TEMachineController> getStructureDefinition() {
         // StructureAgent returns IStructureDefinition<IMachineController>; safe because
@@ -284,7 +289,6 @@ public class TEMachineController extends AbstractMBModifierTE
             .getStructureDefinition();
     }
 
-    @Override
     public int[][] getOffSet() {
         return structureAgent.getOffSet();
     }
@@ -332,7 +336,6 @@ public class TEMachineController extends AbstractMBModifierTE
 
     // ========== Structure Parts Tracking ==========
 
-    @Override
     protected void clearStructureParts() {
         structureAgent.resetStructure();
         invalidatePortCache();
@@ -410,7 +413,6 @@ public class TEMachineController extends AbstractMBModifierTE
         return posToSymbol.get(new ChunkCoordinates(x, y, z));
     }
 
-    @Override
     protected boolean addToMachine(Block block, int meta, int x, int y, int z) {
         return structureAgent.addToMachine(block, meta, x, y, z);
     }
@@ -449,7 +451,6 @@ public class TEMachineController extends AbstractMBModifierTE
         return lastProcessErrorDetail;
     }
 
-    @Override
     protected boolean structureCheck(String piece, int ox, int oy, int oz) {
         // The scan runs inside this call and reports world coordinates only, so park the offset
         // where finalizeSymbolPosition can reach it before starting.
@@ -538,7 +539,6 @@ public class TEMachineController extends AbstractMBModifierTE
         return structureAgent.getCustomStructureName();
     }
 
-    @Override
     public void onFormed() {
         structureAgent.onFormed();
         updateRecipeGroupFromStructure();
@@ -585,12 +585,17 @@ public class TEMachineController extends AbstractMBModifierTE
             return;
         }
 
-        // Use StructureLib-based structure checking (calls super.doUpdate())
-        // Super handles redstone and structure validation
+        // Redstone, port tasks and render throttling.
         super.doUpdate();
 
         if (worldObj.isRemote) {
             return;
+        }
+
+        if (shouldDoWorkThisTick(5) || !isFormed) {
+            // See StructureOffsets for why the tier cannot index this table directly.
+            int[] offset = StructureOffsets.forTier(getOffSet(), getTier());
+            structureCheck(getStructurePieceName(), offset[0], offset[1], offset[2]);
         }
         // Check Redstone signal for suspension
         if (!isRedstoneActive()) {
@@ -1310,6 +1315,25 @@ public class TEMachineController extends AbstractMBModifierTE
     public void setProcessError(ErrorReason reason, String detail) {
         this.lastProcessErrorReason = reason;
         this.lastProcessErrorDetail = detail;
+    }
+
+    @Override
+    public void updateEntityClient() {
+        super.updateEntityClient();
+        if (isFormed != lastIsFormed) {
+            lastIsFormed = isFormed;
+            forceRenderUpdate();
+        }
+    }
+
+    @Override
+    public boolean isActive() {
+        return false;
+    }
+
+    @Override
+    public boolean processTasks(boolean redstoneChecksPassed) {
+        return false;
     }
 
     public boolean isFormed() {
