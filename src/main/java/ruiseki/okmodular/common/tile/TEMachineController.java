@@ -586,7 +586,7 @@ public class TEMachineController extends AbstractMBModifierTE
         }
 
         // Use StructureLib-based structure checking (calls super.doUpdate())
-        // Super handles IC2 registration, energy sync, and structure validation
+        // Super handles redstone and structure validation
         super.doUpdate();
 
         if (worldObj.isRemote) {

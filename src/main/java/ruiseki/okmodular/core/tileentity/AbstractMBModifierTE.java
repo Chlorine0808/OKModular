@@ -24,7 +24,7 @@ import ruiseki.okmodular.core.persist.nbt.NBTPersist;
  * <li>Player ownership via GameProfile</li>
  * </ul>
  */
-public abstract class AbstractMBModifierTE extends AbstractEnergyTE {
+public abstract class AbstractMBModifierTE extends AbstractTE {
 
     /** Owner of the multiblock machine. */
     @NBTPersist
@@ -146,7 +146,6 @@ public abstract class AbstractMBModifierTE extends AbstractEnergyTE {
 
     @Override
     public void doUpdate() {
-        // Always call super first to ensure IC2 registration and energy sync
         super.doUpdate();
 
         if (worldObj.isRemote) {
@@ -216,23 +215,9 @@ public abstract class AbstractMBModifierTE extends AbstractEnergyTE {
         return false;
     }
 
-    /**
-     * Processes tasks only if the multiblock structure is formed.
-     *
-     * @param redstone true if redstone allows operation
-     * @return true if tasks processed
-     */
     @Override
     public boolean processTasks(boolean redstone) {
-        if (this.worldObj.isRemote) {
-            return super.processTasks(redstone);
-        }
-
-        if (!isFormed) {
-            return false;
-        }
-
-        return super.processTasks(redstone);
+        return false;
     }
 
 }
