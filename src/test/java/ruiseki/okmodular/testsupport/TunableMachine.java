@@ -1,6 +1,5 @@
 package ruiseki.okmodular.testsupport;
 
-import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,33 +30,7 @@ public final class TunableMachine implements IRecipeContext, ITieredMachine {
     public long energy = 0;
     public final Map<String, Integer> components = new HashMap<>();
 
-    private final IMachineState state = (IMachineState) Proxy
-        .newProxyInstance(IMachineState.class.getClassLoader(), new Class<?>[] { IMachineState.class }, (p, m, a) -> {
-            switch (m.getName()) {
-                case "getTier":
-                    return tier;
-                case "getSpeedMultiplier":
-                    return speed;
-                case "getEnergyMultiplier":
-                    return energyMultiplier;
-                case "getStoredEnergy":
-                    return energy;
-                case "getEnergyCapacity":
-                    return 1000L;
-                case "getBatchSize":
-                    return 1;
-                default:
-                    return zeroOf(m.getReturnType());
-            }
-        });
-
-    private static Object zeroOf(Class<?> type) {
-        if (type == boolean.class) return false;
-        if (type == int.class) return 0;
-        if (type == long.class) return 0L;
-        if (type == double.class) return 0.0;
-        return null;
-    }
+    private final IMachineState state = new State();
 
     /** この機械に繋がった文脈。 */
     public ConditionContext context() {
@@ -132,5 +105,149 @@ public final class TunableMachine implements IRecipeContext, ITieredMachine {
     @Override
     public ConditionContext getConditionContext() {
         return context();
+    }
+
+    /** 性能と energy だけを答える機械状態。残りは 0 / false。 */
+    private final class State implements IMachineState {
+
+        @Override
+        public long getStoredEnergy() {
+            return energy;
+        }
+
+        @Override
+        public long getEnergyCapacity() {
+            return 1000L;
+        }
+
+        @Override
+        public int getEnergyPerTick() {
+            return 0;
+        }
+
+        @Override
+        public double getProgressPercent() {
+            return 0;
+        }
+
+        @Override
+        public boolean isRunning() {
+            return false;
+        }
+
+        @Override
+        public boolean isWaitingForOutput() {
+            return false;
+        }
+
+        @Override
+        public int getTier() {
+            return tier;
+        }
+
+        @Override
+        public long getTimePlaced() {
+            return 0;
+        }
+
+        @Override
+        public long getTimeContinuous() {
+            return 0;
+        }
+
+        @Override
+        public int getRecipeProcessedCount() {
+            return 0;
+        }
+
+        @Override
+        public int getRecipeProcessedTypesCount() {
+            return 0;
+        }
+
+        @Override
+        public long getStoredFluid() {
+            return 0;
+        }
+
+        @Override
+        public long getFluidCapacity() {
+            return 0;
+        }
+
+        @Override
+        public long getStoredFluid(String name) {
+            return 0;
+        }
+
+        @Override
+        public long getFluidInput(String name) {
+            return 0;
+        }
+
+        @Override
+        public long getFluidOutputSpace(String name) {
+            return 0;
+        }
+
+        @Override
+        public long getStoredMana() {
+            return 0;
+        }
+
+        @Override
+        public long getManaCapacity() {
+            return 0;
+        }
+
+        @Override
+        public long getStoredGas(String name) {
+            return 0;
+        }
+
+        @Override
+        public long getTotalStoredGas() {
+            return 0;
+        }
+
+        @Override
+        public long getGasCapacity() {
+            return 0;
+        }
+
+        @Override
+        public long getStoredEssentia(String aspect) {
+            return 0;
+        }
+
+        @Override
+        public long getEssentiaCapacity() {
+            return 0;
+        }
+
+        @Override
+        public long getStoredVis(String aspect) {
+            return 0;
+        }
+
+        @Override
+        public long getVisCapacity() {
+            return 0;
+        }
+
+        @Override
+        public int getBatchSize() {
+            return 1;
+        }
+
+        @Override
+        public double getSpeedMultiplier() {
+            return speed;
+        }
+
+        @Override
+        public double getEnergyMultiplier() {
+            return energyMultiplier;
+        }
     }
 }
