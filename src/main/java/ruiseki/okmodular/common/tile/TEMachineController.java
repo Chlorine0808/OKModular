@@ -1209,28 +1209,6 @@ public class TEMachineController extends AbstractTE
         return structureAgent.getCustomProperties();
     }
 
-    // ========== Structure Tinting ==========
-
-    /**
-     * Get cached structure tint color.
-     * Used by BlockMachineController's colorMultiplier.
-     *
-     * @return ARGB color value, or null if no color defined
-     */
-    public Integer getCachedStructureTintColor() {
-        return structureAgent.getCachedStructureTintColor();
-    }
-
-    /**
-     * Get the tint color from this controller's structure properties.
-     * Returns null if not formed or no color is defined.
-     *
-     * @return ARGB color value, or null if no color defined
-     */
-    public Integer getStructureTintColor() {
-        return structureAgent.getStructureTintColor();
-    }
-
     // ========== IAlignment Implementation ==========
     // TODO: load rotation limits from config.
 
@@ -1322,22 +1300,6 @@ public class TEMachineController extends AbstractTE
 
     public void setFormed(boolean formed) {
         this.isFormed = formed;
-    }
-
-    public String getLastValidationError() {
-        return structureAgent.getLastValidationError();
-    }
-
-    public void setLastValidationError(String error) {
-        structureAgent.setLastValidationError(error);
-    }
-
-    public boolean isPhysicallyValid() {
-        return structureAgent.isPhysicallyValid();
-    }
-
-    public void setPhysicallyValid(boolean valid) {
-        structureAgent.setPhysicallyValid(valid);
     }
 
     // ========== IRecipeContext Implementation ==========
