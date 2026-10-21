@@ -53,11 +53,9 @@ public class ModFluidGases {
             GameRegistry.registerBlock(block, ItemBlockFluid.class, block.getUnlocalizedName());
             BLOCKS.put(mat, block);
 
-            // 3. Associate block with fluid (skip if another mod already claimed it)
-            if (fluid.getBlock() == null) {
-                fluid.setBlock(block);
-                Logger.info("Associated " + mat.getName() + " with our block.");
-            } else {
+            // 3. Forge's fluid block links itself to a fluid that has no block yet, so by now the
+            // fluid is either ours or was already placed by another mod. Only the latter is news.
+            if (fluid.getBlock() != block) {
                 Logger.info("Fluid " + mat.getName() + " already has a block from another mod.");
             }
         }
