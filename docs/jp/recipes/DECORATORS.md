@@ -22,7 +22,7 @@
 | `harvest_block` | 消えるブロックを採掘して回収（下記） | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
 | `per_position_probability` | 座標ごとに確率でブロック出力を差し替える | `chance` + `symbol` + `output` |
 | `bonus_block_output` | 確率で追加のブロック出力を生成 | `chance` + `outputs`（先頭が `type: "block"`） |
-| `random_block_output` | 候補からブロック出力を抽選 | `count` / `selections` |
+| `random_block_output` | 記号のマスから `count` マスを抽選してブロックを置く（下記） | `count` / `selections` |
 
 ## 2. 書き方
 
@@ -48,6 +48,24 @@
 ```
 
 `weighted_random` の `rolls` を省略すると 1 回抽選、`weight` を省略すると 1 として扱われます。
+
+`random_block_output` は、`selections` の**すべて**を順に適用します。どれか 1 つを選ぶのではありません。
+各要素は「`symbol` のマスから `count` マスを選び、そこに `output` を置く」という指示です。
+
+```json
+{
+  "type": "random_block_output",
+  "count": 1,
+  "selections": [
+    { "symbol": "G", "output": { "symbol": "G", "block": "minecraft:grass" } },
+    { "symbol": "M", "output": { "symbol": "M", "block": "minecraft:mycelium" } }
+  ]
+}
+```
+
+この例は、G のマスから 1 つを草に、**かつ** M のマスから 1 つを菌糸にします。
+選ぶのは `output` が置けるマスだけです。`replace` を書いた出力なら、そのブロックがあるマスだけが候補になります。
+同じ記号に 2 つ並べても、先の要素が置いたマスは `replace` に合わなくなるので、後の要素は別のマスを選びます。
 
 `chance` には数値だけでなく式も書けます（`"chance": "0.1 + tier * 0.05"`）。
 

@@ -23,7 +23,7 @@ inferred from the properties).
 | `harvest_block` | Mines the blocks that are about to disappear (see below) | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
 | `per_position_probability` | Swaps a block output per position, by chance | `chance` + `symbol` + `output` |
 | `bonus_block_output` | Produces extra block output by chance | `chance` + `outputs` (first is `type: "block"`) |
-| `random_block_output` | Draws a block output from candidates | `count` / `selections` |
+| `random_block_output` | Draws `count` cells of a symbol and places a block on them (below) | `count` / `selections` |
 
 ## 2. Writing them
 
@@ -49,6 +49,24 @@ inferred from the properties).
 ```
 
 Omitting `rolls` on `weighted_random` draws once; omitting `weight` treats it as 1.
+
+`random_block_output` applies **every** entry in `selections`, in order. It does not pick one of them.
+Each entry says "draw `count` cells of `symbol` and place `output` on them".
+
+```json
+{
+  "type": "random_block_output",
+  "count": 1,
+  "selections": [
+    { "symbol": "G", "output": { "symbol": "G", "block": "minecraft:grass" } },
+    { "symbol": "M", "output": { "symbol": "M", "block": "minecraft:mycelium" } }
+  ]
+}
+```
+
+This turns one G cell to grass **and** one M cell to mycelium.
+Only cells the `output` may write are drawn: with `replace`, only cells holding that block.
+Two entries on the same symbol do not collide, because a cell the first one wrote no longer matches the second one's `replace`.
 
 `chance` takes an expression as well as a number (`"chance": "0.1 + tier * 0.05"`).
 
