@@ -24,4 +24,9 @@ test {
     inputs.dir(file('docs'))
         .withPropertyName('docs')
         .withPathSensitivity(PathSensitivity.RELATIVE)
+
+    // DependencyFloorTest compares Reference.DEPENDENCIES with the versions declared here.
+    inputs.file(file('dependencies.gradle'))
+        .withPropertyName('dependencies')
+        .withPathSensitivity(PathSensitivity.RELATIVE)
 }

@@ -37,10 +37,13 @@ public class BlockStateHelpers {
         registerProperty(clazz, FACING);
     }
 
+    /** {@code World.setBlock} flags: notify neighbours and send the change to clients. */
+    private static final int PLACE_FLAGS = 3;
+
     public static void setFacingProp(World world, int x, int y, int z, ForgeDirection facing) {
         try (BlockState state = getBlockState(world, x, y, z)) {
             state.setPropertyValue("facing", facing);
-            state.place(world, x, y, z);
+            state.place(world, x, y, z, PLACE_FLAGS);
         }
     }
 
@@ -73,7 +76,7 @@ public class BlockStateHelpers {
     public static void setCraftingState(World world, int x, int y, int z, CraftingState state) {
         try (BlockState blockState = getBlockState(world, x, y, z)) {
             blockState.setPropertyValue(CRAFTING_STATE, state.getIndex());
-            blockState.place(world, x, y, z);
+            blockState.place(world, x, y, z, PLACE_FLAGS);
         }
     }
 
