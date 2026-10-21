@@ -1,13 +1,14 @@
 # OK Modular
 
-Modular multiblock for Minecraft 1.7.10.
-Structures and recipes are defined in JSON
+Modular multiblock machines for Minecraft 1.7.10.
+Structures and recipes are defined in JSON.
 
-Split out of [OmoshiroiKamo](https://github.com/Shigure-Ruiseki/OmoshiroiKamo). 
-**OK Modular is a standalone mod — does not require OmoshiroiKamo.**
+Split out of [OmoshiroiKamo](https://github.com/Shigure-Ruiseki/OmoshiroiKamo).
+**OK Modular is a standalone mod — it does not require OmoshiroiKamo.**
 
 > [!CAUTION]
 > **Not a drop-in replacement for OmoshiroiKamo's machinery module.**
+> Block IDs moved from `omoshiroikamo:` to `okmodular:`, so machines in an existing world do not come back.
 > Back up your world before updating.
 
 ## Required mods
@@ -41,8 +42,8 @@ They are there to be read, changed or deleted.
 
 ## Documentation
 
-| | English |
-|---|---|---|
+| Topic | English |
+|---|---|
 | Structures | [docs/en/structures/](docs/en/structures/) |
 | Recipes | [docs/en/recipes/](docs/en/recipes/) |
 | Machines | [docs/en/machinery/](docs/en/machinery/) |
@@ -51,7 +52,8 @@ They are there to be read, changed or deleted.
 
 - **From OmoshiroiKamo's machinery**: move `config/omoshiroikamo/modular/{structures,recipes}/` and `tiers.json` into `config/okmodular/`.
 - Then re-domain block references inside them to `okmodular:`.
-- NBT is now reached only through `nbt(...)` / `has_nbt(...)` — dot notation and the `tile_nbt` condition were removed. 
+- NBT is now reached only through `nbt(...)` / `has_nbt(...)` — dot notation and the `tile_nbt` condition were removed.
+- The world property `redstone` was renamed to `redstone_signal`. A recipe that still uses `redstone` fails to load with `Unknown variable`.
 - See [EXPRESSION_REFERENCE](docs/en/recipes/EXPRESSION_REFERENCE.md).
 
 ## Development setup
@@ -67,17 +69,18 @@ OKCore is resolved from JitPack, so no local publishing step is needed. Gradle w
 
 # OK Modular（日本語）
 
-Minecraft 1.7.10 用のモジュラーマルチブロック機械 mod です。
-機械・その構造・レシピを JSON で定義し、新しいマルチブロックを追加できます。
+Minecraft 1.7.10 用のモジュラーマルチブロック機械 mod である。
+機械の構造とレシピを JSON で定義して、新しいマルチブロック機械を追加できる。
 
-[OmoshiroiKamo](https://github.com/Shigure-Ruiseki/OmoshiroiKamo) からModularモジュールを分離したものです。
-**OK Modular は単体で動作し、OmoshiroiKamo を前提としません。**
+[OmoshiroiKamo](https://github.com/Shigure-Ruiseki/OmoshiroiKamo) の machinery モジュールを分離したものである。
+**OK Modular は単体で動き、OmoshiroiKamo を必要としない。**
 
 > [!CAUTION]
-> **OmoshiroiKamo の machinery モジュールとの差し替えはできません。** 
-> 更新前にワールドのバックアップを取ってください。
+> **OmoshiroiKamo の machinery モジュールとそのまま入れ替えることはできない。**
+> ブロック ID が `omoshiroikamo:` から `okmodular:` に変わったので、既存のワールドにある機械は戻らない。
+> 更新する前に、ワールドのバックアップを取ること。
 
-## 前提Mod
+## 前提 mod
 
 | Mod | 最低バージョン |
 |---|---|
@@ -86,40 +89,41 @@ Minecraft 1.7.10 用のモジュラーマルチブロック機械 mod です。
 | [StructureLib](https://github.com/GTNewHorizons/StructureLib) | 1.4.39 |
 | [ModularUI2](https://github.com/GTNewHorizons/ModularUI2) | 2.3.79-1.7.10 |
 
-NEI, Waila, BlockRenderer6343, Thaumcraft, AE2, ThaumicEnergistics, Mekanism, EnderIO, IC2, CoFH, Botania との連携があります
+NEI、Waila、BlockRenderer6343、Thaumcraft、AE2、ThaumicEnergistics、Mekanism、EnderIO、IC2、CoFH、Botania が入っていれば、それぞれと連携する。
 
-## Config
+## 設定ファイル
 
 ```
 config/okmodular/
   modular.cfg      worldgen.cfg      tiers.json
-  recipes/         structures/       ← errors.txt もここに書かれます
+  recipes/         structures/       ← errors.txt もここに出力される
   structure_io/
 ```
 
 ### お手本の機械
 
-初回起動時，`structures/`・`recipes/`・`structure_io/` のうち存在しないものが作られ，お手本の機械 6 台（Assembler，Metal Former，Pressurized Crusher，Ore Transformer，Phased Alloy Forge，Spatial Shifter）が書き出される．
-読んで書き換えるか，消して使う．
+OK Modular は初回起動時に、`structures/`、`recipes/`、`structure_io/` のうちまだ無いディレクトリを作り、お手本の機械 6 台（Assembler、Metal Former、Pressurized Crusher、Ore Transformer、Phased Alloy Forge、Spatial Shifter）を書き出す。
+お手本は読むためのもので、書き換えても消してもよい。
 
-- 既にあるディレクトリには何も書かない．消したお手本は戻らない．戻すにはディレクトリごと消す
-- クラフト台で作れるのは Assembler の部品（コントローラ，Plain ケーシング，アイテムポート，エネルギーポート）と Wrench だけ．ほかのケーシングとポートは Assembler で作る
-- 電力は他 mod の RF を使う．OK Modular は発電機を追加しない
+- 既にあるディレクトリには書き出さないので、消したお手本は戻らない。戻すには、そのディレクトリごと消す
+- クラフト台で作れるのは、Assembler 自身の部品（コントローラ、Plain ケーシング、アイテムポート、エネルギーポート）と Wrench だけである。ほかのケーシングとポートは Assembler で作る
+- 機械は他 mod の RF で動く。OK Modular は発電機を追加しない
 
 ## ドキュメント
 
-| | 日本語 |
-|---|---|---|
-| 構造体 |  [docs/jp/structures/](docs/jp/structures/) |
-| レシピ |  [docs/jp/recipes/](docs/jp/recipes/) |
-| 機械 |  [docs/jp/machinery/](docs/jp/machinery/) |
+| 対象 | 日本語 |
+|---|---|
+| 構造体 | [docs/jp/structures/](docs/jp/structures/) |
+| レシピ | [docs/jp/recipes/](docs/jp/recipes/) |
+| 機械 | [docs/jp/machinery/](docs/jp/machinery/) |
 
 ## 移行
 
-- OmoshiroiKamo から: `config/omoshiroikamo/modular/{structures,recipes}/` と`tiers.json` を `config/okmodular/` へ移してください。
-- そのうえで、中のブロック参照を `okmodular:` に書き換えます。
-- NBT へのアクセスは `nbt(...)` / `has_nbt(...)` だけになり、ドット記法と `tile_nbt` 条件は削除されました。
-- [EXPRESSION_REFERENCE](docs/jp/recipes/EXPRESSION_REFERENCE.md) を参照してください。
+- OmoshiroiKamo の machinery から移るときは、`config/omoshiroikamo/modular/{structures,recipes}/` と `tiers.json` を `config/okmodular/` へ移す。
+- そのうえで、ファイルの中のブロック参照を `okmodular:` に書き換える。
+- NBT には `nbt(...)` / `has_nbt(...)` でしかアクセスできなくなった。ドット記法と `tile_nbt` 条件は削除した。
+- 世界プロパティの `redstone` は `redstone_signal` に改名した。`redstone` を書いたままのレシピは、`Unknown variable` で読み込みに失敗する。
+- 詳しくは [EXPRESSION_REFERENCE](docs/jp/recipes/EXPRESSION_REFERENCE.md) を参照。
 
 ## 開発環境
 
@@ -127,5 +131,5 @@ config/okmodular/
 ./gradlew build
 ```
 
-OKCore は JitPack から解決されるので、ローカルへの publish は不要です。Gradle には新しい JDK が必要です
-（`.java-version` は 25 を要求しますが 21 でも動きます）。mod 自体は Java 8 バイトコードとして出力されます。
+OKCore は JitPack から取得するので、ローカルへの publish は要らない。Gradle の実行には新しい JDK が要る
+（`.java-version` は 25 を指定しているが、21 でも動く）。mod 自体は Java 8 のバイトコードとして出力される。
