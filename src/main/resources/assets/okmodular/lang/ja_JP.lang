@@ -243,6 +243,11 @@ command.okmodular.scan_success=%s
 command.okmodular.scan_file=保存しました: %s
 command.okmodular.scan_failed=スキャン失敗: %s
 
+# --- Held item command ---
+command.okmodular.hand_player_only=このコマンドはプレイヤーが実行してください。
+command.okmodular.hand_empty=調べるアイテムを手に持ってください。
+command.okmodular.hand_no_nbt=NBT はありません。
+
 # --- Machine GUI status and controls ---
 gui.status.idle=待機中
 gui.status.processing=レシピ処理中: %d%%
