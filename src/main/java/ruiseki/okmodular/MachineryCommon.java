@@ -40,10 +40,7 @@ public class MachineryCommon extends CommonProxyComponent {
         Arrays.asList(
             PacketStructureTint.class,
             PacketReloadNEI.class,
-            // The wrench's per-side IO toggle. It was missing, so ItemWrench sent this
-            // to a channel that had no discriminator for it and the toggle never
-            // reached the server. The split brought the sender over from the parent
-            // mod's CoreCommon without bringing the registration.
+            // The wrench's per-side IO toggle; unregistered, it never reaches the server.
             PacketToggleSide.class));
 
     @Override

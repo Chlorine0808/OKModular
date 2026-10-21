@@ -116,7 +116,7 @@ public class MachineryModule extends ModModuleBase {
         // Conditions, so its class would never load and its static block would never run.
         Conditions.registerDefaults();
 
-        // Structure engine wiring (formerly done by the parent mod's CoreModule).
+        // Structure engine wiring.
         // The config root is this mod's ID, matching RecipeLoader and TierConfigLoader.
         StructureManager.setReloadCallback(CustomStructureRegistry::registerAll);
         // Writes the example machines into a fresh config before anything reads it.
@@ -124,8 +124,7 @@ public class MachineryModule extends ModModuleBase {
         StructureManager.getInstance()
             .initialize(configDir);
 
-        // Capabilities the machinery ports/proxies depend on. Idempotent, so
-        // harmless if the parent mod already registered its own copies.
+        // Capabilities the machinery ports/proxies depend on. Registering one twice throws.
         CapabilityItemHandler.register();
         CapabilityEnergy.register();
 
@@ -134,8 +133,7 @@ public class MachineryModule extends ModModuleBase {
         MachineryBlocks.preInit();
         BlockResolver.registerHintBlock(MachineryBlocks.CASING_PLAIN.getBlock());
         CustomStructureRegistry.registerControllerBlock(MachineryBlocks.MACHINE_CONTROLLER.getBlock());
-        // Fallback for the 'F' symbol when a structure declares no mapping for it. The parent mod's
-        // MultiBlockModule used to supply this; the plain casing is this mod's equivalent.
+        // Fallback for the 'F' symbol when a structure declares no mapping for it.
         CustomStructureRegistry.registerDefaultStructureBlock(MachineryBlocks.CASING_PLAIN.getBlock());
         MachineryItems.preInit();
         MachineryOreDict.init();
@@ -146,7 +144,6 @@ public class MachineryModule extends ModModuleBase {
         MemoryEventHandler.registerOnWorldUnload(world -> StructureTintCache.clearDimension(world));
         MemoryEventHandler.registerOnClientDisconnect(StructureTintCache::clearAll);
         // Subscribe the handler itself, otherwise the callbacks above can never fire.
-        // The parent mod does this from its own @Mod class; this mod carries its own copy.
         MemoryEventHandler.INSTANCE.register();
 
         // Pre-scan recipe group names so NEI can register handlers
@@ -174,10 +171,7 @@ public class MachineryModule extends ModModuleBase {
     /**
      * Register machinery structures with StructureLib, then register the
      * {@link IMultiblockInfoContainer} for the controller so StructureLib can
-     * render machine previews in NEI. When running standalone this is the only
-     * caller of {@link CustomStructureRegistry#registerAll()}; when the parent
-     * mod is present it maintains its own separate engine (registerAll is
-     * idempotent per registry).
+     * render machine previews in NEI.
      */
     public static void postInitStructures() {
         CustomStructureRegistry.registerAll();

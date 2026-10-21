@@ -120,9 +120,7 @@ public class OKModular extends ModBase {
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         super.postInit(event);
-        // Register machinery structures with StructureLib. OKModular owns its
-        // structure engine now (via OKCore), so this no longer relies on the
-        // parent mod's StructureCompat having run first.
+        // Register machinery structures with StructureLib.
         MachineryModule.postInitStructures();
         if (MinecraftHelpers.isClientSide() && Mods.NotEnoughItems.isLoaded()) {
             NEIConfig.registerStructurePreviews();

@@ -18,9 +18,7 @@ public class StructureMigrationRegistry {
     /**
      * Registered migrators, ordered oldest target version first.
      *
-     * Empty: the migrators this registry shipped with rewrote the parent mod's block names and
-     * stopped matching anything once the machinery split moved them out of it. Register an
-     * {@link IDataMigrator} here when the structure JSON format changes.
+     * Empty. Register an {@link IDataMigrator} here when the structure JSON format changes.
      */
     private static final List<IDataMigrator> MIGRATORS = new ArrayList<>();
 
