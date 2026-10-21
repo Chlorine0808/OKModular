@@ -38,8 +38,7 @@ import ruiseki.okmodular.integration.waila.IWailaTileInfoProvider;
  * <li>Interaction with ItemStacks for saving/loading</li>
  * </ul>
  */
-public abstract class AbstractTE extends AbstractSideCapabilityTE
-    implements TileEntityOK.ITickingTile, IWailaTileInfoProvider {
+public abstract class AbstractTE extends TileEntityOK implements TileEntityOK.ITickingTile, IWailaTileInfoProvider {
 
     @Delegate
     protected final ITickingTile tickingTileComponent = new TickingTileComponent(this);

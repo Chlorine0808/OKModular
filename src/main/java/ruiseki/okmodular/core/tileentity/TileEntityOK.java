@@ -15,19 +15,16 @@ import net.minecraftforge.common.util.ForgeDirection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.gtnewhorizon.gtnhlib.capability.CapabilityProvider;
+
 import lombok.experimental.Delegate;
 import ruiseki.okcore.datastructure.BlockPos;
 import ruiseki.okcore.datastructure.DimPos;
-import ruiseki.okmodular.core.capabilities.Capability;
-import ruiseki.okmodular.core.capabilities.CapabilityDispatcher;
-import ruiseki.okmodular.core.capabilities.ICapabilitySerializable;
-import ruiseki.okmodular.core.event.OKEventFactory;
 import ruiseki.okmodular.core.persist.nbt.INBTProvider;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 import ruiseki.okmodular.core.persist.nbt.NBTProviderComponent;
 
-public abstract class TileEntityOK extends TileEntity
-    implements ITile, INBTProvider, ICapabilitySerializable, IOrientable {
+public abstract class TileEntityOK extends TileEntity implements ITile, INBTProvider, CapabilityProvider, IOrientable {
 
     @Delegate
     private final INBTProvider nbtProvider = new NBTProviderComponent(this);
@@ -46,10 +43,7 @@ public abstract class TileEntityOK extends TileEntity
     private BlockPos cachedPos;
     private final int randomOffset = (int) (Math.random() * 20);
 
-    private final CapabilityDispatcher capabilities;
-
     public TileEntityOK() {
-        this.capabilities = OKEventFactory.gatherCapabilities(this);
         this.ticking = this instanceof ITickingTile;
     }
 
@@ -158,20 +152,11 @@ public abstract class TileEntityOK extends TileEntity
 
     public void writeCommon(NBTTagCompound tag) {
         writeGeneratedFieldsToNBT(tag);
-
-        if (capabilities != null) {
-            tag.setTag("OKCaps", capabilities.serializeNBT());
-        }
     }
 
     public void readCommon(NBTTagCompound tag) {
         if (tag == null) return;
         readGeneratedFieldsFromNBT(tag);
-
-        if (capabilities != null && tag.hasKey("OKCaps")) {
-            capabilities.deserializeNBT(tag.getCompoundTag("OKCaps"));
-        }
-
         onLoad();
     }
 
@@ -210,25 +195,8 @@ public abstract class TileEntityOK extends TileEntity
     }
 
     @Override
-    public boolean hasCapability(@NotNull Capability<?> capability, @Nullable ForgeDirection facing) {
-        return capabilities != null && capabilities.hasCapability(capability, facing);
-    }
-
-    @Override
-    public <T> T getCapability(@NotNull Capability<T> capability, @Nullable ForgeDirection facing) {
-        return capabilities == null ? null : capabilities.getCapability(capability, facing);
-    }
-
-    @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
-        this.readFromNBT(nbt);
-    }
-
-    @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound ret = new NBTTagCompound();
-        this.writeToNBT(ret);
-        return ret;
+    public <T> @Nullable T getCapability(@NotNull Class<T> capability, @NotNull ForgeDirection side) {
+        return null;
     }
 
     @Override

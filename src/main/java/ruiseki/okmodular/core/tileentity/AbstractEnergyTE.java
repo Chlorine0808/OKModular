@@ -4,9 +4,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
 import ic2.api.energy.event.EnergyTileLoadEvent;
@@ -16,8 +13,6 @@ import ic2.api.energy.tile.IEnergySource;
 import ruiseki.okmodular.OKModular;
 import ruiseki.okmodular.common.network.PacketEnergy;
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.okmodular.core.capabilities.Capability;
-import ruiseki.okmodular.core.capabilities.energy.CapabilityEnergy;
 import ruiseki.okmodular.core.energy.EnergyStorage;
 import ruiseki.okmodular.core.energy.IOKEnergyIO;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
@@ -243,22 +238,5 @@ public abstract class AbstractEnergyTE extends AbstractTE implements IOKEnergyIO
     @Optional.Method(modid = "IC2")
     public boolean emitsEnergyTo(TileEntity receiver, ForgeDirection direction) {
         return canConnectEnergy(direction);
-    }
-
-    @Override
-    public boolean hasCapability(@NotNull Capability<?> capability, @Nullable ForgeDirection facing) {
-        if (capability == CapabilityEnergy.ENERGY) {
-            return true;
-        }
-        return super.hasCapability(capability, facing);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getCapability(@NotNull Capability<T> capability, @Nullable ForgeDirection facing) {
-        if (capability == CapabilityEnergy.ENERGY) {
-            return (T) energyStorage;
-        }
-        return super.getCapability(capability, facing);
     }
 }

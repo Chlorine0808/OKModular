@@ -35,8 +35,7 @@ import ruiseki.okmodular.core.persist.nbt.NBTPersist;
  * TileEntity を組めないので反射で確かめている
  * ============================================
  *
- * `AbstractTE` の実体化は `OKEventFactory.gatherCapabilities` を通るので
- * ユニットテストでは組めない。そこで:
+ * ポート族の TileEntity は実体化せず、クラスの形だけを見る。そこで:
  *
  * - **永続化されること**は 2 つに分けて示す。フレームワークが `@NBTPersist` の enum を
  * 正しく扱うことは `EnumPersistenceTest` が実証し、**その注釈が実際に付いていること**を

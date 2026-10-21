@@ -35,8 +35,6 @@ import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tier.TierConfigLoader;
 import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.okmodular.common.tile.TEMachineController;
-import ruiseki.okmodular.core.capabilities.energy.CapabilityEnergy;
-import ruiseki.okmodular.core.capabilities.item.CapabilityItemHandler;
 import ruiseki.okmodular.core.event.MemoryEventHandler;
 import ruiseki.okmodular.structure.BlockResolver;
 import ruiseki.okmodular.structure.CustomStructureRegistry;
@@ -123,10 +121,6 @@ public class MachineryModule extends ModModuleBase {
         StructureManager.setDefaultStructureGenerator(DefaultConfigWriter::writeMissing);
         StructureManager.getInstance()
             .initialize(configDir);
-
-        // Capabilities the machinery ports/proxies depend on. Registering one twice throws.
-        CapabilityItemHandler.register();
-        CapabilityEnergy.register();
 
         ModFluidGases.preInit();
         MachineryIntegration.preInit();
