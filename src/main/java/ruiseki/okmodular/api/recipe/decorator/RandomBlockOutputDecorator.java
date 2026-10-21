@@ -58,9 +58,17 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
 
         int selectCount = totalCount(context);
         for (BlockOutputSelection selection : selections) {
+            // Only cells the output may write are candidates, or a cell holding air would
+            // take a replacement meant for another block
+            List<ChunkCoordinates> candidates = new ArrayList<>();
             List<ChunkCoordinates> allPositions = recipeContext.getSymbolPositions(selection.symbol);
+            if (allPositions != null) {
+                for (ChunkCoordinates pos : allPositions) {
+                    if (selection.output.acceptsAt(recipeContext, pos)) candidates.add(pos);
+                }
+            }
 
-            for (ChunkCoordinates pos : select(allPositions, selectCount, context)) {
+            for (ChunkCoordinates pos : select(candidates, selectCount, context)) {
                 selection.output.applyAt(recipeContext, pos, context);
             }
         }

@@ -150,25 +150,32 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
      * block either, filled cells to clear). Placing and harvesting both read this.
      */
     public List<ChunkCoordinates> targets(IRecipeContext context, int multiplier, ConditionContext condContext) {
-        World world = context.getWorld();
-        String block = getBlock();
-        String replace = getReplace();
+        return CellSelection.firstMatching(
+            context.getSymbolPositions(symbol),
+            pos -> acceptsAt(context, pos),
+            Amounts.toInt(getRequiredAmount(condContext) * multiplier));
+    }
 
-        return CellSelection.firstMatching(context.getSymbolPositions(symbol), pos -> {
-            if (index != -1) {
-                TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
-                if (te instanceof IModularPort mp && mp.getAssignedIndex() != index) return false;
-            }
-            Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
-            if (replace != null) {
-                return matchesBlockId(
-                    getBlockId(currentBlock, world.getBlockMetadata(pos.posX, pos.posY, pos.posZ)),
-                    replace);
-            }
-            boolean empty = currentBlock.isReplaceable(world, pos.posX, pos.posY, pos.posZ)
-                || currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ);
-            return block != null ? empty : !currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ);
-        }, Amounts.toInt(getRequiredAmount(condContext) * multiplier));
+    /**
+     * Whether this output may write the cell: it holds {@code replace}, or with no replace it
+     * is empty (or, with no block either, filled).
+     */
+    public boolean acceptsAt(IRecipeContext context, ChunkCoordinates pos) {
+        World world = context.getWorld();
+        if (index != -1) {
+            TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
+            if (te instanceof IModularPort mp && mp.getAssignedIndex() != index) return false;
+        }
+        Block currentBlock = world.getBlock(pos.posX, pos.posY, pos.posZ);
+        String replace = getReplace();
+        if (replace != null) {
+            return matchesBlockId(
+                getBlockId(currentBlock, world.getBlockMetadata(pos.posX, pos.posY, pos.posZ)),
+                replace);
+        }
+        boolean empty = currentBlock.isReplaceable(world, pos.posX, pos.posY, pos.posZ)
+            || currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ);
+        return getBlock() != null ? empty : !currentBlock.isAir(world, pos.posX, pos.posY, pos.posZ);
     }
 
     /**
