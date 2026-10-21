@@ -15,6 +15,7 @@ import com.cleanroommc.modularui.factory.GuiFactories;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Delegate;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import ruiseki.okcore.enums.RedstoneMode;
@@ -37,8 +38,11 @@ import ruiseki.okmodular.integration.waila.IWailaTileInfoProvider;
  * <li>Interaction with ItemStacks for saving/loading</li>
  * </ul>
  */
-public abstract class AbstractTE extends AbstractTickingTE
+public abstract class AbstractTE extends AbstractSideCapabilityTE
     implements TileEntityOK.ITickingTile, IWailaTileInfoProvider {
+
+    @Delegate
+    protected final ITickingTile tickingTileComponent = new TickingTileComponent(this);
 
     /** Forces client-side update to render changes. */
     protected boolean forceClientUpdate = true;
