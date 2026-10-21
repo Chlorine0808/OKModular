@@ -2,7 +2,7 @@
 
 Recipes are defined in `config/okmodular/recipes/*.json`.
 
-## 📚 Related Documentation
+## Related Documentation
 
 - [Conditions](./CONDITIONS.md) - what decides whether a recipe runs or stops
 - [Decorators](./DECORATORS.md) - chance, bonus output, catalysts
@@ -37,9 +37,9 @@ Recipes are defined in `config/okmodular/recipes/*.json`.
 | `tier` / `tiers` | object | Required component tiers (e.g. `{"glass": 1, "casing": 3}`) |
 | `priority` | number | Priority |
 | `name` / `localizedName` | string | Display name |
-| `registryName` | string | The name inheritance refers to → §6 |
-| `parent` | string | The `registryName` to inherit from → §6 |
-| `abstract` | boolean | Make this an inheritance-only recipe → §6 |
+| `registryName` | string | The name inheritance refers to → §10 |
+| `parent` | string | The `registryName` to inherit from → §10 |
+| `abstract` | boolean | Make this an inheritance-only recipe → §10 |
 
 > [!NOTE]
 > `speedMultiplier` / `energyMultiplier` / `batchMin` / `batchMax` / `durationPolicy` are structure JSON keys.
@@ -49,7 +49,7 @@ Recipes are defined in `config/okmodular/recipes/*.json`.
 > [machine's own conditions](../machinery/MACHINE_CONDITIONS.md); on a recipe it governs that
 > recipe's own `conditions`. They are set separately.
 
-## 2.1 Recipe priority
+### Priority
 
 Recipes are searched and run in this order.
 
@@ -71,8 +71,8 @@ The type is decided by which key is present in the object.
 | `gas` | gas | `amount` is in mB |
 | `energy` / `mana` | energy / mana | Per tick when `perTick` is true |
 | `essentia` / `vis` | aspect | The value is an aspect name |
-| `symbol` | block | Acts on a structure's symbol position → §3.2 |
-| `structure` | block | Acts on a whole arrangement of blocks → §3.3 |
+| `symbol` | block | Acts on a structure's symbol position → §6 |
+| `structure` | block | Acts on a whole arrangement of blocks → §7 |
 
 ```json
 { "item": "minecraft:coal", "amount": 64 }
@@ -123,7 +123,7 @@ Both `pertick` and `perTick` are read.
 > A structure's `energyMultiplier` applies **only when a recipe reads `energy_multi`**.
 > Setting it alone does nothing.
 
-## 3.1 Dynamic amounts
+## 4. Dynamic amounts
 
 `amount` takes an expression instead of a fixed value.
 
@@ -157,7 +157,7 @@ for worked examples see the [Expression Examples](./EXPRESSION_EXAMPLES.md).
 - The ternary operator `? :` and the logical operators `&&` / `||` are available
 - The batch size is applied to amounts automatically. Multiplying by `batch` inside the expression applies it twice
 
-## 3.1.5 Matching and rewriting an item's NBT
+## 5. Matching and rewriting an item's NBT
 
 An item input can **match** on NBT, and an item input or output can **rewrite** it.
 
@@ -215,7 +215,7 @@ The example requires id 16 to be level 5 or better, removes id 20, and raises id
 > `0` is read as "set to zero" instead - `{"Slot": 0, "Count": "+1"}` makes no sense read as
 > "delete slot 0". **Do not mix the two when you mean to delete.**
 
-## 3.2 Blocks (`symbol`)
+## 6. Blocks (`symbol`)
 
 Detects and acts on the block at a symbol position inside the structure. The naming is
 consistent: `replace` (before) and `block` (after).
@@ -268,7 +268,7 @@ use `+=`.
 "nbt": [ "nbt('stored_energy') += 1000" ]
 ```
 
-## 3.3 Arrangements of blocks (`structure`)
+## 7. Arrangements of blocks (`structure`)
 
 Where `symbol` counts blocks one at a time, `structure` acts on a whole arrangement — a shape
 written once as a named pattern and matched or placed as a unit.
@@ -289,24 +289,20 @@ An anchor counts only when every cell of the pattern matches, and the pattern tu
 machine it sits in. The full format, the reserved characters and how the anchor is chosen are in
 [Structure IO](../structures/STRUCTURE_IO.md).
 
-## 4. Conditions and decorators
+## 8. Conditions and decorators
 
 Expressive enough to warrant their own files.
 
 - [Conditions](./CONDITIONS.md) — block, biome, weather, coordinate, NBT and expression checks
 - [Decorators](./DECORATORS.md) — chance, bonus output, weighted draws, catalysts
 
-## 5. Writing an expression as a JSON object
+## 9. Writing an expression as a JSON object
 
 Some parameters take an expression object instead of a number.
-
-| `type` | Behaviour |
-|---|---|
-| `constant` | Returns a fixed number |
-| `nbt` | Reads a number at an NBT path on the machine's TileEntity |
-| `map_range` | Maps one numeric range onto another by linear interpolation |
-| `arithmetic` | Operates on two expressions (`left`, `right`, `operation`: `+` `-` `*` `/` `%`) |
-| `world_property` | Reads world information (`time`, `day`, `moon_phase`) |
+For how to write one and the list of `type`s, see the
+[structured form in the Expression Reference](./EXPRESSION_REFERENCE.md#6-structured-form--an-object-instead-of-a-string).
+`arithmetic` accepts `+` `-` `*` `/` `%` as its `operation`, and `world_property` reads world
+information (`time`, `day`, `moon_phase`).
 
 ### The short string form
 
@@ -319,7 +315,7 @@ it a **recipe script**.
 "chance": "{ nbt('energy') / 100000.0 } * 0.8"
 ```
 
-## 6. Recipe inheritance
+## 10. Recipe inheritance
 
 Put shared properties on an `abstract` recipe and refer to it from others with `parent`.
 

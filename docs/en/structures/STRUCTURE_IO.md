@@ -8,9 +8,18 @@ Pattern files go in `config/okmodular/structure_io/`, beside `recipes/` and `str
 directory name is a config value (`structureIoDirectory` in `modular.cfg`).
 
 > [!NOTE]
-> The blocks written as `symbol` inputs and outputs ([JSON Format §3.2](../recipes/JSON_FORMAT.md#32-blocks-symbol))
+> The blocks written as `symbol` inputs and outputs ([JSON Format §6](../recipes/JSON_FORMAT.md#6-blocks-symbol))
 > are counted individually — "three of these somewhere under that symbol". A pattern is the other
 > question: "this exact shape, in this orientation, at this block".
+
+## Related Documentation
+
+- [Structure JSON Format](./JSON_FORMAT.md)
+- [Recipe JSON Format](../recipes/JSON_FORMAT.md)
+- [Expression Reference](../recipes/EXPRESSION_REFERENCE.md)
+- [Modular Machinery Documentation](../machinery/INDEX.md)
+
+---
 
 ## 1. File Structure
 
@@ -45,15 +54,15 @@ A file may hold a single pattern object, an array of them, or an object with a `
 | :--- | :--- | :--- |
 | `name` | String | Identifier a recipe refers to (required, must be unique) |
 | `layers` | Array | The shape, written exactly as in a structure definition (**exclusive** with `shape`; one of them is required) |
-| `shape` | Object | **Generates** the shape instead of `layers`. [See below](#generating-a-shape-instead-of-drawing-it) |
-| `mappings` | Object | Character → block ID, or [an object describing the cell](#writing-a-cell---chance-and-weights). The list form a structure accepts is not available here |
+| `shape` | Object | **Generates** the shape instead of `layers`. [See below](#4-generating-a-shape-shape) |
+| `mappings` | Object | Character → block ID, or [an object describing the cell](#3-writing-a-cell). The list form a structure accepts is not available here |
 | `anchor` | String | Single character marking the cell that lands on the block the recipe names. Defaults to `Q` |
 
 `layers` takes either a bare array of row strings or `{ "rows": [...] }`, the same two forms a
 structure definition takes.
 
 A shape as simple as a sphere need not be drawn at all - see
-[`shape`](#generating-a-shape-instead-of-drawing-it).
+[`shape`](#4-generating-a-shape-shape).
 
 > [!WARNING]
 > **Give every layer the same number of rows.** Row order is reversed within each layer, using
@@ -72,7 +81,9 @@ Any other character **must** have an entry in `mappings`. One that does not stop
 loading and is reported in `structures/errors.txt`, because a silently dropped character would
 make the pattern check fewer blocks than it looks like it checks.
 
-### Writing a cell - chance and weights
+## 3. Writing a Cell
+
+### Chance and weights
 
 An entry in `mappings` takes an object as well as a block ID string.
 
@@ -100,7 +111,7 @@ An entry in `mappings` takes an object as well as a block ID string.
 **`block` is the one-entry form of `weights`**, so writing both is a load error: it says what
 goes in the same cell twice, and the engine would have to pick one silently.
 
-#### Keys of `weights`
+### Keys of `weights`
 
 Block IDs, plus the same two reserved characters `layers` uses.
 
@@ -112,7 +123,7 @@ Block IDs, plus the same two reserved characters `layers` uses.
 
 "Sometimes clear it" and "sometimes skip it" are different things, so both can be written.
 
-#### Writing them as expressions
+### Writing them as expressions
 
 `chance` and each weight take an [expression](../recipes/EXPRESSION_REFERENCE.md) as readily
 as a number.
@@ -135,7 +146,7 @@ below and so its value is not knowable at placement time. An expression that onl
 machine is carried along with them; that is a deliberate trade, keeping one test for "can this
 be settled early" in exchange for a few thousand cheap evaluations.
 
-#### Reading where the cell is
+### Reading where the cell is
 
 | Variable | What it is | Direction |
 | :--- | :--- | :--- |
@@ -188,7 +199,7 @@ several characters and draw each layer by hand.
 > leaves an input with no arrangement to match against. Left to run, the recipe would simply
 > never fire, which reads as a structure that will not detect.
 
-#### How it scatters
+### How it scatters
 
 The draw mixes in the cell's **world coordinates**, so:
 
@@ -197,7 +208,7 @@ The draw mixes in the cell's **world coordinates**, so:
 - within one run the answer never moves, across a save and reload included
 - the next run lays it out differently
 
-#### Making it clump - `noise(scale)`
+### Making it clump - `noise(scale)`
 
 A `chance` is drawn **independently at every cell**, so a density that falls off by distance still
 leaves the inside evenly scattered. `noise(scale)` is a field where **near positions answer alike**.
@@ -250,7 +261,7 @@ A literal of 0 or less is a load error; an expression that falls there at run ti
 > **`cell_*` can only take away.** A cell that was not drawn does not appear. Getting something
 > to carve without drawing it is what `shape` in the next section is for.
 
-### Generating a shape instead of drawing it
+## 4. Generating a Shape (shape)
 
 Write `shape` in place of `layers` and the cells are generated.
 
@@ -308,6 +319,8 @@ the same cells**. Radius 0 is 1 cell, 1 is 7, 2 is 33, 4 is 257, 8 is 2109, 16 i
 > To have the tier decide the size, **generate the larger shape and carve it**:
 > `"chance": "sqrt(cell_x^2 + cell_y^2 + cell_z^2) <= tier"` makes the tier the radius.
 
+## 5. Where a Pattern Is Placed
+
 ### The anchor
 
 The recipe names a symbol from the machine's structure; each block recorded for that symbol is a
@@ -334,7 +347,7 @@ machine's own structure.
 A pattern is not limited to blocks the formation check covers. Cells that fall outside the
 machine's own shape resolve normally, so an IO region can sit beside or below the machine.
 
-## 3. Referring to a Pattern from a Recipe
+## 6. Referring to a Pattern from a Recipe
 
 ```json
 {
@@ -394,7 +407,7 @@ the centre block of the floor, because every other anchor would push it into the
 and an output drawn to the same footprint therefore always act on the same spot, which is what
 makes "transform this arrangement in place" work.
 
-## 4. Schema Versioning
+## 7. Schema Versioning
 
 Pattern files run through the structure migration registry on load, so the format can be changed
 later and existing files fixed automatically. A migrated file is rewritten, and the original is
@@ -403,7 +416,7 @@ kept alongside it as `.bak`.
 This is the reason patterns are their own files rather than inline recipe JSON: recipe JSON has no
 schema versioning, so anything written there is frozen for good.
 
-## 5. Commands
+## 8. Commands
 
 - `/okmodular reload`: reloads structures, patterns, tiers and recipes. Patterns are reloaded
   before recipes, because a recipe resolves its pattern by name.

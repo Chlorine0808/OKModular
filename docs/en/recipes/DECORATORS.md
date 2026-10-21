@@ -4,7 +4,7 @@ Decorators add behaviour while a recipe runs or when it finishes.
 The same three forms as conditions are available (`type` stated / the key names the type /
 inferred from the properties).
 
-## 📚 Related Documentation
+## Related Documentation
 
 - [JSON Format](./JSON_FORMAT.md)
 - [Conditions](./CONDITIONS.md)
@@ -17,7 +17,7 @@ inferred from the properties).
 | type name | Behaviour | Properties used for inference |
 |---------|------|------------------------|
 | `chance` | Controls the recipe's success chance (a loss produces nothing) | `chance` |
-| `bonus` | Produces extra output by chance | `chance` + `outputs` (`modifierKey` is [gone](#removed-modifierkey)) |
+| `bonus` | Produces extra output by chance | `chance` + `outputs` (`modifierKey` is [gone](#7-removed-modifierkey-on-bonus)) |
 | `weighted_random` | Picks an output from a weighted list | `outputs` (each with `weight`) / `pool` / `rolls` |
 | `requirement` | Checks extra conditions and catalysts while running | `condition` / `requirements` |
 | `harvest_block` | Mines the blocks that are about to disappear (see below) | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
@@ -50,35 +50,7 @@ inferred from the properties).
 
 Omitting `rolls` on `weighted_random` draws once; omitting `weight` treats it as 1.
 
-`random_block_output` applies **every** entry in `selections`, in order. It does not pick one of them.
-Each entry says "draw `count` cells of `symbol` and place `output` on them".
-
-```json
-{
-  "type": "random_block_output",
-  "count": 1,
-  "selections": [
-    { "symbol": "G", "output": { "symbol": "G", "block": "minecraft:grass" } },
-    { "symbol": "M", "output": { "symbol": "M", "block": "minecraft:mycelium" } }
-  ]
-}
-```
-
-This turns one G cell to grass **and** one M cell to mycelium.
-Only cells the `output` may write are drawn: with `replace`, only cells holding that block.
-Two entries on the same symbol do not collide, because a cell the first one wrote no longer matches the second one's `replace`.
-
 `chance` takes an expression as well as a number (`"chance": "0.1 + tier * 0.05"`).
-
-> [!NOTE]
-> **A recipe's `chance` is drawn once per run and the answer is kept.**
-> When the output ports are full the machine retries every tick until they clear, but it
-> does not draw again - and neither does it after a save and reload.
->
-> Without that, a recipe written as `"chance": "energy_p"` - anything that **moves while the
-> machine waits** - could turn from a win into a loss mid-wait and take the whole payout with
-> it. The longer the output stayed blocked, the less likely the recipe was to pay at all,
-> which is not a rule anyone wrote.
 
 ## 3. How the draws work
 
@@ -96,6 +68,16 @@ carried around between calls, which gives the following.
 The first one matters most in practice. The engine checks whether an output fits before
 placing it, so an answer that moved between the two would mean **"said it would fit, then
 placed nothing"**.
+
+> [!NOTE]
+> **A recipe's `chance` is drawn once per run and the answer is kept.**
+> When the output ports are full the machine retries every tick until they clear, but it
+> does not draw again - and neither does it after a save and reload.
+>
+> Without that, a recipe written as `"chance": "energy_p"` - anything that **moves while the
+> machine waits** - could turn from a win into a loss mid-wait and take the whole payout with
+> it. The longer the output stayed blocked, the less likely the recipe was to pay at all,
+> which is not a rule anyone wrote.
 
 ### Batches
 
@@ -123,32 +105,34 @@ multiple of n.
 > **Do not write `batch` into the expression.** The engine applies it, so `"count": "5 *
 > batch"` applies it **twice** - the same trap as an input or output `amount`.
 
+### Two decorators of the same kind
+
 > [!WARNING]
 > **Two decorators of the same kind on one recipe always give the same answer.**
 > Streams are assigned per kind, not per instance. Two `bonus` entries will land together
 > and miss together. For now, give them different `chance` values or fold them into one.
 
-### Removed: `modifierKey`
+## 4. `random_block_output`
 
-`bonus` no longer takes `modifierKey`. Writing it is ignored, with a warning on load.
-
-It never worked. The value was read into a field and the place that should have applied it
-carried a `TODO`, so a recipe with it drew exactly the same odds as one without.
-
-What it was for - letting something about the machine move the chance - is already how
-`chance` works, because `chance` is an expression:
+`random_block_output` applies **every** entry in `selections`, in order. It does not pick one of them.
+Each entry says "draw `count` cells of `symbol` and place `output` on them".
 
 ```json
-{ "type": "bonus", "chance": "0.25 * speed_multi", "outputs": [...] }
-{ "type": "bonus", "chance": "0.1 + tier * 0.05",  "outputs": [...] }
+{
+  "type": "random_block_output",
+  "count": 1,
+  "selections": [
+    { "symbol": "G", "output": { "symbol": "G", "block": "minecraft:grass" } },
+    { "symbol": "M", "output": { "symbol": "M", "block": "minecraft:mycelium" } }
+  ]
+}
 ```
 
-Every value `modifierKey` could have named is visible there as `speed_multi`,
-`energy_multi` or `batch`, and an expression can **combine** them, which one key never
-could. Implementing it would have left one idea with two spellings, the weaker one
-answering differently.
+This turns one G cell to grass **and** one M cell to mycelium.
+Only cells the `output` may write are drawn: with `replace`, only cells holding that block.
+Two entries on the same symbol do not collide, because a cell the first one wrote no longer matches the second one's `replace`.
 
-## 4. `harvest_block` — mine the blocks that are about to disappear
+## 5. `harvest_block` — mine the blocks that are about to disappear
 
 Blocks a structure IO recipe removes come back as drops rather than simply vanishing. Both
 the blocks a consuming input takes and the ones an output overwrites are collected.
@@ -198,7 +182,7 @@ With both `silkTouch` and `shear` set, **silk touch wins**.
 
 Drops go into the item ports. Anything that does not fit is dropped on the floor.
 
-## 5. The requirement decorator
+## 6. The `requirement` decorator
 
 Takes `condition` (an extra condition), `requirements` (catalysts), or both.
 
@@ -230,3 +214,23 @@ They are checked on start and every tick, and the recipe stops if they run short
 > [!IMPORTANT]
 > Structure JSON also has a `requirements` key, and it is **a different thing**.
 > That one specifies port counts.
+
+## 7. Removed: `modifierKey` on `bonus`
+
+`bonus` no longer takes `modifierKey`. Writing it is ignored, with a warning on load.
+
+It never worked. The value was read into a field and the place that should have applied it
+carried a `TODO`, so a recipe with it drew exactly the same odds as one without.
+
+What it was for - letting something about the machine move the chance - is already how
+`chance` works, because `chance` is an expression:
+
+```json
+{ "type": "bonus", "chance": "0.25 * speed_multi", "outputs": [...] }
+{ "type": "bonus", "chance": "0.1 + tier * 0.05",  "outputs": [...] }
+```
+
+Every value `modifierKey` could have named is visible there as `speed_multi`,
+`energy_multi` or `batch`, and an expression can **combine** them, which one key never
+could. Implementing it would have left one idea with two spellings, the weaker one
+answering differently.

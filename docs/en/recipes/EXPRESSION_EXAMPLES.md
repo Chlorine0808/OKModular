@@ -4,7 +4,7 @@ The representative patterns that expressions cover.
 The list of variables and functions, and the common mistakes, are in the
 [Expression Reference](./EXPRESSION_REFERENCE.md).
 
-## 📚 Related Documentation
+## Related Documentation
 
 - [JSON Format](./JSON_FORMAT.md) - Basic JSON syntax
 - [Expression Reference](./EXPRESSION_REFERENCE.md) - Complete list of variables and functions
@@ -103,14 +103,11 @@ The expression is evaluated **once at the start** of a recipe and stays fixed fo
 To re-evaluate it every tick, set `"durationPolicy": "perTick"` on the structure.
 
 > [!IMPORTANT]
-> **Do not multiply or divide `duration` by `speed_multi`.** The engine applies the speed
-> multiplier every tick, so writing it applies it twice. `duration` is a work amount, not a
-> time. Energy is the other way round: writing `energy_multi` into `energy` is the correct
-> route.
+> **Do not multiply or divide `duration` by `speed_multi`.**
+> See [Common Pitfalls](./EXPRESSION_REFERENCE.md#common-pitfalls) for why.
 
-NEI has no machine, so it cannot evaluate a machine-dependent expression. In that case NEI
-shows **the expression itself** instead of a number of seconds (an expression that folds to
-a constant still shows seconds).
+For how NEI shows a machine-dependent expression, see
+[How this looks in NEI](./EXPRESSION_REFERENCE.md#how-this-looks-in-nei).
 
 ## 5. Advancing a block's NBT step by step
 

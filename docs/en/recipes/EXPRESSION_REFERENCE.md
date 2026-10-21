@@ -1,9 +1,9 @@
 # Expression Parser Variable & Function Reference
 
-A comprehensive reference for variables, functions, and advanced queries available in OmoshiroiKamo's `ExpressionParser`.
+A comprehensive reference for variables, functions, and advanced queries available in OKModular's `ExpressionParser`.
 These can be used in the `amount` field of JSON recipes, the `expression` key in `Condition` objects, and machine property configurations.
 
-## 📚 Related Documentation
+## Related Documentation
 
 - [JSON Format](./JSON_FORMAT.md) - Basic JSON syntax
 - [Conditions](./CONDITIONS.md) - writing an `expression` condition
@@ -195,8 +195,6 @@ Performance multipliers provided by the structure definition.
 > **The `bonus` and `weighted_random` decorators follow the same rule** - a batch of three
 > rolls three times. See [Decorators](./DECORATORS.md#batches).
 
----
-
 ## 4. Function Reference
 
 ### Math Functions
@@ -215,17 +213,20 @@ Performance multipliers provided by the structure definition.
 - `tetrate(a, n)`: A tower of `n` copies of `a` (the same as `a ^^ n`)
 - `perm(n, r)` / `npr(n, r)` / `permu(n, r)` / `permutation(n, r)`: Permutations
 - `combi(n, r)` / `ncr(n, r)` / `combination(n, r)`: Combinations
-- `random()`: Random number between 0 and 1. **Unrelated at neighbouring positions** (salt and pepper)
-- `noise(scale)`: Between 0 and 1, but **near positions answer alike**. `scale` is how many blocks
-  across one blob is. This is the one that clumps. ⚠ **Not uniformly distributed** (piles up near 0.5)
-- `chance(x)`: Returns 1 or 0 based on probability `x` (0.0 - 1.0)
 
 > [!NOTE]
 > `log(x)` is the **natural** logarithm, the same as `ln`. For base 10 use `log10(x)`.
 > All three answer **0** rather than throwing when `x <= 0`.
 
+### Random Numbers
+
+- `random()`: Random number between 0 and 1. **Unrelated at neighbouring positions** (salt and pepper)
+- `noise(scale)`: Between 0 and 1, but **near positions answer alike**. `scale` is how many blocks
+  across one blob is. This is the one that clumps. ⚠ **Not uniformly distributed** (piles up near 0.5)
+- `chance(x)`: Returns 1 or 0 based on probability `x` (0.0 - 1.0)
+
 > [!IMPORTANT]
-> **These are not a stream that advances on each call.** They are computed from the machine's
+> **`random()` and `chance()` are not a stream that advances on each call.** They are computed from the machine's
 > evaluation seed (`random_seed`), so **within one run they return the same value however
 > many times they are evaluated**, including across a save and reload. A different run gives
 > a different value.
@@ -237,25 +238,28 @@ Performance multipliers provided by the structure definition.
 > above) and **decorators that draw per position**
 > ([Decorators](./DECORATORS.md#3-how-the-draws-work)). Those shift the seed and draw again.
 
-### Advanced Functions
+### Functions That Inspect the Surroundings
+
 - `can_see_sky(filter...)`: Check sky visibility. Specify IDs to treat blocks like glass as transparent
 - `can_see_void(filter...)`: Check if there is void directly below
+- `count_blocks(distance, filter...)`: Count specific blocks within a range
+    - Example: `count_blocks(1, "minecraft:iron_block")`
 
 > [!NOTE]
-> **Both also work without the brackets**, as the world properties listed above -
+> **`can_see_sky` and `can_see_void` also work without the brackets**, as the world properties listed above -
 > `can_see_sky == 1`. The bare form is the plain test; reach for the function form only when
 > you need to name blocks to see through.
 > **Either spelling counts from the block above the controller** (below it, for
 > `can_see_void`). The controller itself is a solid cube, so including its own position
 > would make the answer always false.
-- `count_blocks(distance, filter...)`: Count specific blocks within a range
-    - Example: `count_blocks(1, "minecraft:iron_block")`
+
+### NBT Access
+
 - `nbt('key')`: Retrieve NBT from the machine itself
 - `nbt('symbol', 'key')`: Retrieve NBT from a block at a specific symbol position
 - `has_nbt('key')` / `has_nbt('symbol', 'key')`: Whether the NBT key exists
 
-### All NBT access goes through `nbt(...)`
-
+All NBT access goes through `nbt(...)`.
 **The target is always an argument.** Nested paths go inside the argument string,
 separated by dots.
 
@@ -298,11 +302,7 @@ double.
 
 Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 
----
-
-## 5. Design Tips
-
-### Where expressions are accepted
+## 5. Where Expressions Are Accepted and When They Are Evaluated
 
 | Field | Evaluated |
 |-------|-----------|
@@ -314,6 +314,9 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 | A recipe's `chance` decorator | Once per run (settled on completion) |
 | An output decorator's `chance` | When it is rolled |
 | `condition` / `conditions` | When the recipe starts, and every tick while it runs |
+| The structure's `speedMultiplier` | Every tick while running |
+| The structure's `batchMin` / `batchMax` | When a recipe starts |
+| The structure's `energyMultiplier` | When a recipe reads `energy_multi` |
 
 > [!NOTE]
 > **How much a recipe pays out is settled when it starts.** Change the machine's tier
@@ -323,15 +326,12 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 >
 > Only the amount is settled. An output item's `nbt` expressions and the decorators
 > (`chance`, `bonus`) are still evaluated when the output is produced.
-| The structure's `speedMultiplier` | Every tick while running |
-| The structure's `batchMin` / `batchMax` | When a recipe starts |
-| The structure's `energyMultiplier` | When a recipe reads `energy_multi` |
 
 A structure's performance modifiers see the machine just as a recipe does, so
 `"speedMultiplier": "1 + tier * 0.25"` works. **A modifier cannot read itself**, though —
 see [the structure JSON format](../structures/JSON_FORMAT.md).
 
-### Structured form — an object instead of a string
+## 6. Structured form — an object instead of a string
 
 An expression can be written as an **object** as well as a string (`"tier * 2"`). The places
 it is accepted are the same; only the reader differs.
@@ -358,7 +358,7 @@ expressions a program builds, or for anything a string cannot carry.
 | `nbt` | `key` (plus optional `default`, `symbol`) | An NBT value; `default` is used when it cannot be read |
 | `nbt_assignment` | `key`, `value` (plus optional `op`) | Writes to NBT; see below |
 
-#### `map_range` — mapping one range onto another
+### `map_range` — mapping one range onto another
 
 ```json
 { "type": "map_range", "input": { "type": "machine_property", "property": "energy_p" },
@@ -372,7 +372,7 @@ empty, 20 when full" - **faster the more is stored**.
 (default `false`) set to `true`, an input outside the range still produces an output inside
 `minOut`..`maxOut`.
 
-#### `op` on `nbt_assignment`
+### `op` on `nbt_assignment`
 
 The operator used when writing. The default is `"="`.
 
@@ -382,6 +382,8 @@ The operator used when writing. The default is `"="`.
 ```
 
 That is the same as `nbt('stored_power') += 1000` in the string form.
+
+## 7. Caveats
 
 ### Common Pitfalls
 - **Quotes in JSON**: Expressions themselves must be strings in JSON, e.g., `"amount": "tier * 2"`.
