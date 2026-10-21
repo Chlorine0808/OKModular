@@ -37,12 +37,12 @@ dependencies {
     // OKCore, resolved from JitPack so this builds without a local publish.
     // The structure engine and the structure/condition/recipe/modular APIs are NOT part of
     // OKCore; this mod carries its own under ruiseki.okmodular.{api,structure,util}.
-    implementation("com.github.Shigure-Ruiseki:OKCore:26.07.10.0:dev") { transitive = false }
+    implementation("com.github.Shigure-Ruiseki:OKCore:26.10.10.0:dev") { transitive = false }
 
     // GTNHLib and ModularUI2 must be at least the versions OKCore requires
     // (see OKCore Reference.DEPENDENCIES); StructureLib kept in sync with the
     // parent mod.
-    implementation("com.github.GTNewHorizons:GTNHLib:0.11.21:dev")
+    implementation("com.github.GTNewHorizons:GTNHLib:0.11.41:dev")
     implementation("com.github.GTNewHorizons:StructureLib:1.4.39:dev")
     implementation("com.github.GTNewHorizons:ModularUI2:2.3.79-1.7.10:dev")
 
