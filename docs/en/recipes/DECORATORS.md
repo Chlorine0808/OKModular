@@ -51,6 +51,9 @@ inferred from the properties).
 Omitting `rolls` on `weighted_random` draws once; omitting `weight` treats it as 1.
 
 `chance` takes an expression as well as a number (`"chance": "0.1 + tier * 0.05"`).
+The `tier` and other performance values it reads are those the recipe started with, so
+rebuilding the structure before completion does not change the odds (see
+[when expressions are evaluated](./EXPRESSION_REFERENCE.md#5-where-expressions-are-accepted-and-when-they-are-evaluated)).
 
 ## 3. How the draws work
 
