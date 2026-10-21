@@ -1,5 +1,7 @@
 package ruiseki.okmodular.api.recipe.core;
 
+import java.util.Map;
+
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 
 /**
@@ -14,6 +16,11 @@ public interface ITieredMachine {
      * @return The current tier (minimum 0)
      */
     int getComponentTier(String componentName);
+
+    /**
+     * Every component tier the structure currently resolves, by component name.
+     */
+    Map<String, Integer> getComponentTiers();
 
     /**
      * Get the speed multiplier of the machine.
