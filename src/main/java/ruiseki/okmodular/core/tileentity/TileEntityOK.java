@@ -41,10 +41,6 @@ public abstract class TileEntityOK extends TileEntity
     @NBTPersist
     private ForgeDirection up = ForgeDirection.UP;
 
-    private static final int UPDATE_BACKOFF_TICKS = 1;
-
-    private boolean shouldSendUpdate = false;
-    private int sendUpdateBackoff = 0;
     private final boolean ticking;
 
     private BlockPos cachedPos;
@@ -54,7 +50,6 @@ public abstract class TileEntityOK extends TileEntity
 
     public TileEntityOK() {
         this.capabilities = OKEventFactory.gatherCapabilities(this);
-        this.sendUpdateBackoff = (int) (Math.random() * UPDATE_BACKOFF_TICKS);
         this.ticking = this instanceof ITickingTile;
     }
 
@@ -110,30 +105,10 @@ public abstract class TileEntityOK extends TileEntity
     public void setOrientation(final ForgeDirection inForward, final ForgeDirection inUp) {
         this.forward = inForward;
         this.up = inUp;
-        this.onSendUpdate();
-        worldObj.notifyBlockOfNeighborChange(xCoord, yCoord, zCoord, Blocks.air);
-    }
-
-    /**
-     * Send a world update for the coordinates of this tile entity.
-     * This will always send lag-safe updates, so calling this many times per tick will
-     * not cause multiple packets to be sent, more info in the class javadoc.
-     */
-    public final void sendUpdate() {
-        if (!isTicking()) {
-            throw new RuntimeException("If you want to update, you must implement ITickingTile. This is a mod error.");
+        if (worldObj != null) {
+            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
         }
-        shouldSendUpdate = true;
-    }
-
-    /**
-     * Send an immediate world update for the coordinates of this tile entity.
-     * This does the same as {@link TileEntityOK#sendUpdate()} but will
-     * ignore the update backoff.
-     */
-    public final void sendImmediateUpdate() {
-        sendUpdate();
-        sendUpdateBackoff = 0;
+        worldObj.notifyBlockOfNeighborChange(xCoord, yCoord, zCoord, Blocks.air);
     }
 
     @Override
@@ -149,7 +124,6 @@ public abstract class TileEntityOK extends TileEntity
      */
     private void updateTicking() {
         doUpdate();
-        trySendActualUpdate();
     }
 
     /**
@@ -157,45 +131,6 @@ public abstract class TileEntityOK extends TileEntity
      * This method is called each tick.
      */
     protected void doUpdate() {}
-
-    private void trySendActualUpdate() {
-        sendUpdateBackoff--;
-        if (sendUpdateBackoff <= 0) {
-            sendUpdateBackoff = getUpdateBackoffTicks();
-
-            if (shouldSendUpdate) {
-                shouldSendUpdate = false;
-
-                beforeSendUpdate();
-                onSendUpdate();
-                afterSendUpdate();
-            }
-        }
-    }
-
-    /**
-     * Called when an update will is sent.
-     * This contains the logic to send the update, so make sure to call the super!
-     */
-    protected void onSendUpdate() {
-        if (worldObj != null) {
-            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
-        }
-    }
-
-    /**
-     * Called when before update is sent.
-     */
-    protected void beforeSendUpdate() {
-
-    }
-
-    /**
-     * Called when after update is sent. (Not necessarily received yet!)
-     */
-    protected void afterSendUpdate() {
-
-    }
 
     @Override
     public Packet getDescriptionPacket() {
@@ -207,7 +142,6 @@ public abstract class TileEntityOK extends TileEntity
         super.onDataPacket(net, packet);
         NBTTagCompound tag = packet.func_148857_g();
         readFromNBT(tag);
-        onUpdateReceived();
     }
 
     @Override
@@ -239,23 +173,6 @@ public abstract class TileEntityOK extends TileEntity
         }
 
         onLoad();
-    }
-
-    /**
-     * This method is called when the tile entity receives
-     * an update (ie a data packet) from the server.
-     * If this tile entity uses NBT, then the NBT will have
-     * already been updated when this method is called.
-     */
-    public void onUpdateReceived() {
-
-    }
-
-    /**
-     * @return The minimum amount of ticks between two consecutive sent packets.
-     */
-    protected int getUpdateBackoffTicks() {
-        return UPDATE_BACKOFF_TICKS;
     }
 
     /**
@@ -389,10 +306,6 @@ public abstract class TileEntityOK extends TileEntity
 
     protected boolean shouldDoWorkThisTick(int interval) {
         return (worldObj.getTotalWorldTime() + randomOffset) % interval == 0;
-    }
-
-    public boolean requiresTESR() {
-        return false;
     }
 
     public interface ITickingTile {
