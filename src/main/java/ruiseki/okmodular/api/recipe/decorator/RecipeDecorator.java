@@ -129,8 +129,8 @@ public abstract class RecipeDecorator implements IModularRecipe {
 
     /** Passes the call down the chain. See {@link #produceExtraOutputs} for the shape. */
     @Override
-    public void beforeInputsConsumed(List<IModularPort> inputPorts, ConditionContext context) {
-        internal.beforeInputsConsumed(inputPorts, context);
+    public List<IRecipeOutput> beforeInputsConsumed(ConditionContext context) {
+        return internal.beforeInputsConsumed(context);
     }
 
     /** Passes the call down the chain. See {@link #produceExtraOutputs} for the shape. */

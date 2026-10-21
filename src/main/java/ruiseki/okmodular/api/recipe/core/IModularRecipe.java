@@ -7,6 +7,7 @@ import java.util.Map;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
+import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 
 /**
  * Interface for modular recipes.
@@ -49,8 +50,14 @@ public interface IModularRecipe extends IRecipe {
      * This is not the place to refuse. The batch size is already chosen and the run is about
      * to begin; a decorator that wants to stop a recipe overrides {@link #canStart}, which is
      * asked before any of this.
+     *
+     * @return outputs to hold with the run's own and pay out at completion, such as what was
+     *         collected from those blocks; never the input ports, which are not where a
+     *         product belongs
      */
-    default void beforeInputsConsumed(List<IModularPort> inputPorts, ConditionContext context) {}
+    default List<IRecipeOutput> beforeInputsConsumed(ConditionContext context) {
+        return Collections.emptyList();
+    }
 
     /**
      * Anything that has to happen while the blocks an output will overwrite are still there.

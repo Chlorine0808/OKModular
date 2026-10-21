@@ -139,8 +139,8 @@ public class ProcessAgent extends AbstractRecipeProcess {
 
         // Last moment the input blocks are still standing. harvest_block collects them here;
         // after the visitor below runs, a consuming BlockInput has removed them and nothing
-        // remembers what they were.
-        recipe.beforeInputsConsumed(inputPorts, context);
+        // remembers what they were. What it collects is held until the cache below is built.
+        List<IRecipeOutput> collected = recipe.beforeInputsConsumed(context);
 
         // Consume and setup state (Specific to ProcessAgent)
         RecipeExecutionVisitor consumeVisitor = new RecipeExecutionVisitor(
@@ -161,6 +161,9 @@ public class ProcessAgent extends AbstractRecipeProcess {
             context);
         cacheVisitor.setBatchSize(currentBatchSize);
         recipe.accept(cacheVisitor);
+        for (IRecipeOutput output : collected) {
+            addCachedOutput(output);
+        }
 
         // Both visitors have run, so the per-tick lists are complete and can be
         // totalled for reporting.

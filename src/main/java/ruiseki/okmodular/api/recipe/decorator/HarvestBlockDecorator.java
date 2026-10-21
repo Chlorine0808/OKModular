@@ -25,6 +25,7 @@ import ruiseki.okmodular.api.recipe.io.BlockInput;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
+import ruiseki.okmodular.api.recipe.io.ItemOutput;
 import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
 import ruiseki.okmodular.core.item.ItemUtils;
 import ruiseki.okmodular.util.Logger;
@@ -104,16 +105,33 @@ public class HarvestBlockDecorator extends RecipeDecorator {
             && levelAllows(recipe, positionsFrom(recipe, context, false), allowed);
     }
 
+    /**
+     * Collects the blocks a consuming input is about to take. The drops are held with the
+     * run's outputs and paid out at completion, never put in the input ports.
+     */
     @Override
-    public void beforeInputsConsumed(List<IModularPort> inputPorts, ConditionContext context) {
-        super.beforeInputsConsumed(inputPorts, context);
-        harvest(context, inputPorts, true);
+    public List<IRecipeOutput> beforeInputsConsumed(ConditionContext context) {
+        List<IRecipeOutput> held = new ArrayList<>(super.beforeInputsConsumed(context));
+        IRecipeContext recipe = context != null ? context.getRecipeContext() : null;
+        if (recipe == null || recipe.getWorld() == null) return held;
+
+        for (ChunkCoordinates pos : positionsFrom(recipe, context, true)) {
+            for (ItemStack drop : dropsAt(recipe.getWorld(), pos)) {
+                held.add(new ItemOutput(drop));
+            }
+        }
+        return held;
     }
 
     @Override
     public void beforeOutputsApplied(List<IModularPort> outputPorts, ConditionContext context) {
         super.beforeOutputsApplied(outputPorts, context);
-        harvest(context, outputPorts, false);
+        IRecipeContext recipe = context != null ? context.getRecipeContext() : null;
+        if (recipe == null || recipe.getWorld() == null) return;
+
+        for (ChunkCoordinates pos : positionsFrom(recipe, context, false)) {
+            insertOrDrop(recipe.getWorld(), pos, dropsAt(recipe.getWorld(), pos), outputPorts);
+        }
     }
 
     /**
@@ -164,24 +182,15 @@ public class HarvestBlockDecorator extends RecipeDecorator {
         return true;
     }
 
-    /** Collects one side's blocks into the ports. {@link #canStart} already allowed it. */
-    private void harvest(ConditionContext context, List<IModularPort> ports, boolean fromInputs) {
-        IRecipeContext recipe = context != null ? context.getRecipeContext() : null;
-        if (recipe == null || recipe.getWorld() == null) return;
-
-        for (ChunkCoordinates pos : positionsFrom(recipe, context, fromInputs)) {
-            harvestAt(recipe.getWorld(), pos, ports);
-        }
-    }
-
-    private void harvestAt(World world, ChunkCoordinates pos, List<IModularPort> ports) {
+    /** What the block at {@code pos} drops. {@link #canStart} already allowed it. */
+    private List<ItemStack> dropsAt(World world, ChunkCoordinates pos) {
         int x = pos.posX;
         int y = pos.posY;
         int z = pos.posZ;
         Block block = world.getBlock(x, y, z);
         int meta = world.getBlockMetadata(x, y, z);
 
-        if (block.isAir(world, x, y, z)) return;
+        if (block.isAir(world, x, y, z)) return new ArrayList<>();
 
         List<ItemStack> drops = new ArrayList<>();
 
@@ -196,16 +205,16 @@ public class HarvestBlockDecorator extends RecipeDecorator {
             // Standard drop with fortune
             drops.addAll(block.getDrops(world, x, y, z, meta, fortune));
         }
+        return drops;
+    }
 
-        if (drops.isEmpty()) return;
-
-        // Try to insert into item ports
+    private void insertOrDrop(World world, ChunkCoordinates pos, List<ItemStack> drops, List<IModularPort> ports) {
         List<IModularPort> itemPorts = filterByType(ports, IPortType.Type.ITEM);
         for (ItemStack drop : drops) {
             ItemStack remaining = insertIntoPorts(itemPorts, drop);
             if (remaining != null && remaining.stackSize > 0) {
                 // Drop into world if port full
-                ItemStackHandlerBase.dropStack(world, x, y, z, remaining);
+                ItemStackHandlerBase.dropStack(world, pos.posX, pos.posY, pos.posZ, remaining);
             }
         }
     }
