@@ -28,7 +28,7 @@ With `type` omitted, the type is inferred from which keys are present.
 | type | What it checks | Shorthand |
 |---|---|---|
 | `block` | The block at the machine's position | `{ "block": "stone" }` |
-| `block_below` | The block under the machine at Y-1 | `{ "block_below": "stone" }` |
+| `block_below` | The block under the machine at Y-1 (kept for old packs) | — (see below) |
 | `dimension` | Being in a particular dimension | `{ "dimension": 0 }` |
 | `biome` | Biome name / tag / temperature and humidity | `{ "biome": "Plains" }` / `{ "tag": "FOREST" }` |
 | `offset` | Any condition, evaluated at a relative position `(dx, dy, dz)` | — |
@@ -42,7 +42,11 @@ Additional properties:
 - `dimension` — `ids`: an array of numbers
 - `biome` — `biomes`: an array of names / `tags`: an array of Forge BiomeDictionary tags /
   `minTemp` `maxTemp`: temperature range / `minHumid` `maxHumid`: humidity range
-- `offset` — `dx` `dy` `dz`: relative position / `condition`: the condition object to evaluate
+- `offset` — `dx` `dy` `dz`: relative position / `condition`: the condition object to evaluate,
+  or `expression`: a string expression to evaluate instead
+- `block_below` — `block`: an object with `name` (and optionally `data`). It cannot be inferred
+  from its keys, so write `"type": "block_below"`. For new recipes, prefer `offset` with
+  `"dy": -1` and a `block` condition
 - `pattern` — `pattern`: an array of strings / `keys`: a mapping from pattern character to condition object
 
 ```json
