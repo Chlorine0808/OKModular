@@ -332,10 +332,9 @@ Long is uppercase only — a lowercase `l` reads too easily as a `1`.
 > a `random_block_output`'s `count`, and so on). The starting performance survives a save
 > and reload.
 >
-> Stored resources (`energy`, `energy_p` and the like) are read when they are read. Adding
-> resources late gains nothing, since what you add is simply used up. `perTick` resources,
-> `condition` and the structure's `speedMultiplier` are evaluated every tick and fall outside
-> this rule.
+> Stored resources (`energy`, `energy_p` and the like) are not copied at the start; an
+> expression reads their current amount. `perTick` resources, `condition` and the
+> structure's `speedMultiplier` are evaluated every tick and fall outside this rule.
 
 A structure's performance modifiers see the machine just as a recipe does, so
 `"speedMultiplier": "1 + tier * 0.25"` works. **A modifier cannot read itself**, though —
