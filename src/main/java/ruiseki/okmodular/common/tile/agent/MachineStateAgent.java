@@ -22,6 +22,7 @@ import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.core.IMachineState;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.common.recipe.ProcessAgent;
 import ruiseki.okmodular.common.tile.TEMachineController;
 import ruiseki.okmodular.common.tile.essentia.AbstractEssentiaPortTE;
 import ruiseki.okmodular.common.tile.vis.AbstractVisPortTE;
@@ -43,12 +44,14 @@ import vazkii.botania.api.mana.spark.ISparkAttachable;
 public class MachineStateAgent implements IMachineState {
 
     private final TEMachineController controller;
+    private final ProcessAgent processAgent;
 
     private int recipeProcessedCount = 0;
     private final Set<String> processedRecipeTypes = new HashSet<>();
 
-    public MachineStateAgent(TEMachineController controller) {
+    public MachineStateAgent(TEMachineController controller, ProcessAgent processAgent) {
         this.controller = controller;
+        this.processAgent = processAgent;
     }
 
     // --- IMachineState Implementation ---
@@ -74,28 +77,27 @@ public class MachineStateAgent implements IMachineState {
 
     @Override
     public int getEnergyPerTick() {
-        return controller.getEnergyPerTick();
+        return processAgent.getEnergyPerTick();
     }
 
     @Override
     public double getProgressPercent() {
-        return controller.getProgressPercent();
+        return processAgent.getProgressPercent();
     }
 
     @Override
     public long getProgress() {
-        return controller.getProcessAgent()
-            .getProgress();
+        return processAgent.getProgress();
     }
 
     @Override
     public boolean isRunning() {
-        return controller.isRunning();
+        return processAgent.isRunning();
     }
 
     @Override
     public boolean isWaitingForOutput() {
-        return controller.isWaitingForOutput();
+        return processAgent.isWaitingForOutput();
     }
 
     @Override
@@ -526,7 +528,7 @@ public class MachineStateAgent implements IMachineState {
 
     @Override
     public int getBatchSize() {
-        return controller.getBatchSize();
+        return processAgent.getBatchSize();
     }
 
     @Override

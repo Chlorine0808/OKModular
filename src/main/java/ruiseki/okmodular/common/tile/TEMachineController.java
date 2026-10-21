@@ -165,7 +165,7 @@ public class TEMachineController extends AbstractTE
     @NBTPersist
     private PortColor activeRecipeColor = PortColor.NONE;
 
-    private final MachineStateAgent machineStateAgent = new MachineStateAgent(this);
+    private final MachineStateAgent machineStateAgent = new MachineStateAgent(this, processAgent);
 
     // Performance modifiers from the structure definition, and the guard that keeps a
     // self-referencing expression from recursing back into the getters below.
@@ -1017,26 +1017,6 @@ public class TEMachineController extends AbstractTE
 
     public long getTimeContinuous() {
         return timeContinuousCount;
-    }
-
-    public double getProgressPercent() {
-        return processAgent.getProgressPercent();
-    }
-
-    public boolean isRunning() {
-        return processAgent.isRunning();
-    }
-
-    public boolean isWaitingForOutput() {
-        return processAgent.isWaitingForOutput();
-    }
-
-    public int getEnergyPerTick() {
-        return processAgent.getEnergyPerTick();
-    }
-
-    public int getBatchSize() {
-        return processAgent.getBatchSize();
     }
 
     @Override
