@@ -89,7 +89,15 @@ public class BlockLiquidBase extends BlockFluidBase {
         stillIcon = register.registerIcon(Reference.PREFIX_MOD + "modular/fluid_still");
         flowingIcon = register.registerIcon(Reference.PREFIX_MOD + "modular/fluid_flow");
 
-        // We still set them on the fluid object just in case other things like buckets use them
-        getFluid().setIcons(stillIcon, flowingIcon);
+        // Buckets and tanks draw the fluid's icons, so ours go on it - but only when the fluid
+        // is ours. A shared name such as steam may belong to a mod that registered first.
+        if (ownsFluid()) {
+            getFluid().setIcons(stillIcon, flowingIcon);
+        }
+    }
+
+    /** Whether the fluid's placed form is this block, rather than another mod's. */
+    public boolean ownsFluid() {
+        return getFluid().getBlock() == this;
     }
 }
