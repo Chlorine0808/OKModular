@@ -750,8 +750,12 @@ public class TEMachineController extends AbstractMBModifierTE
 
             // Look-ahead: search for next recipe while processing (only once)
             if (nextRecipe == null) {
+                ConditionContext lookAheadContext = getConditionContext();
                 nextRecipe = RecipeLoader.getInstance()
-                    .findMatch(recipeGroups.toArray(new String[0]), getContextualInputPorts());
+                    .findMatch(
+                        recipeGroups.toArray(new String[0]),
+                        getContextualInputPorts(),
+                        r -> r.canStart(lookAheadContext));
                 cachedRecipeVersion = RecipeLoader.getInstance()
                     .getRecipeVersion();
             }
@@ -792,6 +796,7 @@ public class TEMachineController extends AbstractMBModifierTE
         final IModularRecipe lookAhead = nextRecipe;
         nextRecipe = null; // Clear cache
         final String[] groupNames = recipeGroups.toArray(new String[0]);
+        final ConditionContext searchContext = getConditionContext();
 
         // Each colour group is offered the look-ahead result first, since checking one
         // recipe against a port list is far cheaper than searching every candidate.
@@ -799,9 +804,11 @@ public class TEMachineController extends AbstractMBModifierTE
         // to the group being considered.
         ColoredRecipeSearch.Selection selection = ColoredRecipeSearch
             .search(PortColorGrouping.group(getContextualInputPorts(), getContextualOutputPorts()), inputs -> {
-                if (lookAhead != null && lookAhead.matchesInput(inputs)) return lookAhead;
+                if (lookAhead != null && lookAhead.matchesInput(inputs) && lookAhead.canStart(searchContext)) {
+                    return lookAhead;
+                }
                 return RecipeLoader.getInstance()
-                    .findMatch(groupNames, inputs);
+                    .findMatch(groupNames, inputs, r -> r.canStart(searchContext));
             });
 
         if (selection.isRunnable()) {

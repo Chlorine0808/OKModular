@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import com.google.gson.JsonObject;
 
@@ -103,14 +104,20 @@ public class RecipeLoader {
         return result;
     }
 
-    public IModularRecipe findMatch(String[] groups, List<IModularPort> inputPorts) {
-        List<IModularRecipe> candidates = getRecipes(groups);
-        for (IModularRecipe recipe : candidates) {
-            if (recipe.matchesInput(inputPorts)) {
-                return recipe;
-            }
+    /**
+     * The first recipe whose inputs are there and which {@code canStart} accepts. When every
+     * input match refuses, the first of them comes back anyway, so the machine can report the
+     * condition that failed rather than a missing input.
+     */
+    public IModularRecipe findMatch(String[] groups, List<IModularPort> inputPorts,
+        Predicate<IModularRecipe> canStart) {
+        IModularRecipe firstRefused = null;
+        for (IModularRecipe recipe : getRecipes(groups)) {
+            if (!recipe.matchesInput(inputPorts)) continue;
+            if (canStart.test(recipe)) return recipe;
+            if (firstRefused == null) firstRefused = recipe;
         }
-        return null;
+        return firstRefused;
     }
 
     public IModularRecipe getRecipeByRegistryName(String registryName) {
