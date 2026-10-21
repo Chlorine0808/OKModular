@@ -1,8 +1,5 @@
 package ruiseki.okmodular.core.tileentity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
@@ -16,10 +13,7 @@ import com.gtnewhorizon.gtnhlib.capability.item.ItemSource;
 import com.gtnewhorizon.gtnhlib.item.InventoryItemSink;
 import com.gtnewhorizon.gtnhlib.item.InventoryItemSource;
 
-import ruiseki.okmodular.OKModular;
 import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
-import ruiseki.okmodular.common.network.PacketFluidTanks;
-import ruiseki.okmodular.core.fluid.SmartTank;
 import ruiseki.okmodular.core.item.ItemUtils;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 import ruiseki.okmodular.core.util.SlotDefinition;
@@ -32,10 +26,6 @@ public abstract class AbstractStorageTE extends AbstractTE implements ISidedInve
     public ItemStackHandlerBase inv;
     private final int[] allSlots;
 
-    @NBTPersist("FluidTanks")
-    public List<SmartTank> fluidTanks;
-    protected boolean tanksDirty = false;
-
     public AbstractStorageTE(SlotDefinition slotDefinition) {
         this.slotDefinition = slotDefinition;
 
@@ -45,12 +35,6 @@ public abstract class AbstractStorageTE extends AbstractTE implements ISidedInve
             onContentsChange(slot);
         });
 
-        int fluidSlots = slotDefinition.getFluidSlots();
-        fluidTanks = new ArrayList<>(fluidSlots);
-        for (int i = 0; i < fluidSlots; i++) {
-            fluidTanks.add(new SmartTank(8000));
-        }
-
         allSlots = new int[inv.getSlots()];
         for (int i = 0; i < allSlots.length; i++) {
             allSlots[i] = i;
@@ -59,12 +43,6 @@ public abstract class AbstractStorageTE extends AbstractTE implements ISidedInve
 
     @Override
     public boolean processTasks(boolean redstoneChecksPassed) {
-        if (tanksDirty && shouldDoWorkThisTick(10)) {
-            OKModular.instance.getPacketHandler()
-                .sendToAllAround(new PacketFluidTanks(this), this);
-            tanksDirty = false;
-            return true;
-        }
         return false;
     }
 
