@@ -12,9 +12,12 @@ import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.condition.ConditionParserRegistry;
 import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.condition.OffsetCondition;
+import ruiseki.okmodular.api.modular.IModularPort;
+import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.ExpressionParser;
 import ruiseki.okmodular.api.recipe.io.AbstractRecipeInput;
+import ruiseki.okmodular.api.recipe.io.IModularRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.parser.InputParserRegistry;
 
@@ -75,6 +78,32 @@ public class RequirementDecorator extends RecipeDecorator {
         List<IRecipeInput> combined = new ArrayList<>(internal.getInputs());
         combined.addAll(requirements);
         return Collections.unmodifiableList(combined);
+    }
+
+    /**
+     * The recipe's own match, and the requirements present on top of it.
+     * <p>
+     * Delegating alone matched without the catalyst, so the search picked this recipe, the
+     * start refused it, and a plain recipe behind it never ran.
+     */
+    @Override
+    public boolean matchesInput(List<IModularPort> inputPorts) {
+        if (!internal.matchesInput(inputPorts)) return false;
+        for (IRecipeInput requirement : requirements) {
+            if (requirement instanceof IModularRecipeInput modular
+                && !modular.process(portsOfType(inputPorts, modular.getPortType()), true)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static List<IModularPort> portsOfType(List<IModularPort> ports, IPortType.Type type) {
+        List<IModularPort> filtered = new ArrayList<>();
+        for (IModularPort port : ports) {
+            if (port.getPortType() == type) filtered.add(port);
+        }
+        return filtered;
     }
 
     public ICondition getExtraCondition() {
