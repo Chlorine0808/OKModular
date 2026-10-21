@@ -26,7 +26,7 @@
 | type | 判定するもの | ショートハンド |
 |---|---|---|
 | `block` | マシンの設置座標にあるブロック | `{ "block": "stone" }` |
-| `block_below` | マシンの下 Y-1 のブロック | `{ "block_below": "stone" }` |
+| `block_below` | マシンの下 Y-1 のブロック（古いパックのために残しています） | —（下記） |
 | `dimension` | 特定の次元にいるか | `{ "dimension": 0 }` |
 | `biome` | バイオーム名 / タグ / 気温・湿度 | `{ "biome": "Plains" }` / `{ "tag": "FOREST" }` |
 | `offset` | 相対座標 `(dx, dy, dz)` で任意の条件を判定 | — |
@@ -40,7 +40,10 @@
 - `dimension`: `ids`（数値の配列）
 - `biome`: `biomes`（名前の配列）/ `tags`（Forge BiomeDictionary タグの配列）/
   `minTemp` `maxTemp`（気温の範囲）/ `minHumid` `maxHumid`（湿度の範囲）
-- `offset`: `dx` `dy` `dz`（相対座標）/ `condition`（実行する条件オブジェクト）
+- `offset`: `dx` `dy` `dz`（相対座標）/ `condition`（実行する条件オブジェクト）。
+  `condition` の代わりに `expression`（文字列の式）も書けます
+- `block_below`: `block`（`name` と、必要なら `data` を持つオブジェクト）。キーから型を推論できないので、
+  `"type": "block_below"` を書いてください。新しく書くレシピでは、`"dy": -1` の `offset` に `block` 条件を入れる形を勧めます
 - `pattern`: `pattern`（文字列の配列）/ `keys`（パターン文字と条件オブジェクトのマッピング）
 
 ```json
