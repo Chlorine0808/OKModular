@@ -7,11 +7,15 @@ import java.util.List;
 import java.util.Map;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.cleanroommc.modularui.api.IGuiHolder;
 import com.cleanroommc.modularui.api.drawable.IKey;
@@ -28,6 +32,10 @@ import com.cleanroommc.modularui.widgets.SlotGroupWidget;
 import com.cleanroommc.modularui.widgets.slot.ItemSlot;
 import com.cleanroommc.modularui.widgets.slot.ModularSlot;
 import com.cleanroommc.modularui.widgets.slot.SlotGroup;
+import com.gtnewhorizon.gtnhlib.capability.item.ItemSink;
+import com.gtnewhorizon.gtnhlib.capability.item.ItemSource;
+import com.gtnewhorizon.gtnhlib.item.InventoryItemSink;
+import com.gtnewhorizon.gtnhlib.item.InventoryItemSource;
 
 import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okcore.helper.LangHelpers;
@@ -41,18 +49,153 @@ import ruiseki.okmodular.client.gui.OKGuiTextures;
 import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
 import ruiseki.okmodular.client.gui.widget.RedstoneModeWidget;
 import ruiseki.okmodular.client.gui.widget.TileWidget;
+import ruiseki.okmodular.core.item.ItemUtils;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
-import ruiseki.okmodular.core.tileentity.AbstractStorageTE;
+import ruiseki.okmodular.core.tileentity.AbstractTE;
 import ruiseki.okmodular.core.util.SlotDefinition;
 
 /**
  * Item Input Port TileEntity.
  * Holds slots for inputting items into machine processing.
- * Extends AbstractStorageTE to leverage existing inventory management system.
  * TODO: enable both IO from NONE side to export catalyst items like GTNH
  */
-public abstract class AbstractItemIOPortTE extends AbstractStorageTE
-    implements IVisitablePort, IGuiHolder<PosGuiData>, IItemPort {
+public abstract class AbstractItemIOPortTE extends AbstractTE
+    implements ISidedInventory, IVisitablePort, IGuiHolder<PosGuiData>, IItemPort {
+
+    protected final SlotDefinition slotDefinition;
+
+    @NBTPersist("item_inv")
+    public ItemStackHandlerBase inv;
+
+    @Override
+    public boolean processTasks(boolean redstoneChecksPassed) {
+        return false;
+    }
+
+    @Override
+    public boolean canInsertItem(int slot, ItemStack itemstack, int side) {
+        if (!slotDefinition.isInputSlot(slot)) {
+            return false;
+        }
+        ItemStack existing = inv.getStackInSlot(slot);
+        if (existing != null) {
+            return ItemUtils.areStackMergable(existing, itemstack);
+        }
+        return isItemValidForSlot(slot, itemstack);
+    }
+
+    @Override
+    public boolean canExtractItem(int slot, ItemStack itemstack, int side) {
+        if (!slotDefinition.isOutputSlot(slot)) {
+            return false;
+        }
+        ItemStack existing = inv.getStackInSlot(slot);
+        if (existing == null || existing.stackSize < itemstack.stackSize) {
+            return false;
+        }
+        return itemstack.getItem() == existing.getItem();
+    }
+
+    @Override
+    public int getSizeInventory() {
+        return inv.getSlots();
+    }
+
+    @Override
+    public ItemStack getStackInSlot(int slot) {
+        if (slot < 0 || slot >= inv.getSlots()) {
+            return null;
+        }
+        return inv.getStackInSlot(slot);
+    }
+
+    @Override
+    public ItemStack decrStackSize(int fromSlot, int amount) {
+        ItemStack fromStack = inv.getStackInSlot(fromSlot);
+        if (fromStack == null) {
+            return null;
+        }
+        if (fromStack.stackSize <= amount) {
+            inv.setStackInSlot(fromSlot, null);
+            return fromStack;
+        }
+        ItemStack result = fromStack.splitStack(amount);
+        inv.setStackInSlot(fromSlot, fromStack.stackSize > 0 ? fromStack : null);
+        return result;
+    }
+
+    @Override
+    public ItemStack getStackInSlotOnClosing(int i) {
+        return null;
+    }
+
+    @Override
+    public void setInventorySlotContents(int slot, ItemStack contents) {
+        if (contents == null) {
+            inv.setStackInSlot(slot, null);
+        } else {
+            inv.setStackInSlot(slot, contents.copy());
+        }
+
+        ItemStack stack = inv.getStackInSlot(slot);
+        if (stack != null && stack.stackSize > getInventoryStackLimit()) {
+            stack.stackSize = getInventoryStackLimit();
+            inv.setStackInSlot(slot, stack);
+        }
+    }
+
+    @Override
+    public String getInventoryName() {
+        return getLocalizedName();
+    }
+
+    @Override
+    public boolean hasCustomInventoryName() {
+        return false;
+    }
+
+    @Override
+    public int getInventoryStackLimit() {
+        return 64;
+    }
+
+    @Override
+    public boolean isUseableByPlayer(EntityPlayer player) {
+        return canInteractWith(player);
+    }
+
+    @Override
+    public void openInventory() {
+
+    }
+
+    @Override
+    public void closeInventory() {
+
+    }
+
+    @Override
+    public abstract boolean isItemValidForSlot(int slot, ItemStack stack);
+
+    public SlotDefinition getSlotDefinition() {
+        return slotDefinition;
+    }
+
+    @Override
+    public <T> @Nullable T getCapability(@NotNull Class<T> capability, @NotNull ForgeDirection side) {
+        if (capability == ItemSink.class) {
+            ItemSink sink = new InventoryItemSink(this, side);
+            sink.setAllowedSinkSlots(slotDefinition.getItemInputSlots());
+            return capability.cast(sink);
+        }
+
+        if (capability == ItemSource.class) {
+            ItemSource sink = new InventoryItemSource(this, side);
+            sink.setAllowedSourceSlots(slotDefinition.getItemOutputSlots());
+            return capability.cast(sink);
+        }
+        return null;
+    }
 
     @NBTPersist
     protected final EnumIO[] sides = new EnumIO[6];
@@ -61,7 +204,14 @@ public abstract class AbstractItemIOPortTE extends AbstractStorageTE
     private final List<ItemStack> pendingDrops = new ArrayList<>();
 
     public AbstractItemIOPortTE(int numInputs, int numOutput) {
-        super(new SlotDefinition().setItemSlots(numInputs, numOutput));
+        this.slotDefinition = new SlotDefinition().setItemSlots(numInputs, numOutput);
+
+        inv = new ItemStackHandlerBase(slotDefinition.getItemSlots());
+        inv.setOnSlotChanged((slot, stack) -> {
+            markDirty();
+            onContentsChange(slot);
+        });
+
         Arrays.fill(sides, EnumIO.NONE);
         // Default IO is NONE, handled by Block.onBlockPlacedBy
     }
@@ -161,7 +311,6 @@ public abstract class AbstractItemIOPortTE extends AbstractStorageTE
         return slots;
     }
 
-    @Override
     public void onContentsChange(int slot) {
         if (worldObj != null && !worldObj.isRemote) {
             worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
