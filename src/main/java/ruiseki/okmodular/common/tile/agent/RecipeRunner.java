@@ -26,6 +26,9 @@ import ruiseki.okmodular.common.tile.ProcessErrorState;
  */
 public class RecipeRunner {
 
+    /** The longest an idle machine waits between searches, in ticks. */
+    public static final int MAX_IDLE_INTERVAL = 20;
+
     /** What the runner needs from the machine it drives. */
     public interface Host {
 
@@ -91,6 +94,11 @@ public class RecipeRunner {
     private boolean lookedAhead = false;
     // Previous working state, for the render update
     private boolean wasWorking = false;
+    // Idle backoff: ticks between searches, doubling while nothing starts, and ticks left
+    private int idleInterval = 1;
+    private int idleWait = 0;
+    // Recipe version at the last idle search, so a reload is searched at once
+    private int idleSearchedVersion = -1;
 
     public RecipeRunner(Host host, ProcessAgent processAgent, ProcessErrorState errors, RecipeFinder finder) {
         this.host = Objects.requireNonNull(host, "host");
@@ -99,8 +107,17 @@ public class RecipeRunner {
         this.finder = Objects.requireNonNull(finder, "finder");
     }
 
-    /** Drops the look-ahead result, which was searched against ports that may have changed. */
-    public void forgetLookAhead() {
+    /**
+     * Searches again on the next tick. Called when the ports or the structure change, since the
+     * look-ahead and the idle backoff were both based on what was there before.
+     */
+    public void wake() {
+        forgetLookAhead();
+        idleInterval = 1;
+        idleWait = 0;
+    }
+
+    private void forgetLookAhead() {
         nextRecipe = null;
         lookedAhead = false;
     }
@@ -191,8 +208,19 @@ public class RecipeRunner {
             return;
         }
 
-        // IDLE: Try to start new recipe
-        startNextRecipe();
+        // IDLE: Try to start new recipe, less often the longer nothing starts. A machine
+        // waiting for input would otherwise run every recipe's checks each tick.
+        if (idleWait > 0 && idleSearchedVersion == finder.getRecipeVersion()) {
+            idleWait--;
+        } else {
+            idleSearchedVersion = finder.getRecipeVersion();
+            if (startNextRecipe()) {
+                idleInterval = 1;
+            } else {
+                idleInterval = Math.min(idleInterval * 2, MAX_IDLE_INTERVAL);
+                idleWait = idleInterval - 1;
+            }
+        }
 
         // Update render if working state changed
         boolean currentlyWorking = processAgent.isRunning();
@@ -202,7 +230,8 @@ public class RecipeRunner {
         }
     }
 
-    private void startNextRecipe() {
+    /** @return whether a recipe started */
+    private boolean startNextRecipe() {
         // Invalidate cache if recipes were reloaded
         if (cachedRecipeVersion != finder.getRecipeVersion()) {
             nextRecipe = null;
@@ -233,13 +262,14 @@ public class RecipeRunner {
             if (processAgent
                 .startRecipe(selection.getRecipe(), selection.getInputs(), selection.getOutputs(), context)) {
                 errors.set(ErrorReason.NONE);
+                return true;
             } else if (processAgent.wasBlockedByCondition()) {
                 // Not a missing input. Saying so would send the player to the wrong hatch.
                 errors.set(ErrorReason.CONDITION_NOT_MET, processAgent.getConditionFailure());
             } else {
                 errors.set(ErrorReason.NO_INPUT);
             }
-            return;
+            return false;
         }
 
         // A recipe was found but no group could run it. The one reported is from the
@@ -254,7 +284,7 @@ public class RecipeRunner {
             } else {
                 errors.set(ErrorReason.OUTPUT_FULL);
             }
-            return;
+            return false;
         }
 
         errors.set(ErrorReason.NO_MATCHING_RECIPE);
@@ -263,6 +293,7 @@ public class RecipeRunner {
         if (processAgent.diagnoseIdle(host.getContextualInputPorts()) == ProcessAgent.TickResult.NO_INPUT) {
             errors.set(ErrorReason.INPUT_MISSING);
         }
+        return false;
     }
 
     /**

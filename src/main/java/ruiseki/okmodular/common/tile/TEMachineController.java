@@ -626,7 +626,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
     public void invalidatePortCache() {
         this.cachedInputPorts = null;
         this.cachedOutputPorts = null;
-        recipeRunner.forgetLookAhead();
+        recipeRunner.wake();
     }
 
     // ========== IModularPort Implementation ==========

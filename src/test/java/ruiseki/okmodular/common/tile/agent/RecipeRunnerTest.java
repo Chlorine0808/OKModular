@@ -242,17 +242,73 @@ public class RecipeRunnerTest {
     }
 
     @Test
-    @DisplayName("先読みを捨てると次は探し直す")
+    @DisplayName("起こすと先読みを捨てて探し直す")
     public void test先読みを捨てる() {
         finder.answer = recipe();
         agent.running = true;
         agent.tickResult = ProcessAgent.TickResult.CONTINUE;
         runner.process();
 
-        runner.forgetLookAhead();
+        runner.wake();
         runner.process();
 
         assertEquals(2, finder.calls);
+    }
+
+    // ========== Idle backoff ==========
+
+    /** Runs the given number of idle ticks and returns the ticks on which a search ran. */
+    private List<Integer> idleSearchTicks(int ticks) {
+        List<Integer> searched = new ArrayList<>();
+        for (int t = 0; t < ticks; t++) {
+            int before = finder.calls;
+            runner.process();
+            if (finder.calls > before) searched.add(t);
+        }
+        return searched;
+    }
+
+    @Test
+    @DisplayName("何も見つからない待機中は、検索の間隔を倍にしていく")
+    public void test間隔を倍にする() {
+        assertEquals(java.util.Arrays.asList(0, 2, 6, 14, 30), idleSearchTicks(31));
+    }
+
+    @Test
+    @DisplayName("間隔は 20 tick で頭打ち")
+    public void test間隔の上限() {
+        List<Integer> searched = idleSearchTicks(200);
+
+        int widest = 0;
+        for (int i = 1; i < searched.size(); i++) {
+            widest = Math.max(widest, searched.get(i) - searched.get(i - 1));
+        }
+        assertEquals(RecipeRunner.MAX_IDLE_INTERVAL, widest);
+    }
+
+    @Test
+    @DisplayName("起こすと次の tick にすぐ探す")
+    public void test起こすとすぐ探す() {
+        idleSearchTicks(31);
+
+        runner.wake();
+
+        assertEquals(Collections.singletonList(0), idleSearchTicks(1));
+    }
+
+    @Test
+    @DisplayName("開始できたら間隔を戻す")
+    public void test開始できたら戻す() {
+        idleSearchTicks(31);
+        finder.answer = recipe();
+        agent.startSucceeds = true;
+        runner.wake();
+        idleSearchTicks(1);
+
+        agent.startSucceeds = false;
+        finder.answer = null;
+
+        assertEquals(Collections.singletonList(0), idleSearchTicks(1), "開始できた直後なのに、前の長い間隔を待っている");
     }
 
     // ========== Fakes ==========
