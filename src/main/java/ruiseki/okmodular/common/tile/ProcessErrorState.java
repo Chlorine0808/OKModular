@@ -27,13 +27,6 @@ public final class ProcessErrorState {
         this.detail = detail;
     }
 
-    /**
-     * Replaces the reason and leaves the detail as it was.
-     */
-    public void setReasonKeepingDetail(ErrorReason reason) {
-        this.reason = reason;
-    }
-
     public void setDetail(String detail) {
         this.detail = detail;
     }

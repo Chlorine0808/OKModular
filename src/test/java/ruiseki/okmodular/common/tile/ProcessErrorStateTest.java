@@ -15,8 +15,9 @@ import ruiseki.okmodular.api.recipe.error.ErrorReason;
  * 別々に読み書きしていた。レシピ進行をコントローラから切り出すには、まずこの組を
  * 1 つの値として渡せる形にする必要がある。
  *
- * 理由だけを差し替える経路（`setReasonKeepingDetail`）は、切り出し前の直接代入
- * `lastProcessErrorReason = X` をそのまま写したもので、詳細を消さない。
+ * 切り出し前は、理由だけの直接代入 `lastProcessErrorReason = X` が詳細を残していた。
+ * `%s` を持つ理由でそこを通るのは redstone の `PAUSED` だけで、GUI は redstone を
+ * 先に判定するので表に出なかった。残す理由が無いので、理由だけの更新は常に詳細を消す。
  */
 @DisplayName("処理エラーの状態")
 public class ProcessErrorStateTest {
@@ -51,18 +52,6 @@ public class ProcessErrorStateTest {
 
         assertEquals(ErrorReason.OUTPUT_FULL, state.getReason());
         assertNull(state.getDetail());
-    }
-
-    @Test
-    @DisplayName("理由の差し替えは詳細を残す（切り出し前の直接代入と同じ）")
-    public void test差し替えは詳細を残す() {
-        ProcessErrorState state = new ProcessErrorState();
-        state.set(ErrorReason.CONDITION_NOT_MET, "tier >= 2");
-
-        state.setReasonKeepingDetail(ErrorReason.INPUT_MISSING);
-
-        assertEquals(ErrorReason.INPUT_MISSING, state.getReason());
-        assertEquals("tier >= 2", state.getDetail());
     }
 
     @Test

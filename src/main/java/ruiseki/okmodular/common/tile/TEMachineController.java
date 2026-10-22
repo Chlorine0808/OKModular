@@ -528,7 +528,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
         // Blueprint required - no operation without it
         if (structureAgent.getCustomStructureName() == null || structureAgent.getCustomStructureName()
             .isEmpty()) {
-            processError.setReasonKeepingDetail(ErrorReason.MISSING_BLUEPRINT);
+            processError.set(ErrorReason.MISSING_BLUEPRINT);
             return;
         }
 
@@ -546,7 +546,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
         }
         // Check Redstone signal for suspension
         if (!isRedstoneActive()) {
-            processError.setReasonKeepingDetail(ErrorReason.PAUSED);
+            processError.set(ErrorReason.PAUSED);
             return;
         }
 
@@ -627,12 +627,12 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             // rather than the contextual list, as it always has.
             List<IModularPort> waitingOutputs = PortColorGrouping.select(getOutputPorts(), activeRecipeColor);
             if (processAgent.diagnoseBlockOutputFull(waitingOutputs, context)) {
-                processError.setReasonKeepingDetail(ErrorReason.BLOCK_OUTPUT_FULL);
+                processError.set(ErrorReason.BLOCK_OUTPUT_FULL);
             } else {
-                processError.setReasonKeepingDetail(ErrorReason.WAITING_OUTPUT);
+                processError.set(ErrorReason.WAITING_OUTPUT);
             }
             if (processAgent.tryOutput(waitingOutputs, context)) {
-                processError.setReasonKeepingDetail(ErrorReason.NONE);
+                processError.set(ErrorReason.NONE);
                 if (!worldObj.isRemote) {
                     machineStateAgent.recordRecipeCompletion(processAgent.getCurrentRecipe());
                 }
@@ -648,11 +648,11 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             ProcessAgent.TickResult result = processAgent.tick(activeInputPorts(), activeOutputPorts(), context);
 
             if (result == ProcessAgent.TickResult.NO_ENERGY) {
-                processError.setReasonKeepingDetail(ErrorReason.NO_ENERGY);
+                processError.set(ErrorReason.NO_ENERGY);
             } else if (result == ProcessAgent.TickResult.NO_MANA) {
-                processError.setReasonKeepingDetail(ErrorReason.NO_MANA);
+                processError.set(ErrorReason.NO_MANA);
             } else if (result == ProcessAgent.TickResult.NO_INPUT) {
-                processError.setReasonKeepingDetail(ErrorReason.INPUT_MISSING);
+                processError.set(ErrorReason.INPUT_MISSING);
                 if (isOnlyNonConsumingRecipe(processAgent.getCurrentRecipe())) {
                     processAgent.abort();
                 }
@@ -660,14 +660,14 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
                 // Only a recipe condition reaches this now, so name the one that stopped it.
                 setProcessError(ErrorReason.PAUSED, processAgent.getConditionFailure());
             } else if (result == ProcessAgent.TickResult.OUTPUT_FULL) {
-                processError.setReasonKeepingDetail(ErrorReason.OUTPUT_FULL);
+                processError.set(ErrorReason.OUTPUT_FULL);
             } else if (result == ProcessAgent.TickResult.BLOCK_MISSING) {
-                processError.setReasonKeepingDetail(ErrorReason.BLOCK_MISSING);
+                processError.set(ErrorReason.BLOCK_MISSING);
                 if (isOnlyNonConsumingRecipe(processAgent.getCurrentRecipe())) {
                     processAgent.abort();
                 }
             } else {
-                processError.setReasonKeepingDetail(ErrorReason.NONE);
+                processError.set(ErrorReason.NONE);
             }
 
             // Look-ahead: search for next recipe while processing (only once)
@@ -685,7 +685,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             // If complete, immediately try to output and start next
             if (result == ProcessAgent.TickResult.READY_OUTPUT) {
                 if (processAgent.tryOutput(activeOutputPorts(), context)) {
-                    processError.setReasonKeepingDetail(ErrorReason.NONE);
+                    processError.set(ErrorReason.NONE);
                     if (!worldObj.isRemote) {
                         machineStateAgent.recordRecipeCompletion(processAgent.getCurrentRecipe());
                     }
@@ -743,12 +743,12 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             ConditionContext context = getConditionContext();
             if (processAgent
                 .startRecipe(selection.getRecipe(), selection.getInputs(), selection.getOutputs(), context)) {
-                processError.setReasonKeepingDetail(ErrorReason.NONE);
+                processError.set(ErrorReason.NONE);
             } else if (processAgent.wasBlockedByCondition()) {
                 // Not a missing input. Saying so would send the player to the wrong hatch.
                 setProcessError(ErrorReason.CONDITION_NOT_MET, processAgent.getConditionFailure());
             } else {
-                processError.setReasonKeepingDetail(ErrorReason.NO_INPUT);
+                processError.set(ErrorReason.NO_INPUT);
             }
             return;
         }
@@ -768,11 +768,11 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             return;
         }
 
-        processError.setReasonKeepingDetail(ErrorReason.NO_MATCHING_RECIPE);
+        processError.set(ErrorReason.NO_MATCHING_RECIPE);
 
         // Check if it's actually NO_INPUT
         if (processAgent.diagnoseIdle(getContextualInputPorts()) == ProcessAgent.TickResult.NO_INPUT) {
-            processError.setReasonKeepingDetail(ErrorReason.INPUT_MISSING);
+            processError.set(ErrorReason.INPUT_MISSING);
         }
     }
 
@@ -913,7 +913,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             setFormed(false);
             clearStructureParts();
             processAgent.abort();
-            processError.setReasonKeepingDetail(ErrorReason.NONE);
+            processError.set(ErrorReason.NONE);
             markDirty();
             if (worldObj != null) {
                 worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
@@ -1077,7 +1077,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
         // Reset structure state
         setFormed(false);
         clearStructureParts();
-        processError.setReasonKeepingDetail(ErrorReason.NONE);
+        processError.set(ErrorReason.NONE);
 
         // Notify client
         markDirty();
