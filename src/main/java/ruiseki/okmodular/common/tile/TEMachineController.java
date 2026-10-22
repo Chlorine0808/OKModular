@@ -397,11 +397,10 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
     }
 
     // Last process error reason for GUI display
-    private ErrorReason lastProcessErrorReason = ErrorReason.NONE;
-    private String lastProcessErrorDetail = null;
+    private final ProcessErrorState processError = new ProcessErrorState();
 
     public String getLastProcessErrorDetail() {
-        return lastProcessErrorDetail;
+        return processError.getDetail();
     }
 
     protected boolean structureCheck(String piece, int ox, int oy, int oz) {
@@ -529,7 +528,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
         // Blueprint required - no operation without it
         if (structureAgent.getCustomStructureName() == null || structureAgent.getCustomStructureName()
             .isEmpty()) {
-            lastProcessErrorReason = ErrorReason.MISSING_BLUEPRINT;
+            processError.setReasonKeepingDetail(ErrorReason.MISSING_BLUEPRINT);
             return;
         }
 
@@ -547,7 +546,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
         }
         // Check Redstone signal for suspension
         if (!isRedstoneActive()) {
-            lastProcessErrorReason = ErrorReason.PAUSED;
+            processError.setReasonKeepingDetail(ErrorReason.PAUSED);
             return;
         }
 
@@ -628,12 +627,12 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             // rather than the contextual list, as it always has.
             List<IModularPort> waitingOutputs = PortColorGrouping.select(getOutputPorts(), activeRecipeColor);
             if (processAgent.diagnoseBlockOutputFull(waitingOutputs, context)) {
-                lastProcessErrorReason = ErrorReason.BLOCK_OUTPUT_FULL;
+                processError.setReasonKeepingDetail(ErrorReason.BLOCK_OUTPUT_FULL);
             } else {
-                lastProcessErrorReason = ErrorReason.WAITING_OUTPUT;
+                processError.setReasonKeepingDetail(ErrorReason.WAITING_OUTPUT);
             }
             if (processAgent.tryOutput(waitingOutputs, context)) {
-                lastProcessErrorReason = ErrorReason.NONE;
+                processError.setReasonKeepingDetail(ErrorReason.NONE);
                 if (!worldObj.isRemote) {
                     machineStateAgent.recordRecipeCompletion(processAgent.getCurrentRecipe());
                 }
@@ -649,11 +648,11 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             ProcessAgent.TickResult result = processAgent.tick(activeInputPorts(), activeOutputPorts(), context);
 
             if (result == ProcessAgent.TickResult.NO_ENERGY) {
-                lastProcessErrorReason = ErrorReason.NO_ENERGY;
+                processError.setReasonKeepingDetail(ErrorReason.NO_ENERGY);
             } else if (result == ProcessAgent.TickResult.NO_MANA) {
-                lastProcessErrorReason = ErrorReason.NO_MANA;
+                processError.setReasonKeepingDetail(ErrorReason.NO_MANA);
             } else if (result == ProcessAgent.TickResult.NO_INPUT) {
-                lastProcessErrorReason = ErrorReason.INPUT_MISSING;
+                processError.setReasonKeepingDetail(ErrorReason.INPUT_MISSING);
                 if (isOnlyNonConsumingRecipe(processAgent.getCurrentRecipe())) {
                     processAgent.abort();
                 }
@@ -661,14 +660,14 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
                 // Only a recipe condition reaches this now, so name the one that stopped it.
                 setProcessError(ErrorReason.PAUSED, processAgent.getConditionFailure());
             } else if (result == ProcessAgent.TickResult.OUTPUT_FULL) {
-                lastProcessErrorReason = ErrorReason.OUTPUT_FULL;
+                processError.setReasonKeepingDetail(ErrorReason.OUTPUT_FULL);
             } else if (result == ProcessAgent.TickResult.BLOCK_MISSING) {
-                lastProcessErrorReason = ErrorReason.BLOCK_MISSING;
+                processError.setReasonKeepingDetail(ErrorReason.BLOCK_MISSING);
                 if (isOnlyNonConsumingRecipe(processAgent.getCurrentRecipe())) {
                     processAgent.abort();
                 }
             } else {
-                lastProcessErrorReason = ErrorReason.NONE;
+                processError.setReasonKeepingDetail(ErrorReason.NONE);
             }
 
             // Look-ahead: search for next recipe while processing (only once)
@@ -686,7 +685,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             // If complete, immediately try to output and start next
             if (result == ProcessAgent.TickResult.READY_OUTPUT) {
                 if (processAgent.tryOutput(activeOutputPorts(), context)) {
-                    lastProcessErrorReason = ErrorReason.NONE;
+                    processError.setReasonKeepingDetail(ErrorReason.NONE);
                     if (!worldObj.isRemote) {
                         machineStateAgent.recordRecipeCompletion(processAgent.getCurrentRecipe());
                     }
@@ -744,12 +743,12 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             ConditionContext context = getConditionContext();
             if (processAgent
                 .startRecipe(selection.getRecipe(), selection.getInputs(), selection.getOutputs(), context)) {
-                lastProcessErrorReason = ErrorReason.NONE;
+                processError.setReasonKeepingDetail(ErrorReason.NONE);
             } else if (processAgent.wasBlockedByCondition()) {
                 // Not a missing input. Saying so would send the player to the wrong hatch.
                 setProcessError(ErrorReason.CONDITION_NOT_MET, processAgent.getConditionFailure());
             } else {
-                lastProcessErrorReason = ErrorReason.NO_INPUT;
+                processError.setReasonKeepingDetail(ErrorReason.NO_INPUT);
             }
             return;
         }
@@ -769,11 +768,11 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             return;
         }
 
-        lastProcessErrorReason = ErrorReason.NO_MATCHING_RECIPE;
+        processError.setReasonKeepingDetail(ErrorReason.NO_MATCHING_RECIPE);
 
         // Check if it's actually NO_INPUT
         if (processAgent.diagnoseIdle(getContextualInputPorts()) == ProcessAgent.TickResult.NO_INPUT) {
-            lastProcessErrorReason = ErrorReason.INPUT_MISSING;
+            processError.setReasonKeepingDetail(ErrorReason.INPUT_MISSING);
         }
     }
 
@@ -914,7 +913,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
             setFormed(false);
             clearStructureParts();
             processAgent.abort();
-            lastProcessErrorReason = ErrorReason.NONE;
+            processError.setReasonKeepingDetail(ErrorReason.NONE);
             markDirty();
             if (worldObj != null) {
                 worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
@@ -1078,7 +1077,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
         // Reset structure state
         setFormed(false);
         clearStructureParts();
-        lastProcessErrorReason = ErrorReason.NONE;
+        processError.setReasonKeepingDetail(ErrorReason.NONE);
 
         // Notify client
         markDirty();
@@ -1202,25 +1201,23 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
     }
 
     public ErrorReason getLastProcessErrorReason() {
-        return lastProcessErrorReason;
+        return processError.getReason();
     }
 
     public void setLastProcessErrorReason(ErrorReason reason) {
-        this.lastProcessErrorReason = reason;
-        this.lastProcessErrorDetail = null; // Reset detail when setting reason directly
+        processError.set(reason);
     }
 
     public void setLastProcessErrorDetail(String detail) {
-        this.lastProcessErrorDetail = detail;
+        processError.setDetail(detail);
     }
 
     public void setProcessError(ErrorReason reason) {
-        setProcessError(reason, null);
+        processError.set(reason);
     }
 
     public void setProcessError(ErrorReason reason, String detail) {
-        this.lastProcessErrorReason = reason;
-        this.lastProcessErrorDetail = detail;
+        processError.set(reason, detail);
     }
 
     @Override
