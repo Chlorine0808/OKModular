@@ -36,7 +36,6 @@ import com.gtnewhorizon.structurelib.alignment.enumerable.ExtendedFacing;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 
 import ruiseki.okcore.enums.RedstoneMode;
-import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.enums.EnumIO;
@@ -45,7 +44,6 @@ import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.modular.PortColor;
-import ruiseki.okmodular.api.modular.PortColorGrouping;
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.core.IMachineState;
@@ -53,17 +51,15 @@ import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.core.ITieredMachine;
 import ruiseki.okmodular.api.recipe.error.ErrorReason;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
-import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
 import ruiseki.okmodular.common.block.BlockMachineController;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
-import ruiseki.okmodular.common.recipe.ColoredRecipeSearch;
 import ruiseki.okmodular.common.recipe.ProcessAgent;
-import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
+import ruiseki.okmodular.common.tile.agent.RecipeRunner;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 import ruiseki.okmodular.core.tileentity.AbstractTE;
 import ruiseki.okmodular.core.tileentity.StructureOffsets;
@@ -118,10 +114,6 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
     private final ProcessAgent processAgent = new ProcessAgent(this);
     // Recipe groups - obtained from custom structure or GUI
     private List<String> recipeGroups = new ArrayList<>(Collections.singletonList("default"));
-    // Look-ahead: next recipe cached during current processing
-    private transient IModularRecipe nextRecipe = null;
-    // Recipe version at the time nextRecipe was cached (for invalidation on reload)
-    private transient int cachedRecipeVersion = -1;
 
     // Cached port lists to avoid per-tick allocations
     private transient List<IModularPort> cachedInputPorts = null;
@@ -272,9 +264,6 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
     // Transient flag to trigger tint packet resend on load
     private boolean needsTintResend = false;
 
-    // Track previous working state for render update
-    private transient boolean wasWorking = false;
-
     public TEMachineController() {
         super();
     }
@@ -398,6 +387,11 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
 
     // Last process error reason for GUI display
     private final ProcessErrorState processError = new ProcessErrorState();
+    private final RecipeRunner recipeRunner = new RecipeRunner(
+        new RunnerHost(),
+        processAgent,
+        processError,
+        RecipeRunner.RecipeFinder.LOADER);
 
     public String getLastProcessErrorDetail() {
         return processError.getDetail();
@@ -562,7 +556,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
                     timeContinuousCount++;
                 }
             }
-            processRecipe();
+            recipeRunner.process();
         }
     }
 
@@ -599,181 +593,11 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
         // abort() resets the process without giving anything back, and that is what the
         // policy means - the alternative, PAUSE, is the default precisely because it does
         // not. Elsewhere abort() is only reached once it is known that nothing was consumed
-        // (see the isOnlyNonConsumingRecipe checks in processRecipe).
+        // (see the isOnlyNonConsumingRecipe checks in RecipeRunner).
         if (entry.getConditionPolicy() == ConditionPolicy.ABORT) {
             processAgent.abort();
         }
         return false;
-    }
-
-    /**
-     * Process recipe using ProcessAgent.
-     * Searches for the next recipe during current recipe processing,
-     * enabling zero-tick delay between recipe completions.
-     * <p>
-     * Both paths below build their context with {@link #getConditionContext()}, the same way
-     * {@link #startNextRecipe()} always has. A bare context answers zero for every machine
-     * property and carries no evaluation seed, so with one of those an {@code "amount"} of
-     * {@code "1 + tier"} produced 1 and {@code chance()} returned the same answer on every
-     * machine forever. One instance per path, reused for the whole of it: its result cache
-     * is what makes the machine's state a single snapshot rather than something that shifts
-     * between the per-tick inputs and the outputs that follow them.
-     */
-    private void processRecipe() {
-        // Try to output if waiting
-        if (processAgent.isWaitingForOutput()) {
-            ConditionContext context = getConditionContext();
-            // Same colour the recipe started in. This path passes getOutputPorts()
-            // rather than the contextual list, as it always has.
-            List<IModularPort> waitingOutputs = PortColorGrouping.select(getOutputPorts(), activeRecipeColor);
-            if (processAgent.diagnoseBlockOutputFull(waitingOutputs, context)) {
-                processError.set(ErrorReason.BLOCK_OUTPUT_FULL);
-            } else {
-                processError.set(ErrorReason.WAITING_OUTPUT);
-            }
-            if (processAgent.tryOutput(waitingOutputs, context)) {
-                processError.set(ErrorReason.NONE);
-                if (!worldObj.isRemote) {
-                    machineStateAgent.recordRecipeCompletion(processAgent.getCurrentRecipe());
-                }
-                // Output succeeded, try to start next recipe immediately
-                startNextRecipe();
-            }
-            return;
-        }
-
-        // If running, tick and look-ahead search for next recipe
-        if (processAgent.isRunning()) {
-            ConditionContext context = getConditionContext();
-            ProcessAgent.TickResult result = processAgent.tick(activeInputPorts(), activeOutputPorts(), context);
-
-            if (result == ProcessAgent.TickResult.NO_ENERGY) {
-                processError.set(ErrorReason.NO_ENERGY);
-            } else if (result == ProcessAgent.TickResult.NO_MANA) {
-                processError.set(ErrorReason.NO_MANA);
-            } else if (result == ProcessAgent.TickResult.NO_INPUT) {
-                processError.set(ErrorReason.INPUT_MISSING);
-                if (isOnlyNonConsumingRecipe(processAgent.getCurrentRecipe())) {
-                    processAgent.abort();
-                }
-            } else if (result == ProcessAgent.TickResult.PAUSED) {
-                // Only a recipe condition reaches this now, so name the one that stopped it.
-                setProcessError(ErrorReason.PAUSED, processAgent.getConditionFailure());
-            } else if (result == ProcessAgent.TickResult.OUTPUT_FULL) {
-                processError.set(ErrorReason.OUTPUT_FULL);
-            } else if (result == ProcessAgent.TickResult.BLOCK_MISSING) {
-                processError.set(ErrorReason.BLOCK_MISSING);
-                if (isOnlyNonConsumingRecipe(processAgent.getCurrentRecipe())) {
-                    processAgent.abort();
-                }
-            } else {
-                processError.set(ErrorReason.NONE);
-            }
-
-            // Look-ahead: search for next recipe while processing (only once)
-            if (nextRecipe == null) {
-                ConditionContext lookAheadContext = getConditionContext();
-                nextRecipe = RecipeLoader.getInstance()
-                    .findMatch(
-                        recipeGroups.toArray(new String[0]),
-                        getContextualInputPorts(),
-                        r -> r.canStart(lookAheadContext));
-                cachedRecipeVersion = RecipeLoader.getInstance()
-                    .getRecipeVersion();
-            }
-
-            // If complete, immediately try to output and start next
-            if (result == ProcessAgent.TickResult.READY_OUTPUT) {
-                if (processAgent.tryOutput(activeOutputPorts(), context)) {
-                    processError.set(ErrorReason.NONE);
-                    if (!worldObj.isRemote) {
-                        machineStateAgent.recordRecipeCompletion(processAgent.getCurrentRecipe());
-                    }
-                    startNextRecipe();
-                }
-            }
-            return;
-        }
-
-        // IDLE: Try to start new recipe
-        startNextRecipe();
-
-        // Update render if working state changed
-        boolean currentlyWorking = processAgent.isRunning();
-        if (currentlyWorking != wasWorking) {
-            wasWorking = currentlyWorking;
-            if (worldObj != null && !worldObj.isRemote) {
-                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
-            }
-        }
-    }
-
-    private void startNextRecipe() {
-        // Invalidate cache if recipes were reloaded
-        if (cachedRecipeVersion != RecipeLoader.getInstance()
-            .getRecipeVersion()) {
-            nextRecipe = null;
-        }
-
-        final IModularRecipe lookAhead = nextRecipe;
-        nextRecipe = null; // Clear cache
-        final String[] groupNames = recipeGroups.toArray(new String[0]);
-        final ConditionContext searchContext = getConditionContext();
-
-        // Each colour group is offered the look-ahead result first, since checking one
-        // recipe against a port list is far cheaper than searching every candidate.
-        // The look-ahead searched the unfiltered port list, so it may well not apply
-        // to the group being considered.
-        ColoredRecipeSearch.Selection selection = ColoredRecipeSearch
-            .search(PortColorGrouping.group(getContextualInputPorts(), getContextualOutputPorts()), inputs -> {
-                if (lookAhead != null && lookAhead.matchesInput(inputs) && lookAhead.canStart(searchContext)) {
-                    return lookAhead;
-                }
-                return RecipeLoader.getInstance()
-                    .findMatch(groupNames, inputs, r -> r.canStart(searchContext));
-            });
-
-        if (selection.isRunnable()) {
-            activeRecipeColor = selection.getColor();
-            // What makes this run's draws differ from the last run's at this machine. The
-            // rest of the evaluation seed - the world, the position, the recipe count - is
-            // mixed in by SeedMixer.forEvaluation at the moment of evaluation, so there is
-            // nothing to persist here beyond the tick itself.
-            currentRecipeStartTick = worldObj.getTotalWorldTime();
-            ConditionContext context = getConditionContext();
-            if (processAgent
-                .startRecipe(selection.getRecipe(), selection.getInputs(), selection.getOutputs(), context)) {
-                processError.set(ErrorReason.NONE);
-            } else if (processAgent.wasBlockedByCondition()) {
-                // Not a missing input. Saying so would send the player to the wrong hatch.
-                setProcessError(ErrorReason.CONDITION_NOT_MET, processAgent.getConditionFailure());
-            } else {
-                processError.set(ErrorReason.NO_INPUT);
-            }
-            return;
-        }
-
-        // A recipe was found but no group could run it. The one reported is from the
-        // highest-priority colour that got that far.
-        if (selection.getRecipe() != null) {
-            if (selection.getInsufficientType() != null) {
-                setProcessError(
-                    ErrorReason.OUTPUT_CAPACITY_INSUFFICIENT,
-                    LangHelpers.localize(
-                        "gui.port_type." + selection.getInsufficientType()
-                            .name()));
-            } else {
-                setProcessError(ErrorReason.OUTPUT_FULL);
-            }
-            return;
-        }
-
-        processError.set(ErrorReason.NO_MATCHING_RECIPE);
-
-        // Check if it's actually NO_INPUT
-        if (processAgent.diagnoseIdle(getContextualInputPorts()) == ProcessAgent.TickResult.NO_INPUT) {
-            processError.set(ErrorReason.INPUT_MISSING);
-        }
     }
 
     @Override
@@ -802,23 +626,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
     public void invalidatePortCache() {
         this.cachedInputPorts = null;
         this.cachedOutputPorts = null;
-        this.nextRecipe = null;
-    }
-
-    /**
-     * The input ports the running recipe is allowed to draw from.
-     *
-     * Filtered by the colour the recipe started in, so a painted port only feeds the
-     * group it belongs to. A machine with nothing painted gets the whole list back
-     * without a copy, which matters because this runs every tick.
-     */
-    private List<IModularPort> activeInputPorts() {
-        return PortColorGrouping.select(getContextualInputPorts(), activeRecipeColor);
-    }
-
-    /** The output ports the running recipe is allowed to put results into. */
-    private List<IModularPort> activeOutputPorts() {
-        return PortColorGrouping.select(getContextualOutputPorts(), activeRecipeColor);
+        recipeRunner.forgetLookAhead();
     }
 
     // ========== IModularPort Implementation ==========
@@ -878,16 +686,6 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
     /**
      * Get structure name from the blueprint in the slot.
      */
-    private boolean isOnlyNonConsumingRecipe(IModularRecipe recipe) {
-        if (recipe == null) return false;
-        List<IRecipeInput> inputs = recipe.getInputs();
-        if (inputs.isEmpty()) return false;
-        for (IRecipeInput input : inputs) {
-            if (input.isConsume()) return false;
-        }
-        return true;
-    }
-
     @Nullable
     private String getStructureNameFromBlueprint() {
         ItemStack blueprint = getBlueprintStack();
@@ -1350,4 +1148,59 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
         }
     }
 
+    /** The controller as {@link RecipeRunner} sees it. */
+    private final class RunnerHost implements RecipeRunner.Host {
+
+        @Override
+        public ConditionContext newConditionContext() {
+            return getConditionContext();
+        }
+
+        @Override
+        public List<IModularPort> getContextualInputPorts() {
+            return TEMachineController.this.getContextualInputPorts();
+        }
+
+        @Override
+        public List<IModularPort> getContextualOutputPorts() {
+            return TEMachineController.this.getContextualOutputPorts();
+        }
+
+        @Override
+        public List<IModularPort> getOutputPorts() {
+            return TEMachineController.this.getOutputPorts();
+        }
+
+        @Override
+        public List<String> getRecipeGroups() {
+            return recipeGroups;
+        }
+
+        @Override
+        public PortColor getActiveRecipeColor() {
+            return activeRecipeColor;
+        }
+
+        @Override
+        public void onRecipeStarting(PortColor color) {
+            activeRecipeColor = color;
+            // What makes this run's draws differ from the last run's at this machine. The
+            // rest of the evaluation seed - the world, the position, the recipe count - is
+            // mixed in by SeedMixer.forEvaluation at the moment of evaluation, so there is
+            // nothing to persist here beyond the tick itself.
+            currentRecipeStartTick = worldObj.getTotalWorldTime();
+        }
+
+        @Override
+        public void recordRecipeCompletion(IModularRecipe recipe) {
+            machineStateAgent.recordRecipeCompletion(recipe);
+        }
+
+        @Override
+        public void onWorkingChanged() {
+            if (worldObj != null && !worldObj.isRemote) {
+                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+            }
+        }
+    }
 }
