@@ -154,6 +154,19 @@ public class RecipeRunnerTest {
         assertEquals(1, finder.calls);
     }
 
+    @Test
+    @DisplayName("先読みは見つからなくても実行中に 1 回だけ")
+    public void test見つからない先読みも1回() {
+        agent.running = true;
+        agent.tickResult = ProcessAgent.TickResult.CONTINUE;
+
+        runner.process();
+        runner.process();
+        runner.process();
+
+        assertEquals(1, finder.calls, "完了時に startNextRecipe が探し直すので、実行中に毎 tick 探す必要は無い");
+    }
+
     // ========== Idle ==========
 
     @Test

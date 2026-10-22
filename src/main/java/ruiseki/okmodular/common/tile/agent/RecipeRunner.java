@@ -87,6 +87,8 @@ public class RecipeRunner {
     private IModularRecipe nextRecipe = null;
     // Recipe version at the time nextRecipe was cached (for invalidation on reload)
     private int cachedRecipeVersion = -1;
+    // Whether this run has looked ahead. A miss is not retried: completion searches anyway.
+    private boolean lookedAhead = false;
     // Previous working state, for the render update
     private boolean wasWorking = false;
 
@@ -100,6 +102,7 @@ public class RecipeRunner {
     /** Drops the look-ahead result, which was searched against ports that may have changed. */
     public void forgetLookAhead() {
         nextRecipe = null;
+        lookedAhead = false;
     }
 
     /**
@@ -166,7 +169,8 @@ public class RecipeRunner {
             }
 
             // Look-ahead: search for next recipe while processing (only once)
-            if (nextRecipe == null) {
+            if (!lookedAhead) {
+                lookedAhead = true;
                 ConditionContext lookAheadContext = host.newConditionContext();
                 nextRecipe = finder.findMatch(
                     host.getRecipeGroups()
@@ -205,7 +209,7 @@ public class RecipeRunner {
         }
 
         final IModularRecipe lookAhead = nextRecipe;
-        nextRecipe = null; // Clear cache
+        forgetLookAhead();
         final String[] groupNames = host.getRecipeGroups()
             .toArray(new String[0]);
         final ConditionContext searchContext = host.newConditionContext();
