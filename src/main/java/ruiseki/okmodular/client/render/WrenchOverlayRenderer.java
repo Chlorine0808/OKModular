@@ -379,7 +379,8 @@ public class WrenchOverlayRenderer {
                 boolean fixed = false;
                 if (fixedPorts != null) {
                     // Find which symbol corresponds to this ChunkCoordinates
-                    for (Map.Entry<Character, List<ChunkCoordinates>> symEntry : controller.getSymbolPositionsMap()
+                    for (Map.Entry<Character, List<ChunkCoordinates>> symEntry : controller.getStructureAgent()
+                        .getSymbolPositionsMap()
                         .entrySet()) {
                         if (symEntry.getValue()
                             .contains(port)) {

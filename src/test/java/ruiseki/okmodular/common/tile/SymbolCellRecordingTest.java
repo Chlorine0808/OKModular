@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
  * なぜソース走査なのか
  * ============================================
  *
- * `TEMachineController` は**ユニットテストで組めない**（`MockWorld` がコンストラクタで NPE。
+ * `TEMachineController` と、それを握る `StructureAgent` は**ユニットテストで組めない**（`MockWorld` がコンストラクタで NPE。
  * `release_freeze.md` §5 の恒久制約）。計算そのものは `StructureCellLocatorTest` が
  * 値で縛っているので、ここで見るのは**その計算が呼ばれているか**だけ。
  *
@@ -29,13 +29,17 @@ import org.junit.jupiter.api.Test;
  * `ConditionsRegistrationTest` / `VisionVariableDelegationTest` と同じ手口で静的に捕まえる。
  *
  * ============================================
- * なぜコントローラ側が計算するのか
+ * なぜ StructureAgent が計算するのか
  * ============================================
  *
  * セルの復元には**コントローラの世界座標・向き・コントローラオフセット**の 3 つが要る。
  * 呼び出し元の `CustomStructureRegistry.wrapTracking` は `IMachineController` しか持たず、
  * そこにはどれも生えていない。**インタフェースを広げるより、
  * 3 つとも既に持っている側で計算する**ほうが結合が増えない。
+ *
+ * `StructureAgent` は具体型のコントローラを握り、オフセットを受け取る `structureCheck` も
+ * 自分で持つので、3 つすべてに届く。symbol の map も走査と同じ側に置き、
+ * コントローラには `IMachineController` / `IRecipeContext` 向けの転送だけを残す。
  *
  * ============================================
  * オフセットの出どころ
@@ -48,13 +52,12 @@ import org.junit.jupiter.api.Test;
 @DisplayName("パターンセルの記録")
 public class SymbolCellRecordingTest {
 
-    private static final Path CONTROLLER = Paths
-        .get("src/main/java/ruiseki/okmodular/common/tile/TEMachineController.java");
+    private static final Path AGENT = Paths.get("src/main/java/ruiseki/okmodular/common/tile/StructureAgent.java");
 
     @Test
     @DisplayName("finalizeSymbolPosition がセルの計算を呼んでいる")
     public void testセルの計算が呼ばれている() {
-        String source = read(CONTROLLER);
+        String source = read(AGENT);
         String body = methodBody(source, "public void finalizeSymbolPosition(");
 
         assertTrue(
@@ -65,8 +68,8 @@ public class SymbolCellRecordingTest {
     @Test
     @DisplayName("structureCheck が走査前にコントローラオフセットを控えている")
     public void testオフセットを控えている() {
-        String source = read(CONTROLLER);
-        String body = methodBody(source, "protected boolean structureCheck(");
+        String source = read(AGENT);
+        String body = methodBody(source, "public boolean structureCheck(");
 
         assertTrue(
             body.contains("structureOriginOffset"),
@@ -77,7 +80,7 @@ public class SymbolCellRecordingTest {
     @Test
     @DisplayName("位置を捨てるときセルも一緒に捨てる")
     public void test消すときも一緒() {
-        String source = read(CONTROLLER);
+        String source = read(AGENT);
         String body = methodBody(source, "public void clearSymbolPositions(");
 
         assertTrue(
@@ -88,7 +91,7 @@ public class SymbolCellRecordingTest {
     @Test
     @DisplayName("記録したセルを外から引ける")
     public void testセルを引く口がある() {
-        assertTrue(read(CONTROLLER).contains("public int[] getSymbolCell("), "記録したセルを読む手段が無い。書く側だけあって読む側が無い形になっている");
+        assertTrue(read(AGENT).contains("public int[] getSymbolCell("), "記録したセルを読む手段が無い。書く側だけあって読む側が無い形になっている");
     }
 
     /**
@@ -101,7 +104,7 @@ public class SymbolCellRecordingTest {
     @Test
     @DisplayName("セルから世界座標へ戻す口がある")
     public void testセルから世界へ戻せる() {
-        String source = read(CONTROLLER);
+        String source = read(AGENT);
         // 整形で改行が入っても落ちないよう、空白を落としてから見る
         String body = methodBody(source, "public int[] getCellPosition(").replaceAll("\\s+", "");
 
