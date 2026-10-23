@@ -166,6 +166,7 @@ public class GuiManager {
             RedstoneMode.class,
             controller::getRedstoneMode,
             controller::setRedstoneMode);
+        redstoneMode.allowC2S();
         syncManager.syncValue("redstoneMode", redstoneMode);
 
         BooleanSyncValue redstonePowered = new BooleanSyncValue(

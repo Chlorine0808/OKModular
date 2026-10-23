@@ -387,17 +387,20 @@ public abstract class AbstractEnergyIOPortTE extends AbstractTE
             RedstoneMode.class,
             this::getRedstoneMode,
             this::setRedstoneMode);
+        redstoneSyncer.allowC2S();
         syncManager.syncValue("redstoneSyncer", redstoneSyncer);
         IntSyncValue energySyncer = new IntSyncValue(this::getEnergyStored, this::setEnergyStored);
         syncManager.syncValue("energySyncer", energySyncer);
         syncManager.syncValue("maxEnergySyncer", new IntSyncValue(this::getMaxEnergyStored));
         BooleanSyncValue ic2CompatSyncer = new BooleanSyncValue(this::isUseIC2Compat, this::setUseIC2Compat);
+        ic2CompatSyncer.allowC2S();
         syncManager.syncValue("ic2CompatSyncer", ic2CompatSyncer);
 
         EnumSyncValue<EnergyMode, ?> modeSyncer = new EnumSyncValue<>(
             EnergyMode.class,
             this::getEnergyMode,
             this::setEnergyMode);
+        modeSyncer.allowC2S();
         syncManager.syncValue("modeSyncer", modeSyncer);
 
         panel.child(

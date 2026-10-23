@@ -348,6 +348,7 @@ public abstract class AbstractItemIOPortTE extends AbstractTE
             RedstoneMode.class,
             this::getRedstoneMode,
             this::setRedstoneMode);
+        redstoneSyncer.allowC2S();
         syncManager.syncValue("redstoneSyncer", redstoneSyncer);
 
         panel.child(
@@ -356,6 +357,7 @@ public abstract class AbstractItemIOPortTE extends AbstractTE
                 .excludeAreaInRecipeViewer());
 
         IntSyncValue sortTrigger = new IntSyncValue(() -> 0, val -> { if (val > 0) sortInventory(); });
+        sortTrigger.allowC2S();
         syncManager.syncValue("sortTrigger", sortTrigger);
 
         // Sort Button

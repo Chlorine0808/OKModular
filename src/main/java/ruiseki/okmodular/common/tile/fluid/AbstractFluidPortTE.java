@@ -224,6 +224,7 @@ public abstract class AbstractFluidPortTE extends AbstractTE
             RedstoneMode.class,
             this::getRedstoneMode,
             this::setRedstoneMode);
+        redstoneSyncer.allowC2S();
         syncManager.syncValue("redstoneSyncer", redstoneSyncer);
 
         panel.child(
