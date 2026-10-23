@@ -84,7 +84,7 @@ public abstract class AbstractEnergyIOPortTE extends AbstractTE
     @Getter
     @Setter
     @NBTPersist
-    public boolean useIC2Compat = false;
+    public boolean useIC2Compat = true;
 
     public AbstractEnergyIOPortTE(int energyCapacity, int energyMaxReceive) {
         energyStorage = new EnergyStorage(energyCapacity, energyMaxReceive) {
