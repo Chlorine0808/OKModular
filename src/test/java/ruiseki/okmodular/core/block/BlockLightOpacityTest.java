@@ -10,6 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -140,6 +143,22 @@ public class BlockLightOpacityTest {
         // コントローラ・ポートのように「描画だけ特殊な中身の詰まったブロック」を透過してしまう。
         assertFalse(source.contains("!block.isOpaqueCube() ||"), "isOpaqueCube() を透過条件にしている。ポートとコントローラが素通りする");
         assertTrue(source.contains("return block.getLightOpacity() == 0;"), "透過条件が光の遮蔽になっていない");
+    }
+
+    @Test
+    @DisplayName("中身の詰まったブロックは隣の明るさを自分の明るさとして答えない")
+    public void test隣の明るさを借りない() throws IOException {
+        // useNeighborBrightness のブロックは、自分の位置の明るさを周囲 5 マスの最大値で答える。
+        // ポートで囲った暗室では、外側の日光がこの経路で内側の滑らか照明に漏れていた。
+        // フルキューブの面はもともと隣のマスの明るさで描かれるので、このフラグは要らない。
+        try (Stream<Path> files = Files.walk(Paths.get("src/main/java"))) {
+            List<Path> users = files.filter(
+                p -> p.toString()
+                    .endsWith(".java"))
+                .filter(p -> read(p).contains("useNeighborBrightness = true"))
+                .collect(Collectors.toList());
+            assertTrue(users.isEmpty(), "useNeighborBrightness を立てている: " + users);
+        }
     }
 
     private static String read(Path file) {
