@@ -374,6 +374,21 @@ public abstract class AbstractEnergyIOPortTE extends AbstractTE
         new CyclicVariantButtonWidget.Variant(IKey.lang("gui.energy_mode.rf"), RF_MODE),
         new CyclicVariantButtonWidget.Variant(IKey.lang("gui.energy_mode.eu"), EU_MODE));
 
+    public static final UITexture IC2_ON = UITexture.builder()
+        .location(Reference.MOD_ID, "gui/machinery/icons")
+        .imageSize(256, 256)
+        .xy(32, 16, 16, 16)
+        .build();
+    public static final UITexture IC2_OFF = UITexture.builder()
+        .location(Reference.MOD_ID, "gui/machinery/icons")
+        .imageSize(256, 256)
+        .xy(48, 16, 16, 16)
+        .build();
+
+    private static final List<CyclicVariantButtonWidget.Variant> IC2_VARIANTS = Arrays.asList(
+        new CyclicVariantButtonWidget.Variant(IKey.lang("gui.machinery.ic2_on"), IC2_ON),
+        new CyclicVariantButtonWidget.Variant(IKey.lang("gui.machinery.ic2_off"), IC2_OFF));
+
     @Override
     public ModularScreen createScreen(PosGuiData data, ModularPanel mainPanel) {
         return new ModularScreen(Reference.MOD_ID, mainPanel);
@@ -460,7 +475,7 @@ public abstract class AbstractEnergyIOPortTE extends AbstractTE
                 .coverChildren()
                 .left(0)
                 .childPadding(2)
-                .child(new ToggleWidget(ic2CompatSyncer))
+                .child(new ToggleWidget(IC2_VARIANTS, ic2CompatSyncer))
                 .child(
                     IKey.lang("gui.machinery.use_ic2")
                         .asWidget()));
