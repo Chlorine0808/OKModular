@@ -63,7 +63,7 @@ public class LangKeyCoverageTest {
 
     /** 翻訳を引く呼び出しの第 1 引数。 */
     private static final Pattern LOOKUP = Pattern.compile(
-        "(?:localize|translateToLocal|translateToLocalFormatted|ChatComponentTranslation)\\s*\\(\\s*\"([^\"]+)\"");
+        "(?:localize|translateToLocal|translateToLocalFormatted|ChatComponentTranslation|IKey\\.lang)\\s*\\(\\s*\"([^\"]+)\"");
 
     /**
      * 実行時に連結して使われる断片と、それを覆っているテスト。
