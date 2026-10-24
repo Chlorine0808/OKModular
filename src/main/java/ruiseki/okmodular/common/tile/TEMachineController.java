@@ -36,17 +36,14 @@ import com.gtnewhorizon.structurelib.alignment.enumerable.ExtendedFacing;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 
 import ruiseki.okcore.enums.RedstoneMode;
-import ruiseki.okcore.helper.LangHelpers;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.condition.ConditionContext;
-import ruiseki.okmodular.api.enums.CraftingState;
 import ruiseki.okmodular.api.enums.EnumIO;
 import ruiseki.okmodular.api.modular.IMachineController;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.modular.IVisitablePort;
 import ruiseki.okmodular.api.modular.PortColor;
-import ruiseki.okmodular.api.modular.PortColorGrouping;
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.DurationPolicy;
 import ruiseki.okmodular.api.recipe.core.IMachineState;
@@ -54,20 +51,18 @@ import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.core.ITieredMachine;
 import ruiseki.okmodular.api.recipe.error.ErrorReason;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
-import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 import ruiseki.okmodular.client.gui.handler.ItemStackHandlerBase;
 import ruiseki.okmodular.common.block.BlockMachineController;
 import ruiseki.okmodular.common.item.ItemMachineBlueprint;
-import ruiseki.okmodular.common.recipe.ColoredRecipeSearch;
 import ruiseki.okmodular.common.recipe.ProcessAgent;
-import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.common.tile.agent.MachineStateAgent;
+import ruiseki.okmodular.common.tile.agent.RecipeRunner;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
-import ruiseki.okmodular.core.tileentity.AbstractMBModifierTE;
-import ruiseki.okmodular.structure.StructureCellLocator;
+import ruiseki.okmodular.core.tileentity.AbstractTE;
+import ruiseki.okmodular.core.tileentity.StructureOffsets;
 import ruiseki.okmodular.structure.StructureManager;
 import ruiseki.okmodular.util.Logger;
 
@@ -77,8 +72,13 @@ import ruiseki.okmodular.util.Logger;
  * and validates the surrounding blocks against that structure definition.
  * TODO: Improve holo indicator
  */
-public class TEMachineController extends AbstractMBModifierTE
-    implements IAlignment, IGuiHolder<PosGuiData>, IRecipeContext, IVisitablePort, ITieredMachine, IMachineController {
+public class TEMachineController extends AbstractTE implements IAlignment, IGuiHolder<PosGuiData>, IRecipeContext,
+    IVisitablePort, ITieredMachine, IMachineController, MachineStateAgent.Host {
+
+    /** Whether the structure around the controller currently matches its blueprint. */
+    @NBTPersist
+    protected boolean isFormed = false;
+    private transient boolean lastIsFormed = false;
 
     // ========== Blueprint Inventory ==========
     public static final int BLUEPRINT_SLOT = 0;
@@ -114,10 +114,6 @@ public class TEMachineController extends AbstractMBModifierTE
     private final ProcessAgent processAgent = new ProcessAgent(this);
     // Recipe groups - obtained from custom structure or GUI
     private List<String> recipeGroups = new ArrayList<>(Collections.singletonList("default"));
-    // Look-ahead: next recipe cached during current processing
-    private transient IModularRecipe nextRecipe = null;
-    // Recipe version at the time nextRecipe was cached (for invalidation on reload)
-    private transient int cachedRecipeVersion = -1;
 
     // Cached port lists to avoid per-tick allocations
     private transient List<IModularPort> cachedInputPorts = null;
@@ -160,7 +156,7 @@ public class TEMachineController extends AbstractMBModifierTE
     @NBTPersist
     private PortColor activeRecipeColor = PortColor.NONE;
 
-    private final MachineStateAgent machineStateAgent = new MachineStateAgent(this);
+    private final MachineStateAgent machineStateAgent = new MachineStateAgent(this, processAgent);
 
     // Performance modifiers from the structure definition, and the guard that keeps a
     // self-referencing expression from recursing back into the getters below.
@@ -196,7 +192,8 @@ public class TEMachineController extends AbstractMBModifierTE
         boolean isValid = false;
         Character foundSymbol = null;
         for (Character c : exPorts) {
-            List<ChunkCoordinates> positions = symbolPositions.get(c);
+            List<ChunkCoordinates> positions = structureAgent.getSymbolPositionsMap()
+                .get(c);
             if (positions != null) {
                 if (positions.contains(target)) {
                     isValid = true;
@@ -267,16 +264,12 @@ public class TEMachineController extends AbstractMBModifierTE
     // Transient flag to trigger tint packet resend on load
     private boolean needsTintResend = false;
 
-    // Track previous working state for render update
-    private transient boolean wasWorking = false;
-
     public TEMachineController() {
         super();
     }
 
     // ========== Structure Definition ==========
 
-    @Override
     @SuppressWarnings("unchecked")
     public IStructureDefinition<TEMachineController> getStructureDefinition() {
         // StructureAgent returns IStructureDefinition<IMachineController>; safe because
@@ -285,7 +278,6 @@ public class TEMachineController extends AbstractMBModifierTE
             .getStructureDefinition();
     }
 
-    @Override
     public int[][] getOffSet() {
         return structureAgent.getOffSet();
     }
@@ -333,85 +325,36 @@ public class TEMachineController extends AbstractMBModifierTE
 
     // ========== Structure Parts Tracking ==========
 
-    @Override
     protected void clearStructureParts() {
         structureAgent.resetStructure();
         invalidatePortCache();
     }
 
-    private final Map<Character, List<ChunkCoordinates>> symbolPositions = new HashMap<>();
-    private final Map<ChunkCoordinates, Character> posToSymbol = new HashMap<>();
-
-    /**
-     * Which pattern cell each tracked position occupies, in structure-local (ABC) coordinates.
-     * <p>
-     * Derived state, rebuilt by every structure check alongside {@link #symbolPositions}. It is not
-     * persisted for the same reason that map is not restored: the check repopulates both.
-     */
-    private final Map<ChunkCoordinates, int[]> symbolCells = new HashMap<>();
-
-    /**
-     * The controller's own cell in the pattern, as handed to the last structure check.
-     * <p>
-     * {@link #structureCheck} is the only place this arrives, and the scan runs underneath it, so
-     * it has to be parked somewhere {@link #finalizeSymbolPosition} can read.
-     */
-    private final int[] structureOriginOffset = new int[3];
-
-    public Map<Character, List<ChunkCoordinates>> getSymbolPositionsMap() {
-        return symbolPositions;
-    }
-
-    /**
-     * @return the {@code {a, b, c}} pattern cell at that position, or null if the position is not
-     *         part of the currently formed structure. The array belongs to the caller.
-     */
     @Override
     public int[] getSymbolCell(int x, int y, int z) {
-        int[] cell = symbolCells.get(new ChunkCoordinates(x, y, z));
-        return cell == null ? null : cell.clone();
+        return structureAgent.getSymbolCell(x, y, z);
     }
 
-    /**
-     * The inverse of {@link #getSymbolCell}, and the reason structure IO can reach past the
-     * machine: this resolves any cell, not only the ones the scan reported.
-     * <p>
-     * The same three values the scan was given -- facing, controller position, controller offset --
-     * are all here, which is why the arithmetic is done on this side rather than handed out.
-     */
     @Override
     public int[] getCellPosition(int a, int b, int c) {
-        return StructureCellLocator.toWorld(extendedFacing, xCoord, yCoord, zCoord, structureOriginOffset, a, b, c);
-    }
-
-    public void clearSymbolPositions() {
-        symbolPositions.clear();
-        posToSymbol.clear();
-        symbolCells.clear();
+        return structureAgent.getCellPosition(a, b, c);
     }
 
     @Override
     public void trackSymbolPosition(char symbol, int x, int y, int z) {
-        ChunkCoordinates coord = new ChunkCoordinates(x, y, z);
-        posToSymbol.put(coord, symbol);
+        structureAgent.trackSymbolPosition(symbol, x, y, z);
     }
 
     @Override
     public void finalizeSymbolPosition(char symbol, int x, int y, int z) {
-        ChunkCoordinates coord = new ChunkCoordinates(x, y, z);
-        symbolPositions.computeIfAbsent(symbol, k -> new ArrayList<>())
-            .add(coord);
-        symbolCells.put(
-            coord,
-            StructureCellLocator.locate(extendedFacing, xCoord, yCoord, zCoord, structureOriginOffset, x, y, z));
+        structureAgent.finalizeSymbolPosition(symbol, x, y, z);
     }
 
     @Override
     public Character getSymbolAt(int x, int y, int z) {
-        return posToSymbol.get(new ChunkCoordinates(x, y, z));
+        return structureAgent.getSymbolAt(x, y, z);
     }
 
-    @Override
     protected boolean addToMachine(Block block, int meta, int x, int y, int z) {
         return structureAgent.addToMachine(block, meta, x, y, z);
     }
@@ -442,56 +385,20 @@ public class TEMachineController extends AbstractMBModifierTE
         structureAgent.addStructurePosition(x, y, z);
     }
 
-    // ========== Crafting Configuration ==========
-    // We disable AbstractMachineTE's built-in crafting logic to rely solely on
-    // ProcessAgent.
-
-    @Override
-    public boolean canStartCrafting() {
-        return false;
-    }
-
-    @Override
-    protected boolean canContinueCrafting() {
-        return false;
-    }
-
-    @Override
-    protected CraftingState updateCraftingState() {
-        return CraftingState.IDLE;
-    }
-
     // Last process error reason for GUI display
-    private ErrorReason lastProcessErrorReason = ErrorReason.NONE;
-    private String lastProcessErrorDetail = null;
+    private final ProcessErrorState processError = new ProcessErrorState();
+    private final RecipeRunner recipeRunner = new RecipeRunner(
+        new RunnerHost(),
+        processAgent,
+        processError,
+        RecipeRunner.RecipeFinder.LOADER);
 
     public String getLastProcessErrorDetail() {
-        return lastProcessErrorDetail;
+        return processError.getDetail();
     }
 
-    @Override
     protected boolean structureCheck(String piece, int ox, int oy, int oz) {
-        // The scan runs inside this call and reports world coordinates only, so park the offset
-        // where finalizeSymbolPosition can reach it before starting.
-        structureOriginOffset[0] = ox;
-        structureOriginOffset[1] = oy;
-        structureOriginOffset[2] = oz;
         return structureAgent.structureCheck(piece, ox, oy, oz);
-    }
-
-    @Override
-    public int getBaseDuration() {
-        return 100;
-    }
-
-    @Override
-    public int getMinDuration() {
-        return 20;
-    }
-
-    @Override
-    public int getMaxDuration() {
-        return 1200;
     }
 
     /**
@@ -573,7 +480,6 @@ public class TEMachineController extends AbstractMBModifierTE
         return structureAgent.getCustomStructureName();
     }
 
-    @Override
     public void onFormed() {
         structureAgent.onFormed();
         updateRecipeGroupFromStructure();
@@ -616,20 +522,25 @@ public class TEMachineController extends AbstractMBModifierTE
         // Blueprint required - no operation without it
         if (structureAgent.getCustomStructureName() == null || structureAgent.getCustomStructureName()
             .isEmpty()) {
-            lastProcessErrorReason = ErrorReason.MISSING_BLUEPRINT;
+            processError.set(ErrorReason.MISSING_BLUEPRINT);
             return;
         }
 
-        // Use StructureLib-based structure checking (calls super.doUpdate())
-        // Super handles IC2 registration, energy sync, and structure validation
+        // Redstone, port tasks and render throttling.
         super.doUpdate();
 
         if (worldObj.isRemote) {
             return;
         }
+
+        if (shouldDoWorkThisTick(5) || !isFormed) {
+            // See StructureOffsets for why the tier cannot index this table directly.
+            int[] offset = StructureOffsets.forTier(getOffSet(), getTier());
+            structureCheck(getStructurePieceName(), offset[0], offset[1], offset[2]);
+        }
         // Check Redstone signal for suspension
         if (!isRedstoneActive()) {
-            lastProcessErrorReason = ErrorReason.PAUSED;
+            processError.set(ErrorReason.PAUSED);
             return;
         }
 
@@ -645,7 +556,7 @@ public class TEMachineController extends AbstractMBModifierTE
                     timeContinuousCount++;
                 }
             }
-            processRecipe();
+            recipeRunner.process();
         }
     }
 
@@ -682,191 +593,11 @@ public class TEMachineController extends AbstractMBModifierTE
         // abort() resets the process without giving anything back, and that is what the
         // policy means - the alternative, PAUSE, is the default precisely because it does
         // not. Elsewhere abort() is only reached once it is known that nothing was consumed
-        // (see the isOnlyNonConsumingRecipe checks in processRecipe).
+        // (see the isOnlyNonConsumingRecipe checks in RecipeRunner).
         if (entry.getConditionPolicy() == ConditionPolicy.ABORT) {
             processAgent.abort();
         }
         return false;
-    }
-
-    /**
-     * Process recipe using ProcessAgent.
-     * Searches for the next recipe during current recipe processing,
-     * enabling zero-tick delay between recipe completions.
-     * <p>
-     * Both paths below build their context with {@link #getConditionContext()}, the same way
-     * {@link #startNextRecipe()} always has. A bare context answers zero for every machine
-     * property and carries no evaluation seed, so with one of those an {@code "amount"} of
-     * {@code "1 + tier"} produced 1 and {@code chance()} returned the same answer on every
-     * machine forever. One instance per path, reused for the whole of it: its result cache
-     * is what makes the machine's state a single snapshot rather than something that shifts
-     * between the per-tick inputs and the outputs that follow them.
-     */
-    private void processRecipe() {
-        // Try to output if waiting
-        if (processAgent.isWaitingForOutput()) {
-            ConditionContext context = getConditionContext();
-            // Same colour the recipe started in. This path passes getOutputPorts()
-            // rather than the contextual list, as it always has.
-            List<IModularPort> waitingOutputs = PortColorGrouping.select(getOutputPorts(), activeRecipeColor);
-            if (processAgent.diagnoseBlockOutputFull(waitingOutputs, context)) {
-                lastProcessErrorReason = ErrorReason.BLOCK_OUTPUT_FULL;
-            } else {
-                lastProcessErrorReason = ErrorReason.WAITING_OUTPUT;
-            }
-            if (processAgent.tryOutput(waitingOutputs, context)) {
-                lastProcessErrorReason = ErrorReason.NONE;
-                if (!worldObj.isRemote) {
-                    machineStateAgent.recordRecipeCompletion(processAgent.getCurrentRecipe());
-                }
-                // Output succeeded, try to start next recipe immediately
-                startNextRecipe();
-            }
-            return;
-        }
-
-        // If running, tick and look-ahead search for next recipe
-        if (processAgent.isRunning()) {
-            ConditionContext context = getConditionContext();
-            ProcessAgent.TickResult result = processAgent.tick(activeInputPorts(), activeOutputPorts(), context);
-
-            if (result == ProcessAgent.TickResult.NO_ENERGY) {
-                lastProcessErrorReason = ErrorReason.NO_ENERGY;
-            } else if (result == ProcessAgent.TickResult.NO_MANA) {
-                lastProcessErrorReason = ErrorReason.NO_MANA;
-            } else if (result == ProcessAgent.TickResult.NO_INPUT) {
-                lastProcessErrorReason = ErrorReason.INPUT_MISSING;
-                if (isOnlyNonConsumingRecipe(processAgent.getCurrentRecipe())) {
-                    processAgent.abort();
-                }
-            } else if (result == ProcessAgent.TickResult.PAUSED) {
-                // Only a recipe condition reaches this now, so name the one that stopped it.
-                setProcessError(ErrorReason.PAUSED, processAgent.getConditionFailure());
-            } else if (result == ProcessAgent.TickResult.OUTPUT_FULL) {
-                lastProcessErrorReason = ErrorReason.OUTPUT_FULL;
-            } else if (result == ProcessAgent.TickResult.BLOCK_MISSING) {
-                lastProcessErrorReason = ErrorReason.BLOCK_MISSING;
-                if (isOnlyNonConsumingRecipe(processAgent.getCurrentRecipe())) {
-                    processAgent.abort();
-                }
-            } else {
-                lastProcessErrorReason = ErrorReason.NONE;
-            }
-
-            // Look-ahead: search for next recipe while processing (only once)
-            if (nextRecipe == null) {
-                ConditionContext lookAheadContext = getConditionContext();
-                nextRecipe = RecipeLoader.getInstance()
-                    .findMatch(
-                        recipeGroups.toArray(new String[0]),
-                        getContextualInputPorts(),
-                        r -> r.canStart(lookAheadContext));
-                cachedRecipeVersion = RecipeLoader.getInstance()
-                    .getRecipeVersion();
-            }
-
-            // If complete, immediately try to output and start next
-            if (result == ProcessAgent.TickResult.READY_OUTPUT) {
-                if (processAgent.tryOutput(activeOutputPorts(), context)) {
-                    lastProcessErrorReason = ErrorReason.NONE;
-                    if (!worldObj.isRemote) {
-                        machineStateAgent.recordRecipeCompletion(processAgent.getCurrentRecipe());
-                    }
-                    startNextRecipe();
-                }
-            }
-            return;
-        }
-
-        // IDLE: Try to start new recipe
-        startNextRecipe();
-
-        // Update render if working state changed
-        boolean currentlyWorking = processAgent.isRunning();
-        if (currentlyWorking != wasWorking) {
-            wasWorking = currentlyWorking;
-            if (worldObj != null && !worldObj.isRemote) {
-                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
-            }
-        }
-    }
-
-    private void startNextRecipe() {
-        // Invalidate cache if recipes were reloaded
-        if (cachedRecipeVersion != RecipeLoader.getInstance()
-            .getRecipeVersion()) {
-            nextRecipe = null;
-        }
-
-        final IModularRecipe lookAhead = nextRecipe;
-        nextRecipe = null; // Clear cache
-        final String[] groupNames = recipeGroups.toArray(new String[0]);
-        final ConditionContext searchContext = getConditionContext();
-
-        // Each colour group is offered the look-ahead result first, since checking one
-        // recipe against a port list is far cheaper than searching every candidate.
-        // The look-ahead searched the unfiltered port list, so it may well not apply
-        // to the group being considered.
-        ColoredRecipeSearch.Selection selection = ColoredRecipeSearch
-            .search(PortColorGrouping.group(getContextualInputPorts(), getContextualOutputPorts()), inputs -> {
-                if (lookAhead != null && lookAhead.matchesInput(inputs) && lookAhead.canStart(searchContext)) {
-                    return lookAhead;
-                }
-                return RecipeLoader.getInstance()
-                    .findMatch(groupNames, inputs, r -> r.canStart(searchContext));
-            });
-
-        if (selection.isRunnable()) {
-            activeRecipeColor = selection.getColor();
-            // What makes this run's draws differ from the last run's at this machine. The
-            // rest of the evaluation seed - the world, the position, the recipe count - is
-            // mixed in by SeedMixer.forEvaluation at the moment of evaluation, so there is
-            // nothing to persist here beyond the tick itself.
-            currentRecipeStartTick = worldObj.getTotalWorldTime();
-            ConditionContext context = getConditionContext();
-            if (processAgent
-                .startRecipe(selection.getRecipe(), selection.getInputs(), selection.getOutputs(), context)) {
-                lastProcessErrorReason = ErrorReason.NONE;
-            } else if (processAgent.wasBlockedByCondition()) {
-                // Not a missing input. Saying so would send the player to the wrong hatch.
-                setProcessError(ErrorReason.CONDITION_NOT_MET, processAgent.getConditionFailure());
-            } else {
-                lastProcessErrorReason = ErrorReason.NO_INPUT;
-            }
-            return;
-        }
-
-        // A recipe was found but no group could run it. The one reported is from the
-        // highest-priority colour that got that far.
-        if (selection.getRecipe() != null) {
-            if (selection.getInsufficientType() != null) {
-                setProcessError(
-                    ErrorReason.OUTPUT_CAPACITY_INSUFFICIENT,
-                    LangHelpers.localize(
-                        "gui.port_type." + selection.getInsufficientType()
-                            .name()));
-            } else {
-                setProcessError(ErrorReason.OUTPUT_FULL);
-            }
-            return;
-        }
-
-        lastProcessErrorReason = ErrorReason.NO_MATCHING_RECIPE;
-
-        // Check if it's actually NO_INPUT
-        if (processAgent.diagnoseIdle(getContextualInputPorts()) == ProcessAgent.TickResult.NO_INPUT) {
-            lastProcessErrorReason = ErrorReason.INPUT_MISSING;
-        }
-    }
-
-    @Override
-    protected void finishCrafting() {
-        resetCrafting();
-    }
-
-    @Override
-    public int getCraftingEnergyCost() {
-        return 0; // Energy is managed by ProcessAgent
     }
 
     @Override
@@ -895,23 +626,7 @@ public class TEMachineController extends AbstractMBModifierTE
     public void invalidatePortCache() {
         this.cachedInputPorts = null;
         this.cachedOutputPorts = null;
-        this.nextRecipe = null;
-    }
-
-    /**
-     * The input ports the running recipe is allowed to draw from.
-     *
-     * Filtered by the colour the recipe started in, so a painted port only feeds the
-     * group it belongs to. A machine with nothing painted gets the whole list back
-     * without a copy, which matters because this runs every tick.
-     */
-    private List<IModularPort> activeInputPorts() {
-        return PortColorGrouping.select(getContextualInputPorts(), activeRecipeColor);
-    }
-
-    /** The output ports the running recipe is allowed to put results into. */
-    private List<IModularPort> activeOutputPorts() {
-        return PortColorGrouping.select(getContextualOutputPorts(), activeRecipeColor);
+        recipeRunner.wake();
     }
 
     // ========== IModularPort Implementation ==========
@@ -971,16 +686,6 @@ public class TEMachineController extends AbstractMBModifierTE
     /**
      * Get structure name from the blueprint in the slot.
      */
-    private boolean isOnlyNonConsumingRecipe(IModularRecipe recipe) {
-        if (recipe == null) return false;
-        List<IRecipeInput> inputs = recipe.getInputs();
-        if (inputs.isEmpty()) return false;
-        for (IRecipeInput input : inputs) {
-            if (input.isConsume()) return false;
-        }
-        return true;
-    }
-
     @Nullable
     private String getStructureNameFromBlueprint() {
         ItemStack blueprint = getBlueprintStack();
@@ -1006,7 +711,7 @@ public class TEMachineController extends AbstractMBModifierTE
             setFormed(false);
             clearStructureParts();
             processAgent.abort();
-            lastProcessErrorReason = ErrorReason.NONE;
+            processError.set(ErrorReason.NONE);
             markDirty();
             if (worldObj != null) {
                 worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
@@ -1057,26 +762,6 @@ public class TEMachineController extends AbstractMBModifierTE
 
     public long getTimeContinuous() {
         return timeContinuousCount;
-    }
-
-    public double getProgressPercent() {
-        return processAgent.getProgressPercent();
-    }
-
-    public boolean isRunning() {
-        return processAgent.isRunning();
-    }
-
-    public boolean isWaitingForOutput() {
-        return processAgent.isWaitingForOutput();
-    }
-
-    public int getEnergyPerTick() {
-        return processAgent.getEnergyPerTick();
-    }
-
-    public int getBatchSize() {
-        return processAgent.getBatchSize();
     }
 
     @Override
@@ -1190,7 +875,7 @@ public class TEMachineController extends AbstractMBModifierTE
         // Reset structure state
         setFormed(false);
         clearStructureParts();
-        lastProcessErrorReason = ErrorReason.NONE;
+        processError.set(ErrorReason.NONE);
 
         // Notify client
         markDirty();
@@ -1269,28 +954,6 @@ public class TEMachineController extends AbstractMBModifierTE
         return structureAgent.getCustomProperties();
     }
 
-    // ========== Structure Tinting ==========
-
-    /**
-     * Get cached structure tint color.
-     * Used by BlockMachineController's colorMultiplier.
-     *
-     * @return ARGB color value, or null if no color defined
-     */
-    public Integer getCachedStructureTintColor() {
-        return structureAgent.getCachedStructureTintColor();
-    }
-
-    /**
-     * Get the tint color from this controller's structure properties.
-     * Returns null if not formed or no color is defined.
-     *
-     * @return ARGB color value, or null if no color defined
-     */
-    public Integer getStructureTintColor() {
-        return structureAgent.getStructureTintColor();
-    }
-
     // ========== IAlignment Implementation ==========
     // TODO: load rotation limits from config.
 
@@ -1336,25 +999,42 @@ public class TEMachineController extends AbstractMBModifierTE
     }
 
     public ErrorReason getLastProcessErrorReason() {
-        return lastProcessErrorReason;
+        return processError.getReason();
     }
 
     public void setLastProcessErrorReason(ErrorReason reason) {
-        this.lastProcessErrorReason = reason;
-        this.lastProcessErrorDetail = null; // Reset detail when setting reason directly
+        processError.set(reason);
     }
 
     public void setLastProcessErrorDetail(String detail) {
-        this.lastProcessErrorDetail = detail;
+        processError.setDetail(detail);
     }
 
     public void setProcessError(ErrorReason reason) {
-        setProcessError(reason, null);
+        processError.set(reason);
     }
 
     public void setProcessError(ErrorReason reason, String detail) {
-        this.lastProcessErrorReason = reason;
-        this.lastProcessErrorDetail = detail;
+        processError.set(reason, detail);
+    }
+
+    @Override
+    public void updateEntityClient() {
+        super.updateEntityClient();
+        if (isFormed != lastIsFormed) {
+            lastIsFormed = isFormed;
+            forceRenderUpdate();
+        }
+    }
+
+    @Override
+    public boolean isActive() {
+        return false;
+    }
+
+    @Override
+    public boolean processTasks(boolean redstoneChecksPassed) {
+        return false;
     }
 
     public boolean isFormed() {
@@ -1363,22 +1043,6 @@ public class TEMachineController extends AbstractMBModifierTE
 
     public void setFormed(boolean formed) {
         this.isFormed = formed;
-    }
-
-    public String getLastValidationError() {
-        return structureAgent.getLastValidationError();
-    }
-
-    public void setLastValidationError(String error) {
-        structureAgent.setLastValidationError(error);
-    }
-
-    public boolean isPhysicallyValid() {
-        return structureAgent.isPhysicallyValid();
-    }
-
-    public void setPhysicallyValid(boolean valid) {
-        structureAgent.setPhysicallyValid(valid);
     }
 
     // ========== IRecipeContext Implementation ==========
@@ -1410,8 +1074,7 @@ public class TEMachineController extends AbstractMBModifierTE
 
     @Override
     public List<ChunkCoordinates> getSymbolPositions(char symbol) {
-        List<ChunkCoordinates> pos = symbolPositions.getOrDefault(symbol, new ArrayList<>());
-        return pos;
+        return structureAgent.getSymbolPositions(symbol);
     }
 
     @Override
@@ -1485,4 +1148,59 @@ public class TEMachineController extends AbstractMBModifierTE
         }
     }
 
+    /** The controller as {@link RecipeRunner} sees it. */
+    private final class RunnerHost implements RecipeRunner.Host {
+
+        @Override
+        public ConditionContext newConditionContext() {
+            return getConditionContext();
+        }
+
+        @Override
+        public List<IModularPort> getContextualInputPorts() {
+            return TEMachineController.this.getContextualInputPorts();
+        }
+
+        @Override
+        public List<IModularPort> getContextualOutputPorts() {
+            return TEMachineController.this.getContextualOutputPorts();
+        }
+
+        @Override
+        public List<IModularPort> getOutputPorts() {
+            return TEMachineController.this.getOutputPorts();
+        }
+
+        @Override
+        public List<String> getRecipeGroups() {
+            return recipeGroups;
+        }
+
+        @Override
+        public PortColor getActiveRecipeColor() {
+            return activeRecipeColor;
+        }
+
+        @Override
+        public void onRecipeStarting(PortColor color) {
+            activeRecipeColor = color;
+            // What makes this run's draws differ from the last run's at this machine. The
+            // rest of the evaluation seed - the world, the position, the recipe count - is
+            // mixed in by SeedMixer.forEvaluation at the moment of evaluation, so there is
+            // nothing to persist here beyond the tick itself.
+            currentRecipeStartTick = worldObj.getTotalWorldTime();
+        }
+
+        @Override
+        public void recordRecipeCompletion(IModularRecipe recipe) {
+            machineStateAgent.recordRecipeCompletion(recipe);
+        }
+
+        @Override
+        public void onWorkingChanged() {
+            if (worldObj != null && !worldObj.isRemote) {
+                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+            }
+        }
+    }
 }

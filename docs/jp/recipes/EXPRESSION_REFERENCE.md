@@ -241,6 +241,7 @@ fluid_f_out("lava")   item_f_in("minecraft:coal")
 - `can_see_void(filter...)`: 真下が奈落かを判定する
 - `count_blocks(distance, filter...)`: 周囲にある特定のブロックを数える
     - 例: `count_blocks(1, "minecraft:iron_block")`
+    - `distance` の上限は 16 です。読み込まれていないチャンクのブロックは数えません。
 
 > [!NOTE]
 > `can_see_sky` と `can_see_void` は、括弧を省いて `can_see_sky == 1` のように変数としても書けます。

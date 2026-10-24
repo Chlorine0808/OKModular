@@ -32,7 +32,6 @@ import ruiseki.okmodular.util.Logger;
 
 /**
  * NEI configuration for OK Modular.
- * Split out of OmoshiroiKamo's NEIConfig (machinery sections).
  */
 public class NEIConfig implements IConfigureNEI {
 
@@ -90,8 +89,7 @@ public class NEIConfig implements IConfigureNEI {
 
     /**
      * Register ModularMachineNEIHandler instances for each known structure.
-     * Must be called AFTER CustomStructureRegistry.registerAll() (i.e., after StructureCompat.postInit()
-     * in OmoshiroiKamo's postInit).
+     * Must be called AFTER CustomStructureRegistry.registerAll() (see OKModular.postInit).
      *
      * TODO: Fix catalyst blueprints appear briefly in left tab then disappear.
      * TODO: Enable 'P' button in structure preview (Name is currently null)

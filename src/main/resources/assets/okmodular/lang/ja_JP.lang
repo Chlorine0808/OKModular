@@ -7,6 +7,8 @@ chat.okmodular.port_io_set=外部ポート (%s) のIOを %s に設定しまし�
 chat.okmodular.port_error=外部ポート (%d, %d, %d) でエラーが発生しました！設定を確認してください。
 gui.machinery.energy_used=消費電力: %s
 gui.machinery.use_ic2=IC2を使用
+gui.machinery.ic2_on=IC2: オン
+gui.machinery.ic2_off=IC2: オフ
 item.machineBlueprint.display.name.format=設計図: %s
 item.machineBlueprint.display.name.empty=空の設計図
 tooltip.machineBlueprint.structure=構造体: %s
@@ -260,7 +262,6 @@ gui.status.missing_definition=構造定義が見つかりません
 gui.status.invalid_definition=無効な構造定義です
 gui.status.requirements_not_met=構造体の要件を満たしていません
 gui.status.unknown=不明なエラー
-gui.progress=進捗: %.1f%%
 gui.energy_transfer=§7転送量: §b%s §7RF/t
 gui.mana_info=%d マナ
 gui.redstone_mode.always_on=常にオン
@@ -292,9 +293,6 @@ gui.io.none=なし
 gui.io.input=入力
 gui.io.output=出力
 gui.io.both=入出力
-gui.craftingState.idle=待機中
-gui.craftingState.running=稼働中
-gui.craftingState.error=エラー
 
 # --- Recipe conditions ---
 okmodular.condition.biome.base=バイオーム条件

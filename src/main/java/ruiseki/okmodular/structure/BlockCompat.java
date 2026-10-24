@@ -7,9 +7,7 @@ import java.util.Map;
  * Remap table for block IDs that were renamed or removed, applied when reading structure and
  * recipe JSON so files written against an older build still resolve.
  *
- * The table is empty: the entries this class shipped with targeted the parent mod's block names
- * and never matched anything once the machinery split moved the class out of it. Add entries here
- * when a block this mod owns is renamed or removed.
+ * The table is empty. Add entries here when a block this mod owns is renamed or removed.
  */
 public class BlockCompat {
 

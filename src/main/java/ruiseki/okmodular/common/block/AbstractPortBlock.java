@@ -64,7 +64,6 @@ public abstract class AbstractPortBlock<T extends AbstractTE> extends AbstractTi
         this.tierCount = ModularTier.getTierCount();
         this.baseIcons = new IIcon[tierCount];
         this.casingIcons = new IIcon[tierCount];
-        this.useNeighborBrightness = true;
         isFullSize = isOpaque = false;
     }
 

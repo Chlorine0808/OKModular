@@ -15,19 +15,16 @@ import net.minecraftforge.common.util.ForgeDirection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.gtnewhorizon.gtnhlib.capability.CapabilityProvider;
+
 import lombok.experimental.Delegate;
 import ruiseki.okcore.datastructure.BlockPos;
 import ruiseki.okcore.datastructure.DimPos;
-import ruiseki.okmodular.core.capabilities.Capability;
-import ruiseki.okmodular.core.capabilities.CapabilityDispatcher;
-import ruiseki.okmodular.core.capabilities.ICapabilitySerializable;
-import ruiseki.okmodular.core.event.OKEventFactory;
 import ruiseki.okmodular.core.persist.nbt.INBTProvider;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 import ruiseki.okmodular.core.persist.nbt.NBTProviderComponent;
 
-public abstract class TileEntityOK extends TileEntity
-    implements ITile, INBTProvider, ICapabilitySerializable, IOrientable {
+public abstract class TileEntityOK extends TileEntity implements ITile, INBTProvider, CapabilityProvider, IOrientable {
 
     @Delegate
     private final INBTProvider nbtProvider = new NBTProviderComponent(this);
@@ -41,20 +38,12 @@ public abstract class TileEntityOK extends TileEntity
     @NBTPersist
     private ForgeDirection up = ForgeDirection.UP;
 
-    private static final int UPDATE_BACKOFF_TICKS = 1;
-
-    private boolean shouldSendUpdate = false;
-    private int sendUpdateBackoff = 0;
     private final boolean ticking;
 
     private BlockPos cachedPos;
     private final int randomOffset = (int) (Math.random() * 20);
 
-    private final CapabilityDispatcher capabilities;
-
     public TileEntityOK() {
-        this.capabilities = OKEventFactory.gatherCapabilities(this);
-        this.sendUpdateBackoff = (int) (Math.random() * UPDATE_BACKOFF_TICKS);
         this.ticking = this instanceof ITickingTile;
     }
 
@@ -110,30 +99,10 @@ public abstract class TileEntityOK extends TileEntity
     public void setOrientation(final ForgeDirection inForward, final ForgeDirection inUp) {
         this.forward = inForward;
         this.up = inUp;
-        this.onSendUpdate();
-        worldObj.notifyBlockOfNeighborChange(xCoord, yCoord, zCoord, Blocks.air);
-    }
-
-    /**
-     * Send a world update for the coordinates of this tile entity.
-     * This will always send lag-safe updates, so calling this many times per tick will
-     * not cause multiple packets to be sent, more info in the class javadoc.
-     */
-    public final void sendUpdate() {
-        if (!isTicking()) {
-            throw new RuntimeException("If you want to update, you must implement ITickingTile. This is a mod error.");
+        if (worldObj != null) {
+            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
         }
-        shouldSendUpdate = true;
-    }
-
-    /**
-     * Send an immediate world update for the coordinates of this tile entity.
-     * This does the same as {@link TileEntityOK#sendUpdate()} but will
-     * ignore the update backoff.
-     */
-    public final void sendImmediateUpdate() {
-        sendUpdate();
-        sendUpdateBackoff = 0;
+        worldObj.notifyBlockOfNeighborChange(xCoord, yCoord, zCoord, Blocks.air);
     }
 
     @Override
@@ -149,7 +118,6 @@ public abstract class TileEntityOK extends TileEntity
      */
     private void updateTicking() {
         doUpdate();
-        trySendActualUpdate();
     }
 
     /**
@@ -157,45 +125,6 @@ public abstract class TileEntityOK extends TileEntity
      * This method is called each tick.
      */
     protected void doUpdate() {}
-
-    private void trySendActualUpdate() {
-        sendUpdateBackoff--;
-        if (sendUpdateBackoff <= 0) {
-            sendUpdateBackoff = getUpdateBackoffTicks();
-
-            if (shouldSendUpdate) {
-                shouldSendUpdate = false;
-
-                beforeSendUpdate();
-                onSendUpdate();
-                afterSendUpdate();
-            }
-        }
-    }
-
-    /**
-     * Called when an update will is sent.
-     * This contains the logic to send the update, so make sure to call the super!
-     */
-    protected void onSendUpdate() {
-        if (worldObj != null) {
-            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
-        }
-    }
-
-    /**
-     * Called when before update is sent.
-     */
-    protected void beforeSendUpdate() {
-
-    }
-
-    /**
-     * Called when after update is sent. (Not necessarily received yet!)
-     */
-    protected void afterSendUpdate() {
-
-    }
 
     @Override
     public Packet getDescriptionPacket() {
@@ -207,7 +136,6 @@ public abstract class TileEntityOK extends TileEntity
         super.onDataPacket(net, packet);
         NBTTagCompound tag = packet.func_148857_g();
         readFromNBT(tag);
-        onUpdateReceived();
     }
 
     @Override
@@ -224,38 +152,12 @@ public abstract class TileEntityOK extends TileEntity
 
     public void writeCommon(NBTTagCompound tag) {
         writeGeneratedFieldsToNBT(tag);
-
-        if (capabilities != null) {
-            tag.setTag("OKCaps", capabilities.serializeNBT());
-        }
     }
 
     public void readCommon(NBTTagCompound tag) {
         if (tag == null) return;
         readGeneratedFieldsFromNBT(tag);
-
-        if (capabilities != null && tag.hasKey("OKCaps")) {
-            capabilities.deserializeNBT(tag.getCompoundTag("OKCaps"));
-        }
-
         onLoad();
-    }
-
-    /**
-     * This method is called when the tile entity receives
-     * an update (ie a data packet) from the server.
-     * If this tile entity uses NBT, then the NBT will have
-     * already been updated when this method is called.
-     */
-    public void onUpdateReceived() {
-
-    }
-
-    /**
-     * @return The minimum amount of ticks between two consecutive sent packets.
-     */
-    protected int getUpdateBackoffTicks() {
-        return UPDATE_BACKOFF_TICKS;
     }
 
     /**
@@ -293,25 +195,8 @@ public abstract class TileEntityOK extends TileEntity
     }
 
     @Override
-    public boolean hasCapability(@NotNull Capability<?> capability, @Nullable ForgeDirection facing) {
-        return capabilities != null && capabilities.hasCapability(capability, facing);
-    }
-
-    @Override
-    public <T> T getCapability(@NotNull Capability<T> capability, @Nullable ForgeDirection facing) {
-        return capabilities == null ? null : capabilities.getCapability(capability, facing);
-    }
-
-    @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
-        this.readFromNBT(nbt);
-    }
-
-    @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound ret = new NBTTagCompound();
-        this.writeToNBT(ret);
-        return ret;
+    public <T> @Nullable T getCapability(@NotNull Class<T> capability, @NotNull ForgeDirection side) {
+        return null;
     }
 
     @Override
@@ -389,10 +274,6 @@ public abstract class TileEntityOK extends TileEntity
 
     protected boolean shouldDoWorkThisTick(int interval) {
         return (worldObj.getTotalWorldTime() + randomOffset) % interval == 0;
-    }
-
-    public boolean requiresTESR() {
-        return false;
     }
 
     public interface ITickingTile {

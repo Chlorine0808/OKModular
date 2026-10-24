@@ -33,6 +33,7 @@ import ruiseki.okmodular.api.structure.core.TierStructureRef;
 import ruiseki.okmodular.api.structure.core.TieredBlockMapping;
 import ruiseki.okmodular.common.network.PacketStructureTint;
 import ruiseki.okmodular.structure.CustomStructureRegistry;
+import ruiseki.okmodular.structure.StructureCellLocator;
 import ruiseki.okmodular.structure.StructureManager;
 import ruiseki.okmodular.util.Logger;
 
@@ -49,6 +50,25 @@ public class StructureAgent {
     private final Set<ChunkCoordinates> structureBlockPositions = new HashSet<>();
     private String lastValidationError = "";
     private boolean isPhysicallyValid = false;
+
+    private final Map<Character, List<ChunkCoordinates>> symbolPositions = new HashMap<>();
+    private final Map<ChunkCoordinates, Character> posToSymbol = new HashMap<>();
+
+    /**
+     * Which pattern cell each tracked position occupies, in structure-local (ABC) coordinates.
+     * <p>
+     * Derived state, rebuilt by every structure check alongside {@link #symbolPositions}. It is not
+     * persisted for the same reason that map is not restored: the check repopulates both.
+     */
+    private final Map<ChunkCoordinates, int[]> symbolCells = new HashMap<>();
+
+    /**
+     * The controller's own cell in the pattern, as handed to the last structure check.
+     * <p>
+     * {@link #structureCheck} is the only place this arrives, and the scan runs underneath it, so
+     * it has to be parked somewhere {@link #finalizeSymbolPosition} can read.
+     */
+    private final int[] structureOriginOffset = new int[3];
 
     public StructureAgent(TEMachineController controller) {
         this.controller = Objects.requireNonNull(controller, "controller");
@@ -109,7 +129,72 @@ public class StructureAgent {
         componentTiers.clear();
         controller.getPortManager()
             .clear();
-        controller.clearSymbolPositions();
+        clearSymbolPositions();
+    }
+
+    // ========== Symbol Tracking ==========
+
+    /**
+     * @return the {@code {a, b, c}} pattern cell at that position, or null if the position is not
+     *         part of the currently formed structure. The array belongs to the caller.
+     */
+    public int[] getSymbolCell(int x, int y, int z) {
+        int[] cell = symbolCells.get(new ChunkCoordinates(x, y, z));
+        return cell == null ? null : cell.clone();
+    }
+
+    /**
+     * The inverse of {@link #getSymbolCell}, and the reason structure IO can reach past the
+     * machine: this resolves any cell, not only the ones the scan reported.
+     * <p>
+     * The same three values the scan was given -- facing, controller position, controller offset --
+     * are all here, which is why the arithmetic is done on this side rather than handed out.
+     */
+    public int[] getCellPosition(int a, int b, int c) {
+        return StructureCellLocator.toWorld(
+            controller.getExtendedFacing(),
+            controller.xCoord,
+            controller.yCoord,
+            controller.zCoord,
+            structureOriginOffset,
+            a,
+            b,
+            c);
+    }
+
+    public void clearSymbolPositions() {
+        symbolPositions.clear();
+        posToSymbol.clear();
+        symbolCells.clear();
+    }
+
+    public void trackSymbolPosition(char symbol, int x, int y, int z) {
+        posToSymbol.put(new ChunkCoordinates(x, y, z), symbol);
+    }
+
+    public void finalizeSymbolPosition(char symbol, int x, int y, int z) {
+        ChunkCoordinates coord = new ChunkCoordinates(x, y, z);
+        symbolPositions.computeIfAbsent(symbol, k -> new ArrayList<>())
+            .add(coord);
+        symbolCells.put(
+            coord,
+            StructureCellLocator.locate(
+                controller.getExtendedFacing(),
+                controller.xCoord,
+                controller.yCoord,
+                controller.zCoord,
+                structureOriginOffset,
+                x,
+                y,
+                z));
+    }
+
+    public Character getSymbolAt(int x, int y, int z) {
+        return posToSymbol.get(new ChunkCoordinates(x, y, z));
+    }
+
+    public List<ChunkCoordinates> getSymbolPositions(char symbol) {
+        return symbolPositions.getOrDefault(symbol, new ArrayList<>());
     }
 
     private void sendClearPacket(Collection<ChunkCoordinates> positions) {
@@ -165,6 +250,12 @@ public class StructureAgent {
 
     public boolean structureCheck(String piece, int ox, int oy, int oz) {
         lastValidationError = "";
+
+        // The scan runs inside this call and reports world coordinates only, so park the offset
+        // where finalizeSymbolPosition can reach it before starting.
+        structureOriginOffset[0] = ox;
+        structureOriginOffset[1] = oy;
+        structureOriginOffset[2] = oz;
 
         Set<ChunkCoordinates> oldPositions = new HashSet<>(structureBlockPositions);
 
@@ -310,8 +401,7 @@ public class StructureAgent {
             char symbol = fixedEntry.getKey();
             EnumIO fixedIo = fixedEntry.getValue();
 
-            List<ChunkCoordinates> positions = controller.getSymbolPositionsMap()
-                .get(symbol);
+            List<ChunkCoordinates> positions = getSymbolPositionsMap().get(symbol);
             if (positions != null) {
                 for (ChunkCoordinates pos : positions) {
                     Map<IPortType.Type, EnumIO> typeMap = controller.getExternalPortConfigs()
@@ -664,7 +754,7 @@ public class StructureAgent {
         // the element check, and trackSymbolPosition fires immediately before that same element.
         // Every check re-resolves it, so nothing was gained by carrying stale coordinates across a
         // reload.
-        controller.clearSymbolPositions();
+        clearSymbolPositions();
 
         // Restore color cache from loaded structure name
         if (loadedBlocks && customStructureName != null) {
@@ -677,7 +767,7 @@ public class StructureAgent {
     // ========== Internal Hooks for Testing ==========
 
     public Map<Character, List<ChunkCoordinates>> getSymbolPositionsMap() {
-        return controller.getSymbolPositionsMap();
+        return symbolPositions;
     }
 
     public World getWorldObj() {

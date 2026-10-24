@@ -40,7 +40,7 @@ import ruiseki.okmodular.MachineryCommon;
  * 親 mod の `CoreCommon` が持っていた登録が付いてこなかった。結果:
  *
  * - `PacketToggleSide` — **レンチの面 IO 切り替えがサーバに届いていなかった**
- * - `PacketEnergy` / `PacketProgress` / `PacketFluidTanks` / `PacketCraftingState`
+ * - `PacketEnergy` / `PacketProgress` / `PacketFluidTanks` / `PacketCraftingState`（後ろ 3 つは削除済み）
  * — 同期パケットが分離以降ずっと沈黙していた
  *
  * ============================================
@@ -84,9 +84,6 @@ public class PacketRegistrationCoverageTest {
             + "登録すると機械 1 個ごとに周囲の全プレイヤー宛の通信が復活するだけになるため触らない。"
             + "実機で本当に要るかを確かめてから判断する。";
         map.put("PacketEnergy", syncReason);
-        map.put("PacketProgress", syncReason);
-        map.put("PacketFluidTanks", syncReason);
-        map.put("PacketCraftingState", syncReason);
         INTENTIONALLY_UNREGISTERED = Collections.unmodifiableMap(map);
     }
 

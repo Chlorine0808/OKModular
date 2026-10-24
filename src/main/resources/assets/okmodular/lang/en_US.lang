@@ -7,6 +7,8 @@ chat.okmodular.port_io_set=External %s port IO set to: %s
 chat.okmodular.port_error=External port error at (%d, %d, %d)! Please check your configuration.
 gui.machinery.energy_used=Energy Used: %s
 gui.machinery.use_ic2=Use IC2
+gui.machinery.ic2_on=IC2: On
+gui.machinery.ic2_off=IC2: Off
 item.machineBlueprint.display.name.format=Blueprint: %s
 item.machineBlueprint.display.name.empty=Blank Blueprint
 tooltip.machineBlueprint.structure=Structure: %s
@@ -262,7 +264,6 @@ gui.status.missing_definition=Structure definition missing
 gui.status.invalid_definition=Invalid structure definition
 gui.status.requirements_not_met=Requirement not met
 gui.status.unknown=Unknown error
-gui.progress=Progress: %.1f%%
 gui.energy_transfer=§7Transfer: §b%s §7RF/t
 gui.mana_info=%d Mana
 gui.redstone_mode.always_on=Always on
@@ -294,9 +295,6 @@ gui.io.none=None
 gui.io.input=Input
 gui.io.output=Output
 gui.io.both=Both
-gui.craftingState.idle=Idle
-gui.craftingState.running=Running
-gui.craftingState.error=Error
 
 # --- Recipe conditions ---
 okmodular.condition.biome.base=Biome condition

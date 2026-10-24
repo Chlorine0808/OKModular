@@ -13,9 +13,6 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import com.gtnewhorizon.gtnhlib.blockstate.core.BlockState;
 import com.gtnewhorizon.gtnhlib.blockstate.properties.DirectionBlockProperty;
-import com.gtnewhorizon.gtnhlib.blockstate.properties.IntegerBlockProperty;
-
-import ruiseki.okmodular.api.enums.CraftingState;
 
 public class BlockStateHelpers {
 
@@ -65,26 +62,6 @@ public class BlockStateHelpers {
             case WEST -> 180f;
             default -> 0f;
         };
-    }
-
-    public static final IntegerBlockProperty CRAFTING_STATE = IntegerBlockProperty.meta("craftingState", 0b1100, 2);
-
-    public static void registerCraftingStateProp(Class<? extends Block> clazz) {
-        registerProperty(clazz, CRAFTING_STATE);
-    }
-
-    public static void setCraftingState(World world, int x, int y, int z, CraftingState state) {
-        try (BlockState blockState = getBlockState(world, x, y, z)) {
-            blockState.setPropertyValue(CRAFTING_STATE, state.getIndex());
-            blockState.place(world, x, y, z, PLACE_FLAGS);
-        }
-    }
-
-    public static CraftingState getCraftingState(World world, int x, int y, int z) {
-        try (BlockState blockState = getBlockState(world, x, y, z)) {
-            int index = blockState.getPropertyValue(CRAFTING_STATE);
-            return CraftingState.byIndex(index);
-        }
     }
 
 }

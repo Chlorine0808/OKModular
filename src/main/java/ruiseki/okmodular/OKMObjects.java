@@ -1,9 +1,7 @@
 package ruiseki.okmodular;
 
 /**
- * Registry-name definitions for OK Modular's blocks, previously part of the
- * parent mod's OKMObjects enum. Only the machinery entries live here; the
- * registry domain is provided by this mod (okmodular:).
+ * Registry-name definitions for OK Modular's blocks, under the okmodular: domain.
  */
 public enum OKMObjects {
 

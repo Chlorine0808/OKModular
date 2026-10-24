@@ -128,3 +128,6 @@ Errors appear in `logs/latest.log`.
 
 The same checks run every tick while the machine is working.
 A heavy query such as `count_blocks` placed in a condition costs that much every tick.
+
+An idle machine that finds no recipe to start searches less often, doubling the interval from 1 tick up to 20 ticks (one second).
+A change to its ports or structure makes it search again at once. A recipe may therefore start up to one second after its inputs arrive.

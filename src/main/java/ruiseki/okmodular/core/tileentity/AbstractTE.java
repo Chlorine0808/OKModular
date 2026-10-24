@@ -15,13 +15,12 @@ import com.cleanroommc.modularui.factory.GuiFactories;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Delegate;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import ruiseki.okcore.enums.RedstoneMode;
 import ruiseki.okcore.helper.LangHelpers;
-import ruiseki.okmodular.OKModular;
 import ruiseki.okmodular.api.modular.PortColor;
-import ruiseki.okmodular.common.network.PacketProgress;
 import ruiseki.okmodular.core.helper.BlockStateHelpers;
 import ruiseki.okmodular.core.persist.nbt.NBTPersist;
 import ruiseki.okmodular.integration.waila.IWailaTileInfoProvider;
@@ -37,8 +36,10 @@ import ruiseki.okmodular.integration.waila.IWailaTileInfoProvider;
  * <li>Interaction with ItemStacks for saving/loading</li>
  * </ul>
  */
-public abstract class AbstractTE extends AbstractTickingTE
-    implements TileEntityOK.ITickingTile, IWailaTileInfoProvider {
+public abstract class AbstractTE extends TileEntityOK implements TileEntityOK.ITickingTile, IWailaTileInfoProvider {
+
+    @Delegate
+    protected final ITickingTile tickingTileComponent = new TickingTileComponent(this);
 
     /** Forces client-side update to render changes. */
     protected boolean forceClientUpdate = true;
@@ -128,14 +129,6 @@ public abstract class AbstractTE extends AbstractTickingTE
 
     /** Flag indicating that neighbor blocks need notification. */
     protected boolean notifyNeighbours = false;
-
-    private final boolean isProgressTile;
-    protected int lastProgressScaled = -1;
-    protected int ticksSinceLastProgressUpdate;
-
-    public AbstractTE() {
-        this.isProgressTile = this instanceof IProgressTile;
-    }
 
     /**
      * Returns the facing direction of the tile entity based on block state.
@@ -247,8 +240,6 @@ public abstract class AbstractTE extends AbstractTickingTE
             return;
         }
 
-        handleProgressUpdate();
-
         boolean requiresClientSync = forceClientUpdate;
         boolean prevRedCheck = redstoneCheckPassed;
 
@@ -343,28 +334,6 @@ public abstract class AbstractTE extends AbstractTickingTE
             GuiFactories.tileEntity()
                 .open(player, xCoord, yCoord, zCoord);
         }
-    }
-
-    private void handleProgressUpdate() {
-        if (!isProgressTile || worldObj.isRemote) return;
-
-        int current = getProgressScaled(16);
-
-        if (++ticksSinceLastProgressUpdate >= getProgressUpdateFreq() || current != lastProgressScaled) {
-
-            OKModular.instance.getPacketHandler()
-                .sendToAllAround(new PacketProgress((IProgressTile) this), this);
-            ticksSinceLastProgressUpdate = 0;
-            lastProgressScaled = current;
-        }
-    }
-
-    public final int getProgressScaled(int scale) {
-        return isProgressTile ? (int) (((IProgressTile) this).getProgress() * scale) : 0;
-    }
-
-    protected int getProgressUpdateFreq() {
-        return 20;
     }
 
     @Override

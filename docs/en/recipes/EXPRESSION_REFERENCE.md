@@ -245,6 +245,7 @@ Performance multipliers provided by the structure definition.
 - `can_see_void(filter...)`: Check if there is void directly below
 - `count_blocks(distance, filter...)`: Count specific blocks within a range
     - Example: `count_blocks(1, "minecraft:iron_block")`
+    - `distance` is capped at 16. Blocks in chunks that are not loaded are not counted.
 
 > [!NOTE]
 > **`can_see_sky` and `can_see_void` also work without the brackets**, as the world properties listed above -

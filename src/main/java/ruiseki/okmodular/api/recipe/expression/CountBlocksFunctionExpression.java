@@ -14,8 +14,22 @@ import ruiseki.okmodular.api.condition.ConditionContext;
 /**
  * Expression that counts blocks in a cubic range around the controller.
  * Usage: count_blocks(distance, [filter])
+ * <p>
+ * The distance is capped at {@link #MAX_DISTANCE}, and chunks that are not loaded are skipped
+ * rather than loaded, because a condition may run this on every recipe search.
  */
 public class CountBlocksFunctionExpression implements IExpression {
+
+    /** The largest distance scanned; (2 * 16 + 1)^3 is about 36 000 reads. */
+    public static final int MAX_DISTANCE = 16;
+
+    /** What the scan asks of the world. */
+    interface Probe {
+
+        boolean isChunkLoaded(int chunkX, int chunkZ);
+
+        boolean counts(int x, int y, int z);
+    }
 
     private final List<IExpression> arguments;
 
@@ -60,23 +74,42 @@ public class CountBlocksFunctionExpression implements IExpression {
         int cy = pos.posY;
         int cz = pos.posZ;
 
-        long count = 0;
-        for (int x = cx - distance; x <= cx + distance; x++) {
-            for (int y = cy - distance; y <= cy + distance; y++) {
-                for (int z = cz - distance; z <= cz + distance; z++) {
-                    if (x == cx && y == cy && z == cz) continue;
+        final boolean filtered = hasFilter;
+        long count = scan(cx, cy, cz, distance, new Probe() {
 
-                    Block block = world.getBlock(x, y, z);
-                    if (hasFilter) {
-                        if (allowedBlocks.contains(block)) count++;
-                    } else {
-                        if (!block.isAir(world, x, y, z)) count++;
-                    }
+            @Override
+            public boolean isChunkLoaded(int chunkX, int chunkZ) {
+                return world.getChunkProvider()
+                    .chunkExists(chunkX, chunkZ);
+            }
+
+            @Override
+            public boolean counts(int x, int y, int z) {
+                Block block = world.getBlock(x, y, z);
+                return filtered ? allowedBlocks.contains(block) : !block.isAir(world, x, y, z);
+            }
+        });
+
+        return new EvaluationValue((double) count);
+    }
+
+    /** Counts the cube around the centre, excluding the centre itself. */
+    static long scan(int cx, int cy, int cz, int distance, Probe probe) {
+        int reach = Math.min(distance, MAX_DISTANCE);
+        int minY = Math.max(cy - reach, 0);
+        int maxY = Math.min(cy + reach, 255);
+
+        long count = 0;
+        for (int x = cx - reach; x <= cx + reach; x++) {
+            for (int z = cz - reach; z <= cz + reach; z++) {
+                if (!probe.isChunkLoaded(x >> 4, z >> 4)) continue;
+                for (int y = minY; y <= maxY; y++) {
+                    if (x == cx && y == cy && z == cz) continue;
+                    if (probe.counts(x, y, z)) count++;
                 }
             }
         }
-
-        return new EvaluationValue((double) count);
+        return count;
     }
 
     private void addBlockToFilter(String name, Set<Block> allowedBlocks) {

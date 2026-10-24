@@ -122,8 +122,8 @@ public class GuiManager {
         syncManager.syncValue("lastErrorDetail", errorDetailSyncer);
 
         StringSyncValue validationErrorSyncer = new StringSyncValue(
-            controller::getLastValidationError,
-            controller::setLastValidationError);
+            controller.getStructureAgent()::getLastValidationError,
+            controller.getStructureAgent()::setLastValidationError);
         syncManager.syncValue("lastValidationError", validationErrorSyncer);
 
         StringSyncValue recipeNameSyncer = new StringSyncValue(
@@ -132,8 +132,8 @@ public class GuiManager {
         syncManager.syncValue("processRecipeName", recipeNameSyncer);
 
         BooleanSyncValue physicallyValidSyncer = new BooleanSyncValue(
-            controller::isPhysicallyValid,
-            controller::setPhysicallyValid);
+            controller.getStructureAgent()::isPhysicallyValid,
+            controller.getStructureAgent()::setPhysicallyValid);
         syncManager.syncValue("isPhysicallyValid", physicallyValidSyncer);
 
         syncManager.bindPlayerInventory(data.getPlayer());
@@ -166,6 +166,7 @@ public class GuiManager {
             RedstoneMode.class,
             controller::getRedstoneMode,
             controller::setRedstoneMode);
+        redstoneMode.allowC2S();
         syncManager.syncValue("redstoneMode", redstoneMode);
 
         BooleanSyncValue redstonePowered = new BooleanSyncValue(
@@ -200,7 +201,8 @@ public class GuiManager {
         if (!hasBlueprint()) return LangHelpers.localize("gui.status.insert_blueprint");
 
         if (!controller.isFormed()) {
-            if (controller.isPhysicallyValid()) {
+            if (controller.getStructureAgent()
+                .isPhysicallyValid()) {
                 // Physically valid but requirements not met
                 return LangHelpers.localize("gui.status.requirements_not_met");
             }
@@ -306,7 +308,8 @@ public class GuiManager {
         if (!hasBlueprint()) return "";
         if (controller.isFormed()) return "";
         if (!hasValidationError()) return "";
-        return controller.getLastValidationError();
+        return controller.getStructureAgent()
+            .getLastValidationError();
     }
 
     private boolean hasBlueprint() {
@@ -315,7 +318,8 @@ public class GuiManager {
     }
 
     private boolean hasValidationError() {
-        String error = controller.getLastValidationError();
+        String error = controller.getStructureAgent()
+            .getLastValidationError();
         return error != null && !error.isEmpty();
     }
 

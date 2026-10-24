@@ -22,7 +22,8 @@ import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.core.IMachineState;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
-import ruiseki.okmodular.common.tile.TEMachineController;
+import ruiseki.okmodular.common.recipe.ProcessAgent;
+import ruiseki.okmodular.common.tile.PortManager;
 import ruiseki.okmodular.common.tile.essentia.AbstractEssentiaPortTE;
 import ruiseki.okmodular.common.tile.vis.AbstractVisPortTE;
 import ruiseki.okmodular.core.energy.IOKEnergySource;
@@ -37,18 +38,38 @@ import vazkii.botania.api.mana.spark.ISparkAttachable;
 /**
  * Agent responsible for tracking and reporting the machine's state and
  * statistics.
- * Delegates dynamic state (energy, progress) to the controller, but owns
- * statistical data.
+ * Reads ports and machine settings through {@link Host}, progress from the
+ * process agent, and owns the statistical data.
  */
 public class MachineStateAgent implements IMachineState {
 
-    private final TEMachineController controller;
+    /** What the agent reads from the machine that owns it. */
+    public interface Host {
+
+        PortManager getPortManager();
+
+        int getTier();
+
+        long getTimePlaced();
+
+        long getTimeContinuous();
+
+        double getSpeedMultiplier();
+
+        double getEnergyMultiplier();
+
+        long getRecipeStartTick();
+    }
+
+    private final Host controller;
+    private final ProcessAgent processAgent;
 
     private int recipeProcessedCount = 0;
     private final Set<String> processedRecipeTypes = new HashSet<>();
 
-    public MachineStateAgent(TEMachineController controller) {
+    public MachineStateAgent(Host controller, ProcessAgent processAgent) {
         this.controller = controller;
+        this.processAgent = processAgent;
     }
 
     // --- IMachineState Implementation ---
@@ -74,28 +95,27 @@ public class MachineStateAgent implements IMachineState {
 
     @Override
     public int getEnergyPerTick() {
-        return controller.getEnergyPerTick();
+        return processAgent.getEnergyPerTick();
     }
 
     @Override
     public double getProgressPercent() {
-        return controller.getProgressPercent();
+        return processAgent.getProgressPercent();
     }
 
     @Override
     public long getProgress() {
-        return controller.getProcessAgent()
-            .getProgress();
+        return processAgent.getProgress();
     }
 
     @Override
     public boolean isRunning() {
-        return controller.isRunning();
+        return processAgent.isRunning();
     }
 
     @Override
     public boolean isWaitingForOutput() {
-        return controller.isWaitingForOutput();
+        return processAgent.isWaitingForOutput();
     }
 
     @Override
@@ -526,7 +546,7 @@ public class MachineStateAgent implements IMachineState {
 
     @Override
     public int getBatchSize() {
-        return controller.getBatchSize();
+        return processAgent.getBatchSize();
     }
 
     @Override

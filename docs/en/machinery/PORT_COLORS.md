@@ -75,5 +75,5 @@ When no group can run, the GUI shows the error from the highest-priority colour.
 
 Breaking a port does not lose its colour.
 
-Colour is a separate axis from ordered port positions (`portIndex` in structure JSON).
+Colour is a separate axis from ordered port positions (the mapping key `index` in structure JSON).
 The index is read within a colour's group, so both work at once.

@@ -118,20 +118,6 @@ public class PacketWireFormatTest {
         return packet;
     }
 
-    private static PacketProgress progress() {
-        PacketProgress packet = new PacketProgress();
-        set(packet, "pos", new BlockPos(10, 20, 30));
-        set(packet, "progress", 0.5f);
-        return packet;
-    }
-
-    private static PacketCraftingState craftingState() {
-        PacketCraftingState packet = new PacketCraftingState();
-        set(packet, "pos", new BlockPos(10, 20, 30));
-        set(packet, "craftingState", 2);
-        return packet;
-    }
-
     // ========== 12 バイトのパケットが実在する ==========
 
     @Test
@@ -140,20 +126,6 @@ public class PacketWireFormatTest {
         // BlockPos の codec は writeLong = 8 バイト（3 int ではない）。
         // フィールドは名前順に並ぶ: pos(8) → storedEnergy(4)。
         assertEquals(12, wireSize(energy()));
-    }
-
-    @Test
-    @DisplayName("PacketProgress は 12 バイト（BlockPos 8 + float 4）")
-    void progress_is_12_bytes() {
-        // 名前順: pos(8) → progress(4)。
-        assertEquals(12, wireSize(progress()));
-    }
-
-    @Test
-    @DisplayName("PacketCraftingState は 12 バイト（int 4 + BlockPos 8）")
-    void crafting_state_is_12_bytes() {
-        // 名前順: craftingState(4) → pos(8)。並びは違うが合計は同じ。
-        assertEquals(12, wireSize(craftingState()));
     }
 
     // ========== PacketStructureTint のワイヤ形式 ==========

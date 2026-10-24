@@ -251,6 +251,7 @@ public abstract class AbstractGasPortTE extends AbstractTE
             RedstoneMode.class,
             this::getRedstoneMode,
             this::setRedstoneMode);
+        redstoneSyncer.allowC2S();
         syncManager.syncValue("redstoneSyncer", redstoneSyncer);
 
         IntSyncValue gasSyncer = new IntSyncValue(tank::getStored, tank::setAmount);
