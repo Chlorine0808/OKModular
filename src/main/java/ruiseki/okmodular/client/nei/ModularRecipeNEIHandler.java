@@ -7,8 +7,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
@@ -31,6 +33,7 @@ import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
+import ruiseki.okmodular.api.recipe.io.BlockIdMatcher;
 import ruiseki.okmodular.api.recipe.io.FluidInput;
 import ruiseki.okmodular.api.recipe.io.FluidOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
@@ -55,6 +58,7 @@ import ruiseki.okmodular.common.item.ItemMachineBlueprint;
 import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.structure.CustomStructureRegistry;
 import ruiseki.okmodular.structure.StructureManager;
+import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
 
 public class ModularRecipeNEIHandler extends RecipeHandlerBase {
 
@@ -195,27 +199,35 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
 
     @Override
     public void loadCraftingRecipes(ItemStack result) {
+        String placedBlock = placedBlockId(result);
         for (IModularRecipe recipe : RecipeLoader.getInstance()
             .getAllRecipes()) {
             if (!recipe.getRecipeGroup()
                 .equals(recipeGroup)) continue;
 
-            boolean match = false;
-            for (IRecipeOutput output : recipe.getOutputs()) {
-                if (output instanceof ItemOutput) {
-                    ItemOutput itemOut = (ItemOutput) output;
-                    for (ItemStack stack : itemOut.getItems()) {
-                        if (NEIServerUtils.areStacksSameTypeCrafting(stack, result)) {
-                            match = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (match) {
+            if (producesItem(recipe, result) || placedBlock != null
+                && NeiRecipeOutputs.placesBlock(recipe, placedBlock, StructurePatternLoader.getInstance()::get)) {
                 arecipes.add(new CachedModularRecipe(recipe));
             }
         }
+    }
+
+    private static boolean producesItem(IModularRecipe recipe, ItemStack result) {
+        for (IRecipeOutput output : NeiRecipeOutputs.all(recipe)) {
+            if (output instanceof ItemOutput itemOut) {
+                for (ItemStack stack : itemOut.getItems()) {
+                    if (NEIServerUtils.areStacksSameTypeCrafting(stack, result)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /** The block this stack places, as {@code modid:name:meta}; null for an item that is not a block. */
+    private static String placedBlockId(ItemStack stack) {
+        Block block = Block.getBlockFromItem(stack.getItem());
+        if (block == null || block == Blocks.air) return null;
+        return BlockIdMatcher.idOf(block, stack.getItemDamage());
     }
 
     @Override
@@ -226,7 +238,7 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
                 .equals(recipeGroup)) continue;
 
             boolean match = false;
-            for (IRecipeOutput output : recipe.getOutputs()) {
+            for (IRecipeOutput output : NeiRecipeOutputs.all(recipe)) {
                 if (output instanceof FluidOutput) {
                     FluidOutput fluidOut = (FluidOutput) output;
                     if (fluidOut.getFluid()
