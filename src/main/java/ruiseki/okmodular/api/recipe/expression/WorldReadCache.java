@@ -39,6 +39,19 @@ public final class WorldReadCache {
         return cache != null ? cache.get(key, now, read) : read.get();
     }
 
+    /** A key for one call. Each part is length-prefixed, so no two argument lists collide. */
+    public static String key(String function, Object... parts) {
+        StringBuilder key = new StringBuilder(function);
+        for (Object part : parts) {
+            String text = String.valueOf(part);
+            key.append('|')
+                .append(text.length())
+                .append(':')
+                .append(text);
+        }
+        return key.toString();
+    }
+
     /** The value read under this key within the last {@link #MAX_AGE} ticks, or a fresh read. */
     public EvaluationValue get(String key, long now, Supplier<EvaluationValue> read) {
         Entry entry = entries.get(key);
