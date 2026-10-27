@@ -11,6 +11,7 @@ import ruiseki.okmodular.api.modular.IPortType;
 import ruiseki.okmodular.api.recipe.context.IRecipeContext;
 import ruiseki.okmodular.api.recipe.core.IMachineState;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.expression.ConstantExpression;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
@@ -57,6 +58,29 @@ public abstract class RecipeDecorator implements IModularRecipe {
     /** Outputs this decorator may add on top of the recipe's own. NEI shows them and searches by them. */
     public List<IRecipeOutput> getPossibleOutputs() {
         return Collections.emptyList();
+    }
+
+    /** What this decorator does, one line each, for NEI. */
+    public List<DecoratorDescription> describe() {
+        return Collections.emptyList();
+    }
+
+    /** A chance as a percentage when it is a plain number, otherwise the expression as written. */
+    protected static String percent(IExpression chance) {
+        if (!(chance instanceof ConstantExpression)) return String.valueOf(chance);
+        return plain(chance.evaluateDouble(null) * 100) + "%";
+    }
+
+    /** A plain number without a trailing ".0", otherwise the expression as written. */
+    protected static String number(IExpression value) {
+        if (!(value instanceof ConstantExpression)) return String.valueOf(value);
+        return plain(value.evaluateDouble(null));
+    }
+
+    private static String plain(double value) {
+        // Rounded first so 0.07 * 100 does not print as 7.000000000000001
+        double rounded = Math.round(value * 1000) / 1000.0;
+        return rounded == Math.rint(rounded) ? String.valueOf((long) rounded) : String.valueOf(rounded);
     }
 
     @Override

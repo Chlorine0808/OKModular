@@ -1,6 +1,7 @@
 package ruiseki.okmodular.api.recipe.decorator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.JsonArray;
@@ -131,6 +132,12 @@ public class BonusOutputDecorator extends RecipeDecorator {
 
     public List<IRecipeOutput> getBonusOutputs() {
         return bonusOutputs;
+    }
+
+    @Override
+    public List<DecoratorDescription> describe() {
+        return Collections
+            .singletonList(new DecoratorDescription("okmodular.nei.decorator.bonus", percent(baseChanceExpr)));
     }
 
     @Override

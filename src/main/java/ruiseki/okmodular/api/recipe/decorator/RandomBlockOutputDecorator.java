@@ -135,6 +135,12 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
     }
 
     @Override
+    public List<DecoratorDescription> describe() {
+        return Collections
+            .singletonList(new DecoratorDescription("okmodular.nei.decorator.random_block_output", number(countExpr)));
+    }
+
+    @Override
     public List<IRecipeOutput> getPossibleOutputs() {
         List<IRecipeOutput> outputs = new ArrayList<>();
         for (BlockOutputSelection selection : selections) outputs.add(selection.output);

@@ -1,6 +1,7 @@
 package ruiseki.okmodular.api.recipe.decorator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.util.WeightedRandom;
@@ -116,6 +117,20 @@ public class WeightedRandomDecorator extends RecipeDecorator {
 
     public List<WeightedOutputEntry> getPool() {
         return pool;
+    }
+
+    @Override
+    public List<DecoratorDescription> describe() {
+        StringBuilder weights = new StringBuilder();
+        for (WeightedOutputEntry entry : pool) {
+            if (weights.length() > 0) weights.append(" / ");
+            weights.append(entry.itemWeight);
+        }
+        return Collections.singletonList(
+            new DecoratorDescription(
+                "okmodular.nei.decorator.weighted_random",
+                String.valueOf(rolls),
+                weights.toString()));
     }
 
     @Override

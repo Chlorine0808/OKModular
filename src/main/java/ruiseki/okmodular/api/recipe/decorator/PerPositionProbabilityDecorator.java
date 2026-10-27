@@ -74,6 +74,15 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
     }
 
     @Override
+    public List<DecoratorDescription> describe() {
+        return Collections.singletonList(
+            new DecoratorDescription(
+                "okmodular.nei.decorator.per_position_probability",
+                String.valueOf(symbol),
+                percent(chanceExpr)));
+    }
+
+    @Override
     public List<IRecipeOutput> getPossibleOutputs() {
         return Collections.singletonList(output);
     }

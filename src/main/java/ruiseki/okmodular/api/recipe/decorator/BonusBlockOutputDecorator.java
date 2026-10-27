@@ -1,6 +1,7 @@
 package ruiseki.okmodular.api.recipe.decorator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.JsonArray;
@@ -68,6 +69,12 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
             if (rolls(context != null ? context.forDraw(draw) : null)) fired++;
         }
         return fired;
+    }
+
+    @Override
+    public List<DecoratorDescription> describe() {
+        return Collections
+            .singletonList(new DecoratorDescription("okmodular.nei.decorator.bonus_block_output", percent(chanceExpr)));
     }
 
     @Override
