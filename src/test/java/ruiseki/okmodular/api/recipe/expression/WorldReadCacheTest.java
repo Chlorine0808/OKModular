@@ -1,6 +1,7 @@
 package ruiseki.okmodular.api.recipe.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -100,6 +101,21 @@ public class WorldReadCacheTest {
         cache.get("k", 50, reader);
 
         assertEquals(2, reader.reads.get());
+    }
+
+    @Test
+    @DisplayName("期限切れのエントリは溜まらない")
+    public void test期限切れの掃除() {
+        // A key built from an argument that changes every tick, such as count_blocks(tick % 1000),
+        // is never asked for again. Without a sweep the map grows until the structure re-forms.
+        WorldReadCache cache = new WorldReadCache();
+        Reader reader = new Reader();
+
+        for (int tick = 0; tick < 1000; tick++) {
+            cache.get("k" + tick, tick, reader);
+        }
+
+        assertTrue(cache.size() <= 2 * WorldReadCache.MAX_AGE, "entries: " + cache.size());
     }
 
     @Test

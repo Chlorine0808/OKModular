@@ -24,9 +24,15 @@ public final class WorldReadCache {
             this.value = value;
             this.readAt = readAt;
         }
+
+        /** A read stamped later than now is stale too, so a clock going back cannot extend it. */
+        boolean isFresh(long now) {
+            return now >= readAt && now - readAt < MAX_AGE;
+        }
     }
 
     private final Map<String, Entry> entries = new HashMap<>();
+    private long lastSweep;
 
     /**
      * Reads through the machine's cache. A pattern cell, or a context with no machine, reads
@@ -55,15 +61,28 @@ public final class WorldReadCache {
     /** The value read under this key within the last {@link #MAX_AGE} ticks, or a fresh read. */
     public EvaluationValue get(String key, long now, Supplier<EvaluationValue> read) {
         Entry entry = entries.get(key);
-        if (entry != null && now >= entry.readAt && now - entry.readAt < MAX_AGE) {
+        if (entry != null && entry.isFresh(now)) {
             return entry.value;
         }
         EvaluationValue value = read.get();
+        sweep(now);
         entries.put(key, new Entry(value, now));
         return value;
     }
 
     public void clear() {
         entries.clear();
+    }
+
+    /** Drops expired entries once every {@link #MAX_AGE} ticks, for keys never asked for again. */
+    private void sweep(long now) {
+        if (now >= lastSweep && now - lastSweep < MAX_AGE) return;
+        lastSweep = now;
+        entries.values()
+            .removeIf(entry -> !entry.isFresh(now));
+    }
+
+    int size() {
+        return entries.size();
     }
 }
