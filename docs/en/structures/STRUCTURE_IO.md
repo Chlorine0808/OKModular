@@ -395,6 +395,13 @@ replace the structure that is running the recipe.
 The capacity check asks whether enough usable anchors exist. A recipe with nowhere to put its
 output therefore refuses to start rather than consuming its inputs and placing nothing.
 
+### Finding it in NEI
+
+Searching NEI for a block finds the recipes that place it: a `block` output writing that block,
+or a `structure` output whose pattern places it in any cell. Every block a drawn cell may receive
+counts, `weights` candidates included; air does not. A block written without meta matches every
+meta of it.
+
 ### Choosing where it lands
 
 A symbol usually names many blocks — a floor is one symbol repeated — and **the output picks the
