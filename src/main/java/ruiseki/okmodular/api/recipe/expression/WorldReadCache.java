@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import ruiseki.okmodular.api.condition.ConditionContext;
+import ruiseki.okmodular.api.recipe.context.IRecipeContext;
+
 /**
  * One machine's recent world reads, reused for up to {@link #MAX_AGE} ticks.
  */
@@ -24,6 +27,17 @@ public final class WorldReadCache {
     }
 
     private final Map<String, Entry> entries = new HashMap<>();
+
+    /**
+     * Reads through the machine's cache. A pattern cell, or a context with no machine, reads
+     * live.
+     */
+    public static EvaluationValue read(ConditionContext context, long now, String key,
+        Supplier<EvaluationValue> read) {
+        IRecipeContext machine = context.getRecipeContext();
+        WorldReadCache cache = machine != null && !context.hasCell() ? machine.getWorldReadCache() : null;
+        return cache != null ? cache.get(key, now, read) : read.get();
+    }
 
     /** The value read under this key within the last {@link #MAX_AGE} ticks, or a fresh read. */
     public EvaluationValue get(String key, long now, Supplier<EvaluationValue> read) {

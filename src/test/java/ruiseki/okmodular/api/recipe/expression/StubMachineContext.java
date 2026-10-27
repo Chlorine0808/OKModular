@@ -173,9 +173,15 @@ public final class StubMachineContext {
     private static final class StubRecipeContext implements IRecipeContext {
 
         private final IMachineState state;
+        private final WorldReadCache worldReadCache = new WorldReadCache();
 
         StubRecipeContext(IMachineState state) {
             this.state = state;
+        }
+
+        @Override
+        public WorldReadCache getWorldReadCache() {
+            return worldReadCache;
         }
 
         @Override

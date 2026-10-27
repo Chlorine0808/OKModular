@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import ruiseki.okmodular.api.condition.ConditionContext;
+
 /**
  * How long a world read is reused.
  *
@@ -96,6 +98,44 @@ public class WorldReadCacheTest {
 
         cache.get("k", 100, reader);
         cache.get("k", 50, reader);
+
+        assertEquals(2, reader.reads.get());
+    }
+
+    @Test
+    @DisplayName("機械のコンテキストは機械のキャッシュを使う")
+    public void test機械のコンテキスト() {
+        ConditionContext context = StubMachineContext.withMachine();
+        Reader reader = new Reader();
+
+        WorldReadCache.read(context, 100, "k", reader);
+        WorldReadCache.read(context, 101, "k", reader);
+
+        assertEquals(1, reader.reads.get());
+    }
+
+    @Test
+    @DisplayName("機械の無いコンテキストは毎回読む")
+    public void test機械なし() {
+        ConditionContext context = StubMachineContext.withoutMachine();
+        Reader reader = new Reader();
+
+        WorldReadCache.read(context, 100, "k", reader);
+        WorldReadCache.read(context, 100, "k", reader);
+
+        assertEquals(2, reader.reads.get());
+    }
+
+    @Test
+    @DisplayName("パターンのセルは毎回読む")
+    public void testセル() {
+        // A pattern is written once per placement, so caching per cell would only hold
+        // entries nobody asks for again.
+        ConditionContext cell = ConditionContext.forCell(StubMachineContext.withMachine(), 5, 64, 5, 1, 0, 1);
+        Reader reader = new Reader();
+
+        WorldReadCache.read(cell, 100, "k", reader);
+        WorldReadCache.read(cell, 100, "k", reader);
 
         assertEquals(2, reader.reads.get());
     }
