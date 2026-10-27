@@ -14,6 +14,7 @@ import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
+import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 
 /**
  * BlockOutput-specific decorator for applying outputs with probability.
@@ -67,6 +68,11 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
             if (rolls(context != null ? context.forDraw(draw) : null)) fired++;
         }
         return fired;
+    }
+
+    @Override
+    public List<IRecipeOutput> getPossibleOutputs() {
+        return new ArrayList<>(bonusOutputs);
     }
 
     /**

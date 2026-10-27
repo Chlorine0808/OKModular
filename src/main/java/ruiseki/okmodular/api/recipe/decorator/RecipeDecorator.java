@@ -1,5 +1,6 @@
 package ruiseki.okmodular.api.recipe.decorator;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,16 @@ public abstract class RecipeDecorator implements IModularRecipe {
         IRecipeContext recipe = context.getRecipeContext();
         IMachineState state = recipe != null ? recipe.getMachineState() : null;
         return state != null ? Math.max(1, state.getBatchSize()) : 1;
+    }
+
+    /** The recipe this decorator wraps, which may itself be a decorator. */
+    public IModularRecipe getInternal() {
+        return internal;
+    }
+
+    /** Outputs this decorator may add on top of the recipe's own. NEI shows them and searches by them. */
+    public List<IRecipeOutput> getPossibleOutputs() {
+        return Collections.emptyList();
     }
 
     @Override

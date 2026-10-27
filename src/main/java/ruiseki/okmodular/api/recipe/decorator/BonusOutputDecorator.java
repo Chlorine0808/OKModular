@@ -133,6 +133,11 @@ public class BonusOutputDecorator extends RecipeDecorator {
         return bonusOutputs;
     }
 
+    @Override
+    public List<IRecipeOutput> getPossibleOutputs() {
+        return bonusOutputs;
+    }
+
     public static IModularRecipe fromJson(IModularRecipe recipe, JsonObject json) {
         IExpression chance = ExpressionsParser.parse(json.get("chance"));
         List<IRecipeOutput> outputs = new ArrayList<>();

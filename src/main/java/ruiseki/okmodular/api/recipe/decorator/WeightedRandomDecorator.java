@@ -118,6 +118,13 @@ public class WeightedRandomDecorator extends RecipeDecorator {
         return pool;
     }
 
+    @Override
+    public List<IRecipeOutput> getPossibleOutputs() {
+        List<IRecipeOutput> outputs = new ArrayList<>();
+        for (WeightedOutputEntry entry : pool) outputs.add(entry.output);
+        return outputs;
+    }
+
     public int getRolls() {
         return rolls;
     }
