@@ -51,6 +51,7 @@ import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.core.ITieredMachine;
 import ruiseki.okmodular.api.recipe.error.ErrorReason;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
+import ruiseki.okmodular.api.recipe.expression.WorldReadCache;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.api.structure.core.ConditionPolicy;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
@@ -392,6 +393,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
         processAgent,
         processError,
         RecipeRunner.RecipeFinder.LOADER);
+    private final WorldReadCache worldReadCache = new WorldReadCache();
 
     public String getLastProcessErrorDetail() {
         return processError.getDetail();
@@ -481,6 +483,7 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
     }
 
     public void onFormed() {
+        worldReadCache.clear();
         structureAgent.onFormed();
         updateRecipeGroupFromStructure();
         invalidatePortCache();
@@ -1058,6 +1061,11 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
     }
 
     @Override
+    public WorldReadCache getWorldReadCache() {
+        return worldReadCache;
+    }
+
+    @Override
     public IStructureEntry getCurrentStructure() {
         String structureName = structureAgent.getCustomStructureName();
         if (structureName == null || structureName.isEmpty()) {
@@ -1121,12 +1129,14 @@ public class TEMachineController extends AbstractTE implements IAlignment, IGuiH
     @Override
     public void invalidate() {
         super.invalidate();
+        worldReadCache.clear();
         structureAgent.resetStructure();
     }
 
     @Override
     public void onChunkUnload() {
         super.onChunkUnload();
+        worldReadCache.clear();
         structureAgent.resetStructure();
     }
 
