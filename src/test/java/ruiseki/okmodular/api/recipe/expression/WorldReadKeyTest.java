@@ -67,6 +67,39 @@ public class WorldReadKeyTest {
             "count_blocks がキャッシュを通っていない");
     }
 
+    @Test
+    @DisplayName("can_see_*: 向き・座標・引数が違えば別のキー")
+    public void testVisionキー() {
+        String sky = VisionFunctionExpression.cacheKey(VisionFunctionExpression.Direction.SKY, 0, 64, 0,
+            Collections.emptyList());
+
+        assertEquals(
+            sky,
+            VisionFunctionExpression.cacheKey(VisionFunctionExpression.Direction.SKY, 0, 64, 0,
+                Collections.emptyList()));
+        assertNotEquals(
+            sky,
+            VisionFunctionExpression.cacheKey(VisionFunctionExpression.Direction.VOID, 0, 64, 0,
+                Collections.emptyList()));
+        // The scan starts from the asked-about position, which need not be the controller.
+        assertNotEquals(
+            sky,
+            VisionFunctionExpression.cacheKey(VisionFunctionExpression.Direction.SKY, 0, 65, 0,
+                Collections.emptyList()));
+        assertNotEquals(
+            sky,
+            VisionFunctionExpression.cacheKey(VisionFunctionExpression.Direction.SKY, 0, 64, 0,
+                Arrays.asList("strict")));
+    }
+
+    @Test
+    @DisplayName("can_see_* は機械のキャッシュを通して読む")
+    public void testVisionの配線() {
+        assertTrue(
+            read("VisionFunctionExpression.java").contains("WorldReadCache.read("),
+            "can_see_sky / can_see_void がキャッシュを通っていない");
+    }
+
     static String read(String file) {
         Path path = Paths.get("src/main/java/ruiseki/okmodular/api/recipe/expression", file);
         try {

@@ -1,5 +1,6 @@
 package ruiseki.okmodular.api.recipe.expression;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -67,36 +68,50 @@ public class VisionFunctionExpression implements IExpression {
         int y = context.getY();
         int z = context.getZ();
 
-        // Parse allowed-block arguments: "transparent", "strict", or "modid:block"
-        boolean strict = false;
-        Set<String> allowedBlockIds = new HashSet<>();
-
+        List<String> names = new ArrayList<>();
         if (arguments != null) {
             for (IExpression argExpr : arguments) {
                 EvaluationValue eval = argExpr.evaluate(context);
                 if (eval.isNbt() && eval.asNbt() instanceof NBTTagList list) {
                     for (int i = 0; i < list.tagCount(); i++) {
-                        String arg = list.getStringTagAt(i);
-                        if ("strict".equalsIgnoreCase(arg)) {
-                            strict = true;
-                        } else if (!"transparent".equalsIgnoreCase(arg) && arg != null && !arg.isEmpty()) {
-                            allowedBlockIds.add(arg.toLowerCase());
-                        }
+                        names.add(list.getStringTagAt(i));
                     }
                 } else {
-                    String arg = eval.asString();
-                    if ("strict".equalsIgnoreCase(arg)) {
-                        strict = true;
-                    } else if (!"transparent".equalsIgnoreCase(arg) && arg != null && !arg.isEmpty()) {
-                        allowedBlockIds.add(arg.toLowerCase());
-                    }
+                    names.add(eval.asString());
                 }
             }
         }
 
         World world = context.getWorld();
-        boolean result = checkVision(world, x, y, z, direction, strict, allowedBlockIds);
-        return result ? EvaluationValue.TRUE : EvaluationValue.FALSE;
+        return WorldReadCache.read(
+            context,
+            world.getTotalWorldTime(),
+            cacheKey(direction, x, y, z, names),
+            () -> checkVision(world, x, y, z, direction, names) ? EvaluationValue.TRUE : EvaluationValue.FALSE);
+    }
+
+    /** The key a call files its answer under in the machine's cache. */
+    static String cacheKey(Direction direction, int x, int y, int z, List<String> names) {
+        List<Object> parts = new ArrayList<>();
+        parts.add(x);
+        parts.add(y);
+        parts.add(z);
+        parts.addAll(names);
+        return WorldReadCache.key(direction == Direction.SKY ? "can_see_sky" : "can_see_void", parts.toArray());
+    }
+
+    /** Reads "transparent", "strict" or "modid:block" from each argument. */
+    private boolean checkVision(World world, int x, int y, int z, Direction dir, List<String> names) {
+        boolean strict = false;
+        Set<String> allowedBlockIds = new HashSet<>();
+        for (String arg : names) {
+            if ("strict".equalsIgnoreCase(arg)) {
+                strict = true;
+            } else if (!"transparent".equalsIgnoreCase(arg) && arg != null && !arg.isEmpty()) {
+                allowedBlockIds.add(arg.toLowerCase());
+            }
+        }
+        return checkVision(world, x, y, z, dir, strict, allowedBlockIds);
     }
 
     private boolean checkVision(World world, int x, int y, int z, Direction dir, boolean strict,
