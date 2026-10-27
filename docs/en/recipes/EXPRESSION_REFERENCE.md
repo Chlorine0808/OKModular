@@ -247,6 +247,16 @@ Performance multipliers provided by the structure definition.
     - Example: `count_blocks(1, "minecraft:iron_block")`
     - `distance` is capped at 16. Blocks in chunks that are not loaded are not counted.
 
+> [!IMPORTANT]
+> **The results of these three functions lag by up to 20 ticks (one second).**
+> A machine reuses the result of the same function called with the same arguments for up to 20 ticks.
+> A block placed or broken nearby may therefore take up to one second to show in a check.
+> The bare `can_see_sky` / `can_see_void` variables behave the same way.
+>
+> The machine drops its reused results and reads again when the structure re-forms, when the
+> machine is broken, and when its chunk unloads.
+> Per-cell evaluation in a pattern, and evaluation with no machine (NEI and the like), always read live.
+
 > [!NOTE]
 > **`can_see_sky` and `can_see_void` also work without the brackets**, as the world properties listed above -
 > `can_see_sky == 1`. The bare form is the plain test; reach for the function form only when
@@ -415,4 +425,7 @@ expression itself** instead of a time. Expressions written purely from constants
 folded to a number at load time and still show as seconds.
 
 ### Performance
-Since expressions may be evaluated every tick, avoid extremely complex logic or excessive use of wide-range `count_blocks` queries.
+Since expressions may be evaluated every tick, avoid extremely complex logic.
+The functions that inspect the surroundings reuse their results for up to 20 ticks, but each
+distinct set of arguments is read separately. Writing many wide-range `count_blocks` calls with
+different arguments costs that many reads.
