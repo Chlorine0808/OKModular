@@ -150,7 +150,7 @@ public class EssentiaOutput extends AbstractModularRecipeOutput {
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        EssentiaOutput result = new EssentiaOutput(aspectTag, amount * multiplier);
+        EssentiaOutput result = new EssentiaOutput(aspectTag, Amounts.toInt((long) amount * multiplier));
         result.interval = this.interval;
         result.index = this.index;
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);

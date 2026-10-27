@@ -206,7 +206,13 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        BlockOutput result = new BlockOutput(symbol, block, replace, amount * multiplier, optional, dynamicNbt);
+        BlockOutput result = new BlockOutput(
+            symbol,
+            block,
+            replace,
+            Amounts.toInt((long) amount * multiplier),
+            optional,
+            dynamicNbt);
         result.nbtExpressions = this.nbtExpressions;
         result.nbtListOp = this.nbtListOp;
         result.nbtMatchMode = this.nbtMatchMode;

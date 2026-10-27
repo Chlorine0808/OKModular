@@ -183,7 +183,7 @@ public class FluidOutput extends AbstractModularRecipeOutput {
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        FluidOutput result = new FluidOutput(fluidName, amount * multiplier);
+        FluidOutput result = new FluidOutput(fluidName, Amounts.toInt((long) amount * multiplier));
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         result.interval = this.interval;
         result.index = this.index;

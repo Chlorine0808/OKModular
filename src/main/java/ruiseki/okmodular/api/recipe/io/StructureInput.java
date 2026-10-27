@@ -212,7 +212,12 @@ public class StructureInput extends AbstractRecipeInput implements IModularRecip
 
     @Override
     public IRecipeInput copy(int multiplier) {
-        StructureInput result = new StructureInput(symbol, patternName, amount * multiplier, consume, optional);
+        StructureInput result = new StructureInput(
+            symbol,
+            patternName,
+            Amounts.toInt((long) amount * multiplier),
+            consume,
+            optional);
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         result.interval = this.interval;
         result.index = this.index;

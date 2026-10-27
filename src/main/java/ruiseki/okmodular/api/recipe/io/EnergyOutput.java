@@ -138,7 +138,7 @@ public class EnergyOutput extends AbstractModularRecipeOutput {
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        EnergyOutput result = new EnergyOutput(amount * multiplier, isPerTick());
+        EnergyOutput result = new EnergyOutput(Amounts.toInt((long) amount * multiplier), isPerTick());
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         result.interval = this.interval;
         result.index = this.index;

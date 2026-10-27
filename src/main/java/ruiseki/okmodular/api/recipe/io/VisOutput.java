@@ -151,7 +151,7 @@ public class VisOutput extends AbstractModularRecipeOutput {
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        VisOutput result = new VisOutput(aspectTag, (int) (amount * multiplier));
+        VisOutput result = new VisOutput(aspectTag, Amounts.toInt((long) amount * multiplier));
         result.interval = this.interval;
         result.index = this.index;
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);

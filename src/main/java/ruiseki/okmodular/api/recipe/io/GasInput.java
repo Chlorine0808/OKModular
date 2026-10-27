@@ -127,7 +127,7 @@ public class GasInput extends AbstractModularRecipeInput {
 
     @Override
     public IRecipeInput copy(int multiplier) {
-        GasInput result = new GasInput(gasName, (int) (amount * multiplier));
+        GasInput result = new GasInput(gasName, Amounts.toInt((long) amount * multiplier));
         result.consume = this.consume;
         result.interval = this.interval;
         result.index = this.index;

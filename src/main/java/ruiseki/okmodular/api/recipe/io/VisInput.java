@@ -122,7 +122,7 @@ public class VisInput extends AbstractModularRecipeInput {
 
     @Override
     public IRecipeInput copy(int multiplier) {
-        VisInput result = new VisInput(aspectTag, (int) (amount * multiplier));
+        VisInput result = new VisInput(aspectTag, Amounts.toInt((long) amount * multiplier));
         result.consume = this.consume;
         result.interval = this.interval;
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);

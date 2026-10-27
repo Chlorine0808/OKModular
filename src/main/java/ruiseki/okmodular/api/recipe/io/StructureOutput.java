@@ -272,7 +272,11 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        StructureOutput result = new StructureOutput(symbol, patternName, amount * multiplier, optional);
+        StructureOutput result = new StructureOutput(
+            symbol,
+            patternName,
+            Amounts.toInt((long) amount * multiplier),
+            optional);
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         result.interval = this.interval;
         result.index = this.index;

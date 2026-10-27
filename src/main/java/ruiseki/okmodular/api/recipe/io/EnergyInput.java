@@ -134,7 +134,7 @@ public class EnergyInput extends AbstractModularRecipeInput {
 
     @Override
     public IRecipeInput copy(int multiplier) {
-        EnergyInput result = new EnergyInput(amount * multiplier, isPerTick());
+        EnergyInput result = new EnergyInput(Amounts.toInt((long) amount * multiplier), isPerTick());
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         result.interval = this.interval;
         result.consume = this.consume;

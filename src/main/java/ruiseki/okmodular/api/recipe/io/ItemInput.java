@@ -510,8 +510,9 @@ public class ItemInput extends AbstractModularRecipeInput {
     @Override
     public IRecipeInput copy(int multiplier) {
         ItemInput result = required != null ? new ItemInput(required) : new ItemInput(oreDict, count);
-        result.count *= multiplier;
-        if (result.required != null) result.required.stackSize *= multiplier;
+        result.count = Amounts.toInt((long) result.count * multiplier);
+        if (result.required != null)
+            result.required.stackSize = Amounts.toInt((long) result.required.stackSize * multiplier);
         result.countExpr = ArithmeticExpression.scaled(this.countExpr, multiplier);
         result.metaExpr = this.metaExpr;
         result.consume = this.consume;

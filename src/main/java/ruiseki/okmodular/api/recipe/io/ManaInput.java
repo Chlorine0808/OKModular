@@ -122,7 +122,7 @@ public class ManaInput extends AbstractModularRecipeInput {
 
     @Override
     public IRecipeInput copy(int multiplier) {
-        ManaInput result = new ManaInput(amount * multiplier, isPerTick());
+        ManaInput result = new ManaInput(Amounts.toInt((long) amount * multiplier), isPerTick());
         result.interval = this.interval;
         result.consume = this.consume;
         result.index = this.index;
