@@ -38,8 +38,7 @@ public final class WorldReadCache {
      * Reads through the machine's cache. A pattern cell, or a context with no machine, reads
      * live.
      */
-    public static EvaluationValue read(ConditionContext context, long now, String key,
-        Supplier<EvaluationValue> read) {
+    public static EvaluationValue read(ConditionContext context, long now, String key, Supplier<EvaluationValue> read) {
         IRecipeContext machine = context.getRecipeContext();
         WorldReadCache cache = machine != null && !context.hasCell() ? machine.getWorldReadCache() : null;
         return cache != null ? cache.get(key, now, read) : read.get();
