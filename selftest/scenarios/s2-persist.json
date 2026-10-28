@@ -28,6 +28,32 @@
     ]
   },
   {
+    "id": "s2-payout-survives",
+    "section": "2",
+    "title": "A machine waiting on full outputs keeps its payout draw across a chunk reload",
+    "source": "run/TESTING.md §2 出力待ちのままセーブして入り直すと、当たり外れが変わらない; docs/jp/recipes/DECORATORS.md §3 抽選の仕組み (NOTE: 抽選はやり直しません。セーブして入り直しても同じ); ProcessAgent#writeToNBT payoutDecided/payoutSucceeded",
+    "machine": { "structure": "selftest_probe" },
+    "inputs": [ { "item": "minecraft:gravel", "amount": 1 } ],
+    "ticks": 100,
+    "steps": [
+      { "at": 5, "action": "fillOutputs", "item": "minecraft:dirt" },
+      { "at": 40, "action": "recordNbt", "label": "decided" },
+      { "at": 41, "action": "unloadReload" },
+      { "at": 50, "action": "clearOutputs" }
+    ],
+    "expect": [
+      { "kind": "recipeStarted", "value": true, "from": 40, "to": 40 },
+      { "kind": "chunkReloaded" },
+      {
+        "kind": "nbtEqual",
+        "a": "decided",
+        "b": "after-reload",
+        "keys": [ "processAgent.payoutDecided", "processAgent.payoutSucceeded" ]
+      },
+      { "kind": "outputMatchesPayout", "item": "minecraft:flint", "label": "after-reload" }
+    ]
+  },
+  {
     "id": "s2-formed-survives",
     "section": "2",
     "title": "A formed machine standing idle is still formed after a chunk reload",
