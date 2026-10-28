@@ -72,6 +72,9 @@ public final class SelfTestTicker {
                         fail++;
                 }
             }
+            notes.add(
+                "WARN+ log lines captured: " + LogCapture.lines()
+                    .size());
             try {
                 RunInfo info = new RunInfo(
                     startedAt,
@@ -89,7 +92,8 @@ public final class SelfTestTicker {
                 SelfTest.LOG.error("selftest report could not be written", t);
                 writeError(reportDir, "report could not be written", t);
             }
-            SelfTest.LOG.info("SELFTEST DONE pass={} fail={} visual={}", pass, fail, visual);
+            // Through the server's logger so the line lands in logs/latest.log, not only fml-server-latest.log.
+            server.logInfo("SELFTEST DONE pass=" + pass + " fail=" + fail + " visual=" + visual);
         } catch (Throwable t) {
             SelfTest.LOG.error("selftest finish failed", t);
             writeError(reportDir, "finish failed", t);
