@@ -29,11 +29,17 @@ final class LiveDriver implements ScenarioDriver {
     private int nextStep;
     /** Snapshots a step takes; the schedule leaves those alone. */
     private Set<String> stepSnapshots;
+    /** Captured lines logged before the first scenario began; every scenario sees those. */
+    private int loadTimeLines = -1;
+    /** Captured lines logged before this scenario began; earlier scenarios' lines are not its own. */
+    private int logStart;
 
     @Override
     public void setUp(Scenario s) {
         obs = new Observation();
         nextStep = 0;
+        logStart = LogCapture.size();
+        if (loadTimeLines < 0) loadTimeLines = logStart;
         stepSnapshots = new HashSet<>();
         for (Step step : s.steps) {
             if (step.action.equals("snapshot") && step.args.has("name")) {
@@ -73,6 +79,7 @@ final class LiveDriver implements ScenarioDriver {
     @Override
     public ScenarioResult finish(Scenario s) {
         Observer.finish(rig, site, obs);
+        obs.logLines.addAll(LogCapture.slice(LogCapture.lines(), loadTimeLines, logStart));
         List<CheckResult> checks = new ArrayList<>();
         for (Expectation e : s.expectations) checks.add(ExpectationJudge.judge(e, obs));
         return ScenarioResult.of(s, checks, obs.snapshots);

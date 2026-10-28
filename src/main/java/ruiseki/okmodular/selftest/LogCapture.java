@@ -48,6 +48,22 @@ public final class LogCapture {
         }
     }
 
+    public static int size() {
+        synchronized (LINES) {
+            return LINES.size();
+        }
+    }
+
+    /** Lines before loadTimeEnd (logged while the server loaded) plus the lines from since onwards. */
+    static List<String> slice(List<String> all, int loadTimeEnd, int since) {
+        int n = all.size();
+        int le = Math.max(0, Math.min(loadTimeEnd, n));
+        int st = Math.max(le, Math.min(since, n));
+        List<String> out = new ArrayList<>(all.subList(0, le));
+        out.addAll(all.subList(st, n));
+        return out;
+    }
+
     private static void add(String line) {
         synchronized (LINES) {
             if (LINES.size() < MAX_LINES) LINES.add(line);

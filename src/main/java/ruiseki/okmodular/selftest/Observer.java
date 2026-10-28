@@ -100,7 +100,6 @@ final class Observer {
             obs.conditionFailure = failure != null ? failure : rig.lastConditionFailure;
         }
         countDrops(site, obs.droppedItems);
-        obs.logLines.addAll(LogCapture.lines());
         readErrorFiles(obs.files);
     }
 
