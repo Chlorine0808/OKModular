@@ -86,6 +86,38 @@
           }
         }
       ]
+    },
+    {
+      "registryName": "selftest_chance_random",
+      "name": "Selftest Chance: glass on exactly 5 air cells",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "type": "random_block_output",
+          "count": 5,
+          "selections": [
+            {
+              "symbol": "_",
+              "output": {
+                "symbol": "_",
+                "block": "minecraft:glass"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

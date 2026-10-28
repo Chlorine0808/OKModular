@@ -143,5 +143,56 @@
         "max": 3
       }
     ]
+  },
+  {
+    "id": "s5-random-count",
+    "section": "5",
+    "title": "random_block_output count 5 places glass on exactly 5 of the 50 air cells (scatter in the figure)",
+    "source": "run/TESTING.md §5 random_block_output の count: N (ちょうど N マス、散らばって); docs/jp/recipes/DECORATORS.md §4 random_block_output. Judged by count only; the scatter is shown in the figure",
+    "machine": {
+      "structure": "selftest_chance"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:gravel",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "air": {
+        "from": [
+          -2,
+          2,
+          -2
+        ],
+        "to": [
+          2,
+          3,
+          2
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "air",
+        "block": "minecraft:glass",
+        "min": 5,
+        "max": 5
+      }
+    ]
   }
 ]
