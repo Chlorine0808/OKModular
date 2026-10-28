@@ -1,0 +1,23 @@
+{
+  "patterns": [
+    {
+      "name": "selftest_anchor_q",
+      "mappings": { "G": "minecraft:gold_block" },
+      "layers": [
+        ["G"],
+        [" "],
+        ["Q"]
+      ]
+    },
+    {
+      "name": "selftest_anchor_a",
+      "anchor": "A",
+      "mappings": { "L": "minecraft:lapis_block" },
+      "layers": [
+        ["L"],
+        [" "],
+        ["A"]
+      ]
+    }
+  ]
+}

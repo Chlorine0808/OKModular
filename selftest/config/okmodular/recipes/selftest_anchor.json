@@ -1,0 +1,41 @@
+{
+  "group": "SelftestAnchor",
+  "recipes": [
+    {
+      "registryName": "selftest_anchor_q",
+      "name": "Selftest Anchor: gold two above the controller",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_anchor_q",
+          "symbol": "Q"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_anchor_a",
+      "name": "Selftest Anchor: lapis two above the A block",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:dirt",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_anchor_a",
+          "symbol": "A"
+        }
+      ]
+    }
+  ]
+}
