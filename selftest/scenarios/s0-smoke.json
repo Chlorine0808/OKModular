@@ -1,0 +1,10 @@
+[
+  {
+    "id": "s0-smoke",
+    "section": "0",
+    "title": "The selftest runs end to end with no machine",
+    "source": "selftest harness: an empty scenario must reach the report",
+    "ticks": 5,
+    "expect": []
+  }
+]
