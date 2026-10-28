@@ -1,0 +1,16 @@
+{
+  "group": "SelftestProbe",
+  "recipes": [
+    {
+      "registryName": "selftest_persist_slow",
+      "name": "Selftest Persist: sand to glass, slowly",
+      "duration": 200,
+      "inputs": [
+        { "item": "minecraft:sand", "amount": 1 }
+      ],
+      "outputs": [
+        { "item": "minecraft:glass", "amount": 1 }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,33 @@
 [
   {
+    "id": "s2-progress-survives",
+    "section": "2",
+    "title": "A running recipe keeps its progress, recipe and start tick across a chunk reload",
+    "source": "run/TESTING.md §2 稼働中にセーブして入り直すと、同じ進捗・同じ払い出しで続く / 抽選の結果がロードを跨いで変わらない (currentRecipeStartTick); ProcessAgent#writeToNBT; TEMachineController#writeCommon",
+    "machine": { "structure": "selftest_probe" },
+    "inputs": [ { "item": "minecraft:sand", "amount": 1 } ],
+    "ticks": 300,
+    "steps": [
+      { "at": 60, "action": "unloadReload" }
+    ],
+    "expect": [
+      { "kind": "chunkReloaded" },
+      {
+        "kind": "nbtEqual",
+        "a": "before-unload",
+        "b": "after-reload",
+        "keys": [
+          "processAgent.progress",
+          "processAgent.workProgress",
+          "processAgent.running",
+          "processAgent.recipeName",
+          "currentRecipeStartTick"
+        ]
+      },
+      { "kind": "outputCount", "item": "minecraft:glass", "min": 1, "max": 1 }
+    ]
+  },
+  {
     "id": "s2-formed-survives",
     "section": "2",
     "title": "A formed machine standing idle is still formed after a chunk reload",
