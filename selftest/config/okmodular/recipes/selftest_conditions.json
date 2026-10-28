@@ -178,6 +178,35 @@
           "weather": "rain"
         }
       ]
+    },
+    {
+      "group": "SelftestCondOffset",
+      "registryName": "selftest_cond_offset",
+      "name": "Selftest Condition: gold two above the controller",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "type": "offset",
+          "dx": 0,
+          "dy": 2,
+          "dz": 0,
+          "condition": {
+            "block": "minecraft:gold_block"
+          }
+        }
+      ]
     }
   ]
 }
