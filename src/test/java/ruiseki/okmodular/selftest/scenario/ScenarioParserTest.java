@@ -164,6 +164,18 @@ class ScenarioParserTest {
     }
 
     @Test
+    void malformedValuesNeverYieldNullParseError() {
+        // Gson throws exceptions without a message for these; they must still be invalid.
+        String[] bad = { ",\"ticks\":{}", ",\"ticks\":null", ",\"steps\":[{\"at\":[],\"action\":\"fill\"}]",
+            ",\"machine\":{\"structure\":\"x\",\"cells\":{\"C*\":null}}", ",\"inputs\":[{\"energy\":null}]" };
+        for (String extra : bad) {
+            String json = "[{\"id\":\"a\",\"source\":\"x\",\"expect\":[]" + extra + "}]";
+            Scenario s = parse(json).get(0);
+            assertNotNull(s.parseError, extra);
+        }
+    }
+
+    @Test
     void unparseableFileThrows() {
         assertThrows(ScenarioParseException.class, () -> parse("{not json"));
         assertThrows(ScenarioParseException.class, () -> parse("42"));

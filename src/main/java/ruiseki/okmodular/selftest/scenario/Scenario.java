@@ -68,6 +68,6 @@ public final class Scenario {
             Collections.<String, Region>emptyMap(),
             Collections.<String, Integer>emptyMap(),
             Collections.<Expectation>emptyList(),
-            message);
+            message != null ? message : "invalid scenario");
     }
 }

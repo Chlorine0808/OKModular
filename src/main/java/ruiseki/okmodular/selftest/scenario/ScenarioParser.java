@@ -133,8 +133,18 @@ public final class ScenarioParser {
                 null);
         } catch (ScenarioParseException | ClassCastException | IllegalStateException | NumberFormatException
             | UnsupportedOperationException e) {
-            return Scenario.invalid(shown, section, source != null ? source : fileName, e.getMessage());
+            return Scenario.invalid(shown, section, source != null ? source : fileName, describe(e));
         }
+    }
+
+    /** Gson exceptions often carry no message; never let that turn into a null parseError. */
+    private static String describe(RuntimeException e) {
+        String m = e.getMessage();
+        return m == null ? e.getClass()
+            .getSimpleName()
+            : e.getClass()
+                .getSimpleName() + ": "
+                + m;
     }
 
     private static MachineSpec machine(JsonElement el) {
