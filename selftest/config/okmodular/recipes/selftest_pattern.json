@@ -91,6 +91,24 @@
           "symbol": "A"
         }
       ]
+    },
+    {
+      "registryName": "selftest_pat_sphere",
+      "name": "Selftest Pattern: a radius 6 ball",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:clay_ball",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_sphere",
+          "symbol": "A"
+        }
+      ]
     }
   ]
 }

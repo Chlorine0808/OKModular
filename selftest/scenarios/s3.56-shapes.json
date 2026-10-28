@@ -1,0 +1,55 @@
+[
+  {
+    "id": "s3.56-sphere",
+    "section": "3.56",
+    "title": "A generated sphere is centred on the anchor plus its offset",
+    "source": "run/TESTING.md §3.56 生成した球が球に見える; docs/jp/structures/STRUCTURE_IO.md §4 形を生成する (dx²+dy²+dz² <= radius², アンカーは中心, offset)",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:clay_ball",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-6, 3, -6],
+        "to": [6, 15, 6],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "ball": {
+        "from": [-6, 1, -6],
+        "to": [6, 15, 6]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "sphereCentred",
+        "snapshot": "ball",
+        "block": "minecraft:emerald_block",
+        "centre": [0, 9, 0],
+        "tolerance": 0.5
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "ball",
+        "block": "minecraft:emerald_block",
+        "min": 925,
+        "max": 925
+      }
+    ]
+  }
+]

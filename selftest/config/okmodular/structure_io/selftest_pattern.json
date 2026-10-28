@@ -341,6 +341,18 @@
           "            A            "
         ]
       ]
+    },
+    {
+      "name": "selftest_pat_sphere",
+      "shape": {
+        "type": "sphere",
+        "radius": 6,
+        "symbol": "X",
+        "offset": [0, 8, 0]
+      },
+      "mappings": {
+        "X": "minecraft:emerald_block"
+      }
     }
   ]
 }
