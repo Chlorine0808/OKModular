@@ -51,5 +51,95 @@
         "max": 925
       }
     ]
+  },
+  {
+    "id": "s3.56-noise-threshold",
+    "section": "3.56",
+    "title": "noise(6) > 0.5 makes blobs",
+    "source": "run/TESTING.md §3.56 ノイズが塊になる; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (閾値で切る / 確率として渡すと塊にならない)",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:flint",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-13, 2, -13],
+        "to": [13, 28, 13],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "box": {
+        "from": [-13, 2, -13],
+        "to": [13, 28, 13]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "clustered",
+        "snapshot": "box",
+        "block": "minecraft:iron_ore",
+        "value": true
+      }
+    ]
+  },
+  {
+    "id": "s3.56-noise-prob",
+    "section": "3.56",
+    "title": "noise(6) as a chance scatters like salt and pepper",
+    "source": "run/TESTING.md §3.56 ⚠ 確率として渡すと塊にならない（対比）; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (閾値で切る / 確率として渡すと塊にならない)",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:bone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-13, 2, -13],
+        "to": [13, 28, 13],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "box": {
+        "from": [-13, 2, -13],
+        "to": [13, 28, 13]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "clustered",
+        "snapshot": "box",
+        "block": "minecraft:iron_ore",
+        "value": false
+      }
+    ]
   }
 ]
