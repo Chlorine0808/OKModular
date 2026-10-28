@@ -145,6 +145,60 @@
           "symbol": "A"
         }
       ]
+    },
+    {
+      "registryName": "selftest_pat_scale_3",
+      "name": "Selftest Pattern: noise(3) > 0.5 in a flat slab",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:string",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_scale_3",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_scale_6",
+      "name": "Selftest Pattern: noise(6) > 0.5 in a flat slab",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:feather",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_scale_6",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_scale_16",
+      "name": "Selftest Pattern: noise(16) > 0.5 in a flat slab",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:wheat_seeds",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_scale_16",
+          "symbol": "A"
+        }
+      ]
     }
   ]
 }

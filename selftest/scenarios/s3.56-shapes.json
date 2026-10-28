@@ -141,5 +141,125 @@
         "value": false
       }
     ]
+  },
+  {
+    "id": "s3.56-scale-3",
+    "section": "3.56",
+    "title": "noise(3) > 0.5: how big the blobs look (3 fine, 16 large and flat)",
+    "source": "run/TESTING.md §3.56 scale の体感; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (scale は塊の大きさ)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:string",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "slab": {
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.56-scale-6",
+    "section": "3.56",
+    "title": "noise(6) > 0.5: how big the blobs look (3 fine, 16 large and flat)",
+    "source": "run/TESTING.md §3.56 scale の体感; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (scale は塊の大きさ)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:feather",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "slab": {
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.56-scale-16",
+    "section": "3.56",
+    "title": "noise(16) > 0.5: how big the blobs look (3 fine, 16 large and flat)",
+    "source": "run/TESTING.md §3.56 scale の体感; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (scale は塊の大きさ)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:wheat_seeds",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "slab": {
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
   }
 ]
