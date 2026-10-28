@@ -401,7 +401,7 @@ public class ItemOutput extends AbstractModularRecipeOutput {
             result.count = this.count;
         } else {
             ItemStack copy = output.copy();
-            copy.stackSize *= multiplier;
+            copy.stackSize = Amounts.toInt((long) copy.stackSize * multiplier);
             result = new ItemOutput(copy);
         }
         result.rawItemName = this.rawItemName;

@@ -125,7 +125,7 @@ public class EssentiaInput extends AbstractModularRecipeInput {
 
     @Override
     public IRecipeInput copy(int multiplier) {
-        EssentiaInput result = new EssentiaInput(aspectTag, amount * multiplier);
+        EssentiaInput result = new EssentiaInput(aspectTag, Amounts.toInt((long) amount * multiplier));
         result.consume = this.consume;
         result.interval = this.interval;
         result.index = this.index;

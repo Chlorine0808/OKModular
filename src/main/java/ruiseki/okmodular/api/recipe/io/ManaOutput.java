@@ -142,7 +142,7 @@ public class ManaOutput extends AbstractModularRecipeOutput {
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        ManaOutput result = new ManaOutput(amount * multiplier, isPerTick());
+        ManaOutput result = new ManaOutput(Amounts.toInt((long) amount * multiplier), isPerTick());
         result.interval = this.interval;
         result.index = this.index;
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);

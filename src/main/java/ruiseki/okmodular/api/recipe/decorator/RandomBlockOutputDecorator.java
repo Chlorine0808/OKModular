@@ -19,6 +19,7 @@ import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
+import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.structure.core.StructureSymbols;
 
 /**
@@ -131,6 +132,19 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
     private static double ticket(long seed, ChunkCoordinates pos) {
         return SeedMixer
             .toUnitInterval(SeedMixer.forPosition(seed, pos.posX, pos.posY, pos.posZ), SeedMixer.RANDOM_BLOCK_OUTPUT);
+    }
+
+    @Override
+    public List<DecoratorDescription> describe() {
+        return Collections
+            .singletonList(new DecoratorDescription("okmodular.nei.decorator.random_block_output", number(countExpr)));
+    }
+
+    @Override
+    public List<IRecipeOutput> getPossibleOutputs() {
+        List<IRecipeOutput> outputs = new ArrayList<>();
+        for (BlockOutputSelection selection : selections) outputs.add(selection.output);
+        return outputs;
     }
 
     /**

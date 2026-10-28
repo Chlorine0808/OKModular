@@ -7,8 +7,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
@@ -30,7 +32,11 @@ import ruiseki.okcore.addon.nei.RecipeHandlerBase;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.decorator.DecoratorDescription;
+import ruiseki.okmodular.api.recipe.decorator.RecipeDecorator;
+import ruiseki.okmodular.api.recipe.decorator.RequirementDecorator;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
+import ruiseki.okmodular.api.recipe.io.BlockIdMatcher;
 import ruiseki.okmodular.api.recipe.io.FluidInput;
 import ruiseki.okmodular.api.recipe.io.FluidOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeInput;
@@ -55,6 +61,7 @@ import ruiseki.okmodular.common.item.ItemMachineBlueprint;
 import ruiseki.okmodular.common.recipe.RecipeLoader;
 import ruiseki.okmodular.structure.CustomStructureRegistry;
 import ruiseki.okmodular.structure.StructureManager;
+import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
 
 public class ModularRecipeNEIHandler extends RecipeHandlerBase {
 
@@ -195,27 +202,35 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
 
     @Override
     public void loadCraftingRecipes(ItemStack result) {
+        String placedBlock = placedBlockId(result);
         for (IModularRecipe recipe : RecipeLoader.getInstance()
             .getAllRecipes()) {
             if (!recipe.getRecipeGroup()
                 .equals(recipeGroup)) continue;
 
-            boolean match = false;
-            for (IRecipeOutput output : recipe.getOutputs()) {
-                if (output instanceof ItemOutput) {
-                    ItemOutput itemOut = (ItemOutput) output;
-                    for (ItemStack stack : itemOut.getItems()) {
-                        if (NEIServerUtils.areStacksSameTypeCrafting(stack, result)) {
-                            match = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (match) {
+            if (producesItem(recipe, result) || placedBlock != null
+                && NeiRecipeOutputs.placesBlock(recipe, placedBlock, StructurePatternLoader.getInstance()::get)) {
                 arecipes.add(new CachedModularRecipe(recipe));
             }
         }
+    }
+
+    private static boolean producesItem(IModularRecipe recipe, ItemStack result) {
+        for (IRecipeOutput output : NeiRecipeOutputs.all(recipe)) {
+            if (output instanceof ItemOutput itemOut) {
+                for (ItemStack stack : itemOut.getItems()) {
+                    if (NEIServerUtils.areStacksSameTypeCrafting(stack, result)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /** The block this stack places, as {@code modid:name:meta}; null for an item that is not a block. */
+    private static String placedBlockId(ItemStack stack) {
+        Block block = Block.getBlockFromItem(stack.getItem());
+        if (block == null || block == Blocks.air) return null;
+        return BlockIdMatcher.idOf(block, stack.getItemDamage());
     }
 
     @Override
@@ -226,7 +241,7 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
                 .equals(recipeGroup)) continue;
 
             boolean match = false;
-            for (IRecipeOutput output : recipe.getOutputs()) {
+            for (IRecipeOutput output : NeiRecipeOutputs.all(recipe)) {
                 if (output instanceof FluidOutput) {
                     FluidOutput fluidOut = (FluidOutput) output;
                     if (fluidOut.getFluid()
@@ -317,6 +332,15 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
         }
     }
 
+    /** Translates a description, its nested descriptions first. */
+    private static String format(DecoratorDescription description) {
+        Object[] args = description.getArgs();
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] instanceof DecoratorDescription nested) args[i] = format(nested);
+        }
+        return StatCollector.translateToLocalFormatted(description.getKey(), args);
+    }
+
     public class CachedModularRecipe extends CachedBaseRecipe {
 
         private final IModularRecipe recipe;
@@ -343,7 +367,14 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
             List<RecipeLayoutPart<?>> inputParts = new ArrayList<>();
             List<RecipeLayoutPart<?>> outputParts = new ArrayList<>();
 
-            collectParts(recipe.getInputs(), inputParts, true);
+            // Catalysts are drawn with the decorator that asks for them, not as consumed inputs
+            List<IRecipeInput> catalysts = catalysts();
+            List<IRecipeInput> consumed = new ArrayList<>();
+            for (IRecipeInput input : recipe.getInputs()) {
+                if (catalysts.stream()
+                    .noneMatch(catalyst -> catalyst == input)) consumed.add(input);
+            }
+            collectParts(consumed, inputParts, true);
             collectPartsErrors(recipe.getOutputs(), outputParts, false);
 
             int currentX = 5;
@@ -517,12 +548,71 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
             } else {
                 PositionedText text = new PositionedText("No Output", 0x222222, new Rectangle(0, currentY, 166, 10));
                 allParts.add(new LayoutPartRenderer(text));
+                currentY += 12;
             }
+
+            List<RecipeLayoutPart<?>> extraInputParts = new ArrayList<>();
+            List<RecipeLayoutPart<?>> extraOutputParts = new ArrayList<>();
+            currentY = layoutDecorators(currentX, currentY, extraInputParts, extraOutputParts);
 
             this.calculatedHeight = currentY + 10;
 
             populateLegacyLists(inputParts, true);
             populateLegacyLists(outputParts, false);
+            populateLegacyLists(extraInputParts, true);
+            populateLegacyLists(extraOutputParts, false);
+        }
+
+        private List<IRecipeInput> catalysts() {
+            List<IRecipeInput> found = new ArrayList<>();
+            for (RecipeDecorator decorator : NeiRecipeOutputs.decorators(recipe)) {
+                if (decorator instanceof RequirementDecorator requirement) found.addAll(requirement.getRequirements());
+            }
+            return found;
+        }
+
+        /** A line per decorator effect, with the catalysts or outputs it involves drawn beneath. */
+        private int layoutDecorators(int startX, int startY, List<RecipeLayoutPart<?>> extraInputParts,
+            List<RecipeLayoutPart<?>> extraOutputParts) {
+            int currentY = startY;
+            boolean headed = false;
+            for (RecipeDecorator decorator : NeiRecipeOutputs.decorators(recipe)) {
+                List<DecoratorDescription> lines = decorator.describe();
+                if (lines.isEmpty()) continue;
+
+                if (!headed) {
+                    currentY += 4;
+                    allParts.add(
+                        new LayoutPartRenderer(
+                            new PositionedText(
+                                StatCollector.translateToLocal("okmodular.nei.decorators"),
+                                0x444444,
+                                new Rectangle(0, currentY, 166, 10))));
+                    currentY += 12;
+                    headed = true;
+                }
+
+                for (DecoratorDescription line : lines) {
+                    PositionedText text = new PositionedText(
+                        " - " + format(line),
+                        0x222222,
+                        new Rectangle(10, currentY, 156, 10),
+                        false);
+                    allParts.add(new LayoutPartRenderer(text));
+                    currentY += text.getRenderedHeight();
+                }
+
+                List<RecipeLayoutPart<?>> parts = new ArrayList<>();
+                if (decorator instanceof RequirementDecorator requirement) {
+                    collectParts(requirement.getRequirements(), parts, true);
+                    extraInputParts.addAll(parts);
+                } else {
+                    collectPartsErrors(decorator.getPossibleOutputs(), parts, false);
+                    extraOutputParts.addAll(parts);
+                }
+                if (!parts.isEmpty()) currentY = layoutSection(parts, startX + 10, currentY + 2) + 2;
+            }
+            return currentY;
         }
 
         private int layoutSection(List<RecipeLayoutPart<?>> parts, int startX, int startY) {

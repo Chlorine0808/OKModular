@@ -105,6 +105,11 @@ public final class CellMapping {
         return choices.length == 1 && chance instanceof ConstantExpression && chance.evaluateDouble(null) >= ALWAYS;
     }
 
+    /** What may go here, as written. A null entry means "leave the cell alone". */
+    String[] choices() {
+        return choices.clone();
+    }
+
     /**
      * Settle what can be settled against the machine, for one placement of the pattern.
      * <p>

@@ -237,3 +237,28 @@ Every value `modifierKey` could have named is visible there as `speed_multi`,
 `energy_multi` or `batch`, and an expression can **combine** them, which one key never
 could. Implementing it would have left one idea with two spellings, the weaker one
 answering differently.
+
+## 8. How Decorators Look in NEI
+
+Each decorator adds a line under **Extras**, below the outputs. The outputs a decorator may add
+are drawn beneath its line, so they are not mistaken for outputs the recipe always produces.
+
+| type name | Line (example) | Drawn beneath it |
+|---|---|---|
+| `chance` | Succeeds 25% of the time; a miss produces nothing | - |
+| `bonus` | 10% chance of these extra outputs: | `outputs` |
+| `weighted_random` | Picks 1 of these by weight (70 / 30): | `outputs`, weights in the same order |
+| `requirement` | Also needs: *condition* / Needs these catalysts, not consumed: | `requirements` |
+| `harvest_block` | Mines the blocks it removes and outputs the drops (Fortune III, harvest level 2) | - |
+| `per_position_probability` | Each L cell becomes this with 5% chance: | `output` |
+| `bonus_block_output` | 50% chance of these extra blocks: | `outputs` |
+| `random_block_output` | Places each of these on 3 random cell(s) of its symbol: | each `output` in `selections` |
+
+- A `chance` or `count` written as a number shows as a value; one written as an expression
+  shows the expression, because NEI has no machine to evaluate it against
+- `harvest_block` shows no items. What drops depends on the block standing in the cell
+- `requirement` catalysts appear only here, not among the inputs, since they are not consumed
+
+Searching NEI for an item's recipes also finds recipes that may produce it through a decorator.
+Searching for a block finds recipes that place it with a decorator's block output (see
+[Structure IO](../structures/STRUCTURE_IO.md#finding-it-in-nei) for `block` and `structure` outputs).

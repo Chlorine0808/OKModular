@@ -352,7 +352,13 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
 
     @Override
     public IRecipeInput copy(int multiplier) {
-        BlockInput result = new BlockInput(symbol, block, replace, amount * multiplier, consume, optional);
+        BlockInput result = new BlockInput(
+            symbol,
+            block,
+            replace,
+            Amounts.toInt((long) amount * multiplier),
+            consume,
+            optional);
         result.nbtExpressions = this.nbtExpressions;
         result.nbtListOp = this.nbtListOp;
         result.nbtMatchMode = this.nbtMatchMode;

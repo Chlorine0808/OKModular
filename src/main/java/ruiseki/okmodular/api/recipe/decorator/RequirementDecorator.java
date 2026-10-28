@@ -106,6 +106,21 @@ public class RequirementDecorator extends RecipeDecorator {
         return filtered;
     }
 
+    /** The catalysts are drawn under this line rather than among the consumed inputs. */
+    @Override
+    public List<DecoratorDescription> describe() {
+        List<DecoratorDescription> lines = new ArrayList<>();
+        if (extraCondition != null) {
+            lines.add(
+                new DecoratorDescription(
+                    "okmodular.nei.decorator.requirement.condition",
+                    extraCondition.getDescription()));
+        }
+        if (!requirements.isEmpty())
+            lines.add(new DecoratorDescription("okmodular.nei.decorator.requirement.catalysts"));
+        return lines;
+    }
+
     public ICondition getExtraCondition() {
         return extraCondition;
     }
