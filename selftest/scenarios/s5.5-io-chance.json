@@ -354,5 +354,109 @@
         "max": 605
       }
     ]
+  },
+  {
+    "id": "s5.5-tier-1",
+    "section": "5.5",
+    "title": "chance \"tier * 0.2\" at tier 1 places emerald on about 20% of cells",
+    "source": "run/TESTING.md §5.5 { chance: \"tier * 0.2\" } で Tier を上げる (濃くなる); docs/jp/structures/STRUCTURE_IO.md §3 式で書く; docs/jp/recipes/EXPRESSION_REFERENCE.md tier; 605 cells (11x11x5 above the anchor) keep the z=4.5 false-fail rate near 7.6e-6 even at p=0.2/0.8",
+    "machine": {
+      "structure": "selftest_chance_tiered",
+      "cells": {
+        "C*": "okmodular:casing_plain:0"
+      }
+    },
+    "inputs": [
+      {
+        "item": "minecraft:clay_ball",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "pattern": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "componentTier",
+        "component": "casing",
+        "value": 1
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:emerald_block",
+        "p": 0.2
+      }
+    ]
+  },
+  {
+    "id": "s5.5-tier-4",
+    "section": "5.5",
+    "title": "chance \"tier * 0.2\" at tier 4 places emerald on about 80% of cells (denser than tier 1)",
+    "source": "run/TESTING.md §5.5 { chance: \"tier * 0.2\" } で Tier を上げる (濃くなる); docs/jp/structures/STRUCTURE_IO.md §3 式で書く; docs/jp/recipes/EXPRESSION_REFERENCE.md tier; 605 cells (11x11x5 above the anchor) keep the z=4.5 false-fail rate near 7.6e-6 even at p=0.2/0.8. The tier-1 and tier-4 ranges do not overlap",
+    "machine": {
+      "structure": "selftest_chance_tiered",
+      "cells": {
+        "C*": "okmodular:casing_plain:3"
+      }
+    },
+    "inputs": [
+      {
+        "item": "minecraft:clay_ball",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "pattern": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "componentTier",
+        "component": "casing",
+        "value": 4
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:emerald_block",
+        "p": 0.8
+      }
+    ]
   }
 ]
