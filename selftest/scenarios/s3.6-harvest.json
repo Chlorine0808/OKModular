@@ -460,5 +460,126 @@
         "to": 200
       }
     ]
+  },
+  {
+    "id": "s3.6-port-full",
+    "section": "3.6",
+    "title": "With the output port full, the overwritten stone's cobblestone drops in the world",
+    "source": "run/TESTING.md §3.6 ポートが満杯のとき (入らない分がその場にドロップする); docs/jp/recipes/DECORATORS.md §5 harvest_block (採掘品はアイテムポートに入ります。入らなかった分はその場にドロップします). Uses the block output side, whose drops go straight to the ports (HarvestBlockDecorator#beforeOutputsApplied)",
+    "machine": {
+      "structure": "selftest_harvest"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "fillOutputs",
+        "item": "minecraft:dirt"
+      },
+      {
+        "at": 1,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:sand",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "snapshots": {
+      "cells": {
+        "from": [
+          0,
+          2,
+          0
+        ],
+        "to": [
+          0,
+          4,
+          0
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      },
+      {
+        "kind": "droppedCount",
+        "item": "minecraft:cobblestone",
+        "min": 1,
+        "max": 3
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:cobblestone",
+        "min": 0,
+        "max": 0
+      }
+    ]
   }
 ]
