@@ -458,6 +458,20 @@
         "a": "first",
         "b": "second",
         "min": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "first",
+        "block": "minecraft:gold_ore",
+        "min": 1,
+        "max": 4913
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "second",
+        "block": "minecraft:gold_ore",
+        "min": 1,
+        "max": 4913
       }
     ]
   }
