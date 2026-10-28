@@ -218,6 +218,20 @@
         "a": "west",
         "b": "east",
         "min": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "west",
+        "block": "minecraft:diamond_block",
+        "min": 1,
+        "max": 729
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "east",
+        "block": "minecraft:diamond_block",
+        "min": 1,
+        "max": 729
       }
     ]
   },
