@@ -20,6 +20,25 @@
       ]
     },
     {
+      "registryName": "selftest_chance_half_two",
+      "name": "Selftest Chance IO: the half pattern at both anchors",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sugar",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_chance_half",
+          "symbol": "A",
+          "amount": 2
+        }
+      ]
+    },
+    {
       "registryName": "selftest_chance_weights",
       "name": "Selftest Chance IO: iron and gold ore at 8:2",
       "duration": 20,

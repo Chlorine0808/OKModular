@@ -173,5 +173,75 @@
         "max": 0
       }
     ]
+  },
+  {
+    "id": "s5.5-two-anchors-differ",
+    "section": "5.5",
+    "title": "One recipe writing the half pattern at two anchors lays out two different arrangements",
+    "source": "run/TESTING.md §5.5 同じレシピがアンカー 2 箇所に置く (2 箇所が別の配置); docs/jp/structures/STRUCTURE_IO.md §3 散り方 (アンカー 2 箇所は別の配置), §6 レシピからの参照 (amount)",
+    "machine": {
+      "structure": "selftest_chance_io2"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sugar",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "west": {
+        "from": [
+          -11,
+          2,
+          -5
+        ],
+        "to": [
+          -1,
+          6,
+          5
+        ]
+      },
+      "east": {
+        "from": [
+          1,
+          2,
+          -5
+        ],
+        "to": [
+          11,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "snapshotsDiffer",
+        "a": "west",
+        "b": "east",
+        "min": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "west",
+        "block": "minecraft:lapis_block",
+        "min": 1,
+        "max": 605
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "east",
+        "block": "minecraft:lapis_block",
+        "min": 1,
+        "max": 605
+      }
+    ]
   }
 ]
