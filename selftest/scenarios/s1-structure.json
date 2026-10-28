@@ -268,5 +268,42 @@
         "block": "minecraft:air"
       }
     ]
+  },
+  {
+    "id": "s1-air-symbol",
+    "section": "1",
+    "title": "A decorator pointed at the air symbol _ changes every empty cell",
+    "source": "run/TESTING.md §1 ⚠ Q と _ は位置を記録する（項目 V）; docs/jp/structures/JSON_FORMAT.md §6 予約記号; docs/jp/recipes/DECORATORS.md §1 per_position_probability; selftest/config/okmodular/recipes/selftest_anchor.json selftest_anchor_air",
+    "machine": {
+      "structure": "selftest_anchor"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sand",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "shape": {
+        "from": [-1, -1, -1],
+        "to": [1, 1, 1]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "shape",
+        "block": "minecraft:glass",
+        "min": 4,
+        "max": 4
+      }
+    ]
   }
 ]

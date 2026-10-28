@@ -36,6 +36,34 @@
           "symbol": "A"
         }
       ]
+    },
+    {
+      "registryName": "selftest_anchor_air",
+      "name": "Selftest Anchor: glass on every air cell",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "type": "per_position_probability",
+          "chance": 1.0,
+          "symbol": "_",
+          "output": {
+            "symbol": "_",
+            "block": "minecraft:glass"
+          }
+        }
+      ]
     }
   ]
 }
