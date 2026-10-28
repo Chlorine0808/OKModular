@@ -36,6 +36,25 @@
           "symbol": "A"
         }
       ]
+    },
+    {
+      "registryName": "selftest_pat_two_anchors",
+      "name": "Selftest Pattern: a distance-shaded ball at both anchors",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_shaded",
+          "symbol": "A",
+          "amount": 2
+        }
+      ]
     }
   ]
 }

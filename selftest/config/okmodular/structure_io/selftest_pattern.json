@@ -218,6 +218,21 @@
           "           "
         ]
       ]
+    },
+    {
+      "name": "selftest_pat_shaded",
+      "shape": {
+        "type": "sphere",
+        "radius": 4,
+        "symbol": "X",
+        "offset": [0, 6, 0]
+      },
+      "mappings": {
+        "X": {
+          "block": "minecraft:diamond_block",
+          "chance": "1 - sqrt(cell_x^2 + (cell_y - 6)^2 + cell_z^2) / 4"
+        }
+      }
     }
   ]
 }

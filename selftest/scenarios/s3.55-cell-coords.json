@@ -163,5 +163,62 @@
         "to": [5, 6, 5]
       }
     ]
+  },
+  {
+    "id": "s3.55-two-anchors",
+    "section": "3.55",
+    "title": "Two anchors get the same shading but different cells (compare the two balls in the figure)",
+    "source": "run/TESTING.md §3.55 アンカー 2 箇所で形が同じ; docs/jp/structures/STRUCTURE_IO.md §3 散り方 (アンカー 2 箇所は別の配置), §4 形を生成する (offset), §6 レシピからの参照 (amount)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern2"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sand",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-10, 3, -4],
+        "to": [-2, 11, 4],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [2, 3, -4],
+        "to": [10, 11, 4],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "west": {
+        "from": [-10, 3, -4],
+        "to": [-2, 11, 4]
+      },
+      "east": {
+        "from": [2, 3, -4],
+        "to": [10, 11, 4]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "snapshotsDiffer",
+        "a": "west",
+        "b": "east",
+        "min": 1
+      }
+    ]
   }
 ]
