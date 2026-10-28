@@ -120,6 +120,41 @@
           "biome": "Desert"
         }
       ]
+    },
+    {
+      "group": "SelftestCondPattern",
+      "registryName": "selftest_cond_pattern",
+      "name": "Selftest Condition: desert ringed by plains",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "pattern": [
+            "PPP",
+            "P#P",
+            "PPP"
+          ],
+          "keys": {
+            "#": {
+              "biome": "Desert"
+            },
+            "P": {
+              "biome": "Plains"
+            }
+          }
+        }
+      ]
     }
   ]
 }
