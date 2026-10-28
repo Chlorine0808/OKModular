@@ -97,6 +97,29 @@
           "dimension": -1
         }
       ]
+    },
+    {
+      "group": "SelftestCondBiome",
+      "registryName": "selftest_cond_biome",
+      "name": "Selftest Condition: in a desert",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "biome": "Desert"
+        }
+      ]
     }
   ]
 }
