@@ -334,5 +334,73 @@
         "contains": "pattern(3x3)"
       }
     ]
+  },
+  {
+    "id": "s3.5-weather-true",
+    "section": "3.5",
+    "title": "A rain condition is met while it rains",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `weather` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `weather`; /weather rain",
+    "exclusive": true,
+    "machine": {
+      "structure": "selftest_cond_weather"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "weather",
+        "value": "rain"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-weather-false",
+    "section": "3.5",
+    "title": "A rain condition refuses in clear weather",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `weather` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `weather`; /weather clear; reason text src/main/resources/assets/okmodular/lang/en_US.lang okmodular.condition.weather.RAIN",
+    "exclusive": true,
+    "machine": {
+      "structure": "selftest_cond_weather"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "weather",
+        "value": "clear"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "conditionFailure",
+        "contains": "Requires rain"
+      }
+    ]
   }
 ]

@@ -155,6 +155,29 @@
           }
         }
       ]
+    },
+    {
+      "group": "SelftestCondWeather",
+      "registryName": "selftest_cond_weather",
+      "name": "Selftest Condition: raining",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "weather": "rain"
+        }
+      ]
     }
   ]
 }
