@@ -50,5 +50,81 @@
         "contains": "Requires block: minecraft:stone"
       }
     ]
+  },
+  {
+    "id": "s3.5-block-below-true",
+    "section": "3.5",
+    "title": "A block_below condition is met when the block under the machine matches",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `block / block_below` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `block_below`; block_below = the block at Y-1 of the machine",
+    "machine": {
+      "structure": "selftest_cond_block_below"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          -1,
+          0
+        ],
+        "block": "minecraft:iron_block"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-block-below-false",
+    "section": "3.5",
+    "title": "A block_below condition refuses when another block is under the machine",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `block / block_below` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `block_below`; reason text src/main/resources/assets/okmodular/lang/en_US.lang okmodular.condition.block_below with the block's display name",
+    "machine": {
+      "structure": "selftest_cond_block_below"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          -1,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "conditionFailure",
+        "contains": "Requires block below: Block of Iron"
+      }
+    ]
   }
 ]

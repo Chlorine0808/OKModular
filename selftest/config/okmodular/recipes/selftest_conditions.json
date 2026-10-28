@@ -48,6 +48,32 @@
           "block": "minecraft:stone"
         }
       ]
+    },
+    {
+      "group": "SelftestCondBlockBelow",
+      "registryName": "selftest_cond_block_below",
+      "name": "Selftest Condition: iron block below",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "type": "block_below",
+          "block": {
+            "name": "minecraft:iron_block"
+          }
+        }
+      ]
     }
   ]
 }
