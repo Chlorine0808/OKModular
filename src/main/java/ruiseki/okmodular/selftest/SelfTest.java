@@ -35,6 +35,9 @@ public final class SelfTest {
 
     static final Logger LOG = LogManager.getLogger("OKModular-selftest");
 
+    /** §2 reloads chunks within one server run; nothing restarts the server between a save and a load. */
+    static final String NO_RESTART_NOTE = "§2: サーバー再起動を跨ぐ確認は未実施（チャンクの再読込だけ）";
+
     private SelfTest() {}
 
     public static void onPreInit() {
@@ -52,6 +55,7 @@ public final class SelfTest {
                 loadScenarios(System.getProperty("okmodular.selftest.scenarios"), notes),
                 System.getProperty("okmodular.selftest.only"),
                 notes);
+            addSectionNotes(scenarios, notes);
             Annotations annotations = loadAnnotations(System.getProperty("okmodular.selftest.annotations"), notes);
             ForgeChunkManager.setForcedChunkLoadingCallback(OKModular.instance, new ReleaseTickets());
             String repo = System.getProperty("okmodular.selftest.repo");
@@ -131,6 +135,16 @@ public final class SelfTest {
             if (keep) out.add(s);
         }
         return out;
+    }
+
+    /** Notes what the selected scenarios leave unchecked; today only §2's missing restart. */
+    static void addSectionNotes(List<Scenario> selected, List<String> notes) {
+        for (Scenario s : selected) {
+            if ("2".equals(s.section)) {
+                notes.add(NO_RESTART_NOTE);
+                return;
+            }
+        }
     }
 
     private static Annotations loadAnnotations(String path, List<String> notes) {
