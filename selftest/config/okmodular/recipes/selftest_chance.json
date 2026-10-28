@@ -56,6 +56,36 @@
           }
         }
       ]
+    },
+    {
+      "registryName": "selftest_chance_bonus",
+      "name": "Selftest Chance: a diamond bonus every run (chance 1.0)",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:glass",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "bonus": {
+            "chance": 1.0,
+            "outputs": [
+              {
+                "item": "minecraft:diamond",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ]
     }
   ]
 }

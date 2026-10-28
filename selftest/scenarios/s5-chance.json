@@ -107,5 +107,41 @@
         "max": 50
       }
     ]
+  },
+  {
+    "id": "s5-bonus-1",
+    "section": "5",
+    "title": "bonus at chance 1.0 pays its diamond on each of 3 runs",
+    "source": "run/TESTING.md §5 bonus に chance: 1.0 (毎回出る); docs/jp/recipes/DECORATORS.md §1 bonus, §2 書き方",
+    "machine": {
+      "structure": "selftest_chance"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sand",
+        "amount": 3
+      }
+    ],
+    "ticks": 200,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:glass",
+        "min": 3,
+        "max": 3
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:diamond",
+        "min": 3,
+        "max": 3
+      }
+    ]
   }
 ]
