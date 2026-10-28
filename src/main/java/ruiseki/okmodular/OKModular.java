@@ -35,6 +35,7 @@ import ruiseki.okmodular.common.command.CommandModularWand;
 import ruiseki.okmodular.config.MachineryConfig;
 import ruiseki.okmodular.config.WorldGenConfig;
 import ruiseki.okmodular.integration.waila.BlockProvider;
+import ruiseki.okmodular.selftest.SelfTest;
 
 /**
  * OK Modular: modular multiblock machinery, split out of Omoshiroi Kamo.
@@ -94,6 +95,7 @@ public class OKModular extends ModBase {
     @EventHandler
     public final void preInit(FMLPreInitializationEvent event) {
         super.preInit(event);
+        SelfTest.onPreInit();
         if (MinecraftHelpers.isClientSide()) {
             ModelRegistry.registerModid(Reference.MOD_ID);
             if (Mods.NotEnoughItems.isLoaded()) {
@@ -137,6 +139,7 @@ public class OKModular extends ModBase {
     @EventHandler
     public void onServerStarted(FMLServerStartedEvent event) {
         super.onServerStarted(event);
+        SelfTest.onServerStarted(MinecraftServer.getServer());
     }
 
     @Override
