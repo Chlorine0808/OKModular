@@ -26,7 +26,13 @@ final class TestSites {
         int i = next++;
         // The origin sits in a chunk's middle, so a small machine never straddles a chunk border.
         Site site = new Site(this, s, world, BASE_X + i * SPACING + 8, s.y, BASE_Z + 8);
-        force(site);
+        try {
+            force(site);
+        } catch (RuntimeException e) {
+            // The caller never sees this site, so nobody else would release its ticket.
+            unforce(site);
+            throw e;
+        }
         return site;
     }
 
@@ -82,6 +88,8 @@ final class TestSites {
         ForgeChunkManager.Ticket t = ForgeChunkManager
             .requestTicket(OKModular.instance, site.world, ForgeChunkManager.Type.NORMAL);
         if (t == null) throw new IllegalStateException("no forced-chunk ticket for the selftest");
+        // Held on the site at once, so a throw below still lets the caller release it.
+        site.ticket = t;
         t.setChunkListDepth(chunksPerSide() * chunksPerSide());
         for (int cx = (site.x - RADIUS) >> 4; cx <= (site.x + RADIUS) >> 4; cx++) {
             for (int cz = (site.z - RADIUS) >> 4; cz <= (site.z + RADIUS) >> 4; cz++) {
@@ -91,7 +99,6 @@ final class TestSites {
                 site.world.theChunkProviderServer.loadChunk(cx, cz);
             }
         }
-        site.ticket = t;
     }
 
     private static int chunksPerSide() {
