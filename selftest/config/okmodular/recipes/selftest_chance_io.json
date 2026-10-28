@@ -57,6 +57,42 @@
       ]
     },
     {
+      "registryName": "selftest_chance_weights_air",
+      "name": "Selftest Chance IO: coal ore or air at 1:1",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_chance_weights_air",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_chance_weights_blank",
+      "name": "Selftest Chance IO: quartz or untouched at 1:1",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_chance_weights_blank",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
       "registryName": "selftest_chance_tier",
       "name": "Selftest Chance IO: emerald with chance tier * 0.2",
       "duration": 20,
