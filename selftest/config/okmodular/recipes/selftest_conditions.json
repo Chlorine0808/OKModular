@@ -1,0 +1,53 @@
+{
+  "recipes": [
+    {
+      "group": "SelftestCondBlock",
+      "registryName": "selftest_cond_block_true",
+      "name": "Selftest Condition: block is the controller itself",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "block": {
+            "name": "okmodular:modular_machine_controller",
+            "data": -1
+          }
+        }
+      ]
+    },
+    {
+      "group": "SelftestCondBlock",
+      "registryName": "selftest_cond_block_false",
+      "name": "Selftest Condition: block is stone",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:glass",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "block": "minecraft:stone"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "s3.5-block-true",
+    "section": "3.5",
+    "title": "A block condition naming the block at the machine's position lets the recipe start",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `block / block_below` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `block`; BlockCondition reads the context position, which is the controller (TEMachineController#newConditionContext), so the matching block is the controller itself; data -1 = any meta (CONDITIONS.md ブロックのメタデータ)",
+    "machine": {
+      "structure": "selftest_cond_block"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-block-false",
+    "section": "3.5",
+    "title": "A block condition naming another block refuses the recipe and says why",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `block / block_below` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `block`; the controller's position does not hold stone; reason text src/main/resources/assets/okmodular/lang/en_US.lang okmodular.condition.block",
+    "machine": {
+      "structure": "selftest_cond_block"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sand",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "conditionFailure",
+        "contains": "Requires block: minecraft:stone"
+      }
+    ]
+  }
+]
