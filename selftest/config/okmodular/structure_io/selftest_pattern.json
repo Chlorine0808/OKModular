@@ -323,6 +323,24 @@
           "           "
         ]
       ]
+    },
+    {
+      "name": "selftest_pat_light",
+      "anchor": "A",
+      "mappings": {
+        "X": {
+          "block": "minecraft:glass",
+          "chance": "light_block < 8 ? 1 : 0"
+        }
+      },
+      "layers": [
+        [
+          "XXXXXXXXXXXX XXXXXXXXXXXX"
+        ],
+        [
+          "            A            "
+        ]
+      ]
     }
   ]
 }

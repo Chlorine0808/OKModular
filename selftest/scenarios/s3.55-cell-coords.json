@@ -328,5 +328,73 @@
         "value": false
       }
     ]
+  },
+  {
+    "id": "s3.55-light",
+    "section": "3.55",
+    "title": "light_block is read per cell: no glass next to the torch, glass far from it",
+    "source": "run/TESTING.md §3.55 light_block / temp がセルごとに効く; docs/jp/recipes/EXPRESSION_REFERENCE.md light_block",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:planks",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [0, 2, 0],
+        "block": "minecraft:torch:5"
+      }
+    ],
+    "snapshots": {
+      "row": {
+        "from": [-12, 1, -1],
+        "to": [12, 2, 1]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "row",
+        "pos": [1, 2, 0],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "row",
+        "pos": [-1, 2, 0],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "row",
+        "block": "minecraft:glass",
+        "from": [8, 2, 0],
+        "to": [12, 2, 0],
+        "min": 5,
+        "max": 5
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "row",
+        "block": "minecraft:glass",
+        "from": [-12, 2, 0],
+        "to": [-8, 2, 0],
+        "min": 5,
+        "max": 5
+      }
+    ]
   }
 ]
