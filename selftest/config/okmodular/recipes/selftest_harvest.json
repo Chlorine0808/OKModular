@@ -49,6 +49,53 @@
           "harvestLevel": 0
         }
       ]
+    },
+    {
+      "registryName": "selftest_harvest_too_hard",
+      "name": "Selftest Harvest: harvestLevel 1 against any block in the three cells",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        },
+        {
+          "symbol": "H",
+          "block": "*",
+          "amount": 3,
+          "consume": true
+        }
+      ],
+      "outputs": [],
+      "decorators": [
+        {
+          "type": "harvest_block",
+          "harvestLevel": 1
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_harvest_no_level",
+      "name": "Selftest Harvest: no harvestLevel against any block in the three cells",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:netherrack",
+          "amount": 1
+        },
+        {
+          "symbol": "H",
+          "block": "*",
+          "amount": 3,
+          "consume": true
+        }
+      ],
+      "outputs": [],
+      "decorators": [
+        {
+          "type": "harvest_block"
+        }
+      ]
     }
   ]
 }

@@ -230,5 +230,235 @@
         "max": 0
       }
     ]
+  },
+  {
+    "id": "s3.6-too-hard",
+    "section": "3.6",
+    "title": "One obsidian among stone with harvestLevel 1 keeps the recipe from starting; swapping it for stone lets it start",
+    "source": "run/TESTING.md §3.6 harvestLevel より硬いブロックを 1 つ混ぜる (レシピが始まらない); docs/jp/recipes/DECORATORS.md §5 harvest_block (harvestLevel: これより硬いブロックがあるとレシピが始まりません; レシピ開始前: 硬すぎるブロックがあれば開始を断る). Obsidian needs pickaxe level 3. The swap at tick 61 is a control showing the obsidian, not the fixture, was the reason",
+    "machine": {
+      "structure": "selftest_harvest"
+    },
+    "ticks": 220,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:obsidian"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 1,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:gravel",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "at": 61,
+        "action": "setBlock",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "cells": {
+        "from": [
+          0,
+          2,
+          0
+        ],
+        "to": [
+          0,
+          4,
+          0
+        ]
+      },
+      "refused": {
+        "from": [
+          0,
+          2,
+          0
+        ],
+        "to": [
+          0,
+          4,
+          0
+        ],
+        "at": 60
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "refused",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:obsidian"
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 61,
+        "to": 200
+      }
+    ]
+  },
+  {
+    "id": "s3.6-iron-no-level",
+    "section": "3.6",
+    "title": "Without harvestLevel one iron ore keeps the recipe from starting, and loading warned about it",
+    "source": "run/TESTING.md §3.6 harvestLevel を書かずに鉄鉱石を混ぜる (同じく始まらない。ロードログに警告が出ている); docs/jp/recipes/DECORATORS.md §5 harvest_block (WARNING: harvestLevel の既定は 0 … 鉄鉱石（レベル 1）が 1 つあるだけでレシピが始まりません … 省略した場合は、ロード時に警告が出ます); warning text from HarvestBlockDecorator#fromJson. The swap at tick 61 is a control showing the iron ore was the reason",
+    "machine": {
+      "structure": "selftest_harvest"
+    },
+    "ticks": 220,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:iron_ore"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 1,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:netherrack",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "at": 61,
+        "action": "setBlock",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "cells": {
+        "from": [
+          0,
+          2,
+          0
+        ],
+        "to": [
+          0,
+          4,
+          0
+        ]
+      },
+      "refused": {
+        "from": [
+          0,
+          2,
+          0
+        ],
+        "to": [
+          0,
+          4,
+          0
+        ],
+        "at": 60
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "refused",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:iron_ore"
+      },
+      {
+        "kind": "logContains",
+        "text": "harvest_block with no harvestLevel defaults to 0"
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 61,
+        "to": 200
+      }
+    ]
   }
 ]
