@@ -6,5 +6,30 @@
     "source": "selftest harness: an empty scenario must reach the report",
     "ticks": 5,
     "expect": []
+  },
+  {
+    "id": "s0-probe-forms",
+    "section": "0",
+    "title": "The probe machine is built and forms",
+    "source": "run/TESTING.md §1 (a structure assembles into a machine); selftest/config/okmodular/structures/selftest_probe.json",
+    "machine": { "structure": "selftest_probe" },
+    "ticks": 10,
+    "snapshots": { "shape": { "from": [-1, -1, -1], "to": [1, 1, 1] } },
+    "expect": [
+      { "kind": "formed", "value": true }
+    ]
+  },
+  {
+    "id": "s0-probe-runs",
+    "section": "0",
+    "title": "The probe machine turns cobblestone into stone",
+    "source": "run/TESTING.md §1 (a structure assembles into a machine); selftest/config/okmodular/recipes/selftest_probe.json selftest_probe_cobble",
+    "machine": { "structure": "selftest_probe" },
+    "inputs": [ { "item": "minecraft:cobblestone", "amount": 1 } ],
+    "ticks": 60,
+    "expect": [
+      { "kind": "recipeStarted", "value": true, "from": 0, "to": 40 },
+      { "kind": "outputCount", "item": "minecraft:stone", "min": 1, "max": 1 }
+    ]
   }
 ]
