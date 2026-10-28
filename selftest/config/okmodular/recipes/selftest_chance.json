@@ -1,0 +1,61 @@
+{
+  "group": "SelftestChance",
+  "recipes": [
+    {
+      "registryName": "selftest_chance_ppp_1",
+      "name": "Selftest Chance: glass on every air cell (chance 1.0)",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "type": "per_position_probability",
+          "chance": 1.0,
+          "symbol": "_",
+          "output": {
+            "symbol": "_",
+            "block": "minecraft:glass"
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_chance_ppp_0",
+      "name": "Selftest Chance: glass on no air cell (chance 0.0)",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:dirt",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "type": "per_position_probability",
+          "chance": 0.0,
+          "symbol": "_",
+          "output": {
+            "symbol": "_",
+            "block": "minecraft:glass"
+          }
+        }
+      ]
+    }
+  ]
+}

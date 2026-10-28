@@ -1,0 +1,111 @@
+[
+  {
+    "id": "s5-ppp-1",
+    "section": "5",
+    "title": "per_position_probability at chance 1.0 turns every air cell of the structure to glass",
+    "source": "run/TESTING.md §5 per_position_probability に chance: 1.0 (対象記号の全マスが変わる); docs/jp/recipes/DECORATORS.md §1 per_position_probability; selftest/config/okmodular/structures/selftest_chance.json (50 '_' cells)",
+    "machine": {
+      "structure": "selftest_chance"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "air": {
+        "from": [
+          -2,
+          2,
+          -2
+        ],
+        "to": [
+          2,
+          3,
+          2
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "air",
+        "block": "minecraft:glass",
+        "min": 50,
+        "max": 50
+      }
+    ]
+  },
+  {
+    "id": "s5-ppp-0",
+    "section": "5",
+    "title": "per_position_probability at chance 0.0 leaves every air cell alone",
+    "source": "run/TESTING.md §5 同じく chance: 0.0 (1 マスも変わらない); docs/jp/recipes/DECORATORS.md §1 per_position_probability. The stone output proves the run completed, so the decorator had its turn",
+    "machine": {
+      "structure": "selftest_chance"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:dirt",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "air": {
+        "from": [
+          -2,
+          2,
+          -2
+        ],
+        "to": [
+          2,
+          3,
+          2
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "air",
+        "block": "minecraft:glass",
+        "min": 0,
+        "max": 0
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "air",
+        "block": "minecraft:air",
+        "min": 50,
+        "max": 50
+      }
+    ]
+  }
+]
