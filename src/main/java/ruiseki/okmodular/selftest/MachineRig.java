@@ -1,6 +1,7 @@
 package ruiseki.okmodular.selftest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,8 @@ final class MachineRig {
     private TEMachineController controller;
     /** The last condition failure seen while sampling; the machine forgets it once a recipe runs. */
     String lastConditionFailure;
+    /** Port positions seen while formed, so ports can still be read after a recipe breaks the structure. */
+    private final Map<String, List<int[]>> portCells = new HashMap<>();
 
     private MachineRig(TestSites.Site site, MachineSpec spec, TEMachineController controller) {
         this.site = site;
@@ -77,7 +80,21 @@ final class MachineRig {
         }
         te.getStructureAgent()
             .forceStructureCheck();
-        return new MachineRig(site, spec, te);
+        MachineRig rig = new MachineRig(site, spec, te);
+        rig.rememberPorts();
+        return rig;
+    }
+
+    private void rememberPorts() {
+        for (boolean input : new boolean[] { true, false }) {
+            for (IPortType.Type type : IPortType.Type.values()) {
+                List<int[]> cells = new ArrayList<>();
+                for (IModularPort p : input ? controller.getInputPorts(type) : controller.getOutputPorts(type)) {
+                    if (p instanceof TileEntity t) cells.add(new int[] { t.xCoord, t.yCoord, t.zCoord });
+                }
+                portCells.put(input + ":" + type, cells);
+            }
+        }
     }
 
     TEMachineController controller() {
@@ -129,10 +146,21 @@ final class MachineRig {
         }
     }
 
+    /**
+     * The machine's ports of one direction and type. A formed machine lists them itself; once
+     * unformed (a block output can overwrite its own structure) the ports seen at build time are
+     * read from the world, since their contents stay in the port blocks.
+     */
     <T> List<T> ports(boolean input, IPortType.Type type, Class<T> cls) {
         List<T> out = new ArrayList<>();
-        for (IModularPort p : input ? controller.getInputPorts(type) : controller.getOutputPorts(type)) {
-            if (cls.isInstance(p)) out.add(cls.cast(p));
+        List<IModularPort> listed = input ? controller.getInputPorts(type) : controller.getOutputPorts(type);
+        if (!listed.isEmpty()) {
+            for (IModularPort p : listed) if (cls.isInstance(p)) out.add(cls.cast(p));
+            return out;
+        }
+        for (int[] c : portCells.getOrDefault(input + ":" + type, new ArrayList<>())) {
+            TileEntity t = site.world.getTileEntity(c[0], c[1], c[2]);
+            if (cls.isInstance(t)) out.add(cls.cast(t));
         }
         return out;
     }
