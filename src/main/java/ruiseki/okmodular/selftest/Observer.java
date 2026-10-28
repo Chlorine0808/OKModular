@@ -39,9 +39,6 @@ import ruiseki.okmodular.structure.StructureManager;
 /** Reads the machine and the world around a site into the selftest's Observation. */
 final class Observer {
 
-    /** Dropped items are counted within this many blocks of the site origin. */
-    static final int DROP_RADIUS = 8;
-
     private Observer() {}
 
     static MachineSample sample(MachineRig rig, int tick) {
@@ -147,15 +144,19 @@ final class Observer {
         }
     }
 
+    /** Dropped items are counted anywhere inside the site's cleared box, down to its floor. */
+    static AxisAlignedBB dropBox(int x, int y, int z) {
+        return AxisAlignedBB.getBoundingBox(
+            x - TestSites.RADIUS,
+            y - TestSites.CLEAR_BELOW,
+            z - TestSites.RADIUS,
+            x + TestSites.RADIUS + 1,
+            y + TestSites.CLEAR_ABOVE + 1,
+            z + TestSites.RADIUS + 1);
+    }
+
     private static void countDrops(TestSites.Site site, Map<String, Integer> out) {
-        AxisAlignedBB box = AxisAlignedBB.getBoundingBox(
-            site.x - DROP_RADIUS,
-            site.y - DROP_RADIUS,
-            site.z - DROP_RADIUS,
-            site.x + DROP_RADIUS + 1,
-            site.y + DROP_RADIUS + 1,
-            site.z + DROP_RADIUS + 1);
-        for (Object o : site.world.getEntitiesWithinAABB(EntityItem.class, box)) {
+        for (Object o : site.world.getEntitiesWithinAABB(EntityItem.class, dropBox(site.x, site.y, site.z))) {
             ItemStack s = ((EntityItem) o).getEntityItem();
             if (s != null && s.stackSize > 0) out.merge(MachineRig.idOf(s), s.stackSize, Integer::sum);
         }
