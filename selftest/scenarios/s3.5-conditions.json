@@ -126,5 +126,58 @@
         "contains": "Requires block below: Block of Iron"
       }
     ]
+  },
+  {
+    "id": "s3.5-dimension-true",
+    "section": "3.5",
+    "title": "A dimension condition for the nether is met in the nether",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `dimension` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `dimension`; ネザーとオーバーワールド",
+    "dimension": -1,
+    "machine": {
+      "structure": "selftest_cond_dimension"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-dimension-false",
+    "section": "3.5",
+    "title": "A dimension condition for the nether refuses in the overworld",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `dimension` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `dimension`; reason text src/main/resources/assets/okmodular/lang/en_US.lang okmodular.condition.dimension",
+    "machine": {
+      "structure": "selftest_cond_dimension"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "conditionFailure",
+        "contains": "Allowed dimensions: [-1]"
+      }
+    ]
   }
 ]

@@ -74,6 +74,29 @@
           }
         }
       ]
+    },
+    {
+      "group": "SelftestCondDimension",
+      "registryName": "selftest_cond_dimension",
+      "name": "Selftest Condition: in the nether",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "dimension": -1
+        }
+      ]
     }
   ]
 }
