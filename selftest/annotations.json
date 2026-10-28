@@ -1,0 +1,15 @@
+{
+  "scenarios": {},
+  "fixes": [
+    {
+      "commit": "a9fd646",
+      "scenario": "s3.6-too-hard",
+      "summary": "harvest_block's level gate read harvest tools before Forge had filled them (ForgeHooks not yet loaded on a fresh server), so obsidian passed harvestLevel 1"
+    },
+    {
+      "commit": "a9fd646",
+      "scenario": "s3.6-iron-no-level",
+      "summary": "Same cause: iron ore read as toolless and passed the default harvestLevel 0"
+    }
+  ]
+}
