@@ -233,6 +233,96 @@
           "chance": "1 - sqrt(cell_x^2 + (cell_y - 6)^2 + cell_z^2) / 4"
         }
       }
+    },
+    {
+      "name": "selftest_pat_stripes",
+      "anchor": "A",
+      "mappings": {
+        "X": {
+          "block": "minecraft:quartz_block",
+          "chance": "cell_x % 2"
+        }
+      },
+      "layers": [
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "     A     ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           "
+        ]
+      ]
     }
   ]
 }

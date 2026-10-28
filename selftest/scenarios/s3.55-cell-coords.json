@@ -220,5 +220,113 @@
         "min": 1
       }
     ]
+  },
+  {
+    "id": "s3.55-stripes-north",
+    "section": "3.55",
+    "title": "cell_x % 2 stripes on a north-facing machine run along world z",
+    "source": "run/TESTING.md §3.55 機械の向きで形が回らない; docs/jp/structures/STRUCTURE_IO.md §3 セルの位置を式から読む (cell_* はパターンの軸. 機械の向きと一緒に回る. 北向きの横置きではワールドの軸と一致), 縞・市松",
+    "machine": {
+      "structure": "selftest_pattern",
+      "facing": "NORTH"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:gravel",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-5, 2, -5],
+        "to": [5, 6, 5],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "pattern": {
+        "from": [-5, 2, -5],
+        "to": [5, 6, 5]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "uniformAlong",
+        "snapshot": "pattern",
+        "block": "minecraft:quartz_block",
+        "axis": "z",
+        "value": true
+      },
+      {
+        "kind": "uniformAlong",
+        "snapshot": "pattern",
+        "block": "minecraft:quartz_block",
+        "axis": "x",
+        "value": false
+      }
+    ]
+  },
+  {
+    "id": "s3.55-stripes-east",
+    "section": "3.55",
+    "title": "cell_x % 2 stripes on a east-facing machine run along world x",
+    "source": "run/TESTING.md §3.55 機械の向きで形が回らない; docs/jp/structures/STRUCTURE_IO.md §3 セルの位置を式から読む (cell_* はパターンの軸. 機械の向きと一緒に回る. 北向きの横置きではワールドの軸と一致), 縞・市松",
+    "machine": {
+      "structure": "selftest_pattern",
+      "facing": "EAST"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:gravel",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-5, 2, -5],
+        "to": [5, 6, 5],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "pattern": {
+        "from": [-5, 2, -5],
+        "to": [5, 6, 5]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "uniformAlong",
+        "snapshot": "pattern",
+        "block": "minecraft:quartz_block",
+        "axis": "x",
+        "value": true
+      },
+      {
+        "kind": "uniformAlong",
+        "snapshot": "pattern",
+        "block": "minecraft:quartz_block",
+        "axis": "z",
+        "value": false
+      }
+    ]
   }
 ]

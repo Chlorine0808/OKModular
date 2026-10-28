@@ -55,6 +55,24 @@
           "amount": 2
         }
       ]
+    },
+    {
+      "registryName": "selftest_pat_stripes",
+      "name": "Selftest Pattern: stripes from cell_x % 2",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_stripes",
+          "symbol": "A"
+        }
+      ]
     }
   ]
 }
