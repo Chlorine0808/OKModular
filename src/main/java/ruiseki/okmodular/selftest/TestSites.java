@@ -1,9 +1,13 @@
 package ruiseki.okmodular.selftest;
 
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -18,6 +22,8 @@ final class TestSites {
     static final int BASE_X = 4096, BASE_Z = 4096, SPACING = 96;
     /** Blocks force-loaded around a site's origin in each horizontal direction. */
     static final int RADIUS = 32;
+    /** The cleared box reaches this far below and above the origin, inside a stone shell. */
+    static final int CLEAR_BELOW = 16, CLEAR_ABOVE = 32;
 
     private int next;
 
@@ -28,6 +34,7 @@ final class TestSites {
         Site site = new Site(this, s, world, BASE_X + i * SPACING + 8, s.y, BASE_Z + 8);
         try {
             force(site);
+            clear(site);
         } catch (RuntimeException e) {
             // The caller never sees this site, so nobody else would release its ticket.
             unforce(site);
@@ -99,6 +106,53 @@ final class TestSites {
                 site.world.theChunkProviderServer.loadChunk(cx, cz);
             }
         }
+    }
+
+    /**
+     * Empties the box around the origin (±RADIUS across, CLEAR_BELOW down, CLEAR_ABOVE up) and walls it
+     * in stone: floor and sides always, a roof only in a world without sky, so a sky check still sees
+     * the sky. The shell keeps terrain liquids out. Writes go straight into the chunk sections and
+     * light is redone once per chunk; tens of thousands of setBlock calls would each relight.
+     */
+    private static void clear(Site site) {
+        WorldServer w = site.world;
+        boolean roof = w.provider.hasNoSky;
+        int x0 = site.x - RADIUS - 1, x1 = site.x + RADIUS + 1;
+        int z0 = site.z - RADIUS - 1, z1 = site.z + RADIUS + 1;
+        int y0 = Math.max(1, site.y - CLEAR_BELOW - 1), y1 = Math.min(255, site.y + CLEAR_ABOVE + 1);
+        for (int cx = x0 >> 4; cx <= x1 >> 4; cx++) {
+            for (int cz = z0 >> 4; cz <= z1 >> 4; cz++) {
+                Chunk chunk = w.theChunkProviderServer.loadChunk(cx, cz);
+                for (int x = Math.max(x0, cx << 4); x <= Math.min(x1, (cx << 4) + 15); x++) {
+                    for (int z = Math.max(z0, cz << 4); z <= Math.min(z1, (cz << 4) + 15); z++) {
+                        for (int y = y0; y <= y1; y++) {
+                            boolean side = x == x0 || x == x1 || z == z0 || z == z1;
+                            boolean shell = y == y0 || (y == y1 ? roof : side);
+                            put(w, chunk, x & 15, y, z & 15, shell ? Blocks.stone : Blocks.air);
+                        }
+                    }
+                }
+                chunk.generateSkylightMap();
+                chunk.setChunkModified();
+            }
+        }
+    }
+
+    private static void put(WorldServer w, Chunk chunk, int x, int y, int z, Block block) {
+        ExtendedBlockStorage[] sections = chunk.getBlockStorageArray();
+        ExtendedBlockStorage section = sections[y >> 4];
+        if (section == null) {
+            if (block == Blocks.air) return;
+            section = sections[y >> 4] = new ExtendedBlockStorage(y >> 4 << 4, !w.provider.hasNoSky);
+        }
+        if (section.getBlockByExtId(x, y & 15, z)
+            .hasTileEntity(section.getExtBlockMetadata(x, y & 15, z))) {
+            chunk.removeTileEntity(x, y, z);
+        }
+        section.func_150818_a(x, y & 15, z, block);
+        section.setExtBlockMetadata(x, y & 15, z, 0);
+        // Light from removed lava or glowstone would otherwise linger in the empty box.
+        section.setExtBlocklightValue(x, y & 15, z, 0);
     }
 
     private static int chunksPerSide() {
