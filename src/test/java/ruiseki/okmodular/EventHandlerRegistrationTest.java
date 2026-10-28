@@ -48,6 +48,7 @@ import org.junit.jupiter.api.Test;
  *
  * **`EVENT_BUS.register(` を呼んでいるファイルの中で `new クラス名(` されている**なら登録済みと見なす。
  * 空白を除去してから探すので、改行で分かれていても拾う。
+ * FML のバス（`FMLCommonHandler.instance().bus().register(`）も同じ扱いにする（tick イベントはこちらに流れる）。
  *
  * 最初は `EVENT_BUS.register(new クラス名(` を直接探す形にしたが、**`NEIConfig` を誤検出した** —
  * あれはローカル変数を経由して登録している。
@@ -83,7 +84,7 @@ public class EventHandlerRegistrationTest {
         List<String> registeringSources = new ArrayList<>();
         for (Path file : allSources()) {
             String body = stripWhitespace(read(file));
-            if (body.contains("EVENT_BUS.register(")) registeringSources.add(body);
+            if (registers(body)) registeringSources.add(body);
         }
         assertFalse(registeringSources.isEmpty(), "EVENT_BUS.register を呼ぶファイルが 1 つも無い。列挙が壊れている");
 
@@ -94,7 +95,7 @@ public class EventHandlerRegistrationTest {
 
             // 自分自身を登録する形（register(this)）か、
             // register を呼ぶファイルの中で new されているか。
-            boolean registered = stripWhitespace(read(file)).contains("EVENT_BUS.register(");
+            boolean registered = registers(stripWhitespace(read(file)));
             if (!registered) {
                 for (String source : registeringSources) {
                     if (source.contains("new" + className + "(")) {
@@ -164,6 +165,11 @@ public class EventHandlerRegistrationTest {
         return file.getFileName()
             .toString()
             .replace(".java", "");
+    }
+
+    /** Forge's EVENT_BUS or FML's bus(); `body` must already be whitespace-stripped. */
+    private static boolean registers(String body) {
+        return body.contains("EVENT_BUS.register(") || body.contains(".bus().register(");
     }
 
     private static String stripWhitespace(String text) {
