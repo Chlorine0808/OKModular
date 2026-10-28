@@ -261,5 +261,91 @@
         "to": 40
       }
     ]
+  },
+  {
+    "id": "s3.56-vein",
+    "section": "3.56",
+    "title": "The finished vein: blobs inside the ball, thinner outwards, ragged edges",
+    "source": "run/TESTING.md §3.56 鉱脈の完成形; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (鉱脈の見た目), §4 形を生成する (cell_* はアンカーから測るので offset を引く)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:apple",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "vein": {
+        "from": [-8, 1, -8],
+        "to": [8, 18, 8]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.56-vein-falloff",
+    "section": "3.56",
+    "title": "The vein's chance without the noise thins out from the centre",
+    "source": "run/TESTING.md §3.56 鉱脈の完成形 (外へ行くほど薄く); docs/jp/structures/STRUCTURE_IO.md §3 セルの位置を式から読む (輪郭をぼかす), §4 形を生成する (offset を引く)",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:stick",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "vein": {
+        "from": [-8, 1, -8],
+        "to": [8, 18, 8]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "densityFallsOutward",
+        "snapshot": "vein",
+        "block": "minecraft:iron_ore",
+        "centre": [0, 10, 0],
+        "radius": 8
+      }
+    ]
   }
 ]

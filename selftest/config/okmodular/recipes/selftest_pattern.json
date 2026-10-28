@@ -199,6 +199,42 @@
           "symbol": "A"
         }
       ]
+    },
+    {
+      "registryName": "selftest_pat_vein",
+      "name": "Selftest Pattern: the finished vein",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:apple",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_vein",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_falloff",
+      "name": "Selftest Pattern: the vein's distance falloff alone",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:stick",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_falloff",
+          "symbol": "A"
+        }
+      ]
     }
   ]
 }
