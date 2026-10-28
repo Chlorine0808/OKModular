@@ -55,7 +55,6 @@ final class TestSites {
         boolean gone = !provider.chunkExists(cx, cz);
 
         force(site);
-        provider.loadChunk(cx, cz);
         TileEntity after = world.getTileEntity(site.x, site.y, site.z);
         if (after != null) obs.nbt.put("after-reload", NbtFlat.flatten(nbtOf(after)));
         obs.chunkReloaded = gone && before != null && after != null && after != before;
@@ -87,6 +86,9 @@ final class TestSites {
         for (int cx = (site.x - RADIUS) >> 4; cx <= (site.x + RADIUS) >> 4; cx++) {
             for (int cz = (site.z - RADIUS) >> 4; cz <= (site.z + RADIUS) >> 4; cz++) {
                 ForgeChunkManager.forceChunk(t, new ChunkCoordIntPair(cx, cz));
+                // Forcing does not load, and provideChunk hands out an empty chunk that drops every
+                // setBlock when loadChunkOnProvideRequest is off.
+                site.world.theChunkProviderServer.loadChunk(cx, cz);
             }
         }
         site.ticket = t;

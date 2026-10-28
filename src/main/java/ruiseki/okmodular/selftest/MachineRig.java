@@ -188,7 +188,17 @@ final class MachineRig {
     private static TEMachineController controllerAt(TestSites.Site site) {
         TileEntity te = site.world.getTileEntity(site.x, site.y, site.z);
         if (!(te instanceof TEMachineController)) {
-            throw new IllegalStateException("no machine controller at the site origin (found " + te + ")");
+            throw new IllegalStateException(
+                "no machine controller at the site origin (" + site.x
+                    + ","
+                    + site.y
+                    + ","
+                    + site.z
+                    + " holds "
+                    + idOf(site.world.getBlock(site.x, site.y, site.z), 0)
+                    + ", tile "
+                    + te
+                    + ")");
         }
         return (TEMachineController) te;
     }
