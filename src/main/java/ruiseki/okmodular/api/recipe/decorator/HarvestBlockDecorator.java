@@ -5,11 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IShearable;
 
 import com.google.gson.JsonObject;
@@ -171,6 +173,9 @@ public class HarvestBlockDecorator extends RecipeDecorator {
      */
     private boolean levelAllows(IRecipeContext context, List<ChunkCoordinates> positions, int allowed) {
         World world = context.getWorld();
+        // Forge fills the vanilla harvest tools in ForgeHooks' static initialiser. Until something
+        // loads it - a player mining, say - every block reads as toolless and passes.
+        ForgeHooks.canToolHarvestBlock(Blocks.stone, 0, null);
 
         for (ChunkCoordinates pos : positions) {
             Block block = world.getBlock(pos.posX, pos.posY, pos.posZ);
