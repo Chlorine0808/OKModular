@@ -1,0 +1,17 @@
+[
+  {
+    "id": "s2-formed-survives",
+    "section": "2",
+    "title": "A formed machine standing idle is still formed after a chunk reload",
+    "source": "run/TESTING.md §2 チャンクを離れて戻ると機械が壊れていない",
+    "machine": { "structure": "selftest_probe" },
+    "ticks": 40,
+    "steps": [
+      { "at": 10, "action": "unloadReload" }
+    ],
+    "expect": [
+      { "kind": "chunkReloaded" },
+      { "kind": "formed", "value": true }
+    ]
+  }
+]
