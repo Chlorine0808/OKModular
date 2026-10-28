@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +25,8 @@ import org.apache.logging.log4j.Logger;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import ruiseki.okmodular.OKModular;
-import ruiseki.okmodular.selftest.grid.BlockGrid;
-import ruiseki.okmodular.selftest.judge.CheckResult;
 import ruiseki.okmodular.selftest.judge.ExpectationJudge;
-import ruiseki.okmodular.selftest.judge.Observation;
-import ruiseki.okmodular.selftest.judge.ScenarioResult;
 import ruiseki.okmodular.selftest.report.Annotations;
-import ruiseki.okmodular.selftest.scenario.Expectation;
 import ruiseki.okmodular.selftest.scenario.Scenario;
 import ruiseki.okmodular.selftest.scenario.ScenarioParser;
 
@@ -63,7 +57,7 @@ public final class SelfTest {
             String repo = System.getProperty("okmodular.selftest.repo");
             SelfTestTicker ticker = new SelfTestTicker(
                 server,
-                new RunSchedule(scenarios, new NoWorldDriver(), RunSchedule.DEFAULT_DEADLINE),
+                new RunSchedule(scenarios, new LiveDriver(), RunSchedule.DEFAULT_DEADLINE),
                 annotations,
                 reportDir,
                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()),
@@ -183,26 +177,5 @@ public final class SelfTest {
         public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {
             for (ForgeChunkManager.Ticket t : tickets) ForgeChunkManager.releaseTicket(t);
         }
-    }
-
-    /** Placeholder driver until the live world driver exists: judges every expectation on an empty observation. */
-    private static final class NoWorldDriver implements ScenarioDriver {
-
-        @Override
-        public void setUp(Scenario s) {}
-
-        @Override
-        public void tick(Scenario s, int t) {}
-
-        @Override
-        public ScenarioResult finish(Scenario s) {
-            Observation o = new Observation();
-            List<CheckResult> checks = new ArrayList<>();
-            for (Expectation e : s.expectations) checks.add(ExpectationJudge.judge(e, o));
-            return ScenarioResult.of(s, checks, Collections.<String, BlockGrid>emptyMap());
-        }
-
-        @Override
-        public void tearDown(Scenario s) {}
     }
 }
