@@ -243,5 +243,116 @@
         "max": 605
       }
     ]
+  },
+  {
+    "id": "s5.5-rerun-after-reload-differs",
+    "section": "5.5",
+    "title": "After a chunk reload the same recipe lays out a different arrangement",
+    "source": "run/TESTING.md §5.5 セーブして入り直し、同じレシピをもう一度 (前と違う配置); docs/jp/structures/STRUCTURE_IO.md §3 散り方 (次の実行では別の配置). A chunk reload stands in for a server restart",
+    "machine": {
+      "structure": "selftest_chance_io"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 110,
+    "steps": [
+      {
+        "at": 41,
+        "action": "fill",
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "at": 42,
+        "action": "unloadReload"
+      },
+      {
+        "at": 50,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:cobblestone",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "snapshots": {
+      "first": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ],
+        "at": 40
+      },
+      "second": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "chunkReloaded"
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 50,
+        "to": 90
+      },
+      {
+        "kind": "snapshotsDiffer",
+        "a": "first",
+        "b": "second",
+        "min": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "first",
+        "block": "minecraft:lapis_block",
+        "min": 1,
+        "max": 605
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "second",
+        "block": "minecraft:lapis_block",
+        "min": 1,
+        "max": 605
+      }
+    ]
   }
 ]
