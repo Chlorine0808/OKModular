@@ -2697,6 +2697,21 @@
           "chance": "1 - sqrt(cell_x^2 + (cell_y - 9)^2 + cell_z^2) / 8"
         }
       }
+    },
+    {
+      "name": "selftest_pat_rerun",
+      "shape": {
+        "type": "sphere",
+        "radius": 8,
+        "symbol": "X",
+        "offset": [0, 9, 0]
+      },
+      "mappings": {
+        "X": {
+          "block": "minecraft:gold_ore",
+          "chance": "noise(6) > 0.5"
+        }
+      }
     }
   ]
 }

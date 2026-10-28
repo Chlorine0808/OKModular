@@ -387,5 +387,78 @@
         "to": 40
       }
     ]
+  },
+  {
+    "id": "s3.56-two-runs",
+    "section": "3.56",
+    "title": "Running the same recipe again lays out different blobs",
+    "source": "run/TESTING.md §3.56 実行ごとに変わる; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (次の実行では別の場), 散り方",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sugar",
+        "amount": 1
+      }
+    ],
+    "ticks": 100,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 41,
+        "action": "fill",
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 42,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:sugar",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "snapshots": {
+      "first": {
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8],
+        "at": 40
+      },
+      "second": {
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 42,
+        "to": 80
+      },
+      {
+        "kind": "snapshotsDiffer",
+        "a": "first",
+        "b": "second",
+        "min": 1
+      }
+    ]
   }
 ]

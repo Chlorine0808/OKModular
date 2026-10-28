@@ -254,6 +254,24 @@
           "amount": 2
         }
       ]
+    },
+    {
+      "registryName": "selftest_pat_rerun",
+      "name": "Selftest Pattern: noise blobs, run twice",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sugar",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_rerun",
+          "symbol": "A"
+        }
+      ]
     }
   ]
 }
