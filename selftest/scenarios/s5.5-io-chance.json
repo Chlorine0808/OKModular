@@ -1,0 +1,122 @@
+[
+  {
+    "id": "s5.5-chance-half",
+    "section": "5.5",
+    "title": "{block, chance 0.5} places lapis on about half of 605 cells",
+    "source": "run/TESTING.md §5.5 { block, chance: 0.5 } (だいたい半分のマスに置かれる。全部か 0 かにならない); docs/jp/structures/STRUCTURE_IO.md §3 確率と重み; 605 cells (11x11x5 above the anchor) keep the z=4.5 false-fail rate near 7.6e-6 even at p=0.2/0.8",
+    "machine": {
+      "structure": "selftest_chance_io"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "pattern": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.5
+      }
+    ]
+  },
+  {
+    "id": "s5.5-miss-keeps-original",
+    "section": "5.5",
+    "title": "Cells that miss their chance keep the stone that was there (none turn to air)",
+    "source": "run/TESTING.md §5.5 chance に外れたマス (元のブロックが残る); docs/jp/structures/STRUCTURE_IO.md §3 確率と重み (IMPORTANT: 外れたセルは空気にならず手を付けないまま残る). The box is pre-filled with stone; lapis and stone both present show that hits and misses happened",
+    "machine": {
+      "structure": "selftest_chance_io"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "pattern": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "pattern",
+        "block": "minecraft:air",
+        "min": 0,
+        "max": 0
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "min": 1,
+        "max": 605
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "pattern",
+        "block": "minecraft:stone",
+        "min": 1,
+        "max": 605
+      }
+    ]
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "group": "SelftestChanceIO",
+  "recipes": [
+    {
+      "registryName": "selftest_chance_half",
+      "name": "Selftest Chance IO: lapis on about half the cells",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_chance_half",
+          "symbol": "A"
+        }
+      ]
+    }
+  ]
+}
