@@ -142,5 +142,53 @@
         "contains": ""
       }
     ]
+  },
+  {
+    "id": "s1-tier-3",
+    "section": "1",
+    "title": "Casing casing_plain:2 gives the casing component tier 3",
+    "source": "run/TESTING.md §1 tiers を書いた部品の Tier が反映される; docs/jp/structures/JSON_FORMAT.md §4 部品ごとの Tier; selftest/config/okmodular/structures/selftest_tiered.json",
+    "machine": {
+      "structure": "selftest_tiered",
+      "cells": {
+        "C*": "okmodular:casing_plain:2"
+      }
+    },
+    "ticks": 10,
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "componentTier",
+        "component": "casing",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "id": "s1-tier-1",
+    "section": "1",
+    "title": "Casing casing_plain:0 gives the casing component tier 1",
+    "source": "run/TESTING.md §1 tiers を書いた部品の Tier が反映される; docs/jp/structures/JSON_FORMAT.md §4 部品ごとの Tier; selftest/config/okmodular/structures/selftest_tiered.json",
+    "machine": {
+      "structure": "selftest_tiered",
+      "cells": {
+        "C*": "okmodular:casing_plain:0"
+      }
+    },
+    "ticks": 10,
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "componentTier",
+        "component": "casing",
+        "value": 1
+      }
+    ]
   }
 ]
