@@ -84,5 +84,84 @@
         "max": 0
       }
     ]
+  },
+  {
+    "id": "s3.55-cell-y",
+    "section": "3.55",
+    "title": "cell_y is positive upwards: 1 - cell_y * 0.2 thins out above the anchor",
+    "source": "run/TESTING.md §3.55 cell_y の向き; docs/jp/structures/STRUCTURE_IO.md §3 セルの位置を式から読む (cell_y は書いた層の上が正, アンカーより上ほど薄い)",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:dirt",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-5, 2, -5],
+        "to": [5, 6, 5],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "pattern": {
+        "from": [-5, 1, -5],
+        "to": [5, 6, 5]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.8,
+        "from": [-5, 2, -5],
+        "to": [5, 2, 5]
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.6,
+        "from": [-5, 3, -5],
+        "to": [5, 3, 5]
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.4,
+        "from": [-5, 4, -5],
+        "to": [5, 4, 5]
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.2,
+        "from": [-5, 5, -5],
+        "to": [5, 5, 5]
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.0,
+        "from": [-5, 6, -5],
+        "to": [5, 6, 5]
+      }
+    ]
   }
 ]
