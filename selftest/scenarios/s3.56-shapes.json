@@ -135,6 +135,13 @@
         "to": 40
       },
       {
+        "kind": "blockCount",
+        "snapshot": "box",
+        "block": "minecraft:iron_ore",
+        "min": 1,
+        "max": 19683
+      },
+      {
         "kind": "clustered",
         "snapshot": "box",
         "block": "minecraft:iron_ore",
