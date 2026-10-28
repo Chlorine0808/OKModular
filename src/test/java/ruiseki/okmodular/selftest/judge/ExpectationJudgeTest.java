@@ -292,6 +292,26 @@ class ExpectationJudgeTest {
         assertFalse(judge("{\"kind\":\"clustered\",\"snapshot\":\"salt\",\"block\":\"m:a\",\"value\":true}", o).passed);
     }
 
+    /**
+     * The margin is 0.15: thresholded noise(6) in the 27^3 box of s3.56-noise-threshold scores
+     * 0.416 +- 0.051, so 0.25 sat only 3.2 sd away (a false fail about once in 2300 runs).
+     */
+    @Test
+    void clusteredMarginIsPointFifteen() {
+        // "aa....aaaa" along x: same-neighbour ratio 8/10, density 6/10, margin 0.2
+        BlockGrid line = new BlockGrid(new int[] { 0, 0, 0 }, new int[] { 9, 0, 0 });
+        for (int x : new int[] { 0, 1, 6, 7, 8, 9 }) line.set(x, 0, 0, "m:a");
+        // "aaaa..aaaa": ratio 12/14, density 8/10, margin 0.06
+        BlockGrid dense = new BlockGrid(new int[] { 0, 0, 0 }, new int[] { 9, 0, 0 });
+        for (int x : new int[] { 0, 1, 2, 3, 6, 7, 8, 9 }) dense.set(x, 0, 0, "m:a");
+        Observation o = obs();
+        o.snapshots.put("line", line);
+        o.snapshots.put("dense", dense);
+        assertTrue(judge("{\"kind\":\"clustered\",\"snapshot\":\"line\",\"block\":\"m:a\",\"value\":true}", o).passed);
+        assertTrue(
+            judge("{\"kind\":\"clustered\",\"snapshot\":\"dense\",\"block\":\"m:a\",\"value\":false}", o).passed);
+    }
+
     @Test
     void densityFallsOutwardNeedsAMonotoneProfile() {
         BlockGrid falling = cube(6);

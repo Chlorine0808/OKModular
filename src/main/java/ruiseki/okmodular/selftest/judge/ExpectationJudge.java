@@ -45,7 +45,7 @@ public final class ExpectationJudge {
                 "logContains")));
 
     /** A cluster this much denser in same-block neighbours than chance counts as clustered. */
-    private static final double CLUSTER_MARGIN = 0.25;
+    private static final double CLUSTER_MARGIN = 0.15;
 
     private ExpectationJudge() {}
 
