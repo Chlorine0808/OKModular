@@ -594,5 +594,23 @@
         "max": 0
       }
     ]
+  },
+  {
+    "id": "s5.5-structure-input-rejected",
+    "section": "5.5",
+    "title": "A chance pattern used as a structure input is refused at load and reported in an errors file",
+    "source": "run/TESTING.md §5.5 ⚠ chance や weights を持つパターンは structure 入力に使えません (エラーが errors.txt に出ること); docs/jp/structures/STRUCTURE_IO.md §3 確率と重み (WARNING: ロード時にエラー); StructureInput#requireSettled; recipe parse errors go to OKCore's JsonErrorCollector, whose file is json_errors.txt; selftest/config/okmodular/recipes/selftest_chance_rejected.json",
+    "ticks": 1,
+    "expect": [
+      {
+        "kind": "logContains",
+        "text": "Patterns using 'chance' are output-only"
+      },
+      {
+        "kind": "fileContains",
+        "path": "json_errors.txt",
+        "text": "selftest_chance_rejected"
+      }
+    ]
   }
 ]
