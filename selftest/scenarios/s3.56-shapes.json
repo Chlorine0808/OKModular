@@ -347,5 +347,45 @@
         "radius": 8
       }
     ]
+  },
+  {
+    "id": "s3.56-vein-two-anchors",
+    "section": "3.56",
+    "title": "Veins at two neighbouring anchors: the noise field carries across",
+    "source": "run/TESTING.md §3.56 アンカー 2 箇所が繋がる; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (場はワールド座標の関数なので繋がって見える)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern2"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:coal",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-14, 2, -8],
+        "to": [14, 18, 8],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "veins": {
+        "from": [-14, 1, -8],
+        "to": [14, 18, 8]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
   }
 ]
