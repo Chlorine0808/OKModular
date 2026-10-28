@@ -1,0 +1,234 @@
+[
+  {
+    "id": "s3.6-consume-input",
+    "section": "3.6",
+    "title": "A consuming block input leaves air and puts the stone's drop, cobblestone, in the port",
+    "source": "run/TESTING.md §3.6 consume: true の BlockInput が消すブロック (消えるのではなくドロップがポートに入る); docs/jp/recipes/DECORATORS.md §5 harvest_block (入力を消す直前: consume: true のブロック入力が持っていくブロックを採る; 採掘品はアイテムポートに入ります)",
+    "machine": {
+      "structure": "selftest_harvest"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 1,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:dirt",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "snapshots": {
+      "cells": {
+        "from": [
+          0,
+          2,
+          0
+        ],
+        "to": [
+          0,
+          4,
+          0
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:cobblestone",
+        "min": 3,
+        "max": 3
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 0,
+        "max": 0
+      }
+    ]
+  },
+  {
+    "id": "s3.6-overwrite-output",
+    "section": "3.6",
+    "title": "A block output collects the stone it overwrites, not the gold block it writes",
+    "source": "run/TESTING.md §3.6 BlockOutput が上書きするブロック (上書き前のブロックがドロップとして入る。上書き後のものではない); docs/jp/recipes/DECORATORS.md §5 harvest_block (出力を書く直前: ブロック出力が上書きするブロックを採る)",
+    "machine": {
+      "structure": "selftest_harvest"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 1,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:sand",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "snapshots": {
+      "cells": {
+        "from": [
+          0,
+          2,
+          0
+        ],
+        "to": [
+          0,
+          4,
+          0
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:cobblestone",
+        "min": 3,
+        "max": 3
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:gold_block",
+        "min": 0,
+        "max": 0
+      }
+    ]
+  }
+]

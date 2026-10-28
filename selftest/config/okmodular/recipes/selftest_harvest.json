@@ -1,0 +1,54 @@
+{
+  "group": "SelftestHarvest",
+  "recipes": [
+    {
+      "registryName": "selftest_harvest_consume",
+      "name": "Selftest Harvest: consume the three stone cells and collect their drops",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:dirt",
+          "amount": 1
+        },
+        {
+          "symbol": "H",
+          "block": "minecraft:stone",
+          "amount": 3,
+          "consume": true
+        }
+      ],
+      "outputs": [],
+      "decorators": [
+        {
+          "type": "harvest_block",
+          "harvestLevel": 0
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_harvest_overwrite",
+      "name": "Selftest Harvest: overwrite the three stone cells with gold blocks",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "symbol": "H",
+          "replace": "minecraft:stone",
+          "block": "minecraft:gold_block",
+          "amount": 3
+        }
+      ],
+      "decorators": [
+        {
+          "type": "harvest_block",
+          "harvestLevel": 0
+        }
+      ]
+    }
+  ]
+}
