@@ -581,5 +581,237 @@
         "max": 0
       }
     ]
+  },
+  {
+    "id": "s3.6-shear-leaves",
+    "section": "3.6",
+    "title": "Shears collect leaves as leaves, not saplings",
+    "source": "run/TESTING.md §3.6 shear を付けて葉ブロックを対象にする (葉がそのまま落ちる（苗木ではなく）); docs/jp/recipes/DECORATORS.md §5 harvest_block (shear: ハサミ。葉やツタがそのまま落ちます). Leaves are placed with meta 4 (no decay); IShearable#onSheared drops meta & 3 = 0",
+    "machine": {
+      "structure": "selftest_harvest"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:leaves:4"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:leaves:4"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:leaves:4"
+      },
+      {
+        "at": 1,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:flint",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "snapshots": {
+      "cells": {
+        "from": [
+          0,
+          2,
+          0
+        ],
+        "to": [
+          0,
+          4,
+          0
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:leaves",
+        "min": 3,
+        "max": 3
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:sapling",
+        "min": 0,
+        "max": 0
+      }
+    ]
+  },
+  {
+    "id": "s3.6-silk-beats-shear",
+    "section": "3.6",
+    "title": "With both silkTouch and shear, stone comes back as stone (silk), not cobblestone",
+    "source": "run/TESTING.md §3.6 silkTouch と shear を両方書く (silkTouch が勝つ); docs/jp/recipes/DECORATORS.md §5 harvest_block (silkTouch と shear を両方書いた場合は silkTouch が優先されます; silkTouch: ブロックそのものを回収します). Stone is not IShearable, so without silk it would drop cobblestone",
+    "machine": {
+      "structure": "selftest_harvest"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 1,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:brick",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "snapshots": {
+      "cells": {
+        "from": [
+          0,
+          2,
+          0
+        ],
+        "to": [
+          0,
+          4,
+          0
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          3,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "cells",
+        "pos": [
+          0,
+          4,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 3,
+        "max": 3
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:cobblestone",
+        "min": 0,
+        "max": 0
+      }
+    ]
   }
 ]

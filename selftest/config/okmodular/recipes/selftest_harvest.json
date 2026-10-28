@@ -96,6 +96,57 @@
           "type": "harvest_block"
         }
       ]
+    },
+    {
+      "registryName": "selftest_harvest_shear",
+      "name": "Selftest Harvest: shear the three leaf cells",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:flint",
+          "amount": 1
+        },
+        {
+          "symbol": "H",
+          "block": "minecraft:leaves",
+          "amount": 3,
+          "consume": true
+        }
+      ],
+      "outputs": [],
+      "decorators": [
+        {
+          "type": "harvest_block",
+          "harvestLevel": 0,
+          "shear": true
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_harvest_silk_shear",
+      "name": "Selftest Harvest: silk touch and shears on the three stone cells",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:brick",
+          "amount": 1
+        },
+        {
+          "symbol": "H",
+          "block": "minecraft:stone",
+          "amount": 3,
+          "consume": true
+        }
+      ],
+      "outputs": [],
+      "decorators": [
+        {
+          "type": "harvest_block",
+          "harvestLevel": 0,
+          "silkTouch": true,
+          "shear": true
+        }
+      ]
     }
   ]
 }
