@@ -1,0 +1,23 @@
+{
+  "group": "SelftestPattern",
+  "recipes": [
+    {
+      "registryName": "selftest_pat_ycut",
+      "name": "Selftest Pattern: y < 40 cuts the pattern",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_ycut",
+          "symbol": "A"
+        }
+      ]
+    }
+  ]
+}

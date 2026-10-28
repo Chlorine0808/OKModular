@@ -1,0 +1,133 @@
+{
+  "patterns": [
+    {
+      "name": "selftest_pat_ycut",
+      "anchor": "A",
+      "mappings": {
+        "X": {
+          "block": "minecraft:gold_block",
+          "chance": "y < 40 ? 1 : 0"
+        }
+      },
+      "layers": [
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXX   XXXX",
+          "XXXX A XXXX",
+          "XXXX   XXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXX   XXXX",
+          "XXXX   XXXX",
+          "XXXX   XXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXX   XXXX",
+          "XXXX   XXXX",
+          "XXXX   XXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ]
+      ]
+    }
+  ]
+}
