@@ -89,6 +89,98 @@
           "           "
         ]
       ]
+    },
+    {
+      "name": "selftest_chance_weights",
+      "anchor": "A",
+      "mappings": {
+        "X": {
+          "weights": {
+            "minecraft:iron_ore": 8,
+            "minecraft:gold_ore": 2
+          }
+        }
+      },
+      "layers": [
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "     A     ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           "
+        ]
+      ]
     }
   ]
 }

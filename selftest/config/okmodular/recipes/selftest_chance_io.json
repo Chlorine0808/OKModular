@@ -18,6 +18,24 @@
           "symbol": "A"
         }
       ]
+    },
+    {
+      "registryName": "selftest_chance_weights",
+      "name": "Selftest Chance IO: iron and gold ore at 8:2",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:dirt",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_chance_weights",
+          "symbol": "A"
+        }
+      ]
     }
   ]
 }
