@@ -14,7 +14,7 @@
     },
     {
       "registryName": "selftest_persist_chance",
-      "name": "Selftest Persist: gravel to flint at 60%",
+      "name": "Selftest Persist: gravel to flint through a chance draw that always wins",
       "duration": 20,
       "inputs": [
         { "item": "minecraft:gravel", "amount": 1 }
@@ -23,9 +23,8 @@
         { "item": "minecraft:flint", "amount": 1 }
       ],
       "decorators": [
-        { "chance": 0.6 }
+        { "chance": 1.0 }
       ]
     }
-  
   ]
 }

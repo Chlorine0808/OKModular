@@ -31,7 +31,7 @@
     "id": "s2-payout-survives",
     "section": "2",
     "title": "A machine waiting on full outputs keeps its payout draw across a chunk reload",
-    "source": "run/TESTING.md §2 出力待ちのままセーブして入り直すと、当たり外れが変わらない; docs/jp/recipes/DECORATORS.md §3 抽選の仕組み (NOTE: 抽選はやり直しません。セーブして入り直しても同じ); ProcessAgent#writeToNBT payoutDecided/payoutSucceeded",
+    "source": "run/TESTING.md §2 出力待ちのままセーブして入り直すと、当たり外れが変わらない; docs/jp/recipes/DECORATORS.md §3 抽選の仕組み (NOTE: 抽選はやり直しません。セーブして入り直しても同じ); ProcessAgent#writeToNBT payoutDecided/payoutSucceeded. The recipe uses chance 1.0, not a value like 0.6: a lost draw ends the run at once and never waits, so the waiting state could not be observed about 4 runs in 10. ChanceRecipeDecorator#producesOutput still draws at 1.0 (unit interval [0,1) < 1.0) and ProcessAgent#payoutSucceeds still records the draw",
     "machine": { "structure": "selftest_probe" },
     "inputs": [ { "item": "minecraft:gravel", "amount": 1 } ],
     "ticks": 100,

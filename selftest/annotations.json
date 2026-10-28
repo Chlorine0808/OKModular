@@ -1,9 +1,0 @@
-{
-  "scenarios": {
-    "s2-payout-survives": {
-      "cause": "expectation-doubt",
-      "note": "chance 0.6 の抽選に外れた実行（約 4 割）は出力待ちにならない。外れは払い出すものが無いので即座に完了し（ProcessAgent#produceOutputs・IRecipe#producesOutput），payoutDecided/payoutSucceeded は NBT に残らない。このときは t=40 の recipeStarted（出力待ちの前提）が落ち，nbtEqual と outputMatchesPayout も「記録なし」で落ちる。本体の不具合ではない。当たりの実行でだけ §2 の行を確かめられる。"
-    }
-  },
-  "fixes": []
-}
