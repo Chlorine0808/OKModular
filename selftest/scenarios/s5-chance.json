@@ -194,5 +194,70 @@
         "max": 5
       }
     ]
+  },
+  {
+    "id": "s5-payout-wait",
+    "section": "5",
+    "title": "A recipe held on full outputs for 60 ticks keeps its payout draw and pays it once emptied",
+    "source": "run/TESTING.md §5 chance: 0.6 のレシピで出力先を満杯にして数十 tick 待つ (空けたら当たったまま払い出される); docs/jp/recipes/DECORATORS.md §3 抽選の仕組み (NOTE: 抽選はやり直しません); ProcessAgent#writeToNBT payoutDecided/payoutSucceeded. The recipe uses chance 1.0, not 0.6: a lost draw ends the run at once and never waits, so the waiting state would be missed about 4 runs in 10. ChanceRecipeDecorator still draws at 1.0 (a [0,1) value < 1.0) and ProcessAgent#payoutSucceeds still records the draw (same ruling as s2-payout-survives)",
+    "machine": {
+      "structure": "selftest_chance"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:clay_ball",
+        "amount": 1
+      }
+    ],
+    "ticks": 130,
+    "steps": [
+      {
+        "at": 5,
+        "action": "fillOutputs",
+        "item": "minecraft:dirt"
+      },
+      {
+        "at": 30,
+        "action": "recordNbt",
+        "label": "before-wait"
+      },
+      {
+        "at": 90,
+        "action": "recordNbt",
+        "label": "after-wait"
+      },
+      {
+        "at": 91,
+        "action": "clearOutputs"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 30,
+        "to": 30
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 90,
+        "to": 90
+      },
+      {
+        "kind": "nbtEqual",
+        "a": "before-wait",
+        "b": "after-wait",
+        "keys": [
+          "processAgent.payoutDecided",
+          "processAgent.payoutSucceeded"
+        ]
+      },
+      {
+        "kind": "outputMatchesPayout",
+        "item": "minecraft:flint",
+        "label": "after-wait"
+      }
+    ]
   }
 ]

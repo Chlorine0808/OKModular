@@ -118,6 +118,28 @@
           ]
         }
       ]
+    },
+    {
+      "registryName": "selftest_chance_payout",
+      "name": "Selftest Chance: clay to flint through a chance draw that always wins",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:clay_ball",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:flint",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "chance": 1.0
+        }
+      ]
     }
   ]
 }
