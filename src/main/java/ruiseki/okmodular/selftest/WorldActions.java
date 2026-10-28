@@ -1,8 +1,5 @@
 package ruiseki.okmodular.selftest;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.block.Block;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -14,8 +11,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import ruiseki.okmodular.selftest.judge.Observation;
-import ruiseki.okmodular.selftest.scenario.InputSpec;
 import ruiseki.okmodular.selftest.scenario.Region;
+import ruiseki.okmodular.selftest.scenario.ScenarioParser;
 import ruiseki.okmodular.selftest.scenario.Step;
 
 /** Carries out one scenario Step on the live world; positions are relative to the site origin. */
@@ -54,7 +51,7 @@ final class WorldActions {
                 biome(site, triple(a, "from"), triple(a, "to"), str(a, "biome"));
                 break;
             case "insert":
-                machine(rig, step).insert(inputs(a));
+                machine(rig, step).insert(ScenarioParser.inputs(a));
                 break;
             case "clearOutputs":
                 machine(rig, step).clearOutputs();
@@ -133,27 +130,6 @@ final class WorldActions {
             }
         }
         throw new IllegalArgumentException("unknown biome \"" + name + "\"");
-    }
-
-    private static List<InputSpec> inputs(JsonObject a) {
-        JsonElement el = a.get("inputs");
-        if (el == null || !el.isJsonArray()) throw new IllegalArgumentException("insert needs an \"inputs\" array");
-        List<InputSpec> out = new ArrayList<>();
-        for (JsonElement e : (JsonArray) el) {
-            JsonObject i = e.getAsJsonObject();
-            int amount = i.has("amount") ? i.get("amount")
-                .getAsInt() : 1;
-            if (i.has("energy")) out.add(
-                new InputSpec(
-                    InputSpec.Kind.ENERGY,
-                    null,
-                    i.get("energy")
-                        .getAsInt()));
-            else if (i.has("item")) out.add(new InputSpec(InputSpec.Kind.ITEM, str(i, "item"), amount));
-            else if (i.has("fluid")) out.add(new InputSpec(InputSpec.Kind.FLUID, str(i, "fluid"), amount));
-            else throw new IllegalArgumentException("an input needs item, fluid or energy");
-        }
-        return out;
     }
 
     private static MachineRig machine(MachineRig rig, Step step) {

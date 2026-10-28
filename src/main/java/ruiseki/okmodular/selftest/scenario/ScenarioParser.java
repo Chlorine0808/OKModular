@@ -76,10 +76,7 @@ public final class ScenarioParser {
             int ticks = intOr(o, "ticks", 0);
 
             MachineSpec machine = o.has("machine") ? machine(o.get("machine")) : null;
-            List<InputSpec> inputs = new ArrayList<InputSpec>();
-            if (o.has("inputs")) {
-                for (JsonElement e : array(o, "inputs")) inputs.add(input(e));
-            }
+            List<InputSpec> inputs = o.has("inputs") ? inputs(o) : new ArrayList<InputSpec>();
             List<Step> steps = new ArrayList<Step>();
             if (o.has("steps")) {
                 for (JsonElement e : array(o, "steps")) steps.add(step(e));
@@ -168,6 +165,13 @@ public final class ScenarioParser {
             cells);
     }
 
+    /** The "inputs" array of an insert step's args, read exactly like a scenario's own inputs. */
+    public static List<InputSpec> inputs(JsonObject args) {
+        List<InputSpec> out = new ArrayList<InputSpec>();
+        for (JsonElement e : array(args, "inputs")) out.add(input(e));
+        return out;
+    }
+
     private static InputSpec input(JsonElement el) {
         JsonObject i = obj(el, "input");
         if (i.has("energy")) {
@@ -193,6 +197,8 @@ public final class ScenarioParser {
             String k = e.getKey();
             if (!k.equals("at") && !k.equals("action")) args.add(k, e.getValue());
         }
+        // Read now so a typo fails the file check rather than the in-game run.
+        if (action.equals("insert")) inputs(args);
         return new Step(intOr(s, "at", 0), action, args);
     }
 

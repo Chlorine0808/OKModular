@@ -79,6 +79,39 @@ class ScenarioParserTest {
     }
 
     @Test
+    @DisplayName("insert の inputs は読み込み時に確かめる")
+    void insertStepInputsAreCheckedWhenParsed() {
+        Scenario bad = parse(
+            "[" + scen("a", ",\"steps\":[{\"at\":1,\"action\":\"insert\",\"inputs\":[{\"itme\":\"x\"}]}]") + "]")
+                .get(0);
+        assertNotNull(bad.parseError);
+        assertTrue(bad.parseError.contains("item, fluid or energy"), bad.parseError);
+        Scenario missing = parse("[" + scen("b", ",\"steps\":[{\"at\":1,\"action\":\"insert\"}]") + "]").get(0);
+        assertTrue(missing.parseError.contains("inputs"), missing.parseError);
+        Scenario good = parse(
+            "[" + scen(
+                "c",
+                ",\"steps\":[{\"at\":1,\"action\":\"insert\",\"inputs\":[{\"item\":\"minecraft:stone\"},{\"energy\":5}]}]")
+                + "]").get(0);
+        assertNull(good.parseError);
+    }
+
+    @Test
+    @DisplayName("insert の inputs は scenario の inputs と同じ読み方をする")
+    void insertInputsReadLikeScenarioInputs() {
+        List<InputSpec> in = ScenarioParser.inputs(
+            new com.google.gson.JsonParser()
+                .parse(
+                    "{\"inputs\":[{\"item\":\"minecraft:stone\"},{\"fluid\":\"water\",\"amount\":7},{\"energy\":9}]}")
+                .getAsJsonObject());
+        assertEquals(InputSpec.Kind.ITEM, in.get(0).kind);
+        assertEquals(1, in.get(0).amount);
+        assertEquals(7, in.get(1).amount);
+        assertEquals(InputSpec.Kind.ENERGY, in.get(2).kind);
+        assertEquals(9, in.get(2).amount);
+    }
+
+    @Test
     void unknownKindMakesScenarioInvalid() {
         String json = "[{\"id\":\"a\",\"source\":\"x\",\"ticks\":1,\"expect\":[{\"kind\":\"formd\"}]}]";
         Scenario s = parse(json).get(0);
