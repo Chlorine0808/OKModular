@@ -71,6 +71,12 @@ public final class SeedMixer {
     /** The stream {@code noise()} hashes its lattice corners from. */
     public static final long NOISE = 11L;
 
+    /**
+     * The stream choosing which output a selected {@code random_block_output} cell gets. Kept
+     * apart from the ticket stream so the lowest-ticket cells do not lean to one output.
+     */
+    public static final long RANDOM_BLOCK_PICK = 12L;
+
     /** Odd 64-bit constant, so distinct streams land far apart. */
     private static final long STREAM_GAMMA = 0x9E3779B97F4A7C15L;
 

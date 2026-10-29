@@ -42,6 +42,43 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
         }
     }
 
+    /** One output of a {@code random_block_output} draw and its weight. */
+    public static final class WeightedBlockOutput {
+
+        public final BlockOutput output;
+        public final int weight;
+
+        public WeightedBlockOutput(BlockOutput output, int weight) {
+            this.output = output;
+            this.weight = weight;
+        }
+    }
+
+    /**
+     * Picks one of {@code accepting} for {@code cell}, in proportion to weight.
+     * Entries with weight 0 or less never win; null when nothing has positive weight.
+     */
+    static WeightedBlockOutput pickFor(List<WeightedBlockOutput> accepting, long seed, ChunkCoordinates cell) {
+        long total = 0;
+        for (WeightedBlockOutput entry : accepting) {
+            if (entry.weight > 0) total += entry.weight;
+        }
+        if (total <= 0) return null;
+
+        double roll = SeedMixer
+            .toUnitInterval(SeedMixer.forPosition(seed, cell.posX, cell.posY, cell.posZ), SeedMixer.RANDOM_BLOCK_PICK)
+            * total;
+        double upTo = 0;
+        WeightedBlockOutput last = null;
+        for (WeightedBlockOutput entry : accepting) {
+            if (entry.weight <= 0) continue;
+            upTo += entry.weight;
+            last = entry;
+            if (roll < upTo) return entry;
+        }
+        return last;
+    }
+
     public RandomBlockOutputDecorator(IModularRecipe internal, IExpression countExpr,
         List<BlockOutputSelection> selections) {
         super(internal);
