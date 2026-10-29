@@ -81,6 +81,19 @@ public class DurationParserTest {
     }
 
     @Test
+    @DisplayName("【回帰防止】周囲を読む式は context 無しの答えに畳まれない")
+    public void test周囲を読む式は保持される() {
+        // count_blocks / can_see_sky answer 0 without a context instead of throwing, so the
+        // fold used to keep that answer: "... > 0 ? 40 : 400" became a fixed 400 and
+        // durationPolicy perTick had nothing to re-evaluate (selftest s6-pertick-jumps).
+        ModularRecipe counted = parse(new JsonPrimitive("count_blocks(2, 'minecraft:gold_block') > 0 ? 40 : 400"));
+        ModularRecipe sky = parse(new JsonPrimitive("can_see_sky ? 40 : 400"));
+
+        assertNotNull(counted.getDurationExpression(), "count_blocks は機械の周りを読むので式のまま残るべき");
+        assertNotNull(sky.getDurationExpression(), "can_see_sky は機械の上を読むので式のまま残るべき");
+    }
+
+    @Test
     @DisplayName("マシン依存の式でも静的な控え値を持つ")
     public void testマシン依存式でも静的値がある() {
         ModularRecipe recipe = parse(new JsonPrimitive("floor(200 / tier)"));
