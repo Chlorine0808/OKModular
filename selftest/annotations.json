@@ -1,10 +1,5 @@
 {
-  "scenarios": {
-    "s5.5-structure-input-rejected": {
-      "cause": "mod-bug",
-      "note": "The load does refuse the recipe: StructureInput#requireSettled throws, the ERROR line is logged and OKCore's JsonErrorCollector collects it (logContains passes). But at server start no errors file is written: JsonErrorCollector.writeToFile is only called from /okmodular reload (MachineryModule), and the collector's configDir is only set in RecipeLoader.reload. run/TESTING.md §5.5 expects the error in an errors file. Not fixed: the fix is in the mod's startup load path and the right file (json_errors.txt or structures/errors.txt) is a choice for the author. The fileContains check asserts json_errors.txt (the file JsonErrorCollector writes on /okmodular reload); if the author picks another startup errors file, change that check's path to follow the choice, not the message it looks for."
-    }
-  },
+  "scenarios": {},
   "fixes": [
     {
       "commit": "a9fd646",
@@ -20,6 +15,11 @@
       "commit": "df612c5",
       "scenario": "s6-pertick-jumps",
       "summary": "DurationParser folded a duration to a constant by evaluating it with a null context; count_blocks answers 0 there, so 'count_blocks(...) > 0 ? 40 : 400' became a fixed 400 and perTick never re-read it"
+    },
+    {
+      "commit": "667b3b9",
+      "scenario": "s5.5-structure-input-rejected",
+      "summary": "Recipe load errors only reached a file through /okmodular reload (OKCore's json_errors.txt at the config root); every load now writes recipes/errors.txt beside the recipe JSON"
     }
   ]
 }
