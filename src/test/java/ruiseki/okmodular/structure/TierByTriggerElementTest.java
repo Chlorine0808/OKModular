@@ -14,7 +14,9 @@ import net.minecraft.world.World;
 
 import org.junit.jupiter.api.Test;
 
+import com.gtnewhorizon.structurelib.structure.AutoPlaceEnvironment;
 import com.gtnewhorizon.structurelib.structure.IStructureElement;
+import com.gtnewhorizon.structurelib.structure.IStructureElement.PlaceResult;
 
 /**
  * A tiered part places the candidate picked by the blueprint's stack size (P23).
@@ -30,15 +32,28 @@ class TierByTriggerElementTest {
 
         private final String name;
         private final List<String> log;
+        private final boolean standing;
 
         Candidate(String name, List<String> log) {
+            this(name, log, false);
+        }
+
+        Candidate(String name, List<String> log, boolean standing) {
             this.name = name;
             this.log = log;
+            this.standing = standing;
         }
 
         @Override
         public boolean check(Object t, World world, int x, int y, int z) {
-            return false;
+            return standing;
+        }
+
+        @Override
+        public PlaceResult survivalPlaceBlock(Object t, World world, int x, int y, int z, ItemStack trigger,
+            AutoPlaceEnvironment env) {
+            log.add("survival " + name);
+            return PlaceResult.REJECT;
         }
 
         @Override
@@ -116,6 +131,23 @@ class TierByTriggerElementTest {
         List<String> log = new ArrayList<>();
         element(log, false).placeBlock(null, null, 0, 0, 0, null);
         assertEquals(Arrays.asList("place t1"), log);
+    }
+
+    @Test
+    void survivalBuildSkipsABlockOfAnotherTier() {
+        List<String> log = new ArrayList<>();
+        TierByTriggerElement<Object> element = new TierByTriggerElement<>(
+            new FixedCheck(true),
+            Arrays.asList(new Candidate("t1", log), new Candidate("t2", log, true)));
+        assertEquals(PlaceResult.SKIP, element.survivalPlaceBlock(null, null, 0, 0, 0, blueprints(1), null));
+        assertEquals(Arrays.asList(), log);
+    }
+
+    @Test
+    void survivalBuildPlacesThePickedTierOnAnEmptySpot() {
+        List<String> log = new ArrayList<>();
+        element(log, false).survivalPlaceBlock(null, null, 0, 0, 0, blueprints(2), null);
+        assertEquals(Arrays.asList("survival t2"), log);
     }
 
     @Test

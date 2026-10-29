@@ -24,7 +24,7 @@ public class TierByTriggerElement<T> implements IStructureElementChain<T> {
 
     /**
      * @param checker        the element that decides whether a built block is valid
-     * @param tiersAscending one placeable element per tier, lowest first
+     * @param tiersAscending one placeable element per tier, lowest first, whose check has no side effects
      */
     @SuppressWarnings("unchecked")
     public TierByTriggerElement(IStructureElement<T> checker, List<IStructureElement<T>> tiersAscending) {
@@ -76,16 +76,35 @@ public class TierByTriggerElement<T> implements IStructureElementChain<T> {
         return pick(trigger).getBlocksToPlace(t, world, x, y, z, trigger, env);
     }
 
+    /**
+     * A block of any tier already standing is kept, as the old chain did. The tier elements have no
+     * side effects in check, unlike the checker, which collects ports.
+     */
+    private boolean anyTierStands(T t, World world, int x, int y, int z) {
+        for (IStructureElement<T> tier : tiers) {
+            if (tier.check(t, world, x, y, z)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     @SuppressWarnings("deprecation")
     public PlaceResult survivalPlaceBlock(T t, World world, int x, int y, int z, ItemStack trigger, IItemSource s,
         EntityPlayerMP actor, Consumer<IChatComponent> chatter) {
+        if (anyTierStands(t, world, x, y, z)) {
+            return PlaceResult.SKIP;
+        }
         return pick(trigger).survivalPlaceBlock(t, world, x, y, z, trigger, s, actor, chatter);
     }
 
     @Override
     public PlaceResult survivalPlaceBlock(T t, World world, int x, int y, int z, ItemStack trigger,
         AutoPlaceEnvironment env) {
+        if (anyTierStands(t, world, x, y, z)) {
+            return PlaceResult.SKIP;
+        }
         return pick(trigger).survivalPlaceBlock(t, world, x, y, z, trigger, env);
     }
 }
