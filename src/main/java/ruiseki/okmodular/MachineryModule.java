@@ -17,9 +17,9 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import ruiseki.okcore.helper.MinecraftHelpers;
 import ruiseki.okcore.init.ModModuleBase;
-import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okcore.proxy.ICommonProxy;
 import ruiseki.okmodular.api.condition.Conditions;
+import ruiseki.okmodular.common.command.LoadErrorReport;
 import ruiseki.okmodular.common.config.DefaultConfigWriter;
 import ruiseki.okmodular.common.fluid.EnumFluidMaterial;
 import ruiseki.okmodular.common.fluid.ModFluidGases;
@@ -220,12 +220,7 @@ public class MachineryModule extends ModModuleBase {
             hasErrors = true;
         }
 
-        if (hasErrors || JsonErrorCollector.getInstance()
-            .hasErrors()) {
-            JsonErrorCollector.getInstance()
-                .writeToFile();
-            JsonErrorCollector.getInstance()
-                .reportToChat(sender);
-        }
+        // Each loader wrote errors.txt beside its JSON; a step that threw has already said so above.
+        LoadErrorReport.toChat(sender);
     }
 }

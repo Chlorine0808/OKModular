@@ -9,7 +9,6 @@ import com.mojang.brigadier.context.CommandContext;
 
 import ruiseki.okcore.command.CommandMod;
 import ruiseki.okcore.init.ModBase;
-import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okmodular.MachineryModule;
 
 public class CommandModularReload extends CommandMod {
@@ -45,8 +44,7 @@ public class CommandModularReload extends CommandMod {
             return Command.SINGLE_SUCCESS;
         }
 
-        if (!JsonErrorCollector.getInstance()
-            .hasErrors()) {
+        if (LoadErrorReport.total() == 0) {
             sender.addChatMessage(
                 new ChatComponentText(EnumChatFormatting.GREEN + "[OKModular] Modular reload completed!"));
         }
