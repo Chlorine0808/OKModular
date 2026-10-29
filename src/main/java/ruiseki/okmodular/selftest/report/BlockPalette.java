@@ -24,8 +24,8 @@ final class BlockPalette {
         FIXED.put("minecraft:gravel", "#a39a94");
         FIXED.put("minecraft:lapis_block", "#2350b8");
         FIXED.put("minecraft:obsidian", "#1d1430");
-        FIXED.put("minecraft:iron_block", "#dcdcdc");
-        FIXED.put("minecraft:quartz_block", "#f4efe6");
+        FIXED.put("minecraft:iron_block", "#aebdc8");
+        FIXED.put("minecraft:quartz_block", "#d6c49c");
         FIXED.put("minecraft:emerald_block", "#2fcf6a");
         FIXED.put("minecraft:diamond_block", "#62e0d8");
         FIXED.put("minecraft:gold_ore", "#b39a2e");

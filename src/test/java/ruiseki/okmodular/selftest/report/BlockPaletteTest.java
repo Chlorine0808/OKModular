@@ -48,6 +48,18 @@ class BlockPaletteTest {
     }
 
     @Test
+    @DisplayName("固定色は白に近すぎない (空気のマスと見分ける)")
+    void fixedColoursStandOffFromAir() {
+        for (String b : COMMON) {
+            String c = BlockPalette.colourOf(b);
+            if (b.startsWith("minecraft:wool") || !c.startsWith("#")) continue;
+            int min = 255;
+            for (int i = 1; i < 7; i += 2) min = Math.min(min, Integer.parseInt(c.substring(i, i + 2), 16));
+            assertTrue(min < 0xd0, b + " " + c);
+        }
+    }
+
+    @Test
     @DisplayName("空気は透明")
     void airIsTransparent() {
         assertEquals("transparent", BlockPalette.colourOf("minecraft:air"));
