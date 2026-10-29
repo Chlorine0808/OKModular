@@ -18,8 +18,8 @@ final class GridFigure {
     private static final int WIDE_CELL_PX = 8;
     private static final int MARGIN_LEFT = 30;
     private static final int MARGIN_TOP = 16;
-    private static final int MARGIN_RIGHT = 4;
-    private static final int MARGIN_BOTTOM = 4;
+    private static final int MARGIN_RIGHT = 20;
+    private static final int MARGIN_BOTTOM = 14;
 
     private GridFigure() {}
 
@@ -125,32 +125,14 @@ final class GridFigure {
                 axisText(sb, MARGIN_LEFT - 4, MARGIN_TOP + (dz - from[2]) * cell + cell / 2 + 3, "end", dz);
             }
         }
+        axisText(sb, 2, MARGIN_TOP - 4, "start", "N↑");
+        axisText(sb, MARGIN_LEFT + w + 2, MARGIN_TOP - 4, "start", "x→");
+        axisText(sb, MARGIN_LEFT - 4, MARGIN_TOP + h + 11, "end", "z↓");
         sb.append("<g transform=\"translate(")
             .append(MARGIN_LEFT)
             .append(',')
             .append(MARGIN_TOP)
             .append(")\">\n");
-        sb.append("<rect class=\"bg\" width=\"")
-            .append(w)
-            .append("\" height=\"")
-            .append(h)
-            .append("\" fill=\"none\" stroke=\"#bbb\" stroke-width=\"1\"/>\n");
-        StringBuilder lines = new StringBuilder();
-        for (int i = 1; i < sx; i++) {
-            lines.append('M')
-                .append(i * cell)
-                .append(",0V")
-                .append(h);
-        }
-        for (int i = 1; i < sz; i++) {
-            lines.append("M0,")
-                .append(i * cell)
-                .append('H')
-                .append(w);
-        }
-        sb.append("<path class=\"grid\" d=\"")
-            .append(lines)
-            .append("\" stroke=\"#ddd\" stroke-width=\"0.5\" fill=\"none\"/>\n");
         // one path per block id keeps the page light; the title still names the block on hover
         Map<String, StringBuilder> paths = new LinkedHashMap<>();
         for (int dz = from[2]; dz <= to[2]; dz++) {
@@ -181,6 +163,27 @@ final class GridFigure {
                 .append(esc(e.getKey()))
                 .append("</title></path>\n");
         }
+        StringBuilder lines = new StringBuilder();
+        for (int i = 1; i < sx; i++) {
+            lines.append('M')
+                .append(i * cell)
+                .append(",0V")
+                .append(h);
+        }
+        for (int i = 1; i < sz; i++) {
+            lines.append("M0,")
+                .append(i * cell)
+                .append('H')
+                .append(w);
+        }
+        sb.append("<path class=\"grid\" d=\"")
+            .append(lines)
+            .append("\" stroke=\"#000\" stroke-opacity=\"0.18\" stroke-width=\"0.6\" fill=\"none\"/>\n");
+        sb.append("<rect class=\"bg\" width=\"")
+            .append(w)
+            .append("\" height=\"")
+            .append(h)
+            .append("\" fill=\"none\" stroke=\"#888\" stroke-width=\"1\"/>\n");
         for (Map.Entry<List<Integer>, BlockGrid.Marker> e : g.markers()
             .entrySet()) {
             List<Integer> k = e.getKey();
@@ -217,11 +220,12 @@ final class GridFigure {
             .append("</text>\n");
     }
 
+    /** Marker glyph with a white halo so it stays visible on dark cells. */
     private static void markText(StringBuilder sb, String cls, int px, int pz, int cell, String s, String fill,
         boolean bold) {
         sb.append("<text class=\"")
             .append(cls)
-            .append("\" x=\"")
+            .append("\" stroke=\"#fff\" stroke-width=\"2\" paint-order=\"stroke\" x=\"")
             .append(px + cell / 2)
             .append("\" y=\"")
             .append(pz + cell / 2 + 4)
@@ -243,13 +247,17 @@ final class GridFigure {
         });
         sb.append("<table class=\"legend\">\n");
         for (String id : ids) {
-            sb.append("<tr><td><span class=\"swatch\" style=\"display:inline-block;width:12px;height:12px;background:")
+            sb.append("<tr><td><span class=\"swatch\" style=\"display:inline-block;width:14px;height:14px;border:1px solid #666;vertical-align:middle;background:")
                 .append(esc(BlockPalette.colourOf(id)))
                 .append("\"></span></td><td class=\"id\">")
                 .append(esc(id))
                 .append("</td><td class=\"n\">")
                 .append(g.count(id))
                 .append("</td></tr>\n");
+        }
+        if (!g.markers()
+            .isEmpty()) {
+            sb.append("<tr><td colspan=\"3\" class=\"marks\">C = コントローラ，★ = 基点</td></tr>\n");
         }
         sb.append("</table>\n");
     }

@@ -47,6 +47,25 @@ class GridFigureTest {
     }
 
     @Test
+    @DisplayName("格子線はセルの上に描く")
+    void gridLinesAreDrawnOverCells() {
+        String html = GridFigure.render("t", sample());
+        int cell = html.indexOf("class=\"cell\"");
+        assertTrue(cell >= 0);
+        int grid = html.indexOf("class=\"grid\"", cell);
+        assertTrue(grid > cell && grid < html.indexOf("</svg>", cell));
+    }
+
+    @Test
+    @DisplayName("軸の向き (x→, z↓, N↑) を書く")
+    void axisLabelsAreDrawn() {
+        String html = GridFigure.render("t", sample());
+        assertTrue(html.contains(">x→<"));
+        assertTrue(html.contains(">z↓<"));
+        assertTrue(html.contains(">N↑<"));
+    }
+
+    @Test
     @DisplayName("隣り合う同じ層は 1 枚にまとめる")
     void identicalAdjacentLayersCollapse() {
         BlockGrid g = new BlockGrid(new int[] { 0, 0, 0 }, new int[] { 1, 3, 1 });
@@ -92,6 +111,9 @@ class GridFigureTest {
         assertTrue(html.contains("class=\"marker controller\""));
         assertTrue(html.contains("★"));
         assertTrue(html.contains(">C<"));
+        int star = html.indexOf("class=\"marker anchor-label\"");
+        String starTag = html.substring(star, html.indexOf('>', star));
+        assertTrue(starTag.contains("stroke=\"#fff\""), starTag);
     }
 
     @Test
