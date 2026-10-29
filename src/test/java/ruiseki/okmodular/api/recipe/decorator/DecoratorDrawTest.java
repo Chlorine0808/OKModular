@@ -61,12 +61,11 @@ import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
  * 1 つのレシピが複数のデコレータを持てるから。同じ系統だと全部が揃って当たり外れする。
  *
  * ============================================
- * 残っている穴（意図的）
+ * Same-kind decorators
  * ============================================
  *
- * **同じ種類のデコレータを 1 レシピに 2 つ**書くと、その 2 つは同じ系統・同じ種なので
- * 必ず同じ答えを出す。系統はデコレータの種類ごとであってインスタンスごとではない。
- * ここでは直していない（`StructureIO_todos.md` に項目として積んである）。
+ * Two decorators of one kind on one recipe now draw from their chain depth, so they no
+ * longer agree. See DecoratorIndependenceTest. A decorator at depth 0 draws as before.
  */
 @DisplayName("デコレータの抽選")
 public class DecoratorDrawTest {

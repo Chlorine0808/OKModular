@@ -55,8 +55,9 @@ public class ChanceRecipeDecorator extends RecipeDecorator {
     @Override
     public boolean producesOutput(ConditionContext context) {
         if (!internal.producesOutput(context)) return false;
-        double chance = chanceExpr.evaluateDouble(context);
-        return SeedMixer.toUnitInterval(context.getEvaluationSeed(), SeedMixer.RECIPE_CHANCE) < chance;
+        ConditionContext own = ownDraw(context);
+        double chance = chanceExpr.evaluateDouble(own);
+        return SeedMixer.toUnitInterval(own.getEvaluationSeed(), SeedMixer.RECIPE_CHANCE) < chance;
     }
 
     @Override

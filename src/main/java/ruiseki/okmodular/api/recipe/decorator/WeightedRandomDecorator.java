@@ -37,9 +37,10 @@ public class WeightedRandomDecorator extends RecipeDecorator {
     public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
         super.produceExtraOutputs(outputPorts, context);
 
-        int draws = totalRolls(context);
+        ConditionContext own = ownDraw(context);
+        int draws = totalRolls(own);
         for (int i = 0; i < draws; i++) {
-            WeightedOutputEntry picked = pick(context, i);
+            WeightedOutputEntry picked = pick(own, i);
             if (picked != null && picked.output instanceof IModularRecipeOutput modularOutput) {
                 List<IModularPort> filtered = filterByType(outputPorts, modularOutput.getPortType());
                 if (modularOutput.checkCapacity(filtered, 1, context)) {

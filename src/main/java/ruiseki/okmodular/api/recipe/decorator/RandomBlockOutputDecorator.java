@@ -112,8 +112,9 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
             }
         }
 
-        long seed = context != null ? context.getEvaluationSeed() : 0L;
-        for (ChunkCoordinates pos : select(candidates, totalCount(context), context)) {
+        ConditionContext own = ownDraw(context);
+        long seed = own != null ? own.getEvaluationSeed() : 0L;
+        for (ChunkCoordinates pos : select(candidates, totalCount(own), own)) {
             WeightedBlockOutput picked = pickFor(accepting.get(pos), seed, pos);
             if (picked != null) picked.output.applyAt(recipeContext, pos, context);
         }

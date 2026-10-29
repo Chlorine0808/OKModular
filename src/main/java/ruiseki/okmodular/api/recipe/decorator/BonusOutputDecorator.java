@@ -55,7 +55,7 @@ public class BonusOutputDecorator extends RecipeDecorator {
     public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
         super.produceExtraOutputs(outputPorts, context);
 
-        int times = timesFiring(context);
+        int times = timesFiring(ownDraw(context));
         for (int fired = 0; fired < times; fired++) {
             for (IRecipeOutput bonus : bonusOutputs) {
                 if (bonus instanceof IModularRecipeOutput modularBonus) {
