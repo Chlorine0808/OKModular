@@ -47,7 +47,8 @@ final class BlockPalette {
             return WOOL[Math.floorMod(meta, 16)];
         }
         String fixed = FIXED.get(base);
-        if (fixed != null) return fixed;
+        // a fixed colour covers meta 0 only; other metas hash the full id so they stay apart
+        if (fixed != null && (c2 < 0 || parseMeta(block.substring(c2 + 1)) == 0)) return fixed;
         int h = block.hashCode();
         int hue = Math.floorMod(h, 360);
         int sat = 45 + Math.floorMod(h >>> 9, 30);

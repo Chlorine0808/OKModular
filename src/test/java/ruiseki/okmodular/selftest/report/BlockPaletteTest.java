@@ -51,4 +51,14 @@ class BlockPaletteTest {
     void woolMetasDiffer() {
         assertNotEquals(BlockPalette.colourOf("minecraft:wool:0"), BlockPalette.colourOf("minecraft:wool:1"));
     }
+
+    @Test
+    @DisplayName("固定色のブロックでも meta が違えば別の色")
+    void fixedBlockMetasDiffer() {
+        assertEquals(BlockPalette.colourOf("minecraft:stone"), BlockPalette.colourOf("minecraft:stone:0"));
+        assertNotEquals(BlockPalette.colourOf("minecraft:stone"), BlockPalette.colourOf("minecraft:stone:1"));
+        assertNotEquals(
+            BlockPalette.colourOf("okmodular:casing_plain:1"),
+            BlockPalette.colourOf("okmodular:casing_plain:2"));
+    }
 }
