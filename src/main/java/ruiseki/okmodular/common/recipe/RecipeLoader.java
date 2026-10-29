@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.util.ErrorsFile;
 import ruiseki.okmodular.util.Logger;
 
 public class RecipeLoader {
@@ -22,6 +23,8 @@ public class RecipeLoader {
     private final Map<String, List<IModularRecipe>> recipesByGroup = new HashMap<>();
 
     private MachineryJsonReader reader;
+
+    private final List<String> errors = new ArrayList<>();
 
     private int recipeVersion = 0;
 
@@ -47,6 +50,7 @@ public class RecipeLoader {
         }
 
         recipesByGroup.clear();
+        errors.clear();
 
         RecipeMigration.migrateAll(recipesDir);
 
@@ -69,6 +73,17 @@ public class RecipeLoader {
         }
 
         Logger.info("Loaded {} recipes in {} groups", recipes.size(), recipesByGroup.size());
+        ErrorsFile.write(recipesDir, "OKModular Recipe Errors", errors);
+    }
+
+    /** Called for each recipe the parser drops; the load writes them to recipes/errors.txt. */
+    void recordError(String message) {
+        errors.add(message);
+    }
+
+    /** What the last load dropped. */
+    public List<String> getErrors() {
+        return Collections.unmodifiableList(errors);
     }
 
     public void reload(File configDir) {

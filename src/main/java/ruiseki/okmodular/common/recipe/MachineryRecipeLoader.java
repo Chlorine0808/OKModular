@@ -168,6 +168,8 @@ public class MachineryRecipeLoader {
      * already reached the log by the time we get here.
      */
     private static void collectQuietly(String message) {
+        RecipeLoader.getInstance()
+            .recordError(message);
         try {
             JsonErrorCollector.getInstance()
                 .collect("MachineryRecipeLoader", message);
