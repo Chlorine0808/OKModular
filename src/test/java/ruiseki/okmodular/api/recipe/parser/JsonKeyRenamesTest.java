@@ -79,7 +79,7 @@ public class JsonKeyRenamesTest {
         assertFalse(json.has("machine") || json.has("time") || json.has("localizedName"));
         assertEquals(3, warnings.size());
         assertEquals(
-            "Recipe key \"machine\" is renamed to \"group\". Read as \"group\"; rename it in the file.",
+            "JSON key \"machine\" is renamed to \"group\". Read as \"group\"; rename it in the file.",
             warnings.get(0));
     }
 
@@ -96,7 +96,7 @@ public class JsonKeyRenamesTest {
         assertFalse(json.has("time"));
         assertEquals(
             Collections.singletonList(
-                "Recipe key \"time\" is renamed to \"duration\". Both \"time\" and \"duration\" are set; \"time\" is ignored."),
+                "JSON key \"time\" is renamed to \"duration\". Both \"time\" and \"duration\" are set; \"time\" is ignored."),
             warnings);
     }
 

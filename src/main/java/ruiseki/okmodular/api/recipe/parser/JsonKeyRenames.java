@@ -71,7 +71,7 @@ public final class JsonKeyRenames {
             if (rename.scope != scope || !json.has(rename.oldKey)) continue;
 
             JsonElement value = json.remove(rename.oldKey);
-            String head = "Recipe key \"" + rename.oldKey + "\" is renamed to \"" + rename.newKey + "\". ";
+            String head = "JSON key \"" + rename.oldKey + "\" is renamed to \"" + rename.newKey + "\". ";
             if (json.has(rename.newKey)) {
                 warnOnce(
                     rename.oldKey,

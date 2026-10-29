@@ -228,7 +228,7 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
         if (json.has("selections")) {
             JsonKeyRenames.warnOnce(
                 "selections",
-                "Recipe key \"selections\" is renamed to \"outputs\" (one decorator per \"symbol\"). Read as such; rename it in the file.");
+                "JSON key \"selections\" is renamed to \"outputs\" (one decorator per \"symbol\"). Read as such; rename it in the file.");
             IModularRecipe chain = recipe;
             for (JsonElement elem : json.getAsJsonArray("selections")) {
                 JsonObject selObj = elem.getAsJsonObject();

@@ -169,8 +169,8 @@ public class WeightedRandomDecorator extends RecipeDecorator {
             JsonKeyRenames.warnOnce(
                 "pool",
                 json.has("outputs")
-                    ? "Recipe key \"pool\" is renamed to \"outputs\". Both \"pool\" and \"outputs\" are set; \"pool\" is ignored."
-                    : "Recipe key \"pool\" is renamed to \"outputs\". Read as \"outputs\"; rename it in the file.");
+                    ? "JSON key \"pool\" is renamed to \"outputs\". Both \"pool\" and \"outputs\" are set; \"pool\" is ignored."
+                    : "JSON key \"pool\" is renamed to \"outputs\". Read as \"outputs\"; rename it in the file.");
         }
         if (arr == null) {
             throw new IllegalArgumentException("weighted_random needs an \"outputs\" (or \"pool\") array: " + json);
