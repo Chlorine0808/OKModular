@@ -57,8 +57,20 @@ public class DecoratorIndependenceTest {
     }
 
     @Test
-    @DisplayName("depth and draw index do not collide")
+    @DisplayName("depth 1 and draw 1 never share a seed")
     public void depthAndDrawDoNotCollide() {
+        for (long s = 0; s < 1000; s++) {
+            assertNotEquals(SeedMixer.forDecorator(s, 1), SeedMixer.forDraw(s, 1), "seed " + s);
+            assertNotEquals(
+                SeedMixer.forDraw(SeedMixer.forDecorator(s, 1), 0),
+                SeedMixer.forDecorator(SeedMixer.forDraw(s, 1), 0),
+                "seed " + s);
+        }
+    }
+
+    @Test
+    @DisplayName("depth and draw do not commute")
+    public void depthAndDrawDoNotCommute() {
         for (long s = 0; s < 1000; s++) {
             assertNotEquals(
                 SeedMixer.forDraw(SeedMixer.forDecorator(s, 1), 1),
