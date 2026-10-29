@@ -1,0 +1,104 @@
+[
+  {
+    "id": "s6-pertick-jumps",
+    "section": "6",
+    "title": "Under durationPolicy perTick a shorter duration mid-run finishes the recipe at once",
+    "source": "run/TESTING.md §6 タイミング `durationPolicy: perTick` で進捗バーが飛ぶ; docs/jp/structures/JSON_FORMAT.md durationPolicy (perTick re-evaluates every tick; CAUTION: once the value drops below the work already done the recipe completes); docs/jp/recipes/EXPRESSION_REFERENCE.md §5 評価タイミング `duration` (line 311); count_blocks lags up to 20 ticks (EXPRESSION_REFERENCE.md 周囲を調べる関数, docs/en/recipes/CONDITIONS.md §5 Tips). Gold at t=40 is read by t=60 at the latest; by then 40+ work is done, so the 40-tick duration completes the recipe well before t=110 instead of t≈400",
+    "machine": {
+      "structure": "selftest_pertick"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 110,
+    "steps": [
+      {
+        "at": 40,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 20
+      },
+      {
+        "kind": "progressAt",
+        "at": 30,
+        "min": 0.04,
+        "max": 0.12
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  },
+  {
+    "id": "s6-onstart-steady",
+    "section": "6",
+    "title": "Under durationPolicy onStart the same recipe keeps its 400-tick duration after gold arrives",
+    "source": "run/TESTING.md §6 タイミング `durationPolicy: perTick` で進捗バーが飛ぶ (control); docs/jp/structures/JSON_FORMAT.md durationPolicy (onStart evaluates once at the start and keeps it for the run); docs/jp/recipes/EXPRESSION_REFERENCE.md §5 評価タイミング `duration` (line 311). Progress stays on the 400-tick line: ~0.075 at t=30, ~0.25 at t=100, and nothing is output by t=110",
+    "machine": {
+      "structure": "selftest_onstart"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 110,
+    "steps": [
+      {
+        "at": 40,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 20
+      },
+      {
+        "kind": "progressAt",
+        "at": 30,
+        "min": 0.04,
+        "max": 0.12
+      },
+      {
+        "kind": "progressAt",
+        "at": 100,
+        "min": 0.2,
+        "max": 0.3
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 0,
+        "max": 0
+      }
+    ]
+  }
+]

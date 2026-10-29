@@ -1,0 +1,22 @@
+{
+  "recipes": [
+    {
+      "group": "SelftestTiming",
+      "registryName": "selftest_timing_gold_duration",
+      "name": "Selftest Timing: 40 ticks with gold near, else 400",
+      "duration": "count_blocks(2, 'minecraft:gold_block') > 0 ? 40 : 400",
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ]
+    }
+  ]
+}

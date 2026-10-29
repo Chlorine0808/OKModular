@@ -15,6 +15,11 @@
       "commit": "a9fd646",
       "scenario": "s3.6-iron-no-level",
       "summary": "Same cause: iron ore read as toolless and passed the default harvestLevel 0"
+    },
+    {
+      "commit": "df612c5",
+      "scenario": "s6-pertick-jumps",
+      "summary": "DurationParser folded a duration to a constant by evaluating it with a null context; count_blocks answers 0 there, so 'count_blocks(...) > 0 ? 40 : 400' became a fixed 400 and perTick never re-read it"
     }
   ]
 }
