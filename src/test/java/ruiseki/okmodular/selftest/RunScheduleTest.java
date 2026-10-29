@@ -115,6 +115,21 @@ class RunScheduleTest {
     }
 
     @Test
+    @DisplayName("a throw while selecting the next scenario cannot escape tick()")
+    void throwInStepSelectionDoesNotEscape() {
+        Fake d = new Fake();
+        // a null entry makes nextRunnable() throw while current is still null
+        RunSchedule r = run(d, 100, null, sc("a", 1));
+        assertFalse(r.deadlineHit());
+        assertEquals(
+            Verdict.PASS,
+            r.results()
+                .get(
+                    r.results()
+                        .size() - 1).verdict);
+    }
+
+    @Test
     @DisplayName("tearDown runs even after an exception (setUp or tick)")
     void tearDownRunsEvenAfterAnException() {
         Fake d = new Fake();

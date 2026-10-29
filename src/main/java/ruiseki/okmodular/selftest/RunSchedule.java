@@ -94,6 +94,8 @@ public final class RunSchedule {
 
     private void fail(Scenario s, String error) {
         current = null;
+        // A throw while picking the next scenario leaves nothing to blame; the next tick moves on.
+        if (s == null) return;
         results.add(ScenarioResult.failed(s, error, noFigures()));
         tearDownQuietly(s);
     }
