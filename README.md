@@ -71,12 +71,12 @@ OKCore is resolved from JitPack, so no local publishing step is needed. Gradle w
 ./gradlew runServer -Pselftest
 ```
 
-This starts a dev server on a fresh flat world, runs every scenario in `selftest/scenarios/` one at a time, writes a report, and stops by itself. Nothing runs without `-Pselftest`.
+This starts a dev server on a fresh flat world, runs every scenario in `selftest/scenarios/` one at a time, writes a report, and stops by itself. Nothing runs without `-Pselftest` (`-Pselftest=false` also leaves it off), and it only runs in a deobfuscated dev environment, never from a release jar.
 
-- `-Pselftest.only=<prefix>` runs only the scenarios whose id or section starts with the prefix. It is a prefix match, so `3.5` also picks up `3.55`.
+- `-Pselftest.only=<prefix>[,<prefix>...]` runs only the scenarios whose id or section starts with one of the prefixes. It is a prefix match, so `3.5` also picks up `3.55`. A scenario file that fails to parse as a whole has no section, so it is always kept and shows up as a failure.
 - `-Pselftest.port=<n>` sets the server port (default 25571).
 - The report is `run/selftest/report/index.html`. It is a local file; do not publish it.
-- Scenarios and fixtures live in `selftest/` (not in the jar). Expected values come from `docs/` and `run/TESTING.md`, and every expectation carries a `source` naming the file and section. Never edit an expectation to match the current behaviour.
+- Scenarios and fixtures live in `selftest/` (not in the jar). Expected values come from `docs/` and the developer's local `run/TESTING.md` (gitignored, so it is not in the repository), and every expectation carries a `source` naming the file and section. Never edit an expectation to match the current behaviour.
 
 ---
 
@@ -153,9 +153,9 @@ OKCore は JitPack から取得するので、ローカルへの publish は要�
 ./gradlew runServer -Pselftest
 ```
 
-新しい平坦ワールドで開発サーバーを起動し，`selftest/scenarios/` のシナリオを 1 件ずつ回して報告を書き，自分で停止する．`-Pselftest` が無ければ何も動かない．
+新しい平坦ワールドで開発サーバーを起動し，`selftest/scenarios/` のシナリオを 1 件ずつ回して報告を書き，自分で停止する．`-Pselftest` が無ければ何も動かない（`-Pselftest=false` でも動かない）．難読化を解いた開発環境でだけ動き，配布用の jar では動かない．
 
-- `-Pselftest.only=<接頭辞>` は，id または節がその接頭辞で始まるシナリオだけを回す．前方一致なので，`3.5` は `3.55` も拾う．
+- `-Pselftest.only=<接頭辞>[,<接頭辞>...]` は，id または節がいずれかの接頭辞で始まるシナリオだけを回す．前方一致なので，`3.5` は `3.55` も拾う．ファイル全体の読み込みに失敗したシナリオは節を持たないので，常に残して失敗として報告する．
 - `-Pselftest.port=<n>` でサーバーのポートを指定する（既定は 25571）．
 - 報告は `run/selftest/report/index.html` である．ローカルのファイルであり，公開しない．
-- シナリオと fixture は `selftest/` に置く（jar には入れない）．期待値は `docs/` と `run/TESTING.md` から書き，すべての期待値に出典（ファイルと節）を `source` として付ける．現在の挙動に合わせて期待値を書き換えてはならない．
+- シナリオと fixture は `selftest/` に置く（jar には入れない）．期待値は `docs/` と開発者の手元にある `run/TESTING.md`（gitignore 対象でリポジトリには無い）から書き，すべての期待値に出典（ファイルと節）を `source` として付ける．現在の挙動に合わせて期待値を書き換えてはならない．
