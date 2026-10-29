@@ -79,7 +79,7 @@ tasks.register('prepareSelftest') {
     }
 }
 
-if (project.hasProperty('selftest')) {
+if (project.hasProperty('selftest') && project.property('selftest').toString() != 'false') {
     def repoDir = projectDir.absolutePath
     def only = project.findProperty('selftest.only')
     tasks.named('runServer') {
