@@ -183,7 +183,10 @@ positions.
 
 With both `silkTouch` and `shear` set, **silk touch wins**.
 
-Drops go into the item ports. Anything that does not fit is dropped on the floor.
+Drops go into the item ports. What a block input takes is paid out with the recipe's outputs at
+completion, so while the ports are full it waits in the machine like any other output. What a
+block output overwrites is collected just before the output is written, so anything that does
+not fit then is dropped on the floor.
 
 ## 6. The `requirement` decorator
 
