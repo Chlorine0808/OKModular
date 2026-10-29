@@ -12,8 +12,9 @@ import ruiseki.okmodular.selftest.grid.BlockGrid;
 final class GridFigure {
 
     static final int CELL_PX = 18;
-    /** Tall grids show at most this many layers (plus any layer holding a marker). */
+    /** Grids drawing more than MAX_CELLS cells show only this many layers (plus any layer holding a marker). */
     static final int MAX_LAYERS = 12;
+    static final int MAX_CELLS = 6000;
     private static final int WIDE_LIMIT = 64;
     private static final int WIDE_CELL_PX = 8;
     private static final int MARGIN_LEFT = 30;
@@ -88,10 +89,16 @@ final class GridFigure {
         return false;
     }
 
-    /** Evenly spaced runs, always keeping the top, the bottom and runs that hold a marker. */
+    /**
+     * Every run while the figure is small; else evenly spaced runs, always keeping the top, the bottom and runs that
+     * hold a marker.
+     */
     private static List<int[]> sample(BlockGrid g, List<int[]> runs) {
         int n = runs.size();
-        if (n <= MAX_LAYERS) return runs;
+        int[] from = g.from();
+        int[] to = g.to();
+        long layerCells = (long) (to[0] - from[0] + 1) * (to[2] - from[2] + 1);
+        if (n <= MAX_LAYERS || n * layerCells <= MAX_CELLS) return runs;
         TreeSet<Integer> keep = new TreeSet<>();
         for (int k = 0; k < MAX_LAYERS; k++) keep.add(Math.round(k * (n - 1) / (float) (MAX_LAYERS - 1)));
         for (int i = 0; i < n; i++) {

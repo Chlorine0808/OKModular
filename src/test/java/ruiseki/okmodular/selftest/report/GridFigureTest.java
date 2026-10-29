@@ -77,9 +77,19 @@ class GridFigureTest {
     }
 
     @Test
+    @DisplayName("小さめの格子は層が多くても間引かない")
+    void smallTallGridsKeepEveryLayer() {
+        BlockGrid g = new BlockGrid(new int[] { 0, 0, 0 }, new int[] { 12, 14, 12 });
+        for (int y = 0; y <= 14; y++) g.set(y % 13, y, 0, "minecraft:stone:" + y);
+        String html = GridFigure.render("t", g);
+        assertEquals(15, count(html, "<svg"));
+        assertFalse(html.contains("class=\"layer-note\""));
+    }
+
+    @Test
     @DisplayName("高い格子は層を間引き，最上・最下と印のある層は残して注記する")
     void tallGridsAreSampled() {
-        BlockGrid g = new BlockGrid(new int[] { 0, 0, 0 }, new int[] { 29, 29, 0 });
+        BlockGrid g = new BlockGrid(new int[] { 0, 0, 0 }, new int[] { 29, 29, 29 });
         for (int y = 0; y <= 29; y++) g.set(y, y, 0, "minecraft:stone");
         g.mark(13, 13, 0, BlockGrid.Marker.ANCHOR);
         String html = GridFigure.render("t", g);
