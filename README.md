@@ -27,7 +27,7 @@ NEI, Waila, BlockRenderer6343, Thaumcraft, AE2, ThaumicEnergistics, Mekanism, En
 ```
 config/okmodular/
   modular.cfg      worldgen.cfg      tiers.json
-  recipes/         structures/       ← errors.txt is written here too
+  recipes/         structures/       ← each folder gets an errors.txt
   structure_io/
 ```
 
@@ -109,7 +109,7 @@ NEI、Waila、BlockRenderer6343、Thaumcraft、AE2、ThaumicEnergistics、Mekani
 ```
 config/okmodular/
   modular.cfg      worldgen.cfg      tiers.json
-  recipes/         structures/       ← errors.txt もここに出力される
+  recipes/         structures/       ← 各フォルダに errors.txt が出力される
   structure_io/
 ```
 

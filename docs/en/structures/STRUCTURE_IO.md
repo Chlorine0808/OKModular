@@ -78,7 +78,7 @@ A shape as simple as a sphere need not be drawn at all - see
 | the anchor | If it has no entry in `mappings`, it is only a marker and its cell is left alone |
 
 Any other character **must** have an entry in `mappings`. One that does not stops the file from
-loading and is reported in `structures/errors.txt`, because a silently dropped character would
+loading and is reported in `errors.txt` beside the pattern files, because a silently dropped character would
 make the pattern check fewer blocks than it looks like it checks.
 
 ## 3. Writing a Cell
