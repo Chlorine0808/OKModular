@@ -247,7 +247,8 @@ final class GridFigure {
         });
         sb.append("<table class=\"legend\">\n");
         for (String id : ids) {
-            sb.append("<tr><td><span class=\"swatch\" style=\"display:inline-block;width:14px;height:14px;border:1px solid #666;vertical-align:middle;background:")
+            sb.append(
+                "<tr><td><span class=\"swatch\" style=\"display:inline-block;width:14px;height:14px;border:1px solid #666;vertical-align:middle;background:")
                 .append(esc(BlockPalette.colourOf(id)))
                 .append("\"></span></td><td class=\"id\">")
                 .append(esc(id))

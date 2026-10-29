@@ -11,13 +11,17 @@ import ruiseki.okmodular.selftest.judge.Verdict;
 /** Renders the selftest results as one self-contained HTML page (inline CSS, no external loads). */
 public final class ReportHtml {
 
-    private static final String CSS = "body{font-family:sans-serif;margin:1.5em auto;max-width:70em;padding:0 1em;color:#222}"
+    private static final String CSS = "body{font-family:sans-serif;margin:1.5em auto;max-width:110em;padding:0 1em;color:#222}"
         + "table{border-collapse:collapse;margin:.5em 0}th,td{border:1px solid #ccc;padding:.2em .6em;text-align:left}"
         + ".banner{background:#fdd;border:2px solid #c00;padding:.5em 1em;font-weight:bold}"
         + ".scenario{border-left:6px solid #ccc;margin:1em 0;padding:.2em 1em}"
         + ".scenario.fail{border-color:#c00}.scenario.visual{border-color:#d90}.scenario.pass{border-color:#2a2}"
         + ".source,.cause,.note,.error{margin:.2em 0}.cause{color:#a00;font-weight:bold}"
-        + ".bad td{background:#fee}.grid-figure{margin:.5em 0}.layer{margin:.3em 0 0}svg{display:block}";
+        + ".bad td{background:#fee}svg{display:block}"
+        + ".figures{display:flex;flex-wrap:wrap;gap:1em 2em;align-items:flex-start}"
+        + ".figures>figure{flex:1 1 0;min-width:16em;margin:.5em 0;overflow-x:auto}"
+        + "figcaption{font-weight:bold}.layers{display:flex;flex-wrap:wrap;gap:.2em 1em}.layer{margin:.3em 0 0}"
+        + ".layer-note{color:#666;font-size:.9em;margin:.2em 0}";
 
     private ReportHtml() {}
 
@@ -186,8 +190,13 @@ public final class ReportHtml {
             }
             sb.append("</table>\n");
         }
-        for (Map.Entry<String, ruiseki.okmodular.selftest.grid.BlockGrid> e : r.figures.entrySet()) {
-            sb.append(GridFigure.render(e.getKey(), e.getValue()));
+        if (!r.figures.isEmpty()) {
+            // snapshots of one scenario (before/after, two runs) sit side by side
+            sb.append("<div class=\"figures\">\n");
+            for (Map.Entry<String, ruiseki.okmodular.selftest.grid.BlockGrid> e : r.figures.entrySet()) {
+                sb.append(GridFigure.render(e.getKey(), e.getValue()));
+            }
+            sb.append("</div>\n");
         }
         sb.append(fold ? "</details>\n" : "</div>\n");
     }

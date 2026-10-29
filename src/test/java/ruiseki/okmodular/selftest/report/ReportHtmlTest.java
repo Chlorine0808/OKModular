@@ -170,4 +170,21 @@ class ReportHtmlTest {
         assertFalse(h.contains("http://cdn"));
         assertFalse(h.contains("<script"));
     }
+
+    @Test
+    void figuresOfOneScenarioSitSideBySide() {
+        BlockGrid g = new BlockGrid(new int[] { 0, 0, 0 }, new int[] { 1, 0, 1 });
+        g.set(0, 0, 0, "minecraft:stone");
+        Map<String, BlockGrid> figs = new java.util.LinkedHashMap<>();
+        figs.put("before", g);
+        figs.put("after", g);
+        ScenarioResult r = ScenarioResult.failed(sc("e", "3.5", "t", "s", false), "x", figs);
+        String h = render(Collections.singletonList(r), Annotations.empty(), INFO);
+        int row = h.indexOf("<div class=\"figures\">");
+        assertTrue(row >= 0);
+        assertEquals(row, h.lastIndexOf("<div class=\"figures\">"));
+        assertTrue(h.indexOf("<figcaption>before", row) > row);
+        assertTrue(h.indexOf("<figcaption>after", row) > row);
+        assertTrue(h.contains(".figures{display:flex"));
+    }
 }
