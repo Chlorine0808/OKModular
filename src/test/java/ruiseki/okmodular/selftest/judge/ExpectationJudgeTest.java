@@ -417,6 +417,15 @@ class ExpectationJudgeTest {
     }
 
     @Test
+    void judgeErrorNamesTheExceptionClassWhenItHasNoMessage() {
+        // an empty array makes Gson throw an IllegalStateException without a message
+        CheckResult c = judge("{\"kind\":\"componentTier\",\"component\":\"x\",\"value\":[]}", obs());
+        assertFalse(c.passed);
+        assertFalse(c.actual.contains("null"), c.actual);
+        assertTrue(c.actual.contains("IllegalStateException"), c.actual);
+    }
+
+    @Test
     void unknownKindAndMissingArgumentsFailWithJudgeError() {
         CheckResult unknown = judge("{\"kind\":\"bogus\"}", obs());
         assertFalse(unknown.passed);

@@ -53,7 +53,13 @@ public final class ExpectationJudge {
         try {
             return dispatch(e, o);
         } catch (RuntimeException ex) {
-            return new CheckResult(e.kind, false, "valid " + e.kind + " check", "judge error: " + ex.getMessage());
+            return new CheckResult(
+                e.kind,
+                false,
+                "valid " + e.kind + " check",
+                "judge error: " + (ex.getMessage() != null ? ex.getMessage()
+                    : ex.getClass()
+                        .getSimpleName()));
         }
     }
 
