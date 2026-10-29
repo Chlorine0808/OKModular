@@ -3,7 +3,7 @@
     "id": "s6-pertick-jumps",
     "section": "6",
     "title": "Under durationPolicy perTick a shorter duration mid-run finishes the recipe at once",
-    "source": "run/TESTING.md §6 タイミング `durationPolicy: perTick` で進捗バーが飛ぶ; docs/jp/structures/JSON_FORMAT.md durationPolicy (perTick re-evaluates every tick; CAUTION: once the value drops below the work already done the recipe completes); docs/jp/recipes/EXPRESSION_REFERENCE.md §5 評価タイミング `duration` (line 311); count_blocks lags up to 20 ticks (EXPRESSION_REFERENCE.md 周囲を調べる関数, docs/en/recipes/CONDITIONS.md §5 Tips). Gold at t=40 is read by t=60 at the latest; by then 40+ work is done, so the 40-tick duration completes the recipe well before t=110 instead of t≈400",
+    "source": "run/TESTING.md §6 タイミング `durationPolicy: perTick` で進捗バーが飛ぶ; docs/jp/structures/JSON_FORMAT.md durationPolicy (perTick re-evaluates every tick; CAUTION: once the value drops below the work already done the recipe completes); docs/jp/recipes/EXPRESSION_REFERENCE.md §5 評価タイミング `duration` (line 311); count_blocks lags up to 20 ticks (EXPRESSION_REFERENCE.md 周囲を調べる関数, docs/en/recipes/CONDITIONS.md §5 Tips). Gold at t=40 is read by t=60 at the latest; by then 40+ work is done, so the 40-tick duration completes the recipe by t=80 (within 40 ticks of the gold) instead of t≈400",
     "machine": {
       "structure": "selftest_pertick"
     },
@@ -13,7 +13,7 @@
         "amount": 1
       }
     ],
-    "ticks": 110,
+    "ticks": 80,
     "steps": [
       {
         "at": 40,
