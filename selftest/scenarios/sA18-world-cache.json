@@ -329,5 +329,53 @@
         "max": 1
       }
     ]
+  },
+  {
+    "id": "sA18-catch-up",
+    "section": "A-18",
+    "title": "A waiting machine picks up an iron block placed later within the cache lag plus the idle search interval",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数 (results lag up to 20 ticks); docs/en/recipes/CONDITIONS.md §5 Tips lines 130-134 (a read is reused for up to 20 ticks, and an idle machine searches at most every 20 ticks, so a recipe may start up to 40 ticks after the block arrives); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数. Iron goes in at t=40, so the start must fall within 40..80 and not before",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 120,
+    "steps": [
+      {
+        "at": 40,
+        "action": "setBlock",
+        "pos": [
+          1,
+          1,
+          0
+        ],
+        "block": "minecraft:iron_block"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 39
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 40,
+        "to": 80
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      }
+    ]
   }
 ]
