@@ -1,0 +1,94 @@
+[
+  {
+    "id": "sA18-count-blocks-true",
+    "section": "A-18",
+    "title": "count_blocks sees an iron block next to the controller",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数 count_blocks (cube of the given distance around the controller, example count_blocks(1, \"minecraft:iron_block\")); docs/jp/recipes/CONDITIONS.md expression. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          1,
+          1,
+          0
+        ],
+        "block": "minecraft:iron_block"
+      },
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:cobblestone",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  },
+  {
+    "id": "sA18-count-blocks-false",
+    "section": "A-18",
+    "title": "count_blocks finds no iron block, so the recipe never starts",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数 count_blocks; docs/jp/recipes/CONDITIONS.md expression. The site is cleared to air, so only the machine's own blocks lie within distance 1. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:cobblestone",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 80
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 0,
+        "max": 0
+      },
+      {
+        "kind": "inputCount",
+        "item": "minecraft:cobblestone",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  }
+]
