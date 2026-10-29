@@ -1,0 +1,177 @@
+[
+  {
+    "id": "s-defaults-assembler",
+    "section": "defaults",
+    "title": "The shipped Assembler forms and assembles reinforced casings",
+    "source": "docs/superpowers/specs/2026-10-28-ingame-selftest-design.md 同梱のお手本機械 6 種; src/main/resources/assets/okmodular/defaults/structures/assembler.json; src/main/resources/assets/okmodular/defaults/recipes/assembler.json assembler_casing_reinforced (parent assembler_base: wrench not consumed, 32 RF/t, duration 100)",
+    "machine": {
+      "structure": "Assembler",
+      "cells": {
+        "C*": "okmodular:casing_plain:0",
+        "P#0": "okmodular:modular_item_input:0",
+        "P#1": "okmodular:modular_item_output:0",
+        "P#2": "okmodular:modular_energy_input:2"
+      }
+    },
+    "inputs": [
+      { "item": "okmodular:wrench", "amount": 1 },
+      { "item": "okmodular:casing_plain:0", "amount": 4 },
+      { "item": "minecraft:obsidian", "amount": 1 },
+      { "item": "minecraft:iron_ingot", "amount": 4 },
+      { "energy": 32768 }
+    ],
+    "ticks": 160,
+    "expect": [
+      { "kind": "formed", "value": true },
+      { "kind": "outputCount", "item": "okmodular:casing_reinforced", "min": 4, "max": 4 },
+      { "kind": "inputCount", "item": "okmodular:wrench", "min": 1, "max": 1 }
+    ]
+  },
+  {
+    "id": "s-defaults-metal-former",
+    "section": "defaults",
+    "title": "The shipped Metal Former forms and presses an iron plate",
+    "source": "docs/superpowers/specs/2026-10-28-ingame-selftest-design.md 同梱のお手本機械 6 種; src/main/resources/assets/okmodular/defaults/structures/metal_former.json; src/main/resources/assets/okmodular/defaults/recipes/metal_former.json metal_former_plate_iron (parent metal_former_plate: 16 RF/t, duration 60)",
+    "machine": {
+      "structure": "MetalFormer",
+      "cells": {
+        "C*": "okmodular:casing_plain:0",
+        "P#0": "okmodular:modular_item_input:0",
+        "P#1": "okmodular:modular_item_output:0",
+        "P#2": "okmodular:modular_energy_input:2"
+      }
+    },
+    "inputs": [
+      { "item": "minecraft:iron_ingot", "amount": 1 },
+      { "energy": 32768 }
+    ],
+    "ticks": 120,
+    "expect": [
+      { "kind": "formed", "value": true },
+      { "kind": "outputCount", "item": "okmodular:plate:26", "min": 1, "max": 1 }
+    ]
+  },
+  {
+    "id": "s-defaults-pressurized-crusher",
+    "section": "defaults",
+    "title": "The shipped Pressurized Crusher forms and crushes cobblestone into gravel",
+    "source": "docs/superpowers/specs/2026-10-28-ingame-selftest-design.md 同梱のお手本機械 6 種; src/main/resources/assets/okmodular/defaults/structures/pressurized_crusher.json; src/main/resources/assets/okmodular/defaults/recipes/pressurized_crusher.json crusher_cobblestone (16 RF/t, duration 40)",
+    "machine": {
+      "structure": "PressurizedCrusher",
+      "cells": {
+        "C*": "okmodular:casing_plain:0",
+        "P#0": "okmodular:modular_item_input:0",
+        "P#1": "okmodular:modular_item_output:0",
+        "P#2": "okmodular:modular_energy_input:2"
+      }
+    },
+    "inputs": [
+      { "item": "minecraft:cobblestone", "amount": 1 },
+      { "energy": 32768 }
+    ],
+    "ticks": 100,
+    "expect": [
+      { "kind": "formed", "value": true },
+      { "kind": "outputCount", "item": "minecraft:gravel", "min": 1, "max": 1 }
+    ]
+  },
+  {
+    "id": "s-defaults-ore-transformer",
+    "section": "defaults",
+    "title": "The shipped Ore Transformer forms and turns the iron ore in its O cell into an iron block",
+    "source": "docs/superpowers/specs/2026-10-28-ingame-selftest-design.md 同梱のお手本機械 6 種; src/main/resources/assets/okmodular/defaults/structures/ore_transformer.json; src/main/resources/assets/okmodular/defaults/recipes/ore_transformer.json ore_transformer_iron_ore_to_block (64 RF/t, duration 200); docs/jp/recipes/JSON_FORMAT.md 優先順位 3 (more input kinds first, so it wins over ore_transformer_iron_ore_to_ingots)",
+    "machine": {
+      "structure": "OreTransformer",
+      "cells": {
+        "C*": "okmodular:casing_plain:0",
+        "P#0": "okmodular:modular_item_input:0",
+        "P#1": "okmodular:modular_item_output:0",
+        "P#2": "okmodular:modular_energy_input:2",
+        "O#0": "minecraft:iron_ore",
+        "O#1": "minecraft:air",
+        "O#2": "minecraft:air"
+      }
+    },
+    "inputs": [
+      { "item": "minecraft:iron_ingot", "amount": 4 },
+      { "energy": 32768 }
+    ],
+    "ticks": 260,
+    "snapshots": {
+      "before": { "from": [-2, 1, -2], "to": [2, 1, 2], "at": 0 },
+      "after": { "from": [-2, 1, -2], "to": [2, 1, 2] }
+    },
+    "expect": [
+      { "kind": "formed", "value": true },
+      { "kind": "blockCount", "snapshot": "before", "block": "minecraft:iron_ore", "min": 1, "max": 1 },
+      { "kind": "blockCount", "snapshot": "after", "block": "minecraft:iron_block", "min": 1, "max": 1 },
+      { "kind": "blockCount", "snapshot": "after", "block": "minecraft:iron_ore", "min": 0, "max": 0 },
+      { "kind": "inputCount", "item": "minecraft:iron_ingot", "min": 0, "max": 0 },
+      { "kind": "outputCount", "item": "minecraft:iron_ingot", "min": 0, "max": 0 }
+    ]
+  },
+  {
+    "id": "s-defaults-phased-alloy-forge",
+    "section": "defaults",
+    "title": "The shipped Phased Alloy Forge forms and alloys bronze",
+    "source": "docs/superpowers/specs/2026-10-28-ingame-selftest-design.md 同梱のお手本機械 6 種; src/main/resources/assets/okmodular/defaults/structures/phased_alloy_forge.json (needs a fluid input port too); src/main/resources/assets/okmodular/defaults/recipes/phased_alloy_forge.json alloy_forge_bronze (3 ingotCopper + 1 ingotTin, 32 RF/t, duration 160)",
+    "machine": {
+      "structure": "PhasedAlloyForge",
+      "cells": {
+        "C*": "okmodular:casing_plain:0",
+        "P#0": "okmodular:modular_item_input:0",
+        "P#1": "okmodular:modular_item_output:0",
+        "P#2": "okmodular:modular_fluid_input:0",
+        "P#3": "okmodular:modular_energy_input:2"
+      }
+    },
+    "inputs": [
+      { "item": "okmodular:ingot:29", "amount": 3 },
+      { "item": "okmodular:ingot:50", "amount": 1 },
+      { "energy": 32768 }
+    ],
+    "ticks": 220,
+    "expect": [
+      { "kind": "formed", "value": true },
+      { "kind": "outputCount", "item": "okmodular:ingot:140", "min": 4, "max": 4 }
+    ]
+  },
+  {
+    "id": "s-defaults-spatial-shifter",
+    "section": "defaults",
+    "title": "The shipped Spatial Shifter forms and builds the core on its empty floor",
+    "source": "docs/superpowers/specs/2026-10-28-ingame-selftest-design.md 同梱のお手本機械 6 種; src/main/resources/assets/okmodular/defaults/structures/spatial_shifter.json; src/main/resources/assets/okmodular/defaults/recipes/spatial_shifter.json spatial_shifter_build_core (shifter_empty on D -> shifter_core, 128 RF/t, duration 200); src/main/resources/assets/okmodular/defaults/structure_io/spatial_shifter.json shifter_empty / shifter_core; docs/jp/structures/STRUCTURE_IO.md §2 予約文字",
+    "machine": {
+      "structure": "SpatialShifter",
+      "cells": {
+        "C*": "okmodular:casing_plain:0",
+        "P#0": "okmodular:modular_item_input:0",
+        "P#1": "okmodular:modular_item_output:0",
+        "P#2": "okmodular:modular_energy_input:2"
+      }
+    },
+    "inputs": [
+      { "item": "minecraft:obsidian", "amount": 4 },
+      { "item": "minecraft:iron_block", "amount": 1 },
+      { "item": "minecraft:glowstone", "amount": 1 },
+      { "energy": 32768 }
+    ],
+    "ticks": 260,
+    "snapshots": {
+      "before": { "from": [-4, -2, -4], "to": [4, 2, 4], "at": 0 },
+      "after": { "from": [-4, -2, -4], "to": [4, 2, 4] }
+    },
+    "expect": [
+      { "kind": "formed", "value": true },
+      { "kind": "blockCount", "snapshot": "before", "block": "minecraft:obsidian", "min": 0, "max": 0 },
+      { "kind": "blockCount", "snapshot": "before", "block": "minecraft:stone", "min": 9, "max": 9 },
+      { "kind": "blockCount", "snapshot": "after", "block": "minecraft:obsidian", "min": 4, "max": 4 },
+      { "kind": "blockCount", "snapshot": "after", "block": "minecraft:iron_block", "min": 1, "max": 1 },
+      { "kind": "blockCount", "snapshot": "after", "block": "minecraft:glowstone", "min": 1, "max": 1 },
+      { "kind": "blockCount", "snapshot": "after", "block": "minecraft:stone", "min": 9, "max": 9 },
+      { "kind": "inputCount", "item": "minecraft:obsidian", "min": 0, "max": 0 },
+      { "kind": "inputCount", "item": "minecraft:iron_block", "min": 0, "max": 0 },
+      { "kind": "inputCount", "item": "minecraft:glowstone", "min": 0, "max": 0 }
+    ]
+  }
+]
