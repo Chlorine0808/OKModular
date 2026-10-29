@@ -45,6 +45,29 @@
           "expression": "can_see_sky == 1"
         }
       ]
+    },
+    {
+      "group": "SelftestCache",
+      "registryName": "selftest_cache_void",
+      "name": "Selftest Cache: the controller sees the void",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "expression": "can_see_void == 1"
+        }
+      ]
     }
   ]
 }

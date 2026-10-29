@@ -217,5 +217,117 @@
         "max": 1
       }
     ]
+  },
+  {
+    "id": "sA18-void-true",
+    "section": "A-18",
+    "title": "can_see_void is true once the column below is cut down to y=0",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 変数・関数 can_see_void (コントローラの真下が Y=0 まで空洞か) and 周囲を調べる関数 (counted from one block below the controller). The site is cleared only 16 below the origin, so the column under the controller (origin y=64) is cut to air down to y=0, bedrock included; a glass sleeve (light opacity 0, which the scan sees through) is set first so no liquid can flow into it. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          -1,
+          -64,
+          -1
+        ],
+        "to": [
+          1,
+          -1,
+          1
+        ],
+        "block": "minecraft:glass"
+      },
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          0,
+          -64,
+          0
+        ],
+        "to": [
+          0,
+          -1,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:gravel",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  },
+  {
+    "id": "sA18-void-false",
+    "section": "A-18",
+    "title": "can_see_void is false over the site's stone floor",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 変数・関数 can_see_void. Nothing is cut: the site's stone floor 17 below the origin is opaque. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:gravel",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 80
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 0,
+        "max": 0
+      },
+      {
+        "kind": "inputCount",
+        "item": "minecraft:gravel",
+        "min": 1,
+        "max": 1
+      }
+    ]
   }
 ]
