@@ -244,6 +244,47 @@ public class BlockResolver {
     }
 
     /**
+     * Create the element of a tiered part: it checks like
+     * {@link #createChainElementWithTileAdder(List)}, but hints and places the tier picked by the
+     * trigger's stack size.
+     *
+     * @param tiers block string to tier
+     * @return the element, or null if no block resolves
+     */
+    public static <T extends IMachineController> IStructureElement<T> createTieredElementWithTileAdder(
+        Map<String, Integer> tiers) {
+        List<String> ordered = orderByTier(tiers);
+        IStructureElement<T> checker = createChainElementWithTileAdder(ordered);
+        if (checker == null) {
+            return null;
+        }
+
+        List<IStructureElement<T>> placeable = new ArrayList<>();
+        for (String blockString : ordered) {
+            IStructureElement<T> element = createElement(blockString);
+            if (element != null) {
+                placeable.add(element);
+            }
+        }
+        return new TierByTriggerElement<>(checker, placeable);
+    }
+
+    /**
+     * Block strings of a tiered part, lowest tier first; equal tiers in block string order.
+     */
+    public static List<String> orderByTier(Map<String, Integer> tiers) {
+        List<Map.Entry<String, Integer>> entries = new ArrayList<>(tiers.entrySet());
+        entries.sort(
+            Map.Entry.<String, Integer>comparingByValue()
+                .thenComparing(Map.Entry.comparingByKey()));
+        List<String> ordered = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : entries) {
+            ordered.add(entry.getKey());
+        }
+        return ordered;
+    }
+
+    /**
      * Callback for ofTileAdder to collect IModularPort TileEntities.
      * Called during structure check for each block position.
      *
