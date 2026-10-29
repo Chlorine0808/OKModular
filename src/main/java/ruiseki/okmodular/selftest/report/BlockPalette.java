@@ -3,7 +3,7 @@ package ruiseki.okmodular.selftest.report;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Fixed colours for common blocks; everything else gets an HSL colour derived from its id. */
+/** Fixed colours for blocks the scenarios use; everything else gets an HSL colour derived from its id. */
 final class BlockPalette {
 
     private static final String[] WOOL = { "#e9ecec", "#f07613", "#bd44b3", "#3aafd9", "#f8c627", "#70b919", "#ed8dac",
@@ -20,6 +20,19 @@ final class BlockPalette {
         FIXED.put("minecraft:glass", "#bfe3f0");
         FIXED.put("minecraft:leaves", "#2f7a1f");
         FIXED.put("minecraft:torch", "#ffb800");
+        FIXED.put("minecraft:sand", "#e3d9a6");
+        FIXED.put("minecraft:gravel", "#a39a94");
+        FIXED.put("minecraft:lapis_block", "#2350b8");
+        FIXED.put("minecraft:obsidian", "#1d1430");
+        FIXED.put("minecraft:iron_block", "#dcdcdc");
+        FIXED.put("minecraft:quartz_block", "#f4efe6");
+        FIXED.put("minecraft:emerald_block", "#2fcf6a");
+        FIXED.put("minecraft:diamond_block", "#62e0d8");
+        FIXED.put("minecraft:gold_ore", "#b39a2e");
+        FIXED.put("minecraft:coal_ore", "#2b2b2b");
+        FIXED.put("minecraft:glowstone", "#c7924a");
+        FIXED.put("minecraft:netherrack", "#7a2f2f");
+        FIXED.put("minecraft:planks", "#a8834f");
         FIXED.put("okmodular:casing_plain", "#9aa0a6");
         FIXED.put("okmodular:casing_reinforced", "#4c5560");
         FIXED.put("okmodular:casing_vented", "#b9a37a");

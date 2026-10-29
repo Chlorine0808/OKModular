@@ -1,6 +1,7 @@
 package ruiseki.okmodular.selftest.report;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,7 +18,10 @@ class BlockPaletteTest {
         "minecraft:torch", "minecraft:wool:0", "minecraft:wool:14", "okmodular:casing_plain",
         "okmodular:casing_reinforced", "okmodular:casing_vented", "okmodular:casing_circuitry",
         "okmodular:modular_item_input", "okmodular:modular_item_output", "okmodular:modular_fluid_input",
-        "okmodular:modular_fluid_output", "okmodular:modular_energy_input", "okmodular:modular_machine_controller" };
+        "okmodular:modular_fluid_output", "okmodular:modular_energy_input", "okmodular:modular_machine_controller",
+        "minecraft:sand", "minecraft:gravel", "minecraft:lapis_block", "minecraft:obsidian", "minecraft:iron_block",
+        "minecraft:quartz_block", "minecraft:emerald_block", "minecraft:diamond_block", "minecraft:gold_ore",
+        "minecraft:coal_ore", "minecraft:glowstone", "minecraft:netherrack", "minecraft:planks" };
 
     @Test
     @DisplayName("同じブロックは同じ色")
@@ -30,6 +34,17 @@ class BlockPaletteTest {
     void distinctCommonBlocksHaveDistinctColours() {
         Set<String> seen = new HashSet<>();
         for (String b : COMMON) assertTrue(seen.add(BlockPalette.colourOf(b)), b);
+    }
+
+    @Test
+    @DisplayName("シナリオで使うバニラのブロックには固定の色がある")
+    void scenarioBlocksHaveFixedColours() {
+        for (String b : COMMON) {
+            if (!b.startsWith("minecraft:wool")) assertFalse(
+                BlockPalette.colourOf(b)
+                    .startsWith("hsl("),
+                b);
+        }
     }
 
     @Test
