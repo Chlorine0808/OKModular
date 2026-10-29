@@ -42,8 +42,13 @@ public final class SelfTest {
 
     public static void onPreInit() {
         if (!requested()) return;
-        LogCapture.install();
-        LOG.info("selftest requested; capturing WARN+ log lines");
+        try {
+            LogCapture.install();
+            LOG.info("selftest requested; capturing WARN+ log lines");
+        } catch (Throwable ex) {
+            // logContains checks then fail on their own; the server and the other checks still run.
+            LOG.warn("selftest could not capture log lines", ex);
+        }
     }
 
     public static void onServerStarted(MinecraftServer server) {
