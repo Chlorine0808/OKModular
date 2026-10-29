@@ -4,7 +4,6 @@ import static com.gtnewhorizon.structurelib.structure.StructureUtility.isAir;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.transpose;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -209,10 +208,7 @@ public class CustomStructureRegistry {
             }
         } else if (mapping instanceof TieredBlockMapping) {
             TieredBlockMapping tm = (TieredBlockMapping) mapping;
-            return BlockResolver.createChainElementWithTileAdder(
-                new ArrayList<>(
-                    tm.getTiers()
-                        .keySet()));
+            return BlockResolver.createTieredElementWithTileAdder(tm.getTiers());
         }
         return null;
     }
