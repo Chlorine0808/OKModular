@@ -124,7 +124,7 @@ class BundledDefaultsTest {
             JsonArray array = root.getAsJsonArray("recipes");
             for (JsonElement element : array) {
                 JsonObject recipe = element.getAsJsonObject();
-                if (!recipe.has("machine") && !recipe.has("group")) recipe.addProperty("group", group);
+                if (!recipe.has("group")) recipe.addProperty("group", group);
                 recipes.add(recipe);
             }
         }
@@ -137,7 +137,8 @@ class BundledDefaultsTest {
     }
 
     private static String group(JsonObject recipe) {
-        return (recipe.has("group") ? recipe.get("group") : recipe.get("machine")).getAsString();
+        return recipe.get("group")
+            .getAsString();
     }
 
     @Test
