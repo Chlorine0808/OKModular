@@ -22,6 +22,29 @@
           "expression": "count_blocks(1, 'minecraft:iron_block') >= 1"
         }
       ]
+    },
+    {
+      "group": "SelftestCache",
+      "registryName": "selftest_cache_sky",
+      "name": "Selftest Cache: the controller sees the sky",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "expression": "can_see_sky == 1"
+        }
+      ]
     }
   ]
 }

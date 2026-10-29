@@ -90,5 +90,132 @@
         "max": 1
       }
     ]
+  },
+  {
+    "id": "sA18-sky-true",
+    "section": "A-18",
+    "title": "can_see_sky is true under open sky",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数 can_see_sky (counted from one block above the controller) and 変数・関数 can_see_sky (コントローラから空が見えるか). The overworld site has no roof; the column above the controller is also filled with air up to y=255 so terrain above the cleared box cannot interfere. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          0,
+          1,
+          0
+        ],
+        "to": [
+          0,
+          191,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:sand",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  },
+  {
+    "id": "sA18-sky-false",
+    "section": "A-18",
+    "title": "can_see_sky is false under a stone roof",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数 can_see_sky (an opaque block above the controller blocks the sky). Same open column as sA18-sky-true, plus a 3x3 stone roof 3 above the controller. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          0,
+          1,
+          0
+        ],
+        "to": [
+          0,
+          191,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          -1,
+          3,
+          -1
+        ],
+        "to": [
+          1,
+          3,
+          1
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:sand",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 80
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 0,
+        "max": 0
+      },
+      {
+        "kind": "inputCount",
+        "item": "minecraft:sand",
+        "min": 1,
+        "max": 1
+      }
+    ]
   }
 ]
