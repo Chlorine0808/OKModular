@@ -172,6 +172,10 @@ public class DocumentedJsonKeyTest {
         Pattern registered = Pattern.compile("\\bregister\\w*\\(\\s*\"([a-zA-Z_]\\w*)\"");
 
         for (Path file : JavaSource.allMainSources()) {
+            // Scenario JSON is a developer harness, not player JSON documented under docs/.
+            if (file.toString()
+                .replace('\\', '/')
+                .contains("/ruiseki/okmodular/selftest/")) continue;
             String source = JavaSource.stripComments(JavaSource.read(file));
             if (!source.contains("com.google.gson")) continue;
 
