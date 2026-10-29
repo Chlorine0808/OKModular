@@ -109,9 +109,9 @@ public class EnergyInput extends AbstractModularRecipeInput {
         }
         if (interval != 1) {
             if (isPerTick()) {
-                json.addProperty("pertick", interval);
+                json.addProperty("perTick", interval);
             } else {
-                json.addProperty("pertick", false);
+                json.addProperty("perTick", false);
             }
         }
     }

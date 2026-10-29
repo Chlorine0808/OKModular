@@ -347,7 +347,7 @@ public class ItemOutput extends AbstractModularRecipeOutput {
             }
             if (output.getItemDamage() != 0) json.addProperty("meta", output.getItemDamage());
         }
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
 
         // Write NBT expressions
         if (nbtExpressions != null && !nbtExpressions.isEmpty()) {

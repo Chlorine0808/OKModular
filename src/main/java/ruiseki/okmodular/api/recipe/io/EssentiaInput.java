@@ -95,7 +95,7 @@ public class EssentiaInput extends AbstractModularRecipeInput {
     public void write(JsonObject json) {
         if (index != -1) json.addProperty("index", index);
         if (!consume) json.addProperty("consume", false);
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
 
         if (aspectTag != null) {
             json.addProperty("essentia", aspectTag);

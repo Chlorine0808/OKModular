@@ -21,8 +21,8 @@ import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
+import ruiseki.okmodular.api.recipe.parser.JsonKeyRenames;
 import ruiseki.okmodular.api.structure.core.StructureSymbols;
-import ruiseki.okmodular.util.Logger;
 
 /**
  * Picks N cells of one symbol and puts one of several weighted outputs on each, drawn per cell.
@@ -226,8 +226,9 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
         IExpression count = json.has("count") ? ExpressionsParser.parse(json.get("count")) : null;
 
         if (json.has("selections")) {
-            Logger.warn(
-                "random_block_output \"selections\" is renamed: write one decorator per symbol with \"symbol\" and \"outputs\". Read as such.");
+            JsonKeyRenames.warnOnce(
+                "selections",
+                "Recipe key \"selections\" is renamed to \"outputs\" (one decorator per \"symbol\"). Read as such; rename it in the file.");
             IModularRecipe chain = recipe;
             for (JsonElement elem : json.getAsJsonArray("selections")) {
                 JsonObject selObj = elem.getAsJsonObject();

@@ -30,6 +30,7 @@ import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.INBTWriteExpression;
 import ruiseki.okmodular.api.recipe.expression.NBTListOperation;
+import ruiseki.okmodular.api.recipe.parser.JsonKeyRenames;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.api.structure.core.StructureSymbols;
 import ruiseki.okmodular.util.Logger;
@@ -405,6 +406,8 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
      * Create BlockOutput from JSON.
      */
     public static BlockOutput fromJson(JsonObject json) {
+        // Decorators call this directly, so it does not pass through OutputParserRegistry.
+        JsonKeyRenames.upgrade(json, JsonKeyRenames.Scope.IO);
         char symbol = StructureSymbols.requireAddressable(
             json.get("symbol")
                 .getAsString()

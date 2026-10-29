@@ -10,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import ruiseki.okcore.json.AbstractJsonReader;
+import ruiseki.okmodular.api.recipe.parser.JsonKeyRenames;
 import ruiseki.okmodular.util.Logger;
 
 /**
@@ -52,10 +53,9 @@ public class MachineryJsonReader extends AbstractJsonReader<List<JsonObject>> {
             if (obj.has("recipes") && obj.get("recipes")
                 .isJsonArray()) {
                 // Header format: { "group": "...", "recipes": [...] }
+                JsonKeyRenames.upgrade(obj, JsonKeyRenames.Scope.RECIPE);
                 String group = obj.has("group") ? obj.get("group")
-                    .getAsString()
-                    : (obj.has("machine") ? obj.get("machine")
-                        .getAsString() : null);
+                    .getAsString() : null;
 
                 JsonArray recipesArr = obj.getAsJsonArray("recipes");
                 Logger.debug(
@@ -66,8 +66,8 @@ public class MachineryJsonReader extends AbstractJsonReader<List<JsonObject>> {
                 for (JsonElement element : recipesArr) {
                     JsonObject m = parseEntry(element, file);
                     if (m != null) {
-                        if (!m.has("machine") && !m.has("group")) {
-                            m.addProperty("machine", group);
+                        if (!m.has("group")) {
+                            m.addProperty("group", group);
                         }
                         list.add(m);
                     }
@@ -106,6 +106,8 @@ public class MachineryJsonReader extends AbstractJsonReader<List<JsonObject>> {
         // list, so the origin has to travel with the recipe or its parse errors
         // cannot name a file.
         m.addProperty(SOURCE_FILE_KEY, source.getName());
+        // Upgrade here too so readers of the cached list (scanGroupNames) see the new keys.
+        JsonKeyRenames.upgrade(m, JsonKeyRenames.Scope.RECIPE);
         return m;
     }
 }

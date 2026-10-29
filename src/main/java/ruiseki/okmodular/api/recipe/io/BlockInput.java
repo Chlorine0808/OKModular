@@ -447,8 +447,8 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
     @Override
     public void read(JsonObject json) {
         // Common JSON parsing for interval
-        if (json.has("pertick")) {
-            JsonElement pt = json.get("pertick");
+        if (json.has("perTick")) {
+            JsonElement pt = json.get("perTick");
             if (pt.isJsonPrimitive()) {
                 if (pt.getAsJsonPrimitive()
                     .isBoolean()) {

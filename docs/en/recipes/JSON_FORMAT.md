@@ -93,8 +93,6 @@ number sets the interval.
 { "fluid": "water", "amount": 50, "perTick": 3 }
 ```
 
-Both `pertick` and `perTick` are read.
-
 > [!IMPORTANT]
 > **The unit is work done, not ticks of the clock.**
 > A machine at 1.5x speed does 1.5 work per tick, so it draws **1.5 units of a `perTick`

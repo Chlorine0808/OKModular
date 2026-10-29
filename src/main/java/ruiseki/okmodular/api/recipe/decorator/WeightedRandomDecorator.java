@@ -17,6 +17,7 @@ import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
+import ruiseki.okmodular.api.recipe.parser.JsonKeyRenames;
 import ruiseki.okmodular.api.recipe.parser.OutputParserRegistry;
 
 /**
@@ -164,6 +165,13 @@ public class WeightedRandomDecorator extends RecipeDecorator {
             .getAsInt() : 1;
 
         JsonArray arr = json.has("outputs") ? json.getAsJsonArray("outputs") : json.getAsJsonArray("pool");
+        if (json.has("pool")) {
+            JsonKeyRenames.warnOnce(
+                "pool",
+                json.has("outputs")
+                    ? "Recipe key \"pool\" is renamed to \"outputs\". Both \"pool\" and \"outputs\" are set; \"pool\" is ignored."
+                    : "Recipe key \"pool\" is renamed to \"outputs\". Read as \"outputs\"; rename it in the file.");
+        }
         if (arr == null) {
             throw new IllegalArgumentException("weighted_random needs an \"outputs\" (or \"pool\") array: " + json);
         }

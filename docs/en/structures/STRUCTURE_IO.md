@@ -368,7 +368,7 @@ machine's own shape resolve normally, so an IO region can sit beside or below th
 | `consume` | Input only. Clears the whole matched arrangement on start |
 | `optional` | Lets the recipe start and finish even when nothing matches |
 | `index` | Restricts to ports with this assigned index |
-| `pertick` | Repeats the check or the write while the recipe runs |
+| `perTick` | Repeats the check or the write while the recipe runs |
 
 ### As an input
 

@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.parser.JsonKeyRenames;
 import ruiseki.okmodular.util.ErrorsFile;
 import ruiseki.okmodular.util.Logger;
 
@@ -51,6 +52,7 @@ public class RecipeLoader {
 
         recipesByGroup.clear();
         errors.clear();
+        JsonKeyRenames.resetWarnings();
 
         RecipeMigration.migrateAll(recipesDir);
 
@@ -179,10 +181,8 @@ public class RecipeLoader {
             }
 
             for (JsonObject mat : materials) {
-                String group = mat.has("machine") ? mat.get("machine")
-                    .getAsString()
-                    : (mat.has("group") ? mat.get("group")
-                        .getAsString() : (mat.has("parent") ? null : "default"));
+                String group = mat.has("group") ? mat.get("group")
+                    .getAsString() : (mat.has("parent") ? null : "default");
                 if (group != null && !groups.contains(group)) {
                     groups.add(group);
                 }

@@ -52,6 +52,7 @@ public class InputParserRegistry {
      * Determines type by checking which key is present.
      */
     public static IRecipeInput parse(JsonObject json) {
+        JsonKeyRenames.upgrade(json, JsonKeyRenames.Scope.IO);
         if (json.has("type")) {
             String type = json.get("type")
                 .getAsString();

@@ -93,8 +93,6 @@
 { "fluid": "water", "amount": 50, "perTick": 3 }
 ```
 
-`pertick` と `perTick` のどちらの綴りでも読まれます。
-
 > [!IMPORTANT]
 > **単位は「実 tick」ではなく「作業量」です**。
 > 速度倍率 1.5 の機械は 1 tick に 1.5 の作業を進めるので、`perTick` 資源も
