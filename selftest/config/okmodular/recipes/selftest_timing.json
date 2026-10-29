@@ -17,6 +17,66 @@
           "amount": 1
         }
       ]
+    },
+    {
+      "group": "SelftestTiming",
+      "registryName": "selftest_timing_abort",
+      "name": "Selftest Timing: gold two above, abort when it goes",
+      "duration": 100,
+      "conditionPolicy": "abort",
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "type": "offset",
+          "dx": 0,
+          "dy": 2,
+          "dz": 0,
+          "condition": {
+            "block": "minecraft:gold_block"
+          }
+        }
+      ]
+    },
+    {
+      "group": "SelftestTiming",
+      "registryName": "selftest_timing_pause",
+      "name": "Selftest Timing: gold two above, pause when it goes",
+      "duration": 100,
+      "conditionPolicy": "pause",
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "type": "offset",
+          "dx": 0,
+          "dy": 2,
+          "dz": 0,
+          "condition": {
+            "block": "minecraft:gold_block"
+          }
+        }
+      ]
     }
   ]
 }

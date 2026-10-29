@@ -100,5 +100,163 @@
         "max": 0
       }
     ]
+  },
+  {
+    "id": "s6-abort",
+    "section": "6",
+    "title": "conditionPolicy abort drops the running recipe when its condition breaks, and the consumed input is gone",
+    "source": "run/TESTING.md §6 タイミング `conditionPolicy: abort` で稼働中に条件が崩れたとき; docs/jp/machinery/MACHINE_CONDITIONS.md §2 稼働中に条件が崩れたとき（`conditionPolicy`） (abort: the recipe is discarded, consumed inputs are not returned); docs/jp/recipes/CONDITIONS.md (conditions are checked every tick while running); docs/jp/recipes/JSON_FORMAT.md conditionPolicy. The offset block condition is not one of the cached world reads, so it breaks on the tick after the gold goes. Of 2 sand, the one consumed at the start is not refunded and the second cannot start without the gold. The gold is set at t=0 and the input inserted at t=1, so the first search already sees the condition met",
+    "machine": {
+      "structure": "selftest_onstart"
+    },
+    "ticks": 120,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      },
+      {
+        "at": 1,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:sand",
+            "amount": 2
+          }
+        ]
+      },
+      {
+        "at": 30,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:air"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 20
+      },
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 35,
+        "to": 120
+      },
+      {
+        "kind": "progressAt",
+        "at": 50,
+        "min": 0,
+        "max": 0
+      },
+      {
+        "kind": "inputCount",
+        "item": "minecraft:sand",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 0,
+        "max": 0
+      }
+    ]
+  },
+  {
+    "id": "s6-pause-control",
+    "section": "6",
+    "title": "conditionPolicy pause holds the progress while the condition is broken and resumes from there",
+    "source": "run/TESTING.md §6 タイミング `conditionPolicy: abort` で稼働中に条件が崩れたとき (pause as the control); docs/jp/machinery/MACHINE_CONDITIONS.md §2 稼働中に条件が崩れたとき（`conditionPolicy`） (pause: resumes where it left off when the condition returns, nothing is lost); docs/jp/recipes/CONDITIONS.md. Gold goes at t=30 and returns at t=60: progress stays near 0.3 meanwhile, and the 100-tick recipe finishes around t=130. The gold is set at t=0 and the input inserted at t=1, so the first search already sees the condition met",
+    "machine": {
+      "structure": "selftest_onstart"
+    },
+    "ticks": 180,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      },
+      {
+        "at": 1,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:gravel",
+            "amount": 1
+          }
+        ]
+      },
+      {
+        "at": 30,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "at": 60,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 20
+      },
+      {
+        "kind": "progressAt",
+        "at": 50,
+        "min": 0.2,
+        "max": 0.4
+      },
+      {
+        "kind": "progressAt",
+        "at": 100,
+        "min": 0.55,
+        "max": 0.8
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "kind": "inputCount",
+        "item": "minecraft:gravel",
+        "min": 0,
+        "max": 0
+      }
+    ]
   }
 ]
