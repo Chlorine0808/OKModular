@@ -100,11 +100,21 @@ public class DecoratorDescriptionTest {
             new BonusBlockOutputDecorator(BARE, new ConstantExpression(0.5), Collections.singletonList(block))
                 .describe());
         assertEquals(
-            Collections.singletonList(line("okmodular.nei.decorator.random_block_output", "3")),
+            Collections.singletonList(line("okmodular.nei.decorator.random_block_output", "L", "3", "2 / 1")),
             new RandomBlockOutputDecorator(
                 BARE,
+                'L',
                 new ConstantExpression(3),
-                Collections.singletonList(new RandomBlockOutputDecorator.BlockOutputSelection('L', block))).describe());
+                Arrays.asList(
+                    new RandomBlockOutputDecorator.WeightedBlockOutput(block, 2),
+                    new RandomBlockOutputDecorator.WeightedBlockOutput(block, 1))).describe());
+        assertEquals(
+            Collections.singletonList(line("okmodular.nei.decorator.random_block_output.all", "L", "1")),
+            new RandomBlockOutputDecorator(
+                BARE,
+                'L',
+                null,
+                Collections.singletonList(new RandomBlockOutputDecorator.WeightedBlockOutput(block, 1))).describe());
     }
 
     @Test

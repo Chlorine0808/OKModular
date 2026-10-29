@@ -2,6 +2,11 @@ package ruiseki.okmodular.api.recipe.parser;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +19,8 @@ import ruiseki.okmodular.api.recipe.core.ModularRecipe;
 import ruiseki.okmodular.api.recipe.decorator.BonusOutputDecorator;
 import ruiseki.okmodular.api.recipe.decorator.ChanceRecipeDecorator;
 import ruiseki.okmodular.api.recipe.decorator.HarvestBlockDecorator;
+import ruiseki.okmodular.api.recipe.decorator.PerPositionProbabilityDecorator;
+import ruiseki.okmodular.api.recipe.decorator.RandomBlockOutputDecorator;
 import ruiseki.okmodular.api.recipe.decorator.WeightedRandomDecorator;
 import ruiseki.okmodular.api.recipe.expression.MapRangeExpression;
 
@@ -206,5 +213,77 @@ public class DecoratorParserTest {
                 + " { \"bonus\": { \"chance\": 0.05, \"outputs\": [ { \"item\": \"minecraft:nether_star\", \"amount\": 1 } ] } } ]");
 
         assertInstanceOf(BonusOutputDecorator.class, result, "末尾の bonus が最も外側になるべき");
+    }
+
+    // ========================================
+    // random_block_output: one symbol, weighted outputs (P24 C)
+    // ========================================
+
+    private static final String C_SHAPE = "\"symbol\":\"O\",\"count\":2,"
+        + "\"outputs\":[{\"weight\":3,\"block\":\"minecraft:stone\"},{\"block\":\"minecraft:dirt\"}]";
+
+    private static List<Integer> weightsOf(IModularRecipe recipe) {
+        List<Integer> weights = new ArrayList<>();
+        for (RandomBlockOutputDecorator.WeightedBlockOutput entry : ((RandomBlockOutputDecorator) recipe)
+            .getWeightedOutputs()) {
+            weights.add(entry.weight);
+        }
+        return weights;
+    }
+
+    @Test
+    @DisplayName("C 形（記号 + outputs）を読む")
+    public void cShapeParses() {
+        IModularRecipe result = decorate("{\"type\":\"random_block_output\"," + C_SHAPE + "}");
+        assertInstanceOf(RandomBlockOutputDecorator.class, result);
+        assertEquals(Arrays.asList(3, 1), weightsOf(result));
+    }
+
+    @Test
+    @DisplayName("type が無くても C 形は random_block_output と推論される")
+    public void cShapeInferredWithoutType() {
+        IModularRecipe result = decorate("{" + C_SHAPE + "}");
+        assertInstanceOf(RandomBlockOutputDecorator.class, result);
+        assertFalse(result instanceof WeightedRandomDecorator);
+    }
+
+    @Test
+    @DisplayName("chance + symbol + output は従来どおり per_position_probability")
+    public void perPositionStillInferred() {
+        IModularRecipe result = decorate(
+            "{\"chance\":0.1,\"symbol\":\"L\",\"output\":{\"symbol\":\"L\",\"block\":\"minecraft:stone\"}}");
+        assertInstanceOf(PerPositionProbabilityDecorator.class, result);
+    }
+
+    @Test
+    @DisplayName("出力の symbol が decorator と食い違えば拒否する")
+    public void mismatchedOutputSymbolIsRejected() {
+        IllegalArgumentException e = assertThrows(
+            IllegalArgumentException.class,
+            () -> decorate("{\"symbol\":\"O\",\"outputs\":[{\"symbol\":\"G\",\"block\":\"minecraft:stone\"}]}"));
+        assertTrue(
+            e.getMessage()
+                .contains("O")
+                && e.getMessage()
+                    .contains("G"),
+            e.getMessage());
+    }
+
+    @Test
+    @DisplayName("旧 selections は symbol ごとの decorator の連なりとして読む")
+    public void oldSelectionsBecomeAChain() {
+        IModularRecipe result = decorate(
+            "{\"type\":\"random_block_output\",\"count\":1,\"selections\":["
+                + "{\"symbol\":\"G\",\"output\":{\"symbol\":\"G\",\"block\":\"minecraft:grass\"}},"
+                + "{\"symbol\":\"M\",\"output\":{\"symbol\":\"M\",\"block\":\"minecraft:mycelium\"}}]}");
+
+        assertInstanceOf(RandomBlockOutputDecorator.class, result);
+        assertEquals(Collections.singletonList(1), weightsOf(result));
+        assertEquals('M', ((RandomBlockOutputDecorator) result).getSymbol());
+
+        IModularRecipe inner = ((RandomBlockOutputDecorator) result).getInternal();
+        assertInstanceOf(RandomBlockOutputDecorator.class, inner);
+        assertEquals(Collections.singletonList(1), weightsOf(inner));
+        assertEquals('G', ((RandomBlockOutputDecorator) inner).getSymbol());
     }
 }

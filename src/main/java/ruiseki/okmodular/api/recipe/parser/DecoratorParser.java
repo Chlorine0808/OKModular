@@ -37,12 +37,13 @@ public class DecoratorParser {
             "weighted_random",
             WeightedRandomDecorator::fromJson,
             json -> json.has("rolls") || json.has("pool")
-                || (json.has("outputs") && isFirstOutputWeighted(json.getAsJsonArray("outputs"))));
+                || (json.has("outputs") && !json.has("symbol")
+                    && isFirstOutputWeighted(json.getAsJsonArray("outputs"))));
 
         register(
             "random_block_output",
             RandomBlockOutputDecorator::fromJson,
-            json -> json.has("count") || json.has("selections"));
+            json -> json.has("selections") || (json.has("symbol") && json.has("outputs") && !json.has("chance")));
 
         register(
             "harvest_block",

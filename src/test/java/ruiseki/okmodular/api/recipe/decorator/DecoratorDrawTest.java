@@ -119,7 +119,7 @@ public class DecoratorDrawTest {
     }
 
     private static RandomBlockOutputDecorator randomBlocks() {
-        return new RandomBlockOutputDecorator(null, new ConstantExpression(1), new ArrayList<>());
+        return new RandomBlockOutputDecorator(null, 'L', new ConstantExpression(1), new ArrayList<>());
     }
 
     /**
@@ -518,6 +518,7 @@ public class DecoratorDrawTest {
         // こちらは**マス数を名指しする**ので、「5 マス置く」を n 回なら 5n マス。
         RandomBlockOutputDecorator decorator = new RandomBlockOutputDecorator(
             null,
+            'L',
             new ConstantExpression(5),
             new ArrayList<>());
 
@@ -532,6 +533,7 @@ public class DecoratorDrawTest {
         // 打ち切りは select 側にあるので、倍にしても落ちない。
         RandomBlockOutputDecorator decorator = new RandomBlockOutputDecorator(
             null,
+            'L',
             new ConstantExpression(40),
             new ArrayList<>());
 

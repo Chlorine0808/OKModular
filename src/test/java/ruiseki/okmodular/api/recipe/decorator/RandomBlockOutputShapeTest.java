@@ -39,7 +39,7 @@ public class RandomBlockOutputShapeTest {
     }
 
     private static RandomBlockOutputDecorator decorator() {
-        return new RandomBlockOutputDecorator(null, new ConstantExpression(1), new ArrayList<>());
+        return new RandomBlockOutputDecorator(null, 'O', new ConstantExpression(1), new ArrayList<>());
     }
 
     @Test
@@ -89,5 +89,12 @@ public class RandomBlockOutputShapeTest {
         }
         double share = first / 100.0;
         assertTrue(share > 0.35 && share < 0.65, "share=" + share);
+    }
+
+    @Test
+    @DisplayName("count を省くと全マス")
+    public void countOmittedMeansEveryCell() {
+        RandomBlockOutputDecorator all = new RandomBlockOutputDecorator(null, 'O', null, new ArrayList<>());
+        assertEquals(Integer.MAX_VALUE, all.totalCount(null));
     }
 }
