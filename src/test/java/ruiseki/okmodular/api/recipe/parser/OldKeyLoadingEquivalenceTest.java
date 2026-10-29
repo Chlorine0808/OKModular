@@ -30,6 +30,7 @@ import ruiseki.okmodular.api.recipe.io.ItemInput;
 import ruiseki.okmodular.api.recipe.io.ItemOutput;
 import ruiseki.okmodular.common.recipe.JSONLoader;
 import ruiseki.okmodular.common.recipe.MachineryJsonReader;
+import ruiseki.okmodular.common.recipe.RecipeLoader;
 
 /**
  * A pack written with the old keys loads to the same recipes as the same pack in the new
@@ -226,5 +227,26 @@ public class OldKeyLoadingEquivalenceTest {
                     .getAsString());
             assertFalse(recipe.has("machine"));
         }
+    }
+
+    @Test
+    public void startupScanThenLoadAllWarnsOncePerKey() throws IOException {
+        Path config = Files.createDirectory(tmp.resolve("config"));
+        Path recipes = Files.createDirectory(config.resolve("recipes"));
+        Files.write(
+            recipes.resolve("pack.json"),
+            ("{ 'machine': 'crusher', 'recipes': [ { 'time': 5, 'input': [ { 'energy': 1 } ],"
+                + " 'output': [ { 'energy': 1 } ] } ] }").replace("'", "\"")
+                    .getBytes(StandardCharsets.UTF_8));
+
+        // The order MachineryModule uses: scan in preInit, load in postInit
+        RecipeLoader.scanGroupNames(config.toFile());
+        RecipeLoader.getInstance()
+            .loadAll(config.toFile());
+
+        assertEquals(4, warnings.size(), warnings.toString());
+        RecipeLoader.getInstance()
+            .reload(config.toFile());
+        assertEquals(8, warnings.size(), "a reload warns again, once per key: " + warnings);
     }
 }

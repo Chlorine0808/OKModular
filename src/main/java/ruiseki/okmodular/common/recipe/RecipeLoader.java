@@ -52,7 +52,6 @@ public class RecipeLoader {
 
         recipesByGroup.clear();
         errors.clear();
-        JsonKeyRenames.resetWarnings();
 
         RecipeMigration.migrateAll(recipesDir);
 
@@ -96,6 +95,9 @@ public class RecipeLoader {
             .setConfigDir(configDir);
 
         Logger.info("Reloading recipes...");
+        // Warnings reset per reload, not per loadAll: at startup scanGroupNames has already
+        // read the files, and loadAll resetting would make every old key warn a second time.
+        JsonKeyRenames.resetWarnings();
         recipeVersion++;
         loadAll(configDir);
     }
@@ -166,6 +168,9 @@ public class RecipeLoader {
     public static List<String> scanGroupNames(File configDir) {
         RecipeLoader instance = getInstance();
         File recipesDir = new File(configDir, "recipes");
+
+        // The first read of a startup; loadAll continues the same warning round
+        JsonKeyRenames.resetWarnings();
 
         if (instance.reader == null || !instance.reader.getPath()
             .equals(recipesDir)) {
