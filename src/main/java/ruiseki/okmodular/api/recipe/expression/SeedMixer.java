@@ -80,6 +80,9 @@ public final class SeedMixer {
     /** Odd 64-bit constant, so distinct streams land far apart. */
     private static final long STREAM_GAMMA = 0x9E3779B97F4A7C15L;
 
+    /** Odd 64-bit constant for the chain-depth axis, distinct from the stream and axis gammas. */
+    private static final long DEPTH_GAMMA = 0xD6E8FEB86659FD93L;
+
     /** Per-axis odd constants, so swapping two coordinates does not land on the same seed. */
     private static final long X_GAMMA = 0xFF51AFD7ED558CCDL;
     private static final long Y_GAMMA = 0xC2B2AE3D27D4EB4FL;
@@ -109,15 +112,26 @@ public final class SeedMixer {
      * stream constants above, so without it draw 1 would sit on top of stream 1. The two
      * still share one number line - a stream and a draw index only stay apart because the
      * streams start at zero and the draws start past them. The day a third axis wants
-     * numbering (a decorator's position in the chain, for one - two {@code bonus} entries on
-     * one recipe currently fire together for want of it), give the axes separate gammas the
-     * way the coordinates already have, rather than widening this offset again.
+     * numbering, give it a gamma of its own the way the coordinates already have, rather than
+     * widening this offset again. A decorator's chain depth is such an axis; see
+     * {@link #forDecorator}.
      *
      * @param index which draw, from zero; index zero returns the seed unchanged so a batch
      *              of one is bit-for-bit what it was
      */
     public static long forDraw(long seed, int index) {
         return index == 0 ? seed : mix(seed + (index + 8L) * STREAM_GAMMA);
+    }
+
+    /**
+     * A seed for the decorator at {@code depth} in a recipe's decorator chain, so two decorators
+     * of the same kind on one recipe do not draw the same numbers.
+     *
+     * @param depth how many decorators sit below this one; depth zero returns the seed unchanged
+     *              so a lone decorator is bit-for-bit what it was
+     */
+    public static long forDecorator(long seed, int depth) {
+        return depth == 0 ? seed : mix(seed + depth * DEPTH_GAMMA);
     }
 
     /**
