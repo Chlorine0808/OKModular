@@ -23,9 +23,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import ruiseki.okmodular.config.MachineryConfig;
-import ruiseki.okmodular.structure.StructureErrorCollector;
 import ruiseki.okmodular.structure.StructureException;
 import ruiseki.okmodular.structure.migration.StructureMigrationRegistry;
+import ruiseki.okmodular.util.ErrorsFile;
 import ruiseki.okmodular.util.Logger;
 
 /**
@@ -40,10 +40,8 @@ import ruiseki.okmodular.util.Logger;
  * That mechanism only exists if the load path calls it, which is why {@link #readFile} does.
  * <p>
  * A file that cannot be read is dropped on its own and kept in {@link #getErrors}, matching how
- * structures and recipes behave: one typo should not take every machine with it. Handing the
- * errors over rather than reporting them from inside mirrors {@code StructureValidationVisitor},
- * whose caller does the collecting -- and it is the only arrangement a test can observe, because
- * {@code StructureErrorCollector} reaches OKCore's collector, which needs a running mod instance.
+ * structures and recipes behave: one typo should not take every machine with it. {@link #loadAll}
+ * writes them to {@code errors.txt} beside the pattern files.
  */
 public final class StructurePatternLoader {
 
@@ -82,12 +80,15 @@ public final class StructurePatternLoader {
      * The production entry point: load, then report whatever went wrong.
      */
     public void loadAll(File configDir) {
-        loadFrom(resolveDir(configDir));
+        File dir = resolveDir(configDir);
+        loadFrom(dir);
 
-        StructureErrorCollector collector = StructureErrorCollector.getInstance();
+        List<String> lines = new ArrayList<>();
         for (StructureException error : errors) {
-            collector.collect(error);
+            Logger.error("[Structure IO] " + error.getFormattedMessage());
+            lines.add(error.getFormattedMessage() + (error.getFileName() != null ? " in " + error.getFileName() : ""));
         }
+        ErrorsFile.write(dir, "OKModular Structure IO Pattern Errors", lines);
     }
 
     /**
