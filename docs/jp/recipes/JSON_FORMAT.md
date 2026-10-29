@@ -27,16 +27,16 @@
 
 | キー | 型 | 意味 |
 |---|---|---|
-| `group` / `machine` | 文字列 | レシピグループ（どのマシンのレシピか） |
-| `duration` / `time` | 数値または式 | 作業量。**時間ではない**（速度倍率で割られる） |
-| `inputs` / `input` | 配列 | 入力 |
-| `outputs` / `output` | 配列 | 出力 |
-| `conditions` / `condition` | 配列またはオブジェクト | 条件 → [CONDITIONS.md](./CONDITIONS.md) |
+| `group` | 文字列 | レシピグループ（どのマシンのレシピか） |
+| `duration` | 数値または式 | 作業量。**時間ではない**（速度倍率で割られる） |
+| `inputs` | 配列 | 入力 |
+| `outputs` | 配列 | 出力 |
+| `conditions` | 配列またはオブジェクト | 条件 → [CONDITIONS.md](./CONDITIONS.md) |
 | `conditionPolicy` | 文字列 | 稼働中に `conditions` が崩れたときの挙動（`pause` / `abort`、デフォルト: `pause`） |
 | `decorators` | 配列 | 挙動の拡張 → [DECORATORS.md](./DECORATORS.md) |
-| `tier` / `tiers` | オブジェクト | 要求されるコンポーネントの Tier（例: `{"glass": 1, "casing": 3}`） |
+| `tiers` | オブジェクト | 要求されるコンポーネントの Tier（例: `{"glass": 1, "casing": 3}`） |
 | `priority` | 数値 | 優先度 |
-| `name` / `localizedName` | 文字列 | 表示名 |
+| `name` | 文字列 | 表示名 |
 | `registryName` | 文字列 | 継承で参照される名前 → §10 |
 | `parent` | 文字列 | 継承元の `registryName` → §10 |
 | `abstract` | 真偽値 | 継承専用のレシピにする → §10 |
@@ -331,3 +331,27 @@
 { "parent": "base_miner", "outputs": [ ... ] }
 ```
 
+## 11. 旧キー
+
+次のキーは名前を変えました。書き込みは新しいキーだけです。旧キーも読み込めますが、ログに警告が出ます。
+
+| 旧キー | 新キー | 場所 |
+|---|---|---|
+| `machine` | `group` | レシピ・ファイル先頭 |
+| `time` | `duration` | レシピ |
+| `input` | `inputs` | レシピ |
+| `output` | `outputs` | レシピ |
+| `condition` | `conditions` | レシピ |
+| `tier` | `tiers` | レシピ |
+| `localizedName` | `name` | レシピ |
+| `pertick` | `perTick` | 入出力 |
+| `nbtmatch` | `nbtMatch` | 入出力 |
+| `nbtlist` | `nbtList` | 入出力 |
+| `pool`（要素は `{ "weight", "output": {...} }`） | `outputs`（要素に `weight` と出力のキーを平らに書く） | `weighted_random` |
+| `selections` | `symbol` + `outputs`（[デコレータ](./DECORATORS.md#4-random_block_output)） | `random_block_output` |
+
+- 旧キーだけがあるときは、新キーとして読みます
+- 新旧の両方があるときは、新キーを使い、旧キーは無視します
+- 警告は、旧キーごとにレシピのリロード 1 回につき 1 行です。`errors.txt` には書きません。レシピは落ちずに動くためです
+- 同じ綴りでも場所で意味が違うキーがあります。`requirement` デコレータの `condition`（式 1 つ）は、レシピの `condition` とは別物なので、そのままです
+- `nbtMatch`・`nbtList`・`perTick` の綴りが正です。全部小文字の綴りは旧キーです

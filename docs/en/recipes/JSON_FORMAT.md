@@ -27,16 +27,16 @@ Recipes are defined in `config/okmodular/recipes/*.json`.
 
 | Key | Type | Meaning |
 |---|---|---|
-| `group` / `machine` | string | Recipe group (which machine the recipe belongs to) |
-| `duration` / `time` | number or expression | Work amount. **Not a time** (it is divided by the speed multiplier) |
-| `inputs` / `input` | array | Inputs |
-| `outputs` / `output` | array | Outputs |
-| `conditions` / `condition` | array or object | Conditions → [CONDITIONS.md](./CONDITIONS.md) |
+| `group` | string | Recipe group (which machine the recipe belongs to) |
+| `duration` | number or expression | Work amount. **Not a time** (it is divided by the speed multiplier) |
+| `inputs` | array | Inputs |
+| `outputs` | array | Outputs |
+| `conditions` | array or object | Conditions → [CONDITIONS.md](./CONDITIONS.md) |
 | `conditionPolicy` | string | What happens to this recipe when `conditions` stop holding mid-run (`pause` / `abort`, default: `pause`) |
 | `decorators` | array | Extended behaviour → [DECORATORS.md](./DECORATORS.md) |
-| `tier` / `tiers` | object | Required component tiers (e.g. `{"glass": 1, "casing": 3}`) |
+| `tiers` | object | Required component tiers (e.g. `{"glass": 1, "casing": 3}`) |
 | `priority` | number | Priority |
-| `name` / `localizedName` | string | Display name |
+| `name` | string | Display name |
 | `registryName` | string | The name inheritance refers to → §10 |
 | `parent` | string | The `registryName` to inherit from → §10 |
 | `abstract` | boolean | Make this an inheritance-only recipe → §10 |
@@ -333,3 +333,28 @@ Put shared properties on an `abstract` recipe and refer to it from others with `
 ```json
 { "parent": "base_miner", "outputs": [ ... ] }
 ```
+
+## 11. Old keys
+
+These keys were renamed. Files are written with the new keys only. The old keys still load, with a warning in the log.
+
+| Old key | New key | Where |
+|---|---|---|
+| `machine` | `group` | recipe, top of the file |
+| `time` | `duration` | recipe |
+| `input` | `inputs` | recipe |
+| `output` | `outputs` | recipe |
+| `condition` | `conditions` | recipe |
+| `tier` | `tiers` | recipe |
+| `localizedName` | `name` | recipe |
+| `pertick` | `perTick` | input / output |
+| `nbtmatch` | `nbtMatch` | input / output |
+| `nbtlist` | `nbtList` | input / output |
+| `pool` (elements are `{ "weight", "output": {...} }`) | `outputs` (each element carries `weight` and the output's keys flat) | `weighted_random` |
+| `selections` | `symbol` + `outputs` ([decorator](./DECORATORS.md#4-random_block_output)) | `random_block_output` |
+
+- When only the old key is present, it is read as the new key
+- When both are present, the new key wins and the old one is ignored
+- The warning is one line per old key per recipe reload. It does not go to `errors.txt`, because the recipe still loads and runs
+- Some words mean different things in different places. The `condition` of a `requirement` decorator (one expression) is not the recipe's `condition`, and keeps its name
+- `nbtMatch`, `nbtList` and `perTick` are the correct spellings. The all-lowercase forms are old keys
