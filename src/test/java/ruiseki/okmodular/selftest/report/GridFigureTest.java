@@ -39,9 +39,39 @@ class GridFigureTest {
     }
 
     @Test
-    @DisplayName("セルの rect は空気でないマスの数に一致する")
+    @DisplayName("セルの四角は空気でないマスの数に一致し，層ごとに同じブロックを 1 本の path にまとめる")
     void cellCountMatchesNonAirCells() {
-        assertEquals(4, count(GridFigure.render("t", sample()), "<rect class=\"cell\""));
+        String html = GridFigure.render("t", sample());
+        assertEquals(4, count(html, "h18v18h-18z"));
+        assertEquals(3, count(html, "<path class=\"cell\""));
+    }
+
+    @Test
+    @DisplayName("隣り合う同じ層は 1 枚にまとめる")
+    void identicalAdjacentLayersCollapse() {
+        BlockGrid g = new BlockGrid(new int[] { 0, 0, 0 }, new int[] { 1, 3, 1 });
+        for (int y = 0; y <= 1; y++) g.set(0, y, 0, "minecraft:stone");
+        String html = GridFigure.render("t", g);
+        assertEquals(2, count(html, "<svg"));
+        assertTrue(html.contains(">y=3〜2（同じ 2 層）<"));
+        assertTrue(html.contains(">y=1〜0（同じ 2 層）<"));
+    }
+
+    @Test
+    @DisplayName("高い格子は層を間引き，最上・最下と印のある層は残して注記する")
+    void tallGridsAreSampled() {
+        BlockGrid g = new BlockGrid(new int[] { 0, 0, 0 }, new int[] { 29, 29, 0 });
+        for (int y = 0; y <= 29; y++) g.set(y, y, 0, "minecraft:stone");
+        g.mark(13, 13, 0, BlockGrid.Marker.ANCHOR);
+        String html = GridFigure.render("t", g);
+        int svgs = count(html, "<svg");
+        assertTrue(svgs <= GridFigure.MAX_LAYERS + 1, "svgs=" + svgs);
+        assertTrue(svgs >= GridFigure.MAX_LAYERS, "svgs=" + svgs);
+        assertTrue(html.contains(">y=29<"));
+        assertTrue(html.contains(">y=0<"));
+        assertTrue(html.contains(">y=13<"));
+        assertTrue(html.contains("class=\"layer-note\""));
+        assertTrue(html.contains("30 層のうち " + svgs + " 層"));
     }
 
     @Test
@@ -70,8 +100,8 @@ class GridFigureTest {
         BlockGrid g = new BlockGrid(new int[] { 0, 0, 0 }, new int[] { 79, 0, 1 });
         g.set(0, 0, 0, "minecraft:stone");
         String html = GridFigure.render("t", g);
-        assertTrue(html.contains("<rect class=\"cell\" x=\"0\" y=\"0\" width=\"8\""));
-        assertFalse(html.contains("width=\"18\""));
+        assertTrue(html.contains("M0,0h8v8h-8z"));
+        assertFalse(html.contains("h18v18"));
     }
 
     @Test
@@ -79,7 +109,7 @@ class GridFigureTest {
     void normalGridsUseDefaultCells() {
         assertTrue(
             GridFigure.render("t", sample())
-                .contains("width=\"" + GridFigure.CELL_PX + "\""));
+                .contains("h" + GridFigure.CELL_PX + "v" + GridFigure.CELL_PX));
     }
 
     @Test

@@ -1,19 +1,25 @@
 package ruiseki.okmodular.selftest.report;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import ruiseki.okmodular.selftest.grid.BlockGrid;
 
-/** Renders a BlockGrid as one top-down SVG per layer (north up) plus a colour legend, as an HTML fragment. */
+/** Renders a BlockGrid as top-down SVG layers (north up) plus a colour legend, as an HTML fragment. */
 final class GridFigure {
 
     static final int CELL_PX = 18;
+    /** Tall grids show at most this many layers (plus any layer holding a marker). */
+    static final int MAX_LAYERS = 12;
     private static final int WIDE_LIMIT = 64;
     private static final int WIDE_CELL_PX = 8;
     private static final int MARGIN_LEFT = 30;
     private static final int MARGIN_TOP = 16;
+    private static final int MARGIN_RIGHT = 4;
+    private static final int MARGIN_BOTTOM = 4;
 
     private GridFigure() {}
 
@@ -21,19 +27,79 @@ final class GridFigure {
         int[] from = grid.from();
         int[] to = grid.to();
         int cell = (to[0] - from[0] + 1) > WIDE_LIMIT ? WIDE_CELL_PX : CELL_PX;
+        // runs of identical adjacent layers, top first: {top y, bottom y}
+        List<int[]> runs = new ArrayList<>();
+        for (int y = to[1]; y >= from[1]; y--) {
+            int[] last = runs.isEmpty() ? null : runs.get(runs.size() - 1);
+            if (last != null && sameLayer(grid, last[1], y)) last[1] = y;
+            else runs.add(new int[] { y, y });
+        }
+        List<int[]> shown = sample(grid, runs);
         StringBuilder sb = new StringBuilder();
         sb.append("<figure class=\"grid-figure\">\n<figcaption>")
             .append(esc(title))
             .append("</figcaption>\n");
-        for (int y = to[1]; y >= from[1]; y--) {
-            sb.append("<h5 class=\"layer\">y=")
-                .append(y)
-                .append("</h5>\n");
-            layer(sb, grid, y, cell);
+        if (shown.size() < runs.size()) {
+            int layers = to[1] - from[1] + 1;
+            sb.append("<p class=\"layer-note\">")
+                .append(layers)
+                .append(" 層のうち ")
+                .append(shown.size())
+                .append(" 層を表示（等間隔に間引き，最上・最下と印のある層は残す）</p>\n");
         }
+        sb.append("<div class=\"layers\">\n");
+        for (int[] run : shown) {
+            sb.append("<div class=\"layer-box\"><h5 class=\"layer\">y=")
+                .append(run[0]);
+            if (run[1] != run[0]) {
+                sb.append('〜')
+                    .append(run[1])
+                    .append("（同じ ")
+                    .append(run[0] - run[1] + 1)
+                    .append(" 層）");
+            }
+            sb.append("</h5>\n");
+            layer(sb, grid, run[0], cell);
+            sb.append("</div>\n");
+        }
+        sb.append("</div>\n");
         legend(sb, grid);
         sb.append("</figure>\n");
         return sb.toString();
+    }
+
+    private static boolean sameLayer(BlockGrid g, int y1, int y2) {
+        int[] from = g.from();
+        int[] to = g.to();
+        for (int x = from[0]; x <= to[0]; x++) {
+            for (int z = from[2]; z <= to[2]; z++) {
+                if (!g.get(x, y1, z)
+                    .equals(g.get(x, y2, z))) return false;
+            }
+        }
+        return !hasMarker(g, y1) && !hasMarker(g, y2);
+    }
+
+    private static boolean hasMarker(BlockGrid g, int y) {
+        for (List<Integer> k : g.markers()
+            .keySet()) {
+            if (k.get(1) == y) return true;
+        }
+        return false;
+    }
+
+    /** Evenly spaced runs, always keeping the top, the bottom and runs that hold a marker. */
+    private static List<int[]> sample(BlockGrid g, List<int[]> runs) {
+        int n = runs.size();
+        if (n <= MAX_LAYERS) return runs;
+        TreeSet<Integer> keep = new TreeSet<>();
+        for (int k = 0; k < MAX_LAYERS; k++) keep.add(Math.round(k * (n - 1) / (float) (MAX_LAYERS - 1)));
+        for (int i = 0; i < n; i++) {
+            if (hasMarker(g, runs.get(i)[0])) keep.add(i);
+        }
+        List<int[]> out = new ArrayList<>();
+        for (int i : keep) out.add(runs.get(i));
+        return out;
     }
 
     private static void layer(StringBuilder sb, BlockGrid g, int y, int cell) {
@@ -44,31 +110,19 @@ final class GridFigure {
         int w = sx * cell;
         int h = sz * cell;
         sb.append("<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"layer-svg\" width=\"")
-            .append(MARGIN_LEFT + w + 4)
+            .append(MARGIN_LEFT + w + MARGIN_RIGHT)
             .append("\" height=\"")
-            .append(MARGIN_TOP + h + 4)
+            .append(MARGIN_TOP + h + MARGIN_BOTTOM)
             .append("\" font-family=\"sans-serif\" font-size=\"9\">\n");
         // x ticks along the top, z ticks down the left; north (smaller z) is up
         for (int dx = from[0]; dx <= to[0]; dx++) {
             if (Math.floorMod(dx, 5) == 0) {
-                sb.append("<text class=\"tick\" x=\"")
-                    .append(MARGIN_LEFT + (dx - from[0]) * cell + cell / 2)
-                    .append("\" y=\"")
-                    .append(MARGIN_TOP - 4)
-                    .append("\" text-anchor=\"middle\" fill=\"#666\">")
-                    .append(dx)
-                    .append("</text>\n");
+                axisText(sb, MARGIN_LEFT + (dx - from[0]) * cell + cell / 2, MARGIN_TOP - 4, "middle", dx);
             }
         }
         for (int dz = from[2]; dz <= to[2]; dz++) {
             if (Math.floorMod(dz, 5) == 0) {
-                sb.append("<text class=\"tick\" x=\"")
-                    .append(MARGIN_LEFT - 4)
-                    .append("\" y=\"")
-                    .append(MARGIN_TOP + (dz - from[2]) * cell + cell / 2 + 3)
-                    .append("\" text-anchor=\"end\" fill=\"#666\">")
-                    .append(dz)
-                    .append("</text>\n");
+                axisText(sb, MARGIN_LEFT - 4, MARGIN_TOP + (dz - from[2]) * cell + cell / 2 + 3, "end", dz);
             }
         }
         sb.append("<g transform=\"translate(")
@@ -81,40 +135,51 @@ final class GridFigure {
             .append("\" height=\"")
             .append(h)
             .append("\" fill=\"none\" stroke=\"#bbb\" stroke-width=\"1\"/>\n");
-        StringBuilder d = new StringBuilder();
+        StringBuilder lines = new StringBuilder();
         for (int i = 1; i < sx; i++) {
-            d.append('M')
+            lines.append('M')
                 .append(i * cell)
                 .append(",0V")
                 .append(h);
         }
         for (int i = 1; i < sz; i++) {
-            d.append("M0,")
+            lines.append("M0,")
                 .append(i * cell)
                 .append('H')
                 .append(w);
         }
         sb.append("<path class=\"grid\" d=\"")
-            .append(d)
+            .append(lines)
             .append("\" stroke=\"#ddd\" stroke-width=\"0.5\" fill=\"none\"/>\n");
-        for (int dx = from[0]; dx <= to[0]; dx++) {
-            for (int dz = from[2]; dz <= to[2]; dz++) {
+        // one path per block id keeps the page light; the title still names the block on hover
+        Map<String, StringBuilder> paths = new LinkedHashMap<>();
+        for (int dz = from[2]; dz <= to[2]; dz++) {
+            for (int dx = from[0]; dx <= to[0]; dx++) {
                 String b = g.get(dx, y, dz);
                 if (BlockGrid.AIR.equals(b)) continue;
-                sb.append("<rect class=\"cell\" x=\"")
+                StringBuilder d = paths.get(b);
+                if (d == null) paths.put(b, d = new StringBuilder());
+                d.append('M')
                     .append((dx - from[0]) * cell)
-                    .append("\" y=\"")
+                    .append(',')
                     .append((dz - from[2]) * cell)
-                    .append("\" width=\"")
+                    .append('h')
                     .append(cell)
-                    .append("\" height=\"")
+                    .append('v')
                     .append(cell)
-                    .append("\" fill=\"")
-                    .append(esc(BlockPalette.colourOf(b)))
-                    .append("\"><title>")
-                    .append(esc(b))
-                    .append("</title></rect>\n");
+                    .append("h-")
+                    .append(cell)
+                    .append('z');
             }
+        }
+        for (Map.Entry<String, StringBuilder> e : paths.entrySet()) {
+            sb.append("<path class=\"cell\" fill=\"")
+                .append(esc(BlockPalette.colourOf(e.getKey())))
+                .append("\" d=\"")
+                .append(e.getValue())
+                .append("\"><title>")
+                .append(esc(e.getKey()))
+                .append("</title></path>\n");
         }
         for (Map.Entry<List<Integer>, BlockGrid.Marker> e : g.markers()
             .entrySet()) {
@@ -132,15 +197,27 @@ final class GridFigure {
                     .append("\" height=\"")
                     .append(cell)
                     .append("\" fill=\"none\" stroke=\"#000\" stroke-width=\"3\"/>\n");
-                text(sb, "marker controller-label", px, pz, cell, "C", "#000", true);
+                markText(sb, "marker controller-label", px, pz, cell, "C", "#000", true);
             } else {
-                text(sb, "marker anchor-label", px, pz, cell, "★", "#c00", false);
+                markText(sb, "marker anchor-label", px, pz, cell, "★", "#c00", false);
             }
         }
         sb.append("</g>\n</svg>\n");
     }
 
-    private static void text(StringBuilder sb, String cls, int px, int pz, int cell, String s, String fill,
+    private static void axisText(StringBuilder sb, int x, int y, String anchor, Object s) {
+        sb.append("<text class=\"tick\" x=\"")
+            .append(x)
+            .append("\" y=\"")
+            .append(y)
+            .append("\" text-anchor=\"")
+            .append(anchor)
+            .append("\" fill=\"#666\">")
+            .append(s)
+            .append("</text>\n");
+    }
+
+    private static void markText(StringBuilder sb, String cls, int px, int pz, int cell, String s, String fill,
         boolean bold) {
         sb.append("<text class=\"")
             .append(cls)
