@@ -17,6 +17,7 @@ tooltip.machineBlueprint.invalid=構造体が無効です
 tooltip.machineBlueprint.null=設計図に構造体が登録されていません
 tooltip.machineBlueprint.show=コントローラーに右クリックで構造体をホロ表示
 tooltip.machineBlueprint.build=コントローラーにシフト右クリックで建造
+tooltip.machineBlueprint.tier=N 枚重ねると Tier 付きの部品を N 番目の Tier で表示・建造
 message.machineBlueprint.empty=この設計図は白紙です
 okmodular.nei.required_tiers=要求されるTier:
 okmodular.nei.tier_format=Tier %d
