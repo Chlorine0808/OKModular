@@ -240,12 +240,19 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
             return chain;
         }
 
-        char symbol = symbolOf(json.get("symbol"));
+        char symbol = symbolOf(requireKey(json, "symbol"));
         List<WeightedBlockOutput> entries = new ArrayList<>();
-        for (JsonElement elem : json.getAsJsonArray("outputs")) {
+        for (JsonElement elem : requireKey(json, "outputs").getAsJsonArray()) {
             entries.add(parseEntry(elem.getAsJsonObject(), symbol));
         }
         return new RandomBlockOutputDecorator(recipe, symbol, count, entries);
+    }
+
+    private static JsonElement requireKey(JsonObject json, String key) {
+        if (!json.has(key)) {
+            throw new IllegalArgumentException("random_block_output needs \"" + key + "\".");
+        }
+        return json.get(key);
     }
 
     private static char symbolOf(JsonElement element) {

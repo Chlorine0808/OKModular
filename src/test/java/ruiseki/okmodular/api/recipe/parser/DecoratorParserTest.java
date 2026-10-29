@@ -270,6 +270,26 @@ public class DecoratorParserTest {
     }
 
     @Test
+    @DisplayName("symbol か outputs が無ければ、欠けたキーを名指しで拒否する")
+    public void missingSymbolOrOutputsIsRejectedByName() {
+        IllegalArgumentException noSymbol = assertThrows(
+            IllegalArgumentException.class,
+            () -> decorate("{\"type\":\"random_block_output\",\"count\":1,\"outputs\":[]}"));
+        assertTrue(
+            noSymbol.getMessage()
+                .contains("\"symbol\""),
+            noSymbol.getMessage());
+
+        IllegalArgumentException noOutputs = assertThrows(
+            IllegalArgumentException.class,
+            () -> decorate("{\"type\":\"random_block_output\",\"count\":1,\"symbol\":\"O\"}"));
+        assertTrue(
+            noOutputs.getMessage()
+                .contains("\"outputs\""),
+            noOutputs.getMessage());
+    }
+
+    @Test
     @DisplayName("旧 selections は symbol ごとの decorator の連なりとして読む")
     public void oldSelectionsBecomeAChain() {
         IModularRecipe result = decorate(
