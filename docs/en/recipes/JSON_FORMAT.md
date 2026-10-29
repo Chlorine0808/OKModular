@@ -163,7 +163,7 @@ An item input can **match** on NBT, and an item input or output can **rewrite** 
 > `/okmodular hand` prints the held item's id, meta and NBT. Use it to see what an `nbt`
 > expression actually wrote.
 
-### `nbtmatch` — how strict the match is
+### `nbtMatch` — how strict the match is
 
 | Value | Meaning |
 |---|---|
@@ -172,19 +172,19 @@ An item input can **match** on NBT, and an item input or output can **rewrite** 
 | `none` | Only items carrying **no** NBT are accepted |
 
 ```json
-{ "item": "minecraft:diamond_sword", "nbtmatch": "exact", "nbt": [ ... ] }
+{ "item": "minecraft:diamond_sword", "nbtMatch": "exact", "nbt": [ ... ] }
 ```
 
 > [!WARNING]
 > **The default is `ignore`.** Leave it out and NBT is not consulted at all, so an input
 > meant to accept only enchanted items **also accepts plain ones**, `nbt` or no `nbt`.
 
-### `nbtlist` — reaching into a list-typed NBT
+### `nbtList` — reaching into a list-typed NBT
 
 For lists such as `ench` (enchantments) or `Items` (an inventory).
 
 ```json
-"nbtlist": {
+"nbtList": {
   "path": "ench",
   "ops": [
     { "id": 16, "lvl": ">=5" },

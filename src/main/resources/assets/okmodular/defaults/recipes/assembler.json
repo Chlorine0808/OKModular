@@ -923,7 +923,7 @@
         {
           "item": "minecraft:enchanted_book",
           "amount": 1,
-          "nbtlist": {
+          "nbtList": {
             "path": "StoredEnchantments",
             "ops": [
               {

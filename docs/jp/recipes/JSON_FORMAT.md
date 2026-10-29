@@ -163,7 +163,7 @@
 > 手に持ったアイテムの ID・メタ値・NBT は `/okmodular hand` で確かめられます。
 > `nbt` 式が何を書き込んだかを見るときに使ってください。
 
-### `nbtmatch` による照合の厳しさ
+### `nbtMatch` による照合の厳しさ
 
 | 値 | 意味 |
 |---|---|
@@ -172,20 +172,20 @@
 | `none` | NBT を持っていないアイテムだけ受け付ける |
 
 ```json
-{ "item": "minecraft:diamond_sword", "nbtmatch": "exact", "nbt": [ ... ] }
+{ "item": "minecraft:diamond_sword", "nbtMatch": "exact", "nbt": [ ... ] }
 ```
 
 > [!WARNING]
-> **既定は `ignore` です**。`nbtmatch` を書かなければ、NBT はまったく照合されません。
+> **既定は `ignore` です**。`nbtMatch` を書かなければ、NBT はまったく照合されません。
 > 「エンチャント付きだけ受け付けたい」つもりで `nbt` を書いても、
-> `nbtmatch` が無ければ素のアイテムも通ります。
+> `nbtMatch` が無ければ素のアイテムも通ります。
 
-### `nbtlist` でリスト型 NBT の中を見る・書き換える
+### `nbtList` でリスト型 NBT の中を見る・書き換える
 
-`nbtlist` は、`ench`（エンチャント）や `Items`（インベントリ）のようなリスト型の NBT を扱います。
+`nbtList` は、`ench`（エンチャント）や `Items`（インベントリ）のようなリスト型の NBT を扱います。
 
 ```json
-"nbtlist": {
+"nbtList": {
   "path": "ench",
   "ops": [
     { "id": 16, "lvl": ">=5" },

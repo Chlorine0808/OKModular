@@ -325,8 +325,8 @@ public class ItemInput extends AbstractModularRecipeInput {
         }
 
         // Read NBTMatchMode
-        if (json.has("nbtmatch")) {
-            String modeStr = json.get("nbtmatch")
+        if (json.has("nbtMatch")) {
+            String modeStr = json.get("nbtMatch")
                 .getAsString();
             this.nbtMatchMode = NBTMatchMode.fromString(modeStr);
         }
@@ -363,7 +363,7 @@ public class ItemInput extends AbstractModularRecipeInput {
         }
 
         // Read NBT list operation
-        if (json.has("nbtlist")) {
+        if (json.has("nbtList")) {
             try {
                 this.nbtListOp = NBTListOperation.fromJson(json);
             } catch (Exception e) {
@@ -438,7 +438,7 @@ public class ItemInput extends AbstractModularRecipeInput {
 
         // Write NBTMatchMode (only if not default IGNORE)
         if (nbtMatchMode != NBTMatchMode.IGNORE) {
-            json.addProperty("nbtmatch", nbtMatchMode.toJsonString());
+            json.addProperty("nbtMatch", nbtMatchMode.toJsonString());
         }
 
         if (oreDict != null) {

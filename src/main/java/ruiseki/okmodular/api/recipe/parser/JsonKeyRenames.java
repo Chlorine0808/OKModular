@@ -50,7 +50,9 @@ public final class JsonKeyRenames {
             new Rename(Scope.RECIPE, "condition", "conditions"),
             new Rename(Scope.RECIPE, "tier", "tiers"),
             new Rename(Scope.RECIPE, "localizedName", "name"),
-            new Rename(Scope.IO, "pertick", "perTick")));
+            new Rename(Scope.IO, "pertick", "perTick"),
+            new Rename(Scope.IO, "nbtmatch", "nbtMatch"),
+            new Rename(Scope.IO, "nbtlist", "nbtList")));
 
     /** Receives each warning; tests replace it to count them. */
     static Consumer<String> sink = msg -> Logger.warn(msg);
