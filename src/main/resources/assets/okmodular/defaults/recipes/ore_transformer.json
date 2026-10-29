@@ -185,15 +185,12 @@
       "decorators": [
         {
           "type": "random_block_output",
+          "symbol": "O",
           "count": 1,
-          "selections": [
+          "outputs": [
             {
-              "symbol": "O",
-              "output": {
-                "symbol": "O",
-                "replace": "minecraft:glass",
-                "block": "minecraft:stained_glass:14"
-              }
+              "replace": "minecraft:glass",
+              "block": "minecraft:stained_glass:14"
             }
           ]
         },

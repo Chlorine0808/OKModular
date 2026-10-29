@@ -106,14 +106,11 @@
       "decorators": [
         {
           "type": "random_block_output",
+          "symbol": "_",
           "count": 5,
-          "selections": [
+          "outputs": [
             {
-              "symbol": "_",
-              "output": {
-                "symbol": "_",
-                "block": "minecraft:glass"
-              }
+              "block": "minecraft:glass"
             }
           ]
         }
