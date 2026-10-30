@@ -37,7 +37,7 @@ public class ItemMachineBlueprint extends ItemOK {
 
     public ItemMachineBlueprint() {
         super("machineBlueprint");
-        setMaxStackSize(1);
+        // Stackable: the stack size picks the tier of tiered parts
         setTextureName("modular/machineBlueprint");
     }
 
@@ -123,6 +123,7 @@ public class ItemMachineBlueprint extends ItemOK {
 
         tooltip.add(EnumChatFormatting.DARK_GRAY + LangHelpers.localize("tooltip.machineBlueprint.show"));
         tooltip.add(EnumChatFormatting.DARK_GRAY + LangHelpers.localize("tooltip.machineBlueprint.build"));
+        tooltip.add(EnumChatFormatting.DARK_GRAY + LangHelpers.localize("tooltip.machineBlueprint.tier"));
     }
 
     @Override

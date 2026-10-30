@@ -155,6 +155,13 @@ A part of the machine can carry a tier that depends on the material it was built
 When a recipe asks for `"tier": { "glass": 2 }`, the settings above make it valid only on
 structures built with `okmodular:glass:2`.
 
+The machine blueprint picks the tier it shows and builds from its stack size: one blueprint
+shows and builds the lowest tier of every tiered part, N blueprints the N-th lowest, and more
+blueprints than a part has tiers its highest. Tiers are counted in the order of their numbers,
+so in the example above three blueprints build `okmodular:glass:2` and
+`okmodular:casing_reinforced:2`. The blueprint is not used up. A structure built from any tier
+still forms the machine.
+
 > [!WARNING]
 > This used to be described as a top-level `tierMap`. No such field exists and nothing reads
 > it, so writing one is **ignored without an error or a log line** - it shows up only as
