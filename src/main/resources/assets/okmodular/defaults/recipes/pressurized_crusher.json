@@ -115,7 +115,7 @@
       "registryName": "crusher_iron_ore_byproduct",
       "name": "Iron Ore to Dust (with byproduct)",
       "duration": 80,
-      "tier": {
+      "tiers": {
         "casing": 2
       },
       "inputs": [
@@ -172,7 +172,7 @@
       "registryName": "crusher_gold_ore_byproduct",
       "name": "Gold Ore to Dust (with byproduct)",
       "duration": 80,
-      "tier": {
+      "tiers": {
         "casing": 2
       },
       "inputs": [
@@ -229,7 +229,7 @@
       "registryName": "crusher_obsidian",
       "name": "Obsidian to Dust",
       "duration": 200,
-      "tier": {
+      "tiers": {
         "casing": 3
       },
       "inputs": [
@@ -253,7 +253,7 @@
       "registryName": "crusher_coal_block",
       "name": "Coal Block to Diamond",
       "duration": 400,
-      "tier": {
+      "tiers": {
         "casing": 3
       },
       "inputs": [

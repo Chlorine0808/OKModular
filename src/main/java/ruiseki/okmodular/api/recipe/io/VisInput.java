@@ -92,7 +92,7 @@ public class VisInput extends AbstractModularRecipeInput {
     @Override
     public void write(JsonObject json) {
         if (!consume) json.addProperty("consume", false);
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
 
         if (aspectTag != null) {
             json.addProperty("vis", aspectTag);

@@ -160,7 +160,7 @@ public class FluidOutput extends AbstractModularRecipeOutput {
         } else {
             json.addProperty("amount", amount);
         }
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
     }
 
     @Override

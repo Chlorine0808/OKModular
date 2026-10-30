@@ -26,8 +26,25 @@ public abstract class RecipeDecorator implements IModularRecipe {
 
     protected final IModularRecipe internal;
 
+    /** How many decorators sit below this one in the chain; zero for the innermost. */
+    protected final int depth;
+
     protected RecipeDecorator(IModularRecipe internal) {
         this.internal = internal;
+        this.depth = internal instanceof RecipeDecorator ? ((RecipeDecorator) internal).depth + 1 : 0;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    /**
+     * The context this decorator draws from: the run's seed with this decorator's depth mixed
+     * in, so two decorators of one kind on one recipe do not draw the same numbers. Apply once
+     * at the entry of a drawing method; depth zero is the context itself.
+     */
+    protected ConditionContext ownDraw(ConditionContext context) {
+        return context == null ? null : context.forDecorator(depth);
     }
 
     /**

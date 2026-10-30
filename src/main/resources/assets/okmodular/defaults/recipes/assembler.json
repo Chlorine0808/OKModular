@@ -21,7 +21,7 @@
       "registryName": "assembler_casing_reinforced",
       "name": "Reinforced Machine Casing",
       "parent": "assembler_base",
-      "tier": {
+      "tiers": {
         "casing": 1
       },
       "priority": 1,
@@ -50,7 +50,7 @@
       "registryName": "assembler_casing_vented",
       "name": "Vented Machine Casing",
       "parent": "assembler_base",
-      "tier": {
+      "tiers": {
         "casing": 1
       },
       "priority": 1,
@@ -75,7 +75,7 @@
       "registryName": "assembler_casing_circuitry",
       "name": "Circuitry Machine Casing",
       "parent": "assembler_base",
-      "tier": {
+      "tiers": {
         "casing": 1
       },
       "priority": 1,
@@ -104,7 +104,7 @@
       "registryName": "assembler_fluid_input_0",
       "name": "Fluid Input Port",
       "parent": "assembler_base",
-      "tier": {
+      "tiers": {
         "casing": 1
       },
       "priority": 1,
@@ -133,7 +133,7 @@
       "registryName": "assembler_fluid_output_0",
       "name": "Fluid Output Port",
       "parent": "assembler_base",
-      "tier": {
+      "tiers": {
         "casing": 1
       },
       "priority": 1,
@@ -163,7 +163,7 @@
       "name": "Machine Casing (Tier 1)",
       "parent": "assembler_base",
       "duration": 200,
-      "tier": {
+      "tiers": {
         "casing": 1
       },
       "inputs": [
@@ -188,7 +188,7 @@
       "name": "Item Input Port (Tier 1)",
       "parent": "assembler_base",
       "duration": 200,
-      "tier": {
+      "tiers": {
         "casing": 1
       },
       "inputs": [
@@ -213,7 +213,7 @@
       "name": "Item Output Port (Tier 1)",
       "parent": "assembler_base",
       "duration": 200,
-      "tier": {
+      "tiers": {
         "casing": 1
       },
       "inputs": [
@@ -238,7 +238,7 @@
       "name": "Energy Input Port (Tier 1)",
       "parent": "assembler_base",
       "duration": 200,
-      "tier": {
+      "tiers": {
         "casing": 1
       },
       "inputs": [
@@ -263,7 +263,7 @@
       "name": "Fluid Input Port (Tier 1)",
       "parent": "assembler_base",
       "duration": 200,
-      "tier": {
+      "tiers": {
         "casing": 1
       },
       "inputs": [
@@ -288,7 +288,7 @@
       "name": "Fluid Output Port (Tier 1)",
       "parent": "assembler_base",
       "duration": 200,
-      "tier": {
+      "tiers": {
         "casing": 1
       },
       "inputs": [
@@ -313,7 +313,7 @@
       "name": "Machine Casing (Tier 2)",
       "parent": "assembler_base",
       "duration": 300,
-      "tier": {
+      "tiers": {
         "casing": 2
       },
       "inputs": [
@@ -338,7 +338,7 @@
       "name": "Item Input Port (Tier 2)",
       "parent": "assembler_base",
       "duration": 300,
-      "tier": {
+      "tiers": {
         "casing": 2
       },
       "inputs": [
@@ -363,7 +363,7 @@
       "name": "Item Output Port (Tier 2)",
       "parent": "assembler_base",
       "duration": 300,
-      "tier": {
+      "tiers": {
         "casing": 2
       },
       "inputs": [
@@ -388,7 +388,7 @@
       "name": "Energy Input Port (Tier 2)",
       "parent": "assembler_base",
       "duration": 300,
-      "tier": {
+      "tiers": {
         "casing": 2
       },
       "inputs": [
@@ -413,7 +413,7 @@
       "name": "Fluid Input Port (Tier 2)",
       "parent": "assembler_base",
       "duration": 300,
-      "tier": {
+      "tiers": {
         "casing": 2
       },
       "inputs": [
@@ -438,7 +438,7 @@
       "name": "Fluid Output Port (Tier 2)",
       "parent": "assembler_base",
       "duration": 300,
-      "tier": {
+      "tiers": {
         "casing": 2
       },
       "inputs": [
@@ -463,7 +463,7 @@
       "name": "Machine Casing (Tier 3)",
       "parent": "assembler_base",
       "duration": 400,
-      "tier": {
+      "tiers": {
         "casing": 3
       },
       "inputs": [
@@ -488,7 +488,7 @@
       "name": "Item Input Port (Tier 3)",
       "parent": "assembler_base",
       "duration": 400,
-      "tier": {
+      "tiers": {
         "casing": 3
       },
       "inputs": [
@@ -513,7 +513,7 @@
       "name": "Item Output Port (Tier 3)",
       "parent": "assembler_base",
       "duration": 400,
-      "tier": {
+      "tiers": {
         "casing": 3
       },
       "inputs": [
@@ -538,7 +538,7 @@
       "name": "Energy Input Port (Tier 3)",
       "parent": "assembler_base",
       "duration": 400,
-      "tier": {
+      "tiers": {
         "casing": 3
       },
       "inputs": [
@@ -563,7 +563,7 @@
       "name": "Fluid Input Port (Tier 3)",
       "parent": "assembler_base",
       "duration": 400,
-      "tier": {
+      "tiers": {
         "casing": 3
       },
       "inputs": [
@@ -588,7 +588,7 @@
       "name": "Fluid Output Port (Tier 3)",
       "parent": "assembler_base",
       "duration": 400,
-      "tier": {
+      "tiers": {
         "casing": 3
       },
       "inputs": [
@@ -613,7 +613,7 @@
       "name": "Machine Casing (Tier 4)",
       "parent": "assembler_base",
       "duration": 500,
-      "tier": {
+      "tiers": {
         "casing": 4
       },
       "inputs": [
@@ -638,7 +638,7 @@
       "name": "Item Input Port (Tier 4)",
       "parent": "assembler_base",
       "duration": 500,
-      "tier": {
+      "tiers": {
         "casing": 4
       },
       "inputs": [
@@ -663,7 +663,7 @@
       "name": "Item Output Port (Tier 4)",
       "parent": "assembler_base",
       "duration": 500,
-      "tier": {
+      "tiers": {
         "casing": 4
       },
       "inputs": [
@@ -688,7 +688,7 @@
       "name": "Energy Input Port (Tier 4)",
       "parent": "assembler_base",
       "duration": 500,
-      "tier": {
+      "tiers": {
         "casing": 4
       },
       "inputs": [
@@ -713,7 +713,7 @@
       "name": "Fluid Input Port (Tier 4)",
       "parent": "assembler_base",
       "duration": 500,
-      "tier": {
+      "tiers": {
         "casing": 4
       },
       "inputs": [
@@ -738,7 +738,7 @@
       "name": "Fluid Output Port (Tier 4)",
       "parent": "assembler_base",
       "duration": 500,
-      "tier": {
+      "tiers": {
         "casing": 4
       },
       "inputs": [
@@ -763,7 +763,7 @@
       "name": "Machine Casing (Tier 5)",
       "parent": "assembler_base",
       "duration": 600,
-      "tier": {
+      "tiers": {
         "casing": 5
       },
       "inputs": [
@@ -788,7 +788,7 @@
       "name": "Item Input Port (Tier 5)",
       "parent": "assembler_base",
       "duration": 600,
-      "tier": {
+      "tiers": {
         "casing": 5
       },
       "inputs": [
@@ -813,7 +813,7 @@
       "name": "Item Output Port (Tier 5)",
       "parent": "assembler_base",
       "duration": 600,
-      "tier": {
+      "tiers": {
         "casing": 5
       },
       "inputs": [
@@ -838,7 +838,7 @@
       "name": "Energy Input Port (Tier 5)",
       "parent": "assembler_base",
       "duration": 600,
-      "tier": {
+      "tiers": {
         "casing": 5
       },
       "inputs": [
@@ -863,7 +863,7 @@
       "name": "Fluid Input Port (Tier 5)",
       "parent": "assembler_base",
       "duration": 600,
-      "tier": {
+      "tiers": {
         "casing": 5
       },
       "inputs": [
@@ -888,7 +888,7 @@
       "name": "Fluid Output Port (Tier 5)",
       "parent": "assembler_base",
       "duration": 600,
-      "tier": {
+      "tiers": {
         "casing": 5
       },
       "inputs": [
@@ -912,7 +912,7 @@
       "registryName": "assembler_casing_circuitry_enchanted",
       "name": "Circuitry Machine Casing (from an Efficiency book)",
       "parent": "assembler_base",
-      "tier": {
+      "tiers": {
         "casing": 2
       },
       "inputs": [
@@ -923,7 +923,7 @@
         {
           "item": "minecraft:enchanted_book",
           "amount": 1,
-          "nbtlist": {
+          "nbtList": {
             "path": "StoredEnchantments",
             "ops": [
               {

@@ -22,15 +22,12 @@ import ruiseki.okmodular.testsupport.JavaSource;
  * レシピのキーの別名と、構造 JSON の版の刻印の検証。
  *
  * ============================================
- * 別名は同じ所へ行かなければ意味が無い
+ * 旧キーは JsonKeyRenames だけが持つ
  * ============================================
  *
- * `duration` と `time`、`inputs` と `input` のように、レシピのキーには単複や
- * 言い換えの別名がある。**別名は同じパーサに結ばれてはじめて別名**で、
- * 片方だけ別の関数に結ぶと「`input` では動くのに `inputs` では動かない」になる。
- *
- * 書いた人は綴りを疑う。パーサは知らないキーを黙って無視するので、
- * どちらが正しいのかを教えてくれるものが無い。
+ * かつてレシピのキーには `time` / `input` などの別名がレジストリに結ばれていた。
+ * 今は旧キーを JsonKeyRenames が新キーへ移すので、レジストリは新キーだけを持つ。
+ * 別名がレジストリに戻ると、表を直しても片方だけ効く状態になる。
  *
  * ============================================
  * 版の刻印は「後から直せる」の根拠
@@ -52,31 +49,24 @@ public class RecipeKeyAliasTest {
     private static final Path REGISTRY = JavaSource.MAIN.resolve("api/recipe/parser/RecipeParserRegistry.java");
     private static final Path WRITER = JavaSource.MAIN.resolve("api/structure/io/StructureJsonWriter.java");
 
-    /** 同じ所へ行かなければならない別名の組。 */
-    private static final List<String[]> ALIASES = Arrays.asList(
-        new String[] { "duration", "time" },
-        new String[] { "inputs", "input" },
-        new String[] { "outputs", "output" },
-        new String[] { "conditions", "condition" });
+    /** Old spellings now live only in JsonKeyRenames; the registry must not bind them again. */
+    private static final List<String> RENAMED_AWAY = Arrays
+        .asList("machine", "time", "input", "output", "condition", "tier", "localizedName");
 
     @Test
-    @DisplayName("別名は同じパーサに結ばれている")
-    public void test別名が別の所へ行っていない() {
+    @DisplayName("旧キーはレジストリに結ばれていない")
+    public void test旧キーを結び直していない() {
         Map<String, String> targets = registeredTargets();
-        List<String> split = new ArrayList<>();
+        List<String> rebound = new ArrayList<>();
 
-        for (String[] pair : ALIASES) {
-            String first = targets.get(pair[0]);
-            String second = targets.get(pair[1]);
-
-            if (first == null || second == null) {
-                split.add(pair[0] + " / " + pair[1] + " のどちらかが登録されていない");
-            } else if (!first.equals(second)) {
-                split.add(pair[0] + " → " + first + " だが " + pair[1] + " → " + second);
-            }
+        for (String old : RENAMED_AWAY) {
+            if (targets.containsKey(old)) rebound.add(old);
         }
 
-        assertTrue(split.isEmpty(), split + "。別名のつもりが別物になっている。片方でしか動かないキーは、書いた人に綴りを疑わせる");
+        assertTrue(rebound.isEmpty(), rebound + " がレジストリに登録されている。旧キーは JsonKeyRenames が新キーへ移すので、ここに別名を足さない");
+        for (String current : Arrays.asList("group", "duration", "inputs", "outputs", "conditions", "tiers", "name")) {
+            assertTrue(targets.containsKey(current), current + " が登録されていない");
+        }
     }
 
     @Test
@@ -102,7 +92,7 @@ public class RecipeKeyAliasTest {
     public void test走査が効いている() {
         Map<String, String> targets = registeredTargets();
 
-        assertTrue(targets.size() >= 12, "登録されたレシピのキーが 12 個未満。走査が壊れている: " + targets.keySet());
+        assertTrue(targets.size() >= 10, "登録されたレシピのキーが 10 個未満。走査が壊れている: " + targets.keySet());
         assertTrue(targets.containsKey("duration"), "duration すら拾えていない");
     }
 

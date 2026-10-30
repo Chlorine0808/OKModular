@@ -36,7 +36,7 @@ public class BonusBlockOutputDecorator extends RecipeDecorator {
     public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
         super.produceExtraOutputs(outputPorts, context);
 
-        int times = timesFiring(context);
+        int times = timesFiring(ownDraw(context));
         for (int fired = 0; fired < times; fired++) {
             for (BlockOutput output : bonusOutputs) {
                 output.apply(outputPorts, 1, context);

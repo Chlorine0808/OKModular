@@ -120,7 +120,7 @@ public class ManaOutput extends AbstractModularRecipeOutput {
             json.addProperty("mana", amountExpr.toString());
         }
         if (interval != 0) {
-            json.addProperty("pertick", interval);
+            json.addProperty("perTick", interval);
         }
     }
 

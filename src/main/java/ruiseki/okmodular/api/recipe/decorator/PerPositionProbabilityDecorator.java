@@ -49,8 +49,9 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
 
         // Each position is asked separately, which only means anything because the seed
         // has the coordinates mixed in - see rollsAt.
+        ConditionContext own = ownDraw(context);
         for (ChunkCoordinates pos : positions) {
-            if (output.acceptsAt(recipeContext, pos) && rollsAt(context, pos)) {
+            if (output.acceptsAt(recipeContext, pos) && rollsAt(own, pos)) {
                 output.applyAt(recipeContext, pos, context);
             }
         }

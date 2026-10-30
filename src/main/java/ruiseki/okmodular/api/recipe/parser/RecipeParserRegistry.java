@@ -25,13 +25,7 @@ public class RecipeParserRegistry {
         register(
             "registryName",
             (builder, element) -> { if (element.isJsonPrimitive()) builder.registryName(element.getAsString()); });
-        register(
-            "localizedName",
-            (builder, element) -> { if (element.isJsonPrimitive()) builder.name(element.getAsString()); });
         register("name", (builder, element) -> { if (element.isJsonPrimitive()) builder.name(element.getAsString()); });
-        register(
-            "machine",
-            (builder, element) -> { if (element.isJsonPrimitive()) builder.recipeGroup(element.getAsString()); });
         register(
             "group",
             (builder, element) -> { if (element.isJsonPrimitive()) builder.recipeGroup(element.getAsString()); });
@@ -42,19 +36,15 @@ public class RecipeParserRegistry {
         // Components
         DurationParser durationParser = new DurationParser();
         register("duration", durationParser);
-        register("time", durationParser);
 
         InputPropertyParser inputParser = new InputPropertyParser();
         register("inputs", inputParser);
-        register("input", inputParser);
 
         OutputPropertyParser outputParser = new OutputPropertyParser();
         register("outputs", outputParser);
-        register("output", outputParser);
 
         ConditionPropertyParser conditionParser = new ConditionPropertyParser();
         register("conditions", conditionParser);
-        register("condition", conditionParser);
         // Same key and same meaning as a structure's, and an unreadable name falls back to
         // the default rather than stopping the recipe from loading.
         register("conditionPolicy", (builder, element) -> {
@@ -65,17 +55,6 @@ public class RecipeParserRegistry {
 
         // Tiers
         register("tiers", (builder, element) -> {
-            if (element.isJsonObject()) {
-                JsonObject obj = element.getAsJsonObject();
-                for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                    builder.addRequiredComponentTier(
-                        entry.getKey(),
-                        entry.getValue()
-                            .getAsInt());
-                }
-            }
-        });
-        register("tier", (builder, element) -> {
             if (element.isJsonObject()) {
                 JsonObject obj = element.getAsJsonObject();
                 for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {

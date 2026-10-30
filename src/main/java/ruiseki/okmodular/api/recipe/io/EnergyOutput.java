@@ -113,9 +113,9 @@ public class EnergyOutput extends AbstractModularRecipeOutput {
         }
         if (interval != 1) {
             if (isPerTick()) {
-                json.addProperty("pertick", interval);
+                json.addProperty("perTick", interval);
             } else {
-                json.addProperty("pertick", false);
+                json.addProperty("perTick", false);
             }
         }
     }

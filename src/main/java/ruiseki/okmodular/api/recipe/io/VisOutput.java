@@ -130,7 +130,7 @@ public class VisOutput extends AbstractModularRecipeOutput {
         } else {
             json.addProperty("amount", amountExpr.toString());
         }
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
     }
 
     @Override

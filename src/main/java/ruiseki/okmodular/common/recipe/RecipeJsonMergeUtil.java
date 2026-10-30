@@ -14,7 +14,7 @@ public class RecipeJsonMergeUtil {
 
     /**
      * Merges parent JSON into child JSON.
-     * Specific arrays (input, output, condition) are merged by prepending parent
+     * Specific arrays (inputs, outputs, conditions) are merged by prepending parent
      * items.
      * Other properties are only taken from parent if missing in child.
      * 
@@ -53,11 +53,7 @@ public class RecipeJsonMergeUtil {
     }
 
     private static boolean isMergeableArray(String key) {
-        return key.equals("input") || key.equals("inputs")
-            || key.equals("output")
-            || key.equals("outputs")
-            || key.equals("condition")
-            || key.equals("conditions");
+        return key.equals("inputs") || key.equals("outputs") || key.equals("conditions");
     }
 
     private static JsonArray mergeArrays(JsonArray childArr, JsonArray parentArr) {

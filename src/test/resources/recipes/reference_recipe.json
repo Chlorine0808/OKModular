@@ -17,7 +17,7 @@
             "amount": 1
         }
     ],
-    "condition": {
+    "conditions": {
         "type": "weather",
         "weather": "clear"
     }

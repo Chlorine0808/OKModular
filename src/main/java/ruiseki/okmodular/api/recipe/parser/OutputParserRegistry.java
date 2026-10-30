@@ -46,6 +46,7 @@ public class OutputParserRegistry {
     }
 
     public static IRecipeOutput parse(JsonObject json) {
+        JsonKeyRenames.upgrade(json, JsonKeyRenames.Scope.IO);
         // 1. Try "type" field first
         if (json.has("type")) {
             String type = json.get("type")

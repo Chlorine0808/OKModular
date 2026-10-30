@@ -76,7 +76,7 @@ public class ExpressionAmountSurvivesLoadTest {
             Arguments.of(
                 "energy",
                 (Supplier<IModularRecipeInput>) () -> EnergyInput
-                    .fromJson(json("{ \"energy\": \"50 * tier\", \"pertick\": true }"))),
+                    .fromJson(json("{ \"energy\": \"50 * tier\", \"perTick\": true }"))),
             Arguments.of(
                 "mana",
                 (Supplier<IModularRecipeInput>) () -> ManaInput.fromJson(json("{ \"mana\": \"50 * tier\" }"))),

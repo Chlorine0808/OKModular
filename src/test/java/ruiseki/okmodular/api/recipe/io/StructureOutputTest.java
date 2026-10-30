@@ -25,7 +25,7 @@ import ruiseki.okmodular.api.recipe.parser.OutputParserRegistry;
 public class StructureOutputTest {
 
     private static final String JSON = ("{ 'type': 'structure', 'pattern': 'altar_core', 'symbol': 'S',"
-        + " 'amount': 2, 'index': 3, 'pertick': 5 }").replace('\'', '"');
+        + " 'amount': 2, 'index': 3, 'perTick': 5 }").replace('\'', '"');
 
     private static StructureOutput parse() {
         return (StructureOutput) StructureOutput.fromJson(

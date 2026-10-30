@@ -257,8 +257,8 @@ public class ItemOutput extends AbstractModularRecipeOutput {
             .getAsInt();
 
         // Read NBTMatchMode
-        if (json.has("nbtmatch")) {
-            String modeStr = json.get("nbtmatch")
+        if (json.has("nbtMatch")) {
+            String modeStr = json.get("nbtMatch")
                 .getAsString();
             this.nbtMatchMode = NBTMatchMode.fromString(modeStr);
         }
@@ -317,7 +317,7 @@ public class ItemOutput extends AbstractModularRecipeOutput {
         }
 
         // Read NBT list operation
-        if (json.has("nbtlist")) {
+        if (json.has("nbtList")) {
             try {
                 this.nbtListOp = NBTListOperation.fromJson(json);
             } catch (Exception e) {
@@ -332,7 +332,7 @@ public class ItemOutput extends AbstractModularRecipeOutput {
 
         // Write NBTMatchMode (only if not default IGNORE)
         if (nbtMatchMode != NBTMatchMode.IGNORE) {
-            json.addProperty("nbtmatch", nbtMatchMode.toJsonString());
+            json.addProperty("nbtMatch", nbtMatchMode.toJsonString());
         }
 
         if (output != null) {
@@ -347,7 +347,7 @@ public class ItemOutput extends AbstractModularRecipeOutput {
             }
             if (output.getItemDamage() != 0) json.addProperty("meta", output.getItemDamage());
         }
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
 
         // Write NBT expressions
         if (nbtExpressions != null && !nbtExpressions.isEmpty()) {

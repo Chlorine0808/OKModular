@@ -18,12 +18,12 @@ inferred from the properties).
 |---------|------|------------------------|
 | `chance` | Controls the recipe's success chance (a loss produces nothing) | `chance` |
 | `bonus` | Produces extra output by chance | `chance` + `outputs` (`modifierKey` is [gone](#7-removed-modifierkey-on-bonus)) |
-| `weighted_random` | Picks an output from a weighted list | `outputs` (each with `weight`) / `pool` / `rolls` |
+| `weighted_random` | Picks an output from a weighted list | `outputs` (each with `weight`) / `rolls` |
 | `requirement` | Checks extra conditions and catalysts while running | `condition` / `requirements` |
 | `harvest_block` | Mines the blocks that are about to disappear (see below) | `fortune` / `silkTouch` / `shear` / `harvestLevel` |
 | `per_position_probability` | Swaps a block output per position, by chance | `chance` + `symbol` + `output` |
 | `bonus_block_output` | Produces extra block output by chance | `chance` + `outputs` (first is `type: "block"`) |
-| `random_block_output` | Draws `count` cells of a symbol and places a block on them (below) | `count` / `selections` |
+| `random_block_output` | Draws `count` cells of a symbol and places a weighted block on each (below) | `symbol` + `outputs` (no `chance`) |
 
 ## 2. Writing them
 
@@ -66,7 +66,8 @@ carried around between calls, which gives the following.
 | **Different between runs** | The next run gives a different result; the seed mixes in the tick the recipe started and how many recipes the machine has finished |
 | **Different per machine** | The seed mixes in the position |
 | **Different per position** | `per_position_probability` and `random_block_output` mix the block coordinates in as well |
-| **Independent of each other** | Each kind draws from its own stream, so `bonus` landing does not mean `bonus_block_output` lands too |
+| **Independent of each other** | Each decorator draws from its own stream, so `bonus` landing does not mean `bonus_block_output` lands too |
+| **Independent of its own kind** | Two `bonus` entries on one recipe can land one without the other |
 
 The first one matters most in practice. The engine checks whether an output fits before
 placing it, so an answer that moved between the two would mean **"said it would fit, then
@@ -108,32 +109,65 @@ multiple of n.
 > **Do not write `batch` into the expression.** The engine applies it, so `"count": "5 *
 > batch"` applies it **twice** - the same trap as an input or output `amount`.
 
-### Two decorators of the same kind
+### Several decorators on one recipe
 
-> [!WARNING]
-> **Two decorators of the same kind on one recipe always give the same answer.**
-> Streams are assigned per kind, not per instance. Two `bonus` entries will land together
-> and miss together. For now, give them different `chance` values or fold them into one.
+Each decorator draws from its own stream, chosen by its position in `decorators`.
+The position counts every decorator, including ones that do not draw (`requirement`, `harvest_block`).
+A recipe whose only drawing decorator is first draws exactly as before.
+
+> [!NOTE]
+> A recipe whose drawing decorator is not first, such as `[requirement, bonus]`, draws different random results after this update.
 
 ## 4. `random_block_output`
 
-`random_block_output` applies **every** entry in `selections`, in order. It does not pick one of them.
-Each entry says "draw `count` cells of `symbol` and place `output` on them".
+`random_block_output` draws `count` cells of one symbol and places one block on each, chosen per cell by weight.
 
 ```json
 {
   "type": "random_block_output",
-  "count": 1,
-  "selections": [
-    { "symbol": "G", "output": { "symbol": "G", "block": "minecraft:grass" } },
-    { "symbol": "M", "output": { "symbol": "M", "block": "minecraft:mycelium" } }
+  "symbol": "O",
+  "count": 2,
+  "outputs": [
+    { "weight": 3, "replace": "minecraft:glass", "block": "minecraft:stained_glass:14" },
+    { "weight": 1, "replace": "minecraft:glass", "block": "minecraft:stained_glass:11" }
   ]
 }
 ```
 
-This turns one G cell to grass **and** one M cell to mycelium.
-Only cells the `output` may write are drawn: with `replace`, only cells holding that block.
-Two entries on the same symbol do not collide, because a cell the first one wrote no longer matches the second one's `replace`.
+| Key | Default | Meaning |
+|---|---|---|
+| `symbol` | required | The symbol whose cells are drawn |
+| `count` | every cell | How many cells to draw. May be an expression |
+| `outputs` | required | An array of block outputs. Each `weight` defaults to 1 |
+
+This turns two of the O cells that hold glass into red (weight 3) or blue (weight 1) glass, each cell drawn on its own.
+
+- **Candidate cells** are the cells of `symbol` that at least one entry of `outputs` may write. An entry with `replace` only counts cells holding that block
+- `count` of the candidates are chosen. The same cells come back within one run; the next run differs
+- For each chosen cell, **only the entries that may write that cell** are drawn from, by weight. Cells are drawn independently, so red and blue mix within one recipe
+- **Omitting `count` uses every candidate cell**: "paint every floor cell by weight"
+- A `count` past the number of candidates fills them all and stops. It is not an error
+- An entry in `outputs` may carry a `symbol`, but one that differs from the decorator's is a load error. Without one, the decorator's `symbol` is used
+
+The earlier `selections` shape still loads and logs a warning (see [old keys](./JSON_FORMAT.md#11-old-keys)).
+Each element is treated as its own `random_block_output` with one weight-1 output, chained in order.
+
+### Picking one block per run
+
+To pick **one block per run** instead of per cell, put block outputs in the `outputs` of a `weighted_random`.
+
+```json
+{
+  "type": "weighted_random",
+  "outputs": [
+    { "weight": 3, "symbol": "O", "replace": "minecraft:glass", "block": "minecraft:stained_glass:14" },
+    { "weight": 1, "symbol": "O", "replace": "minecraft:glass", "block": "minecraft:stained_glass:11" }
+  ]
+}
+```
+
+Red or blue is picked at 3 to 1, and the chosen block output is placed like any other output.
+When it cannot be placed (no cell matches its `replace`, say), nothing is placed and there is no redraw.
 
 ## 5. `harvest_block` — mine the blocks that are about to disappear
 
@@ -255,7 +289,7 @@ are drawn beneath its line, so they are not mistaken for outputs the recipe alwa
 | `harvest_block` | Mines the blocks it removes and outputs the drops (Fortune III, harvest level 2) | - |
 | `per_position_probability` | Each L cell becomes this with 5% chance: | `output` |
 | `bonus_block_output` | 50% chance of these extra blocks: | `outputs` |
-| `random_block_output` | Places each of these on 3 random cell(s) of its symbol: | each `output` in `selections` |
+| `random_block_output` | Picks 2 cell(s) of O and places one of these on each, by weight (3 / 1): / Places one of these on every cell of O, by weight (3 / 1): | `outputs` (in weight order) |
 
 - A `chance` or `count` written as a number shows as a value; one written as an expression
   shows the expression, because NEI has no machine to evaluate it against

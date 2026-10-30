@@ -204,6 +204,24 @@ public class ConditionContext {
     }
 
     /**
+     * The same context, drawing from the seed of the decorator at {@code depth} in the chain.
+     * Depth zero is this context itself. Like {@link #forDraw}, the cell is carried over.
+     */
+    public ConditionContext forDecorator(int depth) {
+        if (depth == 0) return this;
+        return new ConditionContext(
+            world,
+            x,
+            y,
+            z,
+            recipeContext,
+            SeedMixer.forDecorator(evaluationSeed, depth),
+            placementSeed,
+            cell,
+            performance);
+    }
+
+    /**
      * Get a stable seed for deterministic evaluation during this check.
      */
     public long getEvaluationSeed() {

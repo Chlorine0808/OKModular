@@ -3,11 +3,12 @@ package ruiseki.okmodular.api.recipe.decorator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.util.ChunkCoordinates;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -20,33 +21,70 @@ import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
+import ruiseki.okmodular.api.recipe.parser.JsonKeyRenames;
 import ruiseki.okmodular.api.structure.core.StructureSymbols;
 
 /**
- * Decorator that randomly selects N positions from all positions with a specific symbol
- * and applies BlockOutput only to selected positions.
+ * Picks N cells of one symbol and puts one of several weighted outputs on each, drawn per cell.
+ * Without a count, every candidate cell is used.
  */
 public class RandomBlockOutputDecorator extends RecipeDecorator {
 
+    private final char symbol;
     private final IExpression countExpr;
-    private final List<BlockOutputSelection> selections;
+    private final List<WeightedBlockOutput> outputs;
 
-    public static class BlockOutputSelection {
+    /** One output of a {@code random_block_output} draw and its weight. */
+    public static final class WeightedBlockOutput {
 
-        public final char symbol;
         public final BlockOutput output;
+        public final int weight;
 
-        public BlockOutputSelection(char symbol, BlockOutput output) {
-            this.symbol = symbol;
+        public WeightedBlockOutput(BlockOutput output, int weight) {
             this.output = output;
+            this.weight = weight;
         }
     }
 
-    public RandomBlockOutputDecorator(IModularRecipe internal, IExpression countExpr,
-        List<BlockOutputSelection> selections) {
+    /**
+     * Picks one of {@code accepting} for {@code cell}, in proportion to weight.
+     * Entries with weight 0 or less never win; null when nothing has positive weight.
+     */
+    static WeightedBlockOutput pickFor(List<WeightedBlockOutput> accepting, long seed, ChunkCoordinates cell) {
+        long total = 0;
+        for (WeightedBlockOutput entry : accepting) {
+            if (entry.weight > 0) total += entry.weight;
+        }
+        if (total <= 0) return null;
+
+        double roll = SeedMixer
+            .toUnitInterval(SeedMixer.forPosition(seed, cell.posX, cell.posY, cell.posZ), SeedMixer.RANDOM_BLOCK_PICK)
+            * total;
+        double upTo = 0;
+        WeightedBlockOutput last = null;
+        for (WeightedBlockOutput entry : accepting) {
+            if (entry.weight <= 0) continue;
+            upTo += entry.weight;
+            last = entry;
+            if (roll < upTo) return entry;
+        }
+        return last;
+    }
+
+    public RandomBlockOutputDecorator(IModularRecipe internal, char symbol, IExpression countExpr,
+        List<WeightedBlockOutput> outputs) {
         super(internal);
+        this.symbol = symbol;
         this.countExpr = countExpr;
-        this.selections = selections;
+        this.outputs = outputs;
+    }
+
+    public char getSymbol() {
+        return symbol;
+    }
+
+    public List<WeightedBlockOutput> getWeightedOutputs() {
+        return outputs;
     }
 
     @Override
@@ -57,21 +95,28 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
         if (recipeContext == null) recipeContext = IRecipeContext.findIn(outputPorts);
         if (recipeContext == null) return;
 
-        int selectCount = totalCount(context);
-        for (BlockOutputSelection selection : selections) {
-            // Only cells the output may write are candidates, or a cell holding air would
-            // take a replacement meant for another block
-            List<ChunkCoordinates> candidates = new ArrayList<>();
-            List<ChunkCoordinates> allPositions = recipeContext.getSymbolPositions(selection.symbol);
-            if (allPositions != null) {
-                for (ChunkCoordinates pos : allPositions) {
-                    if (selection.output.acceptsAt(recipeContext, pos)) candidates.add(pos);
+        // A cell is a candidate when some entry may write it, or a cell holding air would take
+        // a replacement meant for another block
+        Map<ChunkCoordinates, List<WeightedBlockOutput>> accepting = new HashMap<>();
+        List<ChunkCoordinates> candidates = new ArrayList<>();
+        List<ChunkCoordinates> allPositions = recipeContext.getSymbolPositions(symbol);
+        if (allPositions != null) {
+            for (ChunkCoordinates pos : allPositions) {
+                List<WeightedBlockOutput> forCell = new ArrayList<>();
+                for (WeightedBlockOutput entry : outputs) {
+                    if (entry.output.acceptsAt(recipeContext, pos)) forCell.add(entry);
                 }
+                if (forCell.isEmpty()) continue;
+                accepting.put(pos, forCell);
+                candidates.add(pos);
             }
+        }
 
-            for (ChunkCoordinates pos : select(candidates, selectCount, context)) {
-                selection.output.applyAt(recipeContext, pos, context);
-            }
+        ConditionContext own = ownDraw(context);
+        long seed = own != null ? own.getEvaluationSeed() : 0L;
+        for (ChunkCoordinates pos : select(candidates, totalCount(own), own)) {
+            WeightedBlockOutput picked = pickFor(accepting.get(pos), seed, pos);
+            if (picked != null) picked.output.applyAt(recipeContext, pos, context);
         }
     }
 
@@ -91,8 +136,11 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
      * <p>
      * Nothing clamps the total here. {@link #select} takes as many cells as exist and stops,
      * so a count past the end of the structure fills it rather than failing.
+     * <p>
+     * An omitted {@code count} means every candidate cell, which is {@link Integer#MAX_VALUE}.
      */
     int totalCount(ConditionContext context) {
+        if (countExpr == null) return Integer.MAX_VALUE;
         int batch = batchSizeOf(context);
         int total = 0;
 
@@ -136,48 +184,103 @@ public class RandomBlockOutputDecorator extends RecipeDecorator {
 
     @Override
     public List<DecoratorDescription> describe() {
-        return Collections
-            .singletonList(new DecoratorDescription("okmodular.nei.decorator.random_block_output", number(countExpr)));
+        StringBuilder weights = new StringBuilder();
+        for (WeightedBlockOutput entry : outputs) {
+            if (weights.length() > 0) weights.append(" / ");
+            weights.append(entry.weight);
+        }
+        String sym = String.valueOf(symbol);
+        if (countExpr == null) {
+            return Collections.singletonList(
+                new DecoratorDescription("okmodular.nei.decorator.random_block_output.all", sym, weights.toString()));
+        }
+        return Collections.singletonList(
+            new DecoratorDescription(
+                "okmodular.nei.decorator.random_block_output",
+                sym,
+                number(countExpr),
+                weights.toString()));
     }
 
     @Override
     public List<IRecipeOutput> getPossibleOutputs() {
-        List<IRecipeOutput> outputs = new ArrayList<>();
-        for (BlockOutputSelection selection : selections) outputs.add(selection.output);
-        return outputs;
+        List<IRecipeOutput> result = new ArrayList<>();
+        for (WeightedBlockOutput entry : outputs) result.add(entry.output);
+        return result;
     }
 
     /**
      * Create decorator from JSON.
      *
-     * Expected format:
+     * Expected format ({@code count} may be omitted to use every candidate cell):
      * {
      * "type": "random_block_output",
-     * "count": { "type": "constant", "value": 2 },
-     * "selections": [
-     * {
      * "symbol": "L",
-     * "output": { "symbol": "L", "block": "modid:blockname:meta" }
+     * "count": 2,
+     * "outputs": [ { "weight": 3, "block": "modid:blockname:meta" }, { "block": "modid:other" } ]
      * }
-     * ]
-     * }
+     *
+     * The earlier {@code selections} shape is read as one decorator per selection, chained.
      */
     public static IModularRecipe fromJson(IModularRecipe recipe, JsonObject json) {
-        IExpression count = ExpressionsParser.parse(json.get("count"));
+        IExpression count = json.has("count") ? ExpressionsParser.parse(json.get("count")) : null;
 
-        List<BlockOutputSelection> selections = new ArrayList<>();
-        JsonArray selectionsArray = json.getAsJsonArray("selections");
-        for (JsonElement elem : selectionsArray) {
-            JsonObject selObj = elem.getAsJsonObject();
-            char symbol = StructureSymbols.requireAddressable(
-                selObj.get("symbol")
-                    .getAsString()
-                    .charAt(0),
-                "random_block_output");
-            BlockOutput output = BlockOutput.fromJson(selObj.getAsJsonObject("output"));
-            selections.add(new BlockOutputSelection(symbol, output));
+        if (json.has("selections")) {
+            JsonKeyRenames.warnOnce(
+                "selections",
+                "JSON key \"selections\" is renamed to \"outputs\" (one decorator per \"symbol\"). Read as such; rename it in the file.");
+            IModularRecipe chain = recipe;
+            for (JsonElement elem : json.getAsJsonArray("selections")) {
+                JsonObject selObj = elem.getAsJsonObject();
+                char selSymbol = symbolOf(selObj.get("symbol"));
+                List<WeightedBlockOutput> single = new ArrayList<>();
+                single.add(parseEntry(selObj.getAsJsonObject("output"), selSymbol));
+                chain = new RandomBlockOutputDecorator(chain, selSymbol, count, single);
+            }
+            return chain;
         }
 
-        return new RandomBlockOutputDecorator(recipe, count, selections);
+        char symbol = symbolOf(requireKey(json, "symbol"));
+        List<WeightedBlockOutput> entries = new ArrayList<>();
+        for (JsonElement elem : requireKey(json, "outputs").getAsJsonArray()) {
+            entries.add(parseEntry(elem.getAsJsonObject(), symbol));
+        }
+        return new RandomBlockOutputDecorator(recipe, symbol, count, entries);
+    }
+
+    private static JsonElement requireKey(JsonObject json, String key) {
+        if (!json.has(key)) {
+            throw new IllegalArgumentException("random_block_output needs \"" + key + "\".");
+        }
+        return json.get(key);
+    }
+
+    private static char symbolOf(JsonElement element) {
+        return StructureSymbols.requireAddressable(
+            element.getAsString()
+                .charAt(0),
+            "random_block_output");
+    }
+
+    /** One entry: its weight (default 1) and a block output that takes the decorator's symbol. */
+    private static WeightedBlockOutput parseEntry(JsonObject entryJson, char symbol) {
+        // Shallow copy: the symbol is injected without touching the caller's JSON
+        JsonObject copy = new JsonObject();
+        for (Map.Entry<String, JsonElement> field : entryJson.entrySet()) copy.add(field.getKey(), field.getValue());
+        if (copy.has("symbol")) {
+            char own = symbolOf(copy.get("symbol"));
+            if (own != symbol) {
+                throw new IllegalArgumentException(
+                    "random_block_output draws cells of '" + symbol
+                        + "' but an output names symbol '"
+                        + own
+                        + "'. Drop the output's symbol or make them match.");
+            }
+        } else {
+            copy.addProperty("symbol", String.valueOf(symbol));
+        }
+        int weight = copy.has("weight") ? copy.get("weight")
+            .getAsInt() : 1;
+        return new WeightedBlockOutput(BlockOutput.fromJson(copy), weight);
     }
 }

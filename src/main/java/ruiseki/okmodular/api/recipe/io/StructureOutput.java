@@ -344,7 +344,7 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
         }
         if (optional) json.addProperty("optional", true);
         if (index != -1) json.addProperty("index", index);
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
     }
 
     public static IRecipeOutput fromJson(JsonObject json) {
