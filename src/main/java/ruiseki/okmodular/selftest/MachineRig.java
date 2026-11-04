@@ -92,8 +92,8 @@ final class MachineRig {
         return rig;
     }
 
-    private static void placeCells(TestSites.Site site, String structure, IStructureEntry entry,
-        ExtendedFacing facing, Map<String, String> cells) {
+    private static void placeCells(TestSites.Site site, String structure, IStructureEntry entry, ExtendedFacing facing,
+        Map<String, String> cells) {
         String[][] shape = authoredShape(entry);
         int[] offset = CustomStructureRegistry.getControllerOffset(structure);
         for (Map.Entry<String, String> cell : cells.entrySet()) {
