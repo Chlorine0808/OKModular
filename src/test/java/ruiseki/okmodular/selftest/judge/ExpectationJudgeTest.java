@@ -400,6 +400,19 @@ class ExpectationJudgeTest {
     }
 
     @Test
+    void logContainsWithCountMatchesTheNumberOfLines() {
+        Observation o = obs();
+        o.logLines.add("WARN key \"time\" is renamed");
+        o.logLines.add("WARN key \"input\" is renamed");
+        assertTrue(judge("{\"kind\":\"logContains\",\"text\":\"\\\"time\\\"\",\"count\":1}", o).passed);
+        o.logLines.add("WARN key \"time\" is renamed");
+        CheckResult twice = judge("{\"kind\":\"logContains\",\"text\":\"\\\"time\\\"\",\"count\":1}", o);
+        assertFalse(twice.passed);
+        assertEquals("2 lines", twice.actual);
+        assertTrue(judge("{\"kind\":\"logContains\",\"text\":\"absent\",\"count\":0}", o).passed);
+    }
+
+    @Test
     void expectedAndActualAreHumanReadable() {
         CheckResult c = judge("{\"kind\":\"validationError\",\"contains\":\"casing\"}", obs());
         assertEquals("validationError", c.kind);

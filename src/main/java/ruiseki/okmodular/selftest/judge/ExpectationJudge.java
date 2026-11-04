@@ -436,8 +436,17 @@ public final class ExpectationJudge {
 
     private static CheckResult logContains(Expectation e, Observation o) {
         String text = str(e.args, "text");
-        boolean found = false;
-        for (String l : o.logLines) if (l.contains(text)) found = true;
+        int lines = 0;
+        for (String l : o.logLines) if (l.contains(text)) lines++;
+        if (e.args.has("count")) {
+            int want = (int) num(e.args, "count");
+            return new CheckResult(
+                e.kind,
+                lines == want,
+                want + " log lines containing \"" + text + "\"",
+                lines + " lines");
+        }
+        boolean found = lines > 0;
         return new CheckResult(
             e.kind,
             found,
