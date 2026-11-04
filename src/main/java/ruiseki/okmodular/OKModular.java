@@ -94,8 +94,9 @@ public class OKModular extends ModBase {
     @Override
     @EventHandler
     public final void preInit(FMLPreInitializationEvent event) {
-        super.preInit(event);
+        // Capture first: the modules' preInit already reads the recipe files and logs their warnings.
         SelfTest.onPreInit();
+        super.preInit(event);
         if (MinecraftHelpers.isClientSide()) {
             ModelRegistry.registerModid(Reference.MOD_ID);
             if (Mods.NotEnoughItems.isLoaded()) {
