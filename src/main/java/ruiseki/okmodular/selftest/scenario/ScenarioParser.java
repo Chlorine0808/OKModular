@@ -161,13 +161,39 @@ public final class ScenarioParser {
         if (blueprintCount < 1 || blueprintCount > 64) {
             throw new ScenarioParseException("blueprintCount must be 1 to 64, not " + blueprintCount);
         }
+        boolean survival = m.has("survival");
+        Map<String, String> standing = new LinkedHashMap<String, String>();
+        List<InputSpec> carry = new ArrayList<InputSpec>();
+        if (survival) {
+            JsonObject sv = obj(m.get("survival"), "survival");
+            if (sv.has("standing")) {
+                for (Map.Entry<String, JsonElement> e : obj(sv.get("standing"), "standing").entrySet()) {
+                    standing.put(
+                        e.getKey(),
+                        e.getValue()
+                            .getAsString());
+                }
+            }
+            if (sv.has("carry")) {
+                for (JsonElement e : array(sv, "carry")) {
+                    InputSpec item = input(e);
+                    if (item.kind != InputSpec.Kind.ITEM) {
+                        throw new ScenarioParseException("survival carries items only");
+                    }
+                    carry.add(item);
+                }
+            }
+        }
         return new MachineSpec(
             structure,
             strOr(m, "facing", "NORTH"),
             strOr(m, "rotation", "NORMAL"),
             strOr(m, "flip", "NONE"),
             cells,
-            blueprintCount);
+            blueprintCount,
+            survival,
+            standing,
+            carry);
     }
 
     /** The "inputs" array of an insert step's args, read exactly like a scenario's own inputs. */

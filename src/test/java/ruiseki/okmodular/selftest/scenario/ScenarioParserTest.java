@@ -85,6 +85,32 @@ class ScenarioParserTest {
     }
 
     @Test
+    void survivalBuildReadsStandingBlocksAndWhatThePlayerCarries() {
+        Scenario plain = parse("[" + scen("a", ",\"machine\":{\"structure\":\"x\"}") + "]").get(0);
+        assertFalse(plain.machine.survival);
+        assertTrue(plain.machine.standing.isEmpty());
+        assertTrue(plain.machine.carry.isEmpty());
+
+        String m = ",\"machine\":{\"structure\":\"x\",\"survival\":{\"standing\":{\"C#0\":\"mod:blk:0\"},"
+            + "\"carry\":[{\"item\":\"mod:blk:2\",\"amount\":64},{\"item\":\"mod:port\"}]}}";
+        Scenario s = parse("[" + scen("a", m) + "]").get(0);
+        assertNull(s.parseError);
+        assertTrue(s.machine.survival);
+        assertEquals("mod:blk:0", s.machine.standing.get("C#0"));
+        assertEquals(2, s.machine.carry.size());
+        assertEquals("mod:blk:2", s.machine.carry.get(0).id);
+        assertEquals(64, s.machine.carry.get(0).amount);
+        assertEquals(1, s.machine.carry.get(1).amount);
+    }
+
+    @Test
+    void survivalCarriesItemsOnly() {
+        String m = ",\"machine\":{\"structure\":\"x\",\"survival\":{\"carry\":[{\"fluid\":\"water\",\"amount\":1000}]}}";
+        Scenario s = parse("[" + scen("a", m) + "]").get(0);
+        assertNotNull(s.parseError);
+    }
+
+    @Test
     void unknownActionMakesScenarioInvalid() {
         Scenario s = parse("[" + scen("a", ",\"steps\":[{\"at\":1,\"action\":\"explode\"}]") + "]").get(0);
         assertTrue(s.parseError.contains("unknown action 'explode'"), s.parseError);
