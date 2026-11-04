@@ -1,6 +1,7 @@
 # Recipe System: JSON Format Reference
 
-Recipes are defined in `config/okmodular/recipes/*.json`.
+Recipes are defined in `config/okmodular/recipes/*.json`. To write one from the items already in a
+machine's ports, see [Recipe Capture](./RECIPE_CAPTURE.md).
 
 ## Related Documentation
 

@@ -298,3 +298,4 @@ Either form with fewer than three entries is **skipped silently, that entry only
 
 ## 8. Commands
 - `/okmodular reload`: Reloads structure definitions, recipe definitions and tier definitions.
+- `/okmodular recipe ...`: Builds a recipe from the ports of a formed machine. See [Recipe Capture](../recipes/RECIPE_CAPTURE.md).

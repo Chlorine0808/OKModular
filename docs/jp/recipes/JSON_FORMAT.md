@@ -1,6 +1,7 @@
 # レシピシステム: JSON フォーマットリファレンス
 
-レシピは `config/okmodular/recipes/*.json` で定義されます。
+レシピは `config/okmodular/recipes/*.json` で定義されます。機械のポートに入っているアイテムからレシピを作るには、
+[レシピのキャプチャ](./RECIPE_CAPTURE.md) を参照してください。
 
 ## 関連ドキュメント
 

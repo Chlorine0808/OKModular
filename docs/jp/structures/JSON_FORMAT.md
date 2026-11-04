@@ -290,3 +290,4 @@
 
 ## 8. コマンド
 - `/okmodular reload`: 構造体定義、レシピ定義、Tier定義をリロードします。
+- `/okmodular recipe ...`: 完成した機械のポートからレシピを作ります。[レシピのキャプチャ](../recipes/RECIPE_CAPTURE.md) を参照してください。
