@@ -1,0 +1,65 @@
+[
+  {
+    "id": "sP24-old-keys-run",
+    "section": "P24",
+    "title": "A recipe file written with the old keys still loads and runs",
+    "source": "docs/jp/recipes/JSON_FORMAT.md §11 旧キー (旧キーだけがあるときは、新キーとして読みます); selftest/config/okmodular/recipes/selftest_old_keys.json",
+    "machine": {
+      "structure": "selftest_tiered"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:clay_ball",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:brick",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  },
+  {
+    "id": "sP24-old-keys-warn-once",
+    "section": "P24",
+    "title": "Each old key warns once per reload, though two recipes use it",
+    "source": "docs/jp/recipes/JSON_FORMAT.md §11 旧キー (警告は、旧キーごとにレシピのリロード 1 回につき 1 行です); selftest/config/okmodular/recipes/selftest_old_keys.json",
+    "machine": {
+      "structure": "selftest_tiered"
+    },
+    "ticks": 1,
+    "expect": [
+      {
+        "kind": "logContains",
+        "text": "JSON key \"time\" is renamed",
+        "count": 1
+      },
+      {
+        "kind": "logContains",
+        "text": "JSON key \"input\" is renamed",
+        "count": 1
+      },
+      {
+        "kind": "logContains",
+        "text": "JSON key \"machine\" is renamed",
+        "count": 1
+      }
+    ]
+  }
+]
