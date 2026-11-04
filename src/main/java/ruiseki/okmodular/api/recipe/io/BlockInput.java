@@ -352,7 +352,13 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
 
     @Override
     public IRecipeInput copy(int multiplier) {
-        BlockInput result = new BlockInput(symbol, block, replace, amount * multiplier, consume, optional);
+        BlockInput result = new BlockInput(
+            symbol,
+            block,
+            replace,
+            Amounts.toInt((long) amount * multiplier),
+            consume,
+            optional);
         result.nbtExpressions = this.nbtExpressions;
         result.nbtListOp = this.nbtListOp;
         result.nbtMatchMode = this.nbtMatchMode;
@@ -441,8 +447,8 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
     @Override
     public void read(JsonObject json) {
         // Common JSON parsing for interval
-        if (json.has("pertick")) {
-            JsonElement pt = json.get("pertick");
+        if (json.has("perTick")) {
+            JsonElement pt = json.get("perTick");
             if (pt.isJsonPrimitive()) {
                 if (pt.getAsJsonPrimitive()
                     .isBoolean()) {
@@ -458,8 +464,8 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
         }
 
         // Read NBTMatchMode
-        if (json.has("nbtmatch")) {
-            String modeStr = json.get("nbtmatch")
+        if (json.has("nbtMatch")) {
+            String modeStr = json.get("nbtMatch")
                 .getAsString();
             this.nbtMatchMode = NBTMatchMode.fromString(modeStr);
         }
@@ -492,7 +498,7 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
 
         // Write NBTMatchMode (only if not default IGNORE)
         if (nbtMatchMode != NBTMatchMode.IGNORE) {
-            json.addProperty("nbtmatch", nbtMatchMode.toJsonString());
+            json.addProperty("nbtMatch", nbtMatchMode.toJsonString());
         }
 
         // Write NBT expressions
@@ -568,7 +574,7 @@ public class BlockInput extends AbstractRecipeInput implements IModularRecipeInp
         }
 
         // Read NBT list operation
-        if (json.has("nbtlist")) {
+        if (json.has("nbtList")) {
             try {
                 input.nbtListOp = NBTListOperation.fromJson(json);
             } catch (Exception e) {

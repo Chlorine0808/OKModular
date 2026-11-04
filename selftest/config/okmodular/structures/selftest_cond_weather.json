@@ -1,0 +1,67 @@
+[
+  {
+    "name": "selftest_cond_weather",
+    "displayName": "Selftest Condition weather",
+    "recipeGroup": [
+      "SelftestCondWeather"
+    ],
+    "layers": [
+      {
+        "name": "top",
+        "rows": [
+          "CCC",
+          "CCC",
+          "CCC"
+        ]
+      },
+      {
+        "name": "middle",
+        "rows": [
+          "CIC",
+          "OQE",
+          "CCC"
+        ]
+      },
+      {
+        "name": "bottom",
+        "rows": [
+          "CCC",
+          "CCC",
+          "CCC"
+        ]
+      }
+    ],
+    "mappings": {
+      "C": "okmodular:casing_plain:0",
+      "I": {
+        "blocks": [
+          "okmodular:modular_item_input:0"
+        ]
+      },
+      "O": {
+        "blocks": [
+          "okmodular:modular_item_output:0"
+        ]
+      },
+      "E": {
+        "blocks": [
+          "okmodular:modular_energy_input:0"
+        ]
+      }
+    },
+    "requirements": [
+      {
+        "type": "itemInput",
+        "min": 1
+      },
+      {
+        "type": "itemOutput",
+        "min": 1
+      },
+      {
+        "type": "energyInput",
+        "min": 1
+      }
+    ]
+  }
+]

@@ -1,14 +1,17 @@
 package ruiseki.okmodular.api.recipe.decorator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IShearable;
 
 import com.google.gson.JsonObject;
@@ -170,6 +173,9 @@ public class HarvestBlockDecorator extends RecipeDecorator {
      */
     private boolean levelAllows(IRecipeContext context, List<ChunkCoordinates> positions, int allowed) {
         World world = context.getWorld();
+        // Forge fills the vanilla harvest tools in ForgeHooks' static initialiser. Until something
+        // loads it - a player mining, say - every block reads as toolless and passes.
+        ForgeHooks.canToolHarvestBlock(Blocks.stone, 0, null);
 
         for (ChunkCoordinates pos : positions) {
             Block block = world.getBlock(pos.posX, pos.posY, pos.posZ);
@@ -249,6 +255,28 @@ public class HarvestBlockDecorator extends RecipeDecorator {
             }
         }
         return filtered;
+    }
+
+    /** Drops depend on the block in the cell, so this says what is mined and with what, not which items. */
+    @Override
+    public List<DecoratorDescription> describe() {
+        String level = number(harvestLevelExpr);
+        DecoratorDescription tool = tool();
+        DecoratorDescription line = tool == null
+            ? new DecoratorDescription("okmodular.nei.decorator.harvest_block", level)
+            : new DecoratorDescription("okmodular.nei.decorator.harvest_block.with", tool, level);
+        return Collections.singletonList(line);
+    }
+
+    /** Silk touch wins over shears, as it does when mining. */
+    private DecoratorDescription tool() {
+        if (silkTouch) return new DecoratorDescription("okmodular.nei.decorator.harvest_block.silk_touch");
+        if (shear) return new DecoratorDescription("okmodular.nei.decorator.harvest_block.shear");
+        if (fortune <= 0) return null;
+        // Vanilla names levels 1 to 10 in roman numerals
+        Object level = fortune <= 10 ? new DecoratorDescription("enchantment.level." + fortune)
+            : String.valueOf(fortune);
+        return new DecoratorDescription("okmodular.nei.decorator.harvest_block.fortune", level);
     }
 
     public static IModularRecipe fromJson(IModularRecipe recipe, JsonObject json) {

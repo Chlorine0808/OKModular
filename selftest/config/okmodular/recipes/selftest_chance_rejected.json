@@ -1,0 +1,23 @@
+{
+  "group": "SelftestChanceRejected",
+  "recipes": [
+    {
+      "registryName": "selftest_chance_rejected",
+      "name": "Selftest Chance: a chance pattern used as a structure input (must not load)",
+      "duration": 20,
+      "inputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_chance_rejected",
+          "symbol": "A"
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ]
+    }
+  ]
+}

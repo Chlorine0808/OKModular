@@ -64,7 +64,7 @@ public class DocumentedJsonKeyTest {
      * 外部ポートの名前（`externalPorts` の `energyInput`）。
      * どれもパーサが名前で探すものではないので、実装側に現れないのが正しい。
      *
-     * `nbtlist` の `ops` に書く `id` / `lvl` も同じ。あそこは**対象の NBT がどんな形か**で
+     * `nbtList` の `ops` に書く `id` / `lvl` も同じ。あそこは**対象の NBT がどんな形か**で
      * キーが決まる（`ench` なら `id` と `lvl`、インベントリなら `Slot` と `Count`）ので、
      * `NBTPattern` はキーを列挙せず、来たものをそのまま読む。
      *
@@ -172,6 +172,10 @@ public class DocumentedJsonKeyTest {
         Pattern registered = Pattern.compile("\\bregister\\w*\\(\\s*\"([a-zA-Z_]\\w*)\"");
 
         for (Path file : JavaSource.allMainSources()) {
+            // Scenario JSON is a developer harness, not player JSON documented under docs/.
+            if (file.toString()
+                .replace('\\', '/')
+                .contains("/ruiseki/okmodular/selftest/")) continue;
             String source = JavaSource.stripComments(JavaSource.read(file));
             if (!source.contains("com.google.gson")) continue;
 

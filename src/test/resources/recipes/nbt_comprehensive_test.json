@@ -86,7 +86,7 @@
         {
           "item": "minecraft:diamond_sword",
           "amount": 1,
-          "nbtlist": {
+          "nbtList": {
             "path": "ench",
             "ops": [
               {"id": 16, "lvl": "<3"}
@@ -99,7 +99,7 @@
           "item": "minecraft:diamond_sword",
           "amount": 1,
           "nbt": "nbt('display.Name') = 'Low Sharpness Sword'",
-          "nbtlist": {
+          "nbtList": {
             "path": "ench",
             "ops": [
               {"id": 16, "lvl": 5}
@@ -115,7 +115,7 @@
         {
           "item": "minecraft:diamond_sword",
           "amount": 1,
-          "nbtlist": {
+          "nbtList": {
             "path": "ench",
             "ops": [
               {"id": 34, "lvl": "<=2"}
@@ -128,7 +128,7 @@
           "item": "minecraft:diamond_sword",
           "amount": 1,
           "nbt": "nbt('display.Name') = 'Upgraded Unbreaking'",
-          "nbtlist": {
+          "nbtList": {
             "path": "ench",
             "ops": [
               {"id": 34, "lvl": "+1"}
@@ -144,7 +144,7 @@
         {
           "item": "minecraft:diamond_sword",
           "amount": 1,
-          "nbtlist": {
+          "nbtList": {
             "path": "ench",
             "ops": [
               {"id": 16, "lvl": "==5"}
@@ -167,7 +167,7 @@
         {
           "item": "minecraft:diamond_sword",
           "amount": 1,
-          "nbtlist": {
+          "nbtList": {
             "path": "ench",
             "ops": [
               {"id": 20, "lvl": "!=0"}
@@ -180,7 +180,7 @@
           "item": "minecraft:diamond_sword",
           "amount": 1,
           "nbt": "nbt('display.Name') = 'Has Fire Aspect'",
-          "nbtlist": {
+          "nbtList": {
             "path": "ench",
             "ops": [
               {"id": 20, "lvl": 0}
@@ -246,7 +246,7 @@
             "nbt('customData.power') < 1000",
             "nbt('display.Name') != 'Broken Sword'"
           ],
-          "nbtlist": {
+          "nbtList": {
             "path": "ench",
             "ops": [
               {"id": 16, "lvl": ">=3"},
@@ -267,7 +267,7 @@
             "nbt('customData.bonus') = 1000i",
             "nbt('customData.rarity') = 'Legendary'"
           ],
-          "nbtlist": {
+          "nbtList": {
             "path": "ench",
             "ops": [
               {"id": 16, "lvl": "+2"},

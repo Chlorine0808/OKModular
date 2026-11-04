@@ -92,7 +92,7 @@ public class VisInput extends AbstractModularRecipeInput {
     @Override
     public void write(JsonObject json) {
         if (!consume) json.addProperty("consume", false);
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
 
         if (aspectTag != null) {
             json.addProperty("vis", aspectTag);
@@ -122,7 +122,7 @@ public class VisInput extends AbstractModularRecipeInput {
 
     @Override
     public IRecipeInput copy(int multiplier) {
-        VisInput result = new VisInput(aspectTag, (int) (amount * multiplier));
+        VisInput result = new VisInput(aspectTag, Amounts.toInt((long) amount * multiplier));
         result.consume = this.consume;
         result.interval = this.interval;
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);

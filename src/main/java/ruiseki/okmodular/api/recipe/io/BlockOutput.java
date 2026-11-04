@@ -30,6 +30,7 @@ import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.INBTWriteExpression;
 import ruiseki.okmodular.api.recipe.expression.NBTListOperation;
+import ruiseki.okmodular.api.recipe.parser.JsonKeyRenames;
 import ruiseki.okmodular.api.recipe.visitor.IRecipeVisitor;
 import ruiseki.okmodular.api.structure.core.StructureSymbols;
 import ruiseki.okmodular.util.Logger;
@@ -206,7 +207,13 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        BlockOutput result = new BlockOutput(symbol, block, replace, amount * multiplier, optional, dynamicNbt);
+        BlockOutput result = new BlockOutput(
+            symbol,
+            block,
+            replace,
+            Amounts.toInt((long) amount * multiplier),
+            optional,
+            dynamicNbt);
         result.nbtExpressions = this.nbtExpressions;
         result.nbtListOp = this.nbtListOp;
         result.nbtMatchMode = this.nbtMatchMode;
@@ -333,8 +340,8 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
         }
 
         // Read NBTMatchMode
-        if (json.has("nbtmatch")) {
-            String modeStr = json.get("nbtmatch")
+        if (json.has("nbtMatch")) {
+            String modeStr = json.get("nbtMatch")
                 .getAsString();
             this.nbtMatchMode = NBTMatchMode.fromString(modeStr);
         }
@@ -366,7 +373,7 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
 
         // Write NBTMatchMode (only if not default IGNORE)
         if (nbtMatchMode != NBTMatchMode.IGNORE) {
-            json.addProperty("nbtmatch", nbtMatchMode.toJsonString());
+            json.addProperty("nbtMatch", nbtMatchMode.toJsonString());
         }
 
         // Write new NBT system (preferred)
@@ -399,6 +406,8 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
      * Create BlockOutput from JSON.
      */
     public static BlockOutput fromJson(JsonObject json) {
+        // Decorators call this directly, so it does not pass through OutputParserRegistry.
+        JsonKeyRenames.upgrade(json, JsonKeyRenames.Scope.IO);
         char symbol = StructureSymbols.requireAddressable(
             json.get("symbol")
                 .getAsString()
@@ -458,7 +467,7 @@ public class BlockOutput extends AbstractRecipeOutput implements IModularRecipeO
         }
 
         // Read NBT list operation
-        if (json.has("nbtlist")) {
+        if (json.has("nbtList")) {
             try {
                 nbtListOp = NBTListOperation.fromJson(json);
             } catch (Exception e) {

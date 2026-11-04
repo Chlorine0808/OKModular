@@ -21,8 +21,7 @@ public abstract class AbstractRecipeOutput extends AbstractJsonMaterial implemen
 
     protected void readPerTick(JsonObject json, int defaultInterval) {
         this.interval = defaultInterval;
-        JsonElement element = json.has("pertick") ? json.get("pertick")
-            : (json.has("perTick") ? json.get("perTick") : null);
+        JsonElement element = json.has("perTick") ? json.get("perTick") : null;
         if (element != null && element.isJsonPrimitive()) {
             JsonPrimitive primitive = element.getAsJsonPrimitive();
             if (primitive.isBoolean()) {

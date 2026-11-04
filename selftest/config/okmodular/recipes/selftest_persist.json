@@ -1,0 +1,30 @@
+{
+  "group": "SelftestProbe",
+  "recipes": [
+    {
+      "registryName": "selftest_persist_slow",
+      "name": "Selftest Persist: sand to glass, slowly",
+      "duration": 200,
+      "inputs": [
+        { "item": "minecraft:sand", "amount": 1 }
+      ],
+      "outputs": [
+        { "item": "minecraft:glass", "amount": 1 }
+      ]
+    },
+    {
+      "registryName": "selftest_persist_chance",
+      "name": "Selftest Persist: gravel to flint through a chance draw that always wins",
+      "duration": 20,
+      "inputs": [
+        { "item": "minecraft:gravel", "amount": 1 }
+      ],
+      "outputs": [
+        { "item": "minecraft:flint", "amount": 1 }
+      ],
+      "decorators": [
+        { "chance": 1.0 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "group": "SelftestProbe",
+  "recipes": [
+    {
+      "registryName": "selftest_probe_cobble",
+      "name": "Selftest Probe: cobblestone to stone",
+      "duration": 20,
+      "inputs": [
+        { "item": "minecraft:cobblestone", "amount": 1 }
+      ],
+      "outputs": [
+        { "item": "minecraft:stone", "amount": 1 }
+      ]
+    }
+  ]
+}

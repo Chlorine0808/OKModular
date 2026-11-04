@@ -170,6 +170,25 @@ public class StructurePatternLoaderTest {
     }
 
     /**
+     * 以前はエラーを `structures/errors.txt` へ回していたが，そのファイルはパターンより先に
+     * 書き出されるので，パターンのエラーは一度もファイルに載らなかった。
+     */
+    @Test
+    @DisplayName("読めなかったパターンを structure_io/errors.txt に書く")
+    public void test失敗を同じフォルダに書く() throws IOException {
+        File patterns = new File(dir, "structure_io");
+        patterns.mkdirs();
+        Files.write(new File(patterns, "broken.json").toPath(), "{ not json".getBytes(StandardCharsets.UTF_8));
+
+        loader.loadAll(dir);
+
+        File errors = new File(patterns, "errors.txt");
+        assertTrue(errors.isFile(), "structure_io/errors.txt が書かれていない");
+        String text = new String(Files.readAllBytes(errors.toPath()), StandardCharsets.UTF_8);
+        assertTrue(text.contains("broken.json"), text);
+    }
+
+    /**
      * `migrate()` は登録された migrator が 0 件の今は何もしない。**だから呼び出しを
      * 振る舞いで確かめられない** — 呼んでも呼ばなくても結果が同じになる。
      *

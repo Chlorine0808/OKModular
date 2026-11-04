@@ -127,7 +127,9 @@ Use `nbt(...)` inside an `expression`.
 Errors appear in `logs/latest.log`.
 
 The same checks run every tick while the machine is working.
-A heavy query such as `count_blocks` placed in a condition costs that much every tick.
+The functions that inspect the surroundings (`count_blocks`, `can_see_sky`, `can_see_void`) reuse their
+results for up to 20 ticks, so a heavy scan runs at most once every 20 ticks.
+In exchange, a change to the blocks nearby can take up to 20 ticks (one second) to show in a check.
 
 An idle machine that finds no recipe to start searches less often, doubling the interval from 1 tick up to 20 ticks (one second).
 A change to its ports or structure makes it search again at once. A recipe may therefore start up to one second after its inputs arrive.

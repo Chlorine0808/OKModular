@@ -1,0 +1,309 @@
+[
+  {
+    "id": "s1-asym-north",
+    "section": "1",
+    "title": "The left-right asymmetric structure forms facing north",
+    "source": "run/TESTING.md §1 回転・鏡像で正しく認識される; docs/jp/structures/JSON_FORMAT.md §4 マッピング; selftest/config/okmodular/structures/selftest_asym.json",
+    "machine": {
+      "structure": "selftest_asym",
+      "facing": "NORTH"
+    },
+    "ticks": 10,
+    "snapshots": {
+      "shape": {
+        "from": [-3, -1, -3],
+        "to": [3, 1, 3]
+      }
+    },
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      }
+    ]
+  },
+  {
+    "id": "s1-asym-east",
+    "section": "1",
+    "title": "The left-right asymmetric structure forms facing east",
+    "source": "run/TESTING.md §1 回転・鏡像で正しく認識される; docs/jp/structures/JSON_FORMAT.md §4 マッピング; selftest/config/okmodular/structures/selftest_asym.json",
+    "machine": {
+      "structure": "selftest_asym",
+      "facing": "EAST"
+    },
+    "ticks": 10,
+    "snapshots": {
+      "shape": {
+        "from": [-3, -1, -3],
+        "to": [3, 1, 3]
+      }
+    },
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      }
+    ]
+  },
+  {
+    "id": "s1-asym-south",
+    "section": "1",
+    "title": "The left-right asymmetric structure forms facing south",
+    "source": "run/TESTING.md §1 回転・鏡像で正しく認識される; docs/jp/structures/JSON_FORMAT.md §4 マッピング; selftest/config/okmodular/structures/selftest_asym.json",
+    "machine": {
+      "structure": "selftest_asym",
+      "facing": "SOUTH"
+    },
+    "ticks": 10,
+    "snapshots": {
+      "shape": {
+        "from": [-3, -1, -3],
+        "to": [3, 1, 3]
+      }
+    },
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      }
+    ]
+  },
+  {
+    "id": "s1-asym-west",
+    "section": "1",
+    "title": "The left-right asymmetric structure forms facing west",
+    "source": "run/TESTING.md §1 回転・鏡像で正しく認識される; docs/jp/structures/JSON_FORMAT.md §4 マッピング; selftest/config/okmodular/structures/selftest_asym.json",
+    "machine": {
+      "structure": "selftest_asym",
+      "facing": "WEST"
+    },
+    "ticks": 10,
+    "snapshots": {
+      "shape": {
+        "from": [-3, -1, -3],
+        "to": [3, 1, 3]
+      }
+    },
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      }
+    ]
+  },
+  {
+    "id": "s1-asym-flip",
+    "section": "1",
+    "title": "The mirrored asymmetric structure forms",
+    "source": "run/TESTING.md §1 回転・鏡像で正しく認識される; docs/jp/structures/JSON_FORMAT.md §4 マッピング; selftest/config/okmodular/structures/selftest_asym.json",
+    "machine": {
+      "structure": "selftest_asym",
+      "flip": "HORIZONTAL"
+    },
+    "ticks": 10,
+    "snapshots": {
+      "shape": {
+        "from": [-3, -1, -3],
+        "to": [3, 1, 3]
+      }
+    },
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      }
+    ]
+  },
+  {
+    "id": "s1-asym-broken",
+    "section": "1",
+    "title": "A missing casing block keeps the structure from forming and says why",
+    "source": "run/TESTING.md §1 5x5 などの構造が組み上がって機械になる (its negative); docs/jp/structures/JSON_FORMAT.md §2 layers; selftest/config/okmodular/structures/selftest_asym.json",
+    "machine": {
+      "structure": "selftest_asym",
+      "cells": {
+        "C#0": "minecraft:air"
+      }
+    },
+    "ticks": 10,
+    "snapshots": {
+      "shape": {
+        "from": [-3, -1, -3],
+        "to": [3, 1, 3]
+      }
+    },
+    "expect": [
+      {
+        "kind": "formed",
+        "value": false
+      },
+      {
+        "kind": "validationError",
+        "contains": ""
+      }
+    ]
+  },
+  {
+    "id": "s1-tier-3",
+    "section": "1",
+    "title": "Casing casing_plain:2 gives the casing component tier 3",
+    "source": "run/TESTING.md §1 tiers を書いた部品の Tier が反映される; docs/jp/structures/JSON_FORMAT.md §4 部品ごとの Tier; selftest/config/okmodular/structures/selftest_tiered.json",
+    "machine": {
+      "structure": "selftest_tiered",
+      "cells": {
+        "C*": "okmodular:casing_plain:2"
+      }
+    },
+    "ticks": 10,
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "componentTier",
+        "component": "casing",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "id": "s1-tier-1",
+    "section": "1",
+    "title": "Casing casing_plain:0 gives the casing component tier 1",
+    "source": "run/TESTING.md §1 tiers を書いた部品の Tier が反映される; docs/jp/structures/JSON_FORMAT.md §4 部品ごとの Tier; selftest/config/okmodular/structures/selftest_tiered.json",
+    "machine": {
+      "structure": "selftest_tiered",
+      "cells": {
+        "C*": "okmodular:casing_plain:0"
+      }
+    },
+    "ticks": 10,
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "componentTier",
+        "component": "casing",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "id": "s1-anchor-q",
+    "section": "1",
+    "title": "A structure output anchored on Q writes relative to the controller",
+    "source": "run/TESTING.md §1 アンカーの解決（構造 IO の Q / 記号）; docs/jp/structures/STRUCTURE_IO.md §5 アンカー, §6 出力として; selftest/config/okmodular/structure_io/selftest_anchor.json selftest_anchor_q",
+    "machine": {
+      "structure": "selftest_anchor"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "shape": {
+        "from": [-1, -1, -1],
+        "to": [1, 3, 1]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "shape",
+        "pos": [0, 2, 0],
+        "block": "minecraft:gold_block"
+      }
+    ]
+  },
+  {
+    "id": "s1-anchor-symbol",
+    "section": "1",
+    "title": "A structure output anchored on the symbol A writes relative to that block",
+    "source": "run/TESTING.md §1 アンカーの解決（構造 IO の Q / 記号）; docs/jp/structures/STRUCTURE_IO.md §5 アンカー, §6 出力として; selftest/config/okmodular/structure_io/selftest_anchor.json selftest_anchor_a",
+    "machine": {
+      "structure": "selftest_anchor"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:dirt",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "shape": {
+        "from": [-1, -1, -1],
+        "to": [1, 3, 1]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "shape",
+        "pos": [0, 3, 0],
+        "block": "minecraft:lapis_block"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "shape",
+        "pos": [0, 2, 0],
+        "block": "minecraft:air"
+      }
+    ]
+  },
+  {
+    "id": "s1-air-symbol",
+    "section": "1",
+    "title": "A decorator pointed at the air symbol _ changes every empty cell",
+    "source": "run/TESTING.md §1 ⚠ Q と _ は位置を記録する（項目 V）; docs/jp/structures/JSON_FORMAT.md §6 予約記号; docs/jp/recipes/DECORATORS.md §1 per_position_probability; selftest/config/okmodular/recipes/selftest_anchor.json selftest_anchor_air",
+    "machine": {
+      "structure": "selftest_anchor"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sand",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "shape": {
+        "from": [-1, -1, -1],
+        "to": [1, 1, 1]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "shape",
+        "block": "minecraft:glass",
+        "min": 4,
+        "max": 4
+      }
+    ]
+  }
+]

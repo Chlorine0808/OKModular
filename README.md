@@ -27,7 +27,7 @@ NEI, Waila, BlockRenderer6343, Thaumcraft, AE2, ThaumicEnergistics, Mekanism, En
 ```
 config/okmodular/
   modular.cfg      worldgen.cfg      tiers.json
-  recipes/         structures/       ← errors.txt is written here too
+  recipes/         structures/       ← each folder gets an errors.txt
   structure_io/
 ```
 
@@ -65,6 +65,19 @@ They are there to be read, changed or deleted.
 OKCore is resolved from JitPack, so no local publishing step is needed. Gradle wants a modern JDK
 (`.java-version` asks for 25; 21 works too); the mod itself ships as Java 8 bytecode.
 
+### In-game selftest
+
+```
+./gradlew runServer -Pselftest
+```
+
+This starts a dev server on a fresh flat world, runs every scenario in `selftest/scenarios/` one at a time, writes a report, and stops by itself. Nothing runs without `-Pselftest` (`-Pselftest=false` also leaves it off), and it only runs in a deobfuscated dev environment, never from a release jar.
+
+- `-Pselftest.only=<prefix>[,<prefix>...]` runs only the scenarios whose id or section starts with one of the prefixes. It is a prefix match, so `3.5` also picks up `3.55`. A scenario file that fails to parse as a whole has no section, so it is always kept and shows up as a failure.
+- `-Pselftest.port=<n>` sets the server port (default 25571).
+- The report is `run/selftest/report/index.html`. It is a local file; do not publish it.
+- Scenarios and fixtures live in `selftest/` (not in the jar). Expected values come from `docs/` and the developer's local `run/TESTING.md` (gitignored, so it is not in the repository), and every expectation carries a `source` naming the file and section. Never edit an expectation to match the current behaviour.
+
 ---
 
 # OK Modular（日本語）
@@ -96,7 +109,7 @@ NEI、Waila、BlockRenderer6343、Thaumcraft、AE2、ThaumicEnergistics、Mekani
 ```
 config/okmodular/
   modular.cfg      worldgen.cfg      tiers.json
-  recipes/         structures/       ← errors.txt もここに出力される
+  recipes/         structures/       ← 各フォルダに errors.txt が出力される
   structure_io/
 ```
 
@@ -133,3 +146,16 @@ OK Modular は初回起動時に、`structures/`、`recipes/`、`structure_io/` 
 
 OKCore は JitPack から取得するので、ローカルへの publish は要らない。Gradle の実行には新しい JDK が要る
 （`.java-version` は 25 を指定しているが、21 でも動く）。mod 自体は Java 8 のバイトコードとして出力される。
+
+### ゲーム内 selftest
+
+```
+./gradlew runServer -Pselftest
+```
+
+新しい平坦ワールドで開発サーバーを起動し，`selftest/scenarios/` のシナリオを 1 件ずつ回して報告を書き，自分で停止する．`-Pselftest` が無ければ何も動かない（`-Pselftest=false` でも動かない）．難読化を解いた開発環境でだけ動き，配布用の jar では動かない．
+
+- `-Pselftest.only=<接頭辞>[,<接頭辞>...]` は，id または節がいずれかの接頭辞で始まるシナリオだけを回す．前方一致なので，`3.5` は `3.55` も拾う．ファイル全体の読み込みに失敗したシナリオは節を持たないので，常に残して失敗として報告する．
+- `-Pselftest.port=<n>` でサーバーのポートを指定する（既定は 25571）．
+- 報告は `run/selftest/report/index.html` である．ローカルのファイルであり，公開しない．
+- シナリオと fixture は `selftest/` に置く（jar には入れない）．期待値は `docs/` と開発者の手元にある `run/TESTING.md`（gitignore 対象でリポジトリには無い）から書き，すべての期待値に出典（ファイルと節）を `source` として付ける．現在の挙動に合わせて期待値を書き換えてはならない．

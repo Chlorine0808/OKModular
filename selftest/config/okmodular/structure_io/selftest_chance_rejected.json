@@ -1,0 +1,25 @@
+{
+  "patterns": [
+    {
+      "name": "selftest_chance_rejected",
+      "anchor": "A",
+      "mappings": {
+        "X": {
+          "block": "minecraft:stone",
+          "chance": 0.5
+        }
+      },
+      "layers": [
+        [
+          "X"
+        ],
+        [
+          " "
+        ],
+        [
+          "A"
+        ]
+      ]
+    }
+  ]
+}

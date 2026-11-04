@@ -114,7 +114,7 @@ class BundledDefaultsTest {
         return all;
     }
 
-    /** Recipes as MachineryJsonReader hands them to the loader: group stamped as machine. */
+    /** Recipes as MachineryJsonReader hands them to the loader: group stamped onto each recipe. */
     private static List<JsonObject> recipeJsons() {
         List<JsonObject> recipes = new ArrayList<>();
         for (String file : DefaultConfigWriter.MANIFEST.get(DefaultConfigWriter.RECIPES)) {
@@ -124,7 +124,7 @@ class BundledDefaultsTest {
             JsonArray array = root.getAsJsonArray("recipes");
             for (JsonElement element : array) {
                 JsonObject recipe = element.getAsJsonObject();
-                if (!recipe.has("machine") && !recipe.has("group")) recipe.addProperty("machine", group);
+                if (!recipe.has("group")) recipe.addProperty("group", group);
                 recipes.add(recipe);
             }
         }
@@ -137,7 +137,8 @@ class BundledDefaultsTest {
     }
 
     private static String group(JsonObject recipe) {
-        return (recipe.has("group") ? recipe.get("group") : recipe.get("machine")).getAsString();
+        return recipe.get("group")
+            .getAsString();
     }
 
     @Test

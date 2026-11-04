@@ -78,7 +78,7 @@ A shape as simple as a sphere need not be drawn at all - see
 | the anchor | If it has no entry in `mappings`, it is only a marker and its cell is left alone |
 
 Any other character **must** have an entry in `mappings`. One that does not stops the file from
-loading and is reported in `structures/errors.txt`, because a silently dropped character would
+loading and is reported in `errors.txt` beside the pattern files, because a silently dropped character would
 make the pattern check fewer blocks than it looks like it checks.
 
 ## 3. Writing a Cell
@@ -368,7 +368,7 @@ machine's own shape resolve normally, so an IO region can sit beside or below th
 | `consume` | Input only. Clears the whole matched arrangement on start |
 | `optional` | Lets the recipe start and finish even when nothing matches |
 | `index` | Restricts to ports with this assigned index |
-| `pertick` | Repeats the check or the write while the recipe runs |
+| `perTick` | Repeats the check or the write while the recipe runs |
 
 ### As an input
 
@@ -394,6 +394,13 @@ replace the structure that is running the recipe.
 
 The capacity check asks whether enough usable anchors exist. A recipe with nowhere to put its
 output therefore refuses to start rather than consuming its inputs and placing nothing.
+
+### Finding it in NEI
+
+Searching NEI for a block finds the recipes that place it: a `block` output writing that block,
+or a `structure` output whose pattern places it in any cell. Every block a drawn cell may receive
+counts, `weights` candidates included; air does not. A block written without meta matches every
+meta of it.
 
 ### Choosing where it lands
 

@@ -113,9 +113,9 @@ public class EnergyOutput extends AbstractModularRecipeOutput {
         }
         if (interval != 1) {
             if (isPerTick()) {
-                json.addProperty("pertick", interval);
+                json.addProperty("perTick", interval);
             } else {
-                json.addProperty("pertick", false);
+                json.addProperty("perTick", false);
             }
         }
     }
@@ -138,7 +138,7 @@ public class EnergyOutput extends AbstractModularRecipeOutput {
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        EnergyOutput result = new EnergyOutput(amount * multiplier, isPerTick());
+        EnergyOutput result = new EnergyOutput(Amounts.toInt((long) amount * multiplier), isPerTick());
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         result.interval = this.interval;
         result.index = this.index;

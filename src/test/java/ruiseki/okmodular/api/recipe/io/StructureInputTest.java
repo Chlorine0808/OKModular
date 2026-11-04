@@ -52,7 +52,7 @@ import ruiseki.okmodular.structure.pattern.StructurePatternLoader;
 public class StructureInputTest {
 
     private static final String JSON = ("{ 'type': 'structure', 'pattern': 'altar_core', 'symbol': 'S',"
-        + " 'amount': 2, 'consume': true, 'index': 3, 'pertick': 5 }").replace('\'', '"');
+        + " 'amount': 2, 'consume': true, 'index': 3, 'perTick': 5 }").replace('\'', '"');
 
     private static StructureInput parse() {
         return (StructureInput) StructureInput.fromJson(

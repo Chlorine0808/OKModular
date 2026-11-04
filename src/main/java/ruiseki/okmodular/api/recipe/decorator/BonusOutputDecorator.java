@@ -1,6 +1,7 @@
 package ruiseki.okmodular.api.recipe.decorator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.JsonArray;
@@ -54,7 +55,7 @@ public class BonusOutputDecorator extends RecipeDecorator {
     public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
         super.produceExtraOutputs(outputPorts, context);
 
-        int times = timesFiring(context);
+        int times = timesFiring(ownDraw(context));
         for (int fired = 0; fired < times; fired++) {
             for (IRecipeOutput bonus : bonusOutputs) {
                 if (bonus instanceof IModularRecipeOutput modularBonus) {
@@ -130,6 +131,17 @@ public class BonusOutputDecorator extends RecipeDecorator {
     }
 
     public List<IRecipeOutput> getBonusOutputs() {
+        return bonusOutputs;
+    }
+
+    @Override
+    public List<DecoratorDescription> describe() {
+        return Collections
+            .singletonList(new DecoratorDescription("okmodular.nei.decorator.bonus", percent(baseChanceExpr)));
+    }
+
+    @Override
+    public List<IRecipeOutput> getPossibleOutputs() {
         return bonusOutputs;
     }
 

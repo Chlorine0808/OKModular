@@ -13,6 +13,8 @@ import com.google.gson.JsonObject;
 import ruiseki.okcore.json.JsonErrorCollector;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
+import ruiseki.okmodular.api.recipe.parser.JsonKeyRenames;
+import ruiseki.okmodular.util.ErrorsFile;
 import ruiseki.okmodular.util.Logger;
 
 public class RecipeLoader {
@@ -22,6 +24,8 @@ public class RecipeLoader {
     private final Map<String, List<IModularRecipe>> recipesByGroup = new HashMap<>();
 
     private MachineryJsonReader reader;
+
+    private final List<String> errors = new ArrayList<>();
 
     private int recipeVersion = 0;
 
@@ -47,6 +51,7 @@ public class RecipeLoader {
         }
 
         recipesByGroup.clear();
+        errors.clear();
 
         RecipeMigration.migrateAll(recipesDir);
 
@@ -69,6 +74,17 @@ public class RecipeLoader {
         }
 
         Logger.info("Loaded {} recipes in {} groups", recipes.size(), recipesByGroup.size());
+        ErrorsFile.write(recipesDir, "OKModular Recipe Errors", errors);
+    }
+
+    /** Called for each recipe the parser drops; the load writes them to recipes/errors.txt. */
+    void recordError(String message) {
+        errors.add(message);
+    }
+
+    /** What the last load dropped. */
+    public List<String> getErrors() {
+        return Collections.unmodifiableList(errors);
     }
 
     public void reload(File configDir) {
@@ -79,6 +95,9 @@ public class RecipeLoader {
             .setConfigDir(configDir);
 
         Logger.info("Reloading recipes...");
+        // Warnings reset per reload, not per loadAll: at startup scanGroupNames has already
+        // read the files, and loadAll resetting would make every old key warn a second time.
+        JsonKeyRenames.resetWarnings();
         recipeVersion++;
         loadAll(configDir);
     }
@@ -150,6 +169,9 @@ public class RecipeLoader {
         RecipeLoader instance = getInstance();
         File recipesDir = new File(configDir, "recipes");
 
+        // The first read of a startup; loadAll continues the same warning round
+        JsonKeyRenames.resetWarnings();
+
         if (instance.reader == null || !instance.reader.getPath()
             .equals(recipesDir)) {
             instance.reader = new MachineryJsonReader(recipesDir);
@@ -164,10 +186,8 @@ public class RecipeLoader {
             }
 
             for (JsonObject mat : materials) {
-                String group = mat.has("machine") ? mat.get("machine")
-                    .getAsString()
-                    : (mat.has("group") ? mat.get("group")
-                        .getAsString() : (mat.has("parent") ? null : "default"));
+                String group = mat.has("group") ? mat.get("group")
+                    .getAsString() : (mat.has("parent") ? null : "default");
                 if (group != null && !groups.contains(group)) {
                     groups.add(group);
                 }

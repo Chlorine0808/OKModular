@@ -1,0 +1,485 @@
+[
+  {
+    "id": "s3.56-sphere",
+    "section": "3.56",
+    "title": "A generated sphere is centred on the anchor plus its offset",
+    "source": "run/TESTING.md §3.56 生成した球が球に見える; docs/jp/structures/STRUCTURE_IO.md §4 形を生成する (dx²+dy²+dz² <= radius², アンカーは中心, offset)",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:clay_ball",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-6, 3, -6],
+        "to": [6, 15, 6],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "ball": {
+        "from": [-6, 1, -6],
+        "to": [6, 15, 6]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "sphereCentred",
+        "snapshot": "ball",
+        "block": "minecraft:emerald_block",
+        "centre": [0, 9, 0],
+        "tolerance": 0.5
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "ball",
+        "block": "minecraft:emerald_block",
+        "min": 925,
+        "max": 925
+      }
+    ]
+  },
+  {
+    "id": "s3.56-noise-threshold",
+    "section": "3.56",
+    "title": "noise(6) > 0.5 makes blobs",
+    "source": "run/TESTING.md §3.56 ノイズが塊になる; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (閾値で切る / 確率として渡すと塊にならない)",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:flint",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-13, 2, -13],
+        "to": [13, 28, 13],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "box": {
+        "from": [-13, 2, -13],
+        "to": [13, 28, 13]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "clustered",
+        "snapshot": "box",
+        "block": "minecraft:iron_ore",
+        "value": true
+      }
+    ]
+  },
+  {
+    "id": "s3.56-noise-prob",
+    "section": "3.56",
+    "title": "noise(6) as a chance scatters like salt and pepper",
+    "source": "run/TESTING.md §3.56 ⚠ 確率として渡すと塊にならない（対比）; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (閾値で切る / 確率として渡すと塊にならない)",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:bone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-13, 2, -13],
+        "to": [13, 28, 13],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "box": {
+        "from": [-13, 2, -13],
+        "to": [13, 28, 13]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "box",
+        "block": "minecraft:iron_ore",
+        "min": 1,
+        "max": 19683
+      },
+      {
+        "kind": "clustered",
+        "snapshot": "box",
+        "block": "minecraft:iron_ore",
+        "value": false
+      }
+    ]
+  },
+  {
+    "id": "s3.56-scale-3",
+    "section": "3.56",
+    "title": "noise(3) > 0.5: how big the blobs look (3 fine, 16 large and flat)",
+    "source": "run/TESTING.md §3.56 scale の体感; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (scale は塊の大きさ)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:string",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "slab": {
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.56-scale-6",
+    "section": "3.56",
+    "title": "noise(6) > 0.5: how big the blobs look (3 fine, 16 large and flat)",
+    "source": "run/TESTING.md §3.56 scale の体感; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (scale は塊の大きさ)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:feather",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "slab": {
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.56-scale-16",
+    "section": "3.56",
+    "title": "noise(16) > 0.5: how big the blobs look (3 fine, 16 large and flat)",
+    "source": "run/TESTING.md §3.56 scale の体感; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (scale は塊の大きさ)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:wheat_seeds",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "slab": {
+        "from": [-16, 2, -16],
+        "to": [16, 6, 16]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.56-vein",
+    "section": "3.56",
+    "title": "The finished vein: blobs inside the ball, thinner outwards, ragged edges",
+    "source": "run/TESTING.md §3.56 鉱脈の完成形; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (鉱脈の見た目), §4 形を生成する (cell_* はアンカーから測るので offset を引く)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:apple",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "vein": {
+        "from": [-8, 1, -8],
+        "to": [8, 18, 8]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.56-vein-falloff",
+    "section": "3.56",
+    "title": "The vein's chance without the noise thins out from the centre",
+    "source": "run/TESTING.md §3.56 鉱脈の完成形 (外へ行くほど薄く); docs/jp/structures/STRUCTURE_IO.md §3 セルの位置を式から読む (輪郭をぼかす), §4 形を生成する (offset を引く)",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:stick",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "vein": {
+        "from": [-8, 1, -8],
+        "to": [8, 18, 8]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "densityFallsOutward",
+        "snapshot": "vein",
+        "block": "minecraft:iron_ore",
+        "centre": [0, 10, 0],
+        "radius": 8
+      }
+    ]
+  },
+  {
+    "id": "s3.56-vein-two-anchors",
+    "section": "3.56",
+    "title": "Veins at two neighbouring anchors: the noise field carries across",
+    "source": "run/TESTING.md §3.56 アンカー 2 箇所が繋がる; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (場はワールド座標の関数なので繋がって見える)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern2"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:coal",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-14, 2, -8],
+        "to": [14, 18, 8],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "veins": {
+        "from": [-14, 1, -8],
+        "to": [14, 18, 8]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.56-two-runs",
+    "section": "3.56",
+    "title": "Running the same recipe again lays out different blobs",
+    "source": "run/TESTING.md §3.56 実行ごとに変わる; docs/jp/structures/STRUCTURE_IO.md §3 noise(scale) で塊を作る (次の実行では別の場), 散り方",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sugar",
+        "amount": 1
+      }
+    ],
+    "ticks": 100,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 41,
+        "action": "fill",
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 42,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:sugar",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "snapshots": {
+      "first": {
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8],
+        "at": 40
+      },
+      "second": {
+        "from": [-8, 2, -8],
+        "to": [8, 18, 8]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 42,
+        "to": 80
+      },
+      {
+        "kind": "snapshotsDiffer",
+        "a": "first",
+        "b": "second",
+        "min": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "first",
+        "block": "minecraft:gold_ore",
+        "min": 1,
+        "max": 4913
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "second",
+        "block": "minecraft:gold_ore",
+        "min": 1,
+        "max": 4913
+      }
+    ]
+  }
+]

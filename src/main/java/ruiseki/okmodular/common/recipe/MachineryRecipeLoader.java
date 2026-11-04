@@ -16,6 +16,7 @@ import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.core.ModularRecipe;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.recipe.parser.DecoratorParser;
+import ruiseki.okmodular.api.recipe.parser.JsonKeyRenames;
 import ruiseki.okmodular.api.recipe.parser.RecipeParserRegistry;
 import ruiseki.okmodular.util.Logger;
 
@@ -28,6 +29,13 @@ public class MachineryRecipeLoader {
     public static List<IModularRecipe> load(List<JsonObject> recipeJsons) {
         List<IModularRecipe> recipes = new ArrayList<>();
         Map<String, JsonObject> recipeMap = new HashMap<>();
+
+        // 0. Bring old key spellings up to date before anything reads a key. Parent and child
+        // are both upgraded here, ahead of the merge, so a child using "group" and a parent
+        // using "machine" (or the reverse) end up with one "group".
+        for (JsonObject json : recipeJsons) {
+            JsonKeyRenames.upgrade(json, JsonKeyRenames.Scope.RECIPE);
+        }
 
         // 1. Index recipes by registryName and validate basic info
         for (JsonObject json : recipeJsons) {
@@ -67,10 +75,8 @@ public class MachineryRecipeLoader {
                 .getAsString();
         }
 
-        String name = json.has("localizedName") ? json.get("localizedName")
-            .getAsString()
-            : (json.has("name") ? json.get("name")
-                .getAsString() : null);
+        String name = json.has("name") ? json.get("name")
+            .getAsString() : null;
 
         if (name != null) {
             return name.toLowerCase()
@@ -168,6 +174,8 @@ public class MachineryRecipeLoader {
      * already reached the log by the time we get here.
      */
     private static void collectQuietly(String message) {
+        RecipeLoader.getInstance()
+            .recordError(message);
         try {
             JsonErrorCollector.getInstance()
                 .collect("MachineryRecipeLoader", message);

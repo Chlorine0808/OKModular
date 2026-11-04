@@ -172,7 +172,7 @@ public class NBTListOperation {
      *
      * Expected format:
      * {
-     * "nbtlist": {
+     * "nbtList": {
      * "path": "ench",
      * "ops": [
      * {"id": 16, "lvl": ">=5"},
@@ -183,11 +183,11 @@ public class NBTListOperation {
      * }
      */
     public static NBTListOperation fromJson(JsonObject json) {
-        if (!json.has("nbtlist")) {
-            throw new IllegalArgumentException("Missing 'nbtlist' field");
+        if (!json.has("nbtList")) {
+            throw new IllegalArgumentException("Missing 'nbtList' field");
         }
 
-        JsonObject nbtlist = json.getAsJsonObject("nbtlist");
+        JsonObject nbtlist = json.getAsJsonObject("nbtList");
 
         String path = nbtlist.has("path") ? nbtlist.get("path")
             .getAsString() : "Items";

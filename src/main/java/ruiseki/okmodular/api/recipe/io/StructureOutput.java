@@ -272,7 +272,11 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        StructureOutput result = new StructureOutput(symbol, patternName, amount * multiplier, optional);
+        StructureOutput result = new StructureOutput(
+            symbol,
+            patternName,
+            Amounts.toInt((long) amount * multiplier),
+            optional);
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         result.interval = this.interval;
         result.index = this.index;
@@ -340,7 +344,7 @@ public class StructureOutput extends AbstractRecipeOutput implements IModularRec
         }
         if (optional) json.addProperty("optional", true);
         if (index != -1) json.addProperty("index", index);
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
     }
 
     public static IRecipeOutput fromJson(JsonObject json) {

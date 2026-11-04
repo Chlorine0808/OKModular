@@ -9,6 +9,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 import ruiseki.okmodular.api.condition.ConditionContext;
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.recipe.core.IMachineState;
+import ruiseki.okmodular.api.recipe.expression.WorldReadCache;
 import ruiseki.okmodular.api.structure.core.IStructureEntry;
 
 /**
@@ -115,6 +116,11 @@ public interface IRecipeContext {
      * Get the machine state for this context, if applicable.
      */
     default IMachineState getMachineState() {
+        return null;
+    }
+
+    /** Where this machine keeps its recent world reads, or null to read live every time. */
+    default WorldReadCache getWorldReadCache() {
         return null;
     }
 }

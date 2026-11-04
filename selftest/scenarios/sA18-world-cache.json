@@ -1,0 +1,381 @@
+[
+  {
+    "id": "sA18-count-blocks-true",
+    "section": "A-18",
+    "title": "count_blocks sees an iron block next to the controller",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数 count_blocks (cube of the given distance around the controller, example count_blocks(1, \"minecraft:iron_block\")); docs/jp/recipes/CONDITIONS.md expression. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          1,
+          1,
+          0
+        ],
+        "block": "minecraft:iron_block"
+      },
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:cobblestone",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  },
+  {
+    "id": "sA18-count-blocks-false",
+    "section": "A-18",
+    "title": "count_blocks finds no iron block, so the recipe never starts",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数 count_blocks; docs/jp/recipes/CONDITIONS.md expression. The site is cleared to air, so only the machine's own blocks lie within distance 1. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:cobblestone",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 80
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 0,
+        "max": 0
+      },
+      {
+        "kind": "inputCount",
+        "item": "minecraft:cobblestone",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  },
+  {
+    "id": "sA18-sky-true",
+    "section": "A-18",
+    "title": "can_see_sky is true under open sky",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数 can_see_sky (counted from one block above the controller) and 変数・関数 can_see_sky (コントローラから空が見えるか). The overworld site has no roof; the column above the controller is also filled with air up to y=255 so terrain above the cleared box cannot interfere. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          0,
+          1,
+          0
+        ],
+        "to": [
+          0,
+          191,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:sand",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  },
+  {
+    "id": "sA18-sky-false",
+    "section": "A-18",
+    "title": "can_see_sky is false under a stone roof",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数 can_see_sky (an opaque block above the controller blocks the sky). Same open column as sA18-sky-true, plus a 3x3 stone roof 3 above the controller. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          0,
+          1,
+          0
+        ],
+        "to": [
+          0,
+          191,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          -1,
+          3,
+          -1
+        ],
+        "to": [
+          1,
+          3,
+          1
+        ],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:sand",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 80
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 0,
+        "max": 0
+      },
+      {
+        "kind": "inputCount",
+        "item": "minecraft:sand",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  },
+  {
+    "id": "sA18-void-true",
+    "section": "A-18",
+    "title": "can_see_void is true once the column below is cut down to y=0",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 変数・関数 can_see_void (コントローラの真下が Y=0 まで空洞か) and 周囲を調べる関数 (counted from one block below the controller). The site is cleared only 16 below the origin, so the column under the controller (origin y=64) is cut to air down to y=0, bedrock included; a glass sleeve (light opacity 0, which the scan sees through) is set first so no liquid can flow into it. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          -1,
+          -64,
+          -1
+        ],
+        "to": [
+          1,
+          -1,
+          1
+        ],
+        "block": "minecraft:glass"
+      },
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          0,
+          -64,
+          0
+        ],
+        "to": [
+          0,
+          -1,
+          0
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:gravel",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  },
+  {
+    "id": "sA18-void-false",
+    "section": "A-18",
+    "title": "can_see_void is false over the site's stone floor",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 変数・関数 can_see_void. Nothing is cut: the site's stone floor 17 below the origin is opaque. The input is inserted at t=5, after the world is set up at t=0, so the condition's first read (and its cached answer) already sees the final world",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "ticks": 80,
+    "steps": [
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:gravel",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 80
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 0,
+        "max": 0
+      },
+      {
+        "kind": "inputCount",
+        "item": "minecraft:gravel",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  },
+  {
+    "id": "sA18-catch-up",
+    "section": "A-18",
+    "title": "A waiting machine picks up an iron block placed later within the cache lag plus the idle search interval",
+    "source": "OmoshiroiKamo run/_SSOT.md A-18 (world-reading functions count_blocks / can_see_sky / can_see_void keep their result up to 20 ticks per controller x function x arguments); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数 (results lag up to 20 ticks); docs/en/recipes/CONDITIONS.md §5 Tips lines 130-134 (a read is reused for up to 20 ticks, and an idle machine searches at most every 20 ticks, so a recipe may start up to 40 ticks after the block arrives); docs/jp/recipes/EXPRESSION_REFERENCE.md 周囲を調べる関数. Iron goes in at t=40, so the start must fall within 40..80 and not before",
+    "machine": {
+      "structure": "selftest_cache"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 120,
+    "steps": [
+      {
+        "at": 40,
+        "action": "setBlock",
+        "pos": [
+          1,
+          1,
+          0
+        ],
+        "block": "minecraft:iron_block"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 39
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 40,
+        "to": 80
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      }
+    ]
+  }
+]

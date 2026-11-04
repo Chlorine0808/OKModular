@@ -1,0 +1,414 @@
+[
+  {
+    "id": "s3.55-y-cut",
+    "section": "3.55",
+    "title": "y reads the cell's height: a pattern spanning y 36..44 is cut at y=40",
+    "source": "run/TESTING.md §3.55 y が セルの高さを指す（機械のではない） and ⚠ y の確認は配置の中で切れること; docs/jp/structures/STRUCTURE_IO.md §3 セルの位置を式から読む (x / y / z = そのセルのワールド座標, ある深さより下だけ)",
+    "y": 37,
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-5, 2, -5],
+        "to": [5, 7, 5],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-5, -1, -5],
+        "to": [-2, 1, 5],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [2, -1, -5],
+        "to": [5, 1, 5],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-1, -1, -5],
+        "to": [1, 1, -2],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-1, -1, 2],
+        "to": [1, 1, 5],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "pattern": {
+        "from": [-5, -1, -5],
+        "to": [5, 7, 5]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "pattern",
+        "block": "minecraft:gold_block",
+        "from": [-5, -1, -5],
+        "to": [5, 2, 5],
+        "min": 457,
+        "max": 457
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "pattern",
+        "block": "minecraft:gold_block",
+        "from": [-5, 3, -5],
+        "to": [5, 7, 5],
+        "min": 0,
+        "max": 0
+      }
+    ]
+  },
+  {
+    "id": "s3.55-cell-y",
+    "section": "3.55",
+    "title": "cell_y is positive upwards: 1 - cell_y * 0.2 thins out above the anchor",
+    "source": "run/TESTING.md §3.55 cell_y の向き; docs/jp/structures/STRUCTURE_IO.md §3 セルの位置を式から読む (cell_y は書いた層の上が正, アンカーより上ほど薄い)",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:dirt",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-5, 2, -5],
+        "to": [5, 6, 5],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "pattern": {
+        "from": [-5, 1, -5],
+        "to": [5, 6, 5]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.8,
+        "from": [-5, 2, -5],
+        "to": [5, 2, 5]
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.6,
+        "from": [-5, 3, -5],
+        "to": [5, 3, 5]
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.4,
+        "from": [-5, 4, -5],
+        "to": [5, 4, 5]
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.2,
+        "from": [-5, 5, -5],
+        "to": [5, 5, 5]
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.0,
+        "from": [-5, 6, -5],
+        "to": [5, 6, 5]
+      }
+    ]
+  },
+  {
+    "id": "s3.55-two-anchors",
+    "section": "3.55",
+    "title": "Two anchors get the same shading but different cells (compare the two balls in the figure)",
+    "source": "run/TESTING.md §3.55 アンカー 2 箇所で形が同じ; docs/jp/structures/STRUCTURE_IO.md §3 散り方 (アンカー 2 箇所は別の配置), §4 形を生成する (offset), §6 レシピからの参照 (amount)",
+    "visual": true,
+    "machine": {
+      "structure": "selftest_pattern2"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sand",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-10, 3, -4],
+        "to": [-2, 11, 4],
+        "block": "minecraft:stone"
+      },
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [2, 3, -4],
+        "to": [10, 11, 4],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "west": {
+        "from": [-10, 3, -4],
+        "to": [-2, 11, 4]
+      },
+      "east": {
+        "from": [2, 3, -4],
+        "to": [10, 11, 4]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "snapshotsDiffer",
+        "a": "west",
+        "b": "east",
+        "min": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "west",
+        "block": "minecraft:diamond_block",
+        "min": 1,
+        "max": 729
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "east",
+        "block": "minecraft:diamond_block",
+        "min": 1,
+        "max": 729
+      }
+    ]
+  },
+  {
+    "id": "s3.55-stripes-north",
+    "section": "3.55",
+    "title": "cell_x % 2 stripes on a north-facing machine run along world z",
+    "source": "run/TESTING.md §3.55 機械の向きで形が回らない; docs/jp/structures/STRUCTURE_IO.md §3 セルの位置を式から読む (cell_* はパターンの軸. 機械の向きと一緒に回る. 北向きの横置きではワールドの軸と一致), 縞・市松",
+    "machine": {
+      "structure": "selftest_pattern",
+      "facing": "NORTH"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:gravel",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-5, 2, -5],
+        "to": [5, 6, 5],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "pattern": {
+        "from": [-5, 2, -5],
+        "to": [5, 6, 5]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "uniformAlong",
+        "snapshot": "pattern",
+        "block": "minecraft:quartz_block",
+        "axis": "z",
+        "value": true
+      },
+      {
+        "kind": "uniformAlong",
+        "snapshot": "pattern",
+        "block": "minecraft:quartz_block",
+        "axis": "x",
+        "value": false
+      }
+    ]
+  },
+  {
+    "id": "s3.55-stripes-east",
+    "section": "3.55",
+    "title": "cell_x % 2 stripes on a east-facing machine run along world x",
+    "source": "run/TESTING.md §3.55 機械の向きで形が回らない; docs/jp/structures/STRUCTURE_IO.md §3 セルの位置を式から読む (cell_* はパターンの軸. 機械の向きと一緒に回る. 北向きの横置きではワールドの軸と一致), 縞・市松",
+    "machine": {
+      "structure": "selftest_pattern",
+      "facing": "EAST"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:gravel",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [-5, 2, -5],
+        "to": [5, 6, 5],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "pattern": {
+        "from": [-5, 2, -5],
+        "to": [5, 6, 5]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "uniformAlong",
+        "snapshot": "pattern",
+        "block": "minecraft:quartz_block",
+        "axis": "x",
+        "value": true
+      },
+      {
+        "kind": "uniformAlong",
+        "snapshot": "pattern",
+        "block": "minecraft:quartz_block",
+        "axis": "z",
+        "value": false
+      }
+    ]
+  },
+  {
+    "id": "s3.55-light",
+    "section": "3.55",
+    "title": "light_block is read per cell: no glass next to the torch, glass far from it",
+    "source": "run/TESTING.md §3.55 light_block / temp がセルごとに効く; docs/jp/recipes/EXPRESSION_REFERENCE.md light_block",
+    "machine": {
+      "structure": "selftest_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:planks",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [0, 2, 0],
+        "block": "minecraft:torch:5"
+      }
+    ],
+    "snapshots": {
+      "row": {
+        "from": [-12, 1, -1],
+        "to": [12, 2, 1]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "row",
+        "pos": [1, 2, 0],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "blockAt",
+        "snapshot": "row",
+        "pos": [-1, 2, 0],
+        "block": "minecraft:air"
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "row",
+        "block": "minecraft:glass",
+        "from": [8, 2, 0],
+        "to": [12, 2, 0],
+        "min": 5,
+        "max": 5
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "row",
+        "block": "minecraft:glass",
+        "from": [-12, 2, 0],
+        "to": [-8, 2, 0],
+        "min": 5,
+        "max": 5
+      }
+    ]
+  }
+]

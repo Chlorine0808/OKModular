@@ -1,0 +1,263 @@
+[
+  {
+    "id": "s5-ppp-1",
+    "section": "5",
+    "title": "per_position_probability at chance 1.0 turns every air cell of the structure to glass",
+    "source": "run/TESTING.md §5 per_position_probability に chance: 1.0 (対象記号の全マスが変わる); docs/jp/recipes/DECORATORS.md §1 per_position_probability; selftest/config/okmodular/structures/selftest_chance.json (50 '_' cells)",
+    "machine": {
+      "structure": "selftest_chance"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "air": {
+        "from": [
+          -2,
+          2,
+          -2
+        ],
+        "to": [
+          2,
+          3,
+          2
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "air",
+        "block": "minecraft:glass",
+        "min": 50,
+        "max": 50
+      }
+    ]
+  },
+  {
+    "id": "s5-ppp-0",
+    "section": "5",
+    "title": "per_position_probability at chance 0.0 leaves every air cell alone",
+    "source": "run/TESTING.md §5 同じく chance: 0.0 (1 マスも変わらない); docs/jp/recipes/DECORATORS.md §1 per_position_probability. The stone output proves the run completed, so the decorator had its turn",
+    "machine": {
+      "structure": "selftest_chance"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:dirt",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "air": {
+        "from": [
+          -2,
+          2,
+          -2
+        ],
+        "to": [
+          2,
+          3,
+          2
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "air",
+        "block": "minecraft:glass",
+        "min": 0,
+        "max": 0
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "air",
+        "block": "minecraft:air",
+        "min": 50,
+        "max": 50
+      }
+    ]
+  },
+  {
+    "id": "s5-bonus-1",
+    "section": "5",
+    "title": "bonus at chance 1.0 pays its diamond on each of 3 runs",
+    "source": "run/TESTING.md §5 bonus に chance: 1.0 (毎回出る); docs/jp/recipes/DECORATORS.md §1 bonus, §2 書き方",
+    "machine": {
+      "structure": "selftest_chance"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sand",
+        "amount": 3
+      }
+    ],
+    "ticks": 200,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:glass",
+        "min": 3,
+        "max": 3
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:diamond",
+        "min": 3,
+        "max": 3
+      }
+    ]
+  },
+  {
+    "id": "s5-random-count",
+    "section": "5",
+    "title": "random_block_output count 5 places glass on exactly 5 of the 50 air cells (scatter in the figure)",
+    "source": "run/TESTING.md §5 random_block_output の count: N (ちょうど N マス、散らばって); docs/jp/recipes/DECORATORS.md §4 random_block_output. Judged by count only; the scatter is shown in the figure",
+    "machine": {
+      "structure": "selftest_chance"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:gravel",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "air": {
+        "from": [
+          -2,
+          2,
+          -2
+        ],
+        "to": [
+          2,
+          3,
+          2
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "outputCount",
+        "item": "minecraft:stone",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "air",
+        "block": "minecraft:glass",
+        "min": 5,
+        "max": 5
+      }
+    ]
+  },
+  {
+    "id": "s5-payout-wait",
+    "section": "5",
+    "title": "A recipe held on full outputs for 60 ticks keeps its payout draw and pays it once emptied",
+    "source": "run/TESTING.md §5 chance: 0.6 のレシピで出力先を満杯にして数十 tick 待つ (空けたら当たったまま払い出される); docs/jp/recipes/DECORATORS.md §3 抽選の仕組み (NOTE: 抽選はやり直しません); ProcessAgent#writeToNBT payoutDecided/payoutSucceeded. The recipe uses chance 1.0, not 0.6: a lost draw ends the run at once and never waits, so the waiting state would be missed about 4 runs in 10. ChanceRecipeDecorator still draws at 1.0 (a [0,1) value < 1.0) and ProcessAgent#payoutSucceeds still records the draw (same ruling as s2-payout-survives)",
+    "machine": {
+      "structure": "selftest_chance"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:clay_ball",
+        "amount": 1
+      }
+    ],
+    "ticks": 130,
+    "steps": [
+      {
+        "at": 5,
+        "action": "fillOutputs",
+        "item": "minecraft:dirt"
+      },
+      {
+        "at": 30,
+        "action": "recordNbt",
+        "label": "before-wait"
+      },
+      {
+        "at": 90,
+        "action": "recordNbt",
+        "label": "after-wait"
+      },
+      {
+        "at": 91,
+        "action": "clearOutputs"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 30,
+        "to": 30
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 90,
+        "to": 90
+      },
+      {
+        "kind": "nbtEqual",
+        "a": "before-wait",
+        "b": "after-wait",
+        "keys": [
+          "processAgent.payoutDecided",
+          "processAgent.payoutSucceeded"
+        ]
+      },
+      {
+        "kind": "outputMatchesPayout",
+        "item": "minecraft:flint",
+        "label": "after-wait"
+      }
+    ]
+  }
+]

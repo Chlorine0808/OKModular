@@ -173,7 +173,7 @@ public class OutputAmountSnapshotTest {
     @Test
     @DisplayName("perTick 出力は畳まない")
     public void testperTickは畳まない() {
-        EnergyOutput output = EnergyOutput.fromJson(json("{ \"energy\": \"2 + 3\", \"pertick\": true }"));
+        EnergyOutput output = EnergyOutput.fromJson(json("{ \"energy\": \"2 + 3\", \"perTick\": true }"));
         assertTrue(output.isPerTick(), "前提: perTick として読めていること");
 
         agent.startRecipe(recipeWith(output), NO_PORTS, NO_PORTS, context());

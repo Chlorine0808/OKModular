@@ -1,6 +1,7 @@
 package ruiseki.okmodular.api.recipe.decorator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.util.WeightedRandom;
@@ -16,6 +17,7 @@ import ruiseki.okmodular.api.recipe.core.IModularRecipe;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.IModularRecipeOutput;
 import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
+import ruiseki.okmodular.api.recipe.parser.JsonKeyRenames;
 import ruiseki.okmodular.api.recipe.parser.OutputParserRegistry;
 
 /**
@@ -36,9 +38,10 @@ public class WeightedRandomDecorator extends RecipeDecorator {
     public void produceExtraOutputs(List<IModularPort> outputPorts, ConditionContext context) {
         super.produceExtraOutputs(outputPorts, context);
 
-        int draws = totalRolls(context);
+        ConditionContext own = ownDraw(context);
+        int draws = totalRolls(own);
         for (int i = 0; i < draws; i++) {
-            WeightedOutputEntry picked = pick(context, i);
+            WeightedOutputEntry picked = pick(own, i);
             if (picked != null && picked.output instanceof IModularRecipeOutput modularOutput) {
                 List<IModularPort> filtered = filterByType(outputPorts, modularOutput.getPortType());
                 if (modularOutput.checkCapacity(filtered, 1, context)) {
@@ -118,6 +121,27 @@ public class WeightedRandomDecorator extends RecipeDecorator {
         return pool;
     }
 
+    @Override
+    public List<DecoratorDescription> describe() {
+        StringBuilder weights = new StringBuilder();
+        for (WeightedOutputEntry entry : pool) {
+            if (weights.length() > 0) weights.append(" / ");
+            weights.append(entry.itemWeight);
+        }
+        return Collections.singletonList(
+            new DecoratorDescription(
+                "okmodular.nei.decorator.weighted_random",
+                String.valueOf(rolls),
+                weights.toString()));
+    }
+
+    @Override
+    public List<IRecipeOutput> getPossibleOutputs() {
+        List<IRecipeOutput> outputs = new ArrayList<>();
+        for (WeightedOutputEntry entry : pool) outputs.add(entry.output);
+        return outputs;
+    }
+
     public int getRolls() {
         return rolls;
     }
@@ -141,6 +165,13 @@ public class WeightedRandomDecorator extends RecipeDecorator {
             .getAsInt() : 1;
 
         JsonArray arr = json.has("outputs") ? json.getAsJsonArray("outputs") : json.getAsJsonArray("pool");
+        if (json.has("pool")) {
+            JsonKeyRenames.warnOnce(
+                "pool",
+                json.has("outputs")
+                    ? "JSON key \"pool\" is renamed to \"outputs\". Both \"pool\" and \"outputs\" are set; \"pool\" is ignored."
+                    : "JSON key \"pool\" is renamed to \"outputs\". Read as \"outputs\"; rename it in the file.");
+        }
         if (arr == null) {
             throw new IllegalArgumentException("weighted_random needs an \"outputs\" (or \"pool\") array: " + json);
         }

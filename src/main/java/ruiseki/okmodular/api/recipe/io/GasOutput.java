@@ -127,7 +127,7 @@ public class GasOutput extends AbstractModularRecipeOutput {
         } else {
             json.addProperty("amount", amountExpr.toString());
         }
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class GasOutput extends AbstractModularRecipeOutput {
 
     @Override
     public IRecipeOutput copy(int multiplier) {
-        GasOutput result = new GasOutput(gasName, amount * multiplier);
+        GasOutput result = new GasOutput(gasName, Amounts.toInt((long) amount * multiplier));
         result.interval = this.interval;
         result.index = this.index;
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);

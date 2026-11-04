@@ -1,0 +1,616 @@
+[
+  {
+    "id": "s5.5-chance-half",
+    "section": "5.5",
+    "title": "{block, chance 0.5} places lapis on about half of 605 cells",
+    "source": "run/TESTING.md §5.5 { block, chance: 0.5 } (だいたい半分のマスに置かれる。全部か 0 かにならない); docs/jp/structures/STRUCTURE_IO.md §3 確率と重み; 605 cells (11x11x5 above the anchor) keep the z=4.5 false-fail rate near 7.6e-6 even at p=0.2/0.8",
+    "machine": {
+      "structure": "selftest_chance_io"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "pattern": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "p": 0.5
+      }
+    ]
+  },
+  {
+    "id": "s5.5-miss-keeps-original",
+    "section": "5.5",
+    "title": "Cells that miss their chance keep the stone that was there (none turn to air)",
+    "source": "run/TESTING.md §5.5 chance に外れたマス (元のブロックが残る); docs/jp/structures/STRUCTURE_IO.md §3 確率と重み (IMPORTANT: 外れたセルは空気にならず手を付けないまま残る). The box is pre-filled with stone; lapis and stone both present show that hits and misses happened",
+    "machine": {
+      "structure": "selftest_chance_io"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "pattern": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "pattern",
+        "block": "minecraft:air",
+        "min": 0,
+        "max": 0
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "pattern",
+        "block": "minecraft:lapis_block",
+        "min": 1,
+        "max": 605
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "pattern",
+        "block": "minecraft:stone",
+        "min": 1,
+        "max": 605
+      }
+    ]
+  },
+  {
+    "id": "s5.5-weights-8-2",
+    "section": "5.5",
+    "title": "weights {iron_ore: 8, gold_ore: 2} mixes 8:2",
+    "source": "run/TESTING.md §5.5 { weights: { A: 8, B: 2 } } (8:2 に混ざる); docs/jp/structures/STRUCTURE_IO.md §3 確率と重み (C: 全セルに置き、内訳は 8:2); 605 cells (11x11x5 above the anchor) keep the z=4.5 false-fail rate near 7.6e-6 even at p=0.2/0.8",
+    "machine": {
+      "structure": "selftest_chance_io"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:dirt",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "pattern": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:iron_ore",
+        "p": 0.8,
+        "among": [
+          "minecraft:iron_ore",
+          "minecraft:gold_ore"
+        ]
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "pattern",
+        "block": "minecraft:air",
+        "min": 0,
+        "max": 0
+      }
+    ]
+  },
+  {
+    "id": "s5.5-two-anchors-differ",
+    "section": "5.5",
+    "title": "One recipe writing the half pattern at two anchors lays out two different arrangements",
+    "source": "run/TESTING.md §5.5 同じレシピがアンカー 2 箇所に置く (2 箇所が別の配置); docs/jp/structures/STRUCTURE_IO.md §3 散り方 (アンカー 2 箇所は別の配置), §6 レシピからの参照 (amount)",
+    "machine": {
+      "structure": "selftest_chance_io2"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sugar",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "west": {
+        "from": [
+          -11,
+          2,
+          -5
+        ],
+        "to": [
+          -1,
+          6,
+          5
+        ]
+      },
+      "east": {
+        "from": [
+          1,
+          2,
+          -5
+        ],
+        "to": [
+          11,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "snapshotsDiffer",
+        "a": "west",
+        "b": "east",
+        "min": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "west",
+        "block": "minecraft:lapis_block",
+        "min": 1,
+        "max": 605
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "east",
+        "block": "minecraft:lapis_block",
+        "min": 1,
+        "max": 605
+      }
+    ]
+  },
+  {
+    "id": "s5.5-rerun-after-reload-differs",
+    "section": "5.5",
+    "title": "After a chunk reload the same recipe lays out a different arrangement",
+    "source": "run/TESTING.md §5.5 セーブして入り直し、同じレシピをもう一度 (前と違う配置); docs/jp/structures/STRUCTURE_IO.md §3 散り方 (次の実行では別の配置). A chunk reload stands in for a server restart",
+    "machine": {
+      "structure": "selftest_chance_io"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 110,
+    "steps": [
+      {
+        "at": 41,
+        "action": "fill",
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ],
+        "block": "minecraft:air"
+      },
+      {
+        "at": 42,
+        "action": "unloadReload"
+      },
+      {
+        "at": 50,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:cobblestone",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "snapshots": {
+      "first": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ],
+        "at": 40
+      },
+      "second": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "chunkReloaded"
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 50,
+        "to": 90
+      },
+      {
+        "kind": "snapshotsDiffer",
+        "a": "first",
+        "b": "second",
+        "min": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "first",
+        "block": "minecraft:lapis_block",
+        "min": 1,
+        "max": 605
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "second",
+        "block": "minecraft:lapis_block",
+        "min": 1,
+        "max": 605
+      }
+    ]
+  },
+  {
+    "id": "s5.5-tier-1",
+    "section": "5.5",
+    "title": "chance \"tier * 0.2\" at tier 1 places emerald on about 20% of cells",
+    "source": "run/TESTING.md §5.5 { chance: \"tier * 0.2\" } で Tier を上げる (濃くなる); docs/jp/structures/STRUCTURE_IO.md §3 式で書く; docs/jp/recipes/EXPRESSION_REFERENCE.md tier; 605 cells (11x11x5 above the anchor) keep the z=4.5 false-fail rate near 7.6e-6 even at p=0.2/0.8",
+    "machine": {
+      "structure": "selftest_chance_tiered",
+      "cells": {
+        "C*": "okmodular:casing_plain:0"
+      }
+    },
+    "inputs": [
+      {
+        "item": "minecraft:clay_ball",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "pattern": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "componentTier",
+        "component": "casing",
+        "value": 1
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:emerald_block",
+        "p": 0.2
+      }
+    ]
+  },
+  {
+    "id": "s5.5-tier-4",
+    "section": "5.5",
+    "title": "chance \"tier * 0.2\" at tier 4 places emerald on about 80% of cells (denser than tier 1)",
+    "source": "run/TESTING.md §5.5 { chance: \"tier * 0.2\" } で Tier を上げる (濃くなる); docs/jp/structures/STRUCTURE_IO.md §3 式で書く; docs/jp/recipes/EXPRESSION_REFERENCE.md tier; 605 cells (11x11x5 above the anchor) keep the z=4.5 false-fail rate near 7.6e-6 even at p=0.2/0.8. The tier-1 and tier-4 ranges do not overlap",
+    "machine": {
+      "structure": "selftest_chance_tiered",
+      "cells": {
+        "C*": "okmodular:casing_plain:3"
+      }
+    },
+    "inputs": [
+      {
+        "item": "minecraft:clay_ball",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "snapshots": {
+      "pattern": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "componentTier",
+        "component": "casing",
+        "value": 4
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:emerald_block",
+        "p": 0.8
+      }
+    ]
+  },
+  {
+    "id": "s5.5-weights-air",
+    "section": "5.5",
+    "title": "weights {coal_ore: 1, \"_\": 1} clears about half of the stone to air",
+    "source": "run/TESTING.md §5.5 weights に \"_\" を混ぜる (そのマスが空気になる); docs/jp/structures/STRUCTURE_IO.md §3 weights のキー (_ = 空気); box pre-filled with stone; 605 cells (11x11x5 above the anchor) keep the z=4.5 false-fail rate near 7.6e-6 even at p=0.2/0.8",
+    "machine": {
+      "structure": "selftest_chance_io"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sand",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "pattern": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:air",
+        "p": 0.5
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "pattern",
+        "block": "minecraft:stone",
+        "min": 0,
+        "max": 0
+      }
+    ]
+  },
+  {
+    "id": "s5.5-weights-blank",
+    "section": "5.5",
+    "title": "weights {quartz_block: 1, \" \": 1} leaves about half of the stone untouched",
+    "source": "run/TESTING.md §5.5 weights に \" \" を混ぜる (そのマスは元のまま); docs/jp/structures/STRUCTURE_IO.md §3 weights のキー (空白 = 手を付けない); box pre-filled with stone; 605 cells (11x11x5 above the anchor) keep the z=4.5 false-fail rate near 7.6e-6 even at p=0.2/0.8",
+    "machine": {
+      "structure": "selftest_chance_io"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:gravel",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "fill",
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ],
+        "block": "minecraft:stone"
+      }
+    ],
+    "snapshots": {
+      "pattern": {
+        "from": [
+          -5,
+          2,
+          -5
+        ],
+        "to": [
+          5,
+          6,
+          5
+        ]
+      }
+    },
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      },
+      {
+        "kind": "blockFraction",
+        "snapshot": "pattern",
+        "block": "minecraft:stone",
+        "p": 0.5
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "pattern",
+        "block": "minecraft:air",
+        "min": 0,
+        "max": 0
+      }
+    ]
+  },
+  {
+    "id": "s5.5-structure-input-rejected",
+    "section": "5.5",
+    "title": "A chance pattern used as a structure input is refused at load and reported in an errors file",
+    "source": "run/TESTING.md §5.5 ⚠ chance や weights を持つパターンは structure 入力に使えません (エラーが errors.txt に出ること); docs/jp/structures/STRUCTURE_IO.md §3 確率と重み (WARNING: ロード時にエラー); StructureInput#requireSettled; recipe load errors are written to recipes/errors.txt beside the recipe JSON; selftest/config/okmodular/recipes/selftest_chance_rejected.json",
+    "ticks": 1,
+    "expect": [
+      {
+        "kind": "logContains",
+        "text": "Patterns using 'chance' are output-only"
+      },
+      {
+        "kind": "fileContains",
+        "path": "recipes/errors.txt",
+        "text": "selftest_chance_rejected"
+      }
+    ]
+  }
+]

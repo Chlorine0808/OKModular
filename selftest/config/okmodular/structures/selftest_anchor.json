@@ -1,0 +1,24 @@
+[
+  {
+    "name": "selftest_anchor",
+    "displayName": "Selftest Anchor",
+    "recipeGroup": ["SelftestAnchor"],
+    "layers": [
+      { "name": "top",    "rows": ["_C_", "CAC", "_C_"] },
+      { "name": "middle", "rows": ["CIC", "OQE", "CCC"] },
+      { "name": "bottom", "rows": ["CCC", "CCC", "CCC"] }
+    ],
+    "mappings": {
+      "C": "okmodular:casing_plain:0",
+      "A": "minecraft:iron_block",
+      "I": { "blocks": ["okmodular:modular_item_input:0"] },
+      "O": { "blocks": ["okmodular:modular_item_output:0"] },
+      "E": { "blocks": ["okmodular:modular_energy_input:0"] }
+    },
+    "requirements": [
+      { "type": "itemInput", "min": 1 },
+      { "type": "itemOutput", "min": 1 },
+      { "type": "energyInput", "min": 1 }
+    ]
+  }
+]

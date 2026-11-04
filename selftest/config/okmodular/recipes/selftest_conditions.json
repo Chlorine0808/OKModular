@@ -1,0 +1,212 @@
+{
+  "recipes": [
+    {
+      "group": "SelftestCondBlock",
+      "registryName": "selftest_cond_block_true",
+      "name": "Selftest Condition: block is the controller itself",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "block": {
+            "name": "okmodular:modular_machine_controller",
+            "data": -1
+          }
+        }
+      ]
+    },
+    {
+      "group": "SelftestCondBlock",
+      "registryName": "selftest_cond_block_false",
+      "name": "Selftest Condition: block is stone",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:glass",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "block": "minecraft:stone"
+        }
+      ]
+    },
+    {
+      "group": "SelftestCondBlockBelow",
+      "registryName": "selftest_cond_block_below",
+      "name": "Selftest Condition: iron block below",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "type": "block_below",
+          "block": {
+            "name": "minecraft:iron_block"
+          }
+        }
+      ]
+    },
+    {
+      "group": "SelftestCondDimension",
+      "registryName": "selftest_cond_dimension",
+      "name": "Selftest Condition: in the nether",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "dimension": -1
+        }
+      ]
+    },
+    {
+      "group": "SelftestCondBiome",
+      "registryName": "selftest_cond_biome",
+      "name": "Selftest Condition: in a desert",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "biome": "Desert"
+        }
+      ]
+    },
+    {
+      "group": "SelftestCondPattern",
+      "registryName": "selftest_cond_pattern",
+      "name": "Selftest Condition: desert ringed by plains",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "pattern": [
+            "PPP",
+            "P#P",
+            "PPP"
+          ],
+          "keys": {
+            "#": {
+              "biome": "Desert"
+            },
+            "P": {
+              "biome": "Plains"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group": "SelftestCondWeather",
+      "registryName": "selftest_cond_weather",
+      "name": "Selftest Condition: raining",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "weather": "rain"
+        }
+      ]
+    },
+    {
+      "group": "SelftestCondOffset",
+      "registryName": "selftest_cond_offset",
+      "name": "Selftest Condition: gold two above the controller",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "type": "offset",
+          "dx": 0,
+          "dy": 2,
+          "dz": 0,
+          "condition": {
+            "block": "minecraft:gold_block"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+[
+  {
+    "name": "selftest_harvest",
+    "displayName": "Selftest Harvest",
+    "recipeGroup": ["SelftestHarvest"],
+    "layers": [
+      { "name": "h3",     "rows": ["   ", " H ", "   "] },
+      { "name": "h2",     "rows": ["   ", " H ", "   "] },
+      { "name": "h1",     "rows": ["   ", " H ", "   "] },
+      { "name": "top",    "rows": ["CCC", "CCC", "CCC"] },
+      { "name": "middle", "rows": ["CIC", "OQE", "CCC"] },
+      { "name": "bottom", "rows": ["CCC", "CCC", "CCC"] }
+    ],
+    "mappings": {
+      "C": "okmodular:casing_plain:0",
+      "H": {
+        "blocks": [
+          "minecraft:stone",
+          "air",
+          "minecraft:obsidian",
+          "minecraft:iron_ore",
+          "minecraft:gold_block",
+          "minecraft:leaves:*"
+        ]
+      },
+      "I": { "blocks": ["okmodular:modular_item_input:0"] },
+      "O": { "blocks": ["okmodular:modular_item_output:0"] },
+      "E": { "blocks": ["okmodular:modular_energy_input:0"] }
+    },
+    "requirements": [
+      { "type": "itemInput", "min": 1 },
+      { "type": "itemOutput", "min": 1 },
+      { "type": "energyInput", "min": 1 }
+    ]
+  }
+]

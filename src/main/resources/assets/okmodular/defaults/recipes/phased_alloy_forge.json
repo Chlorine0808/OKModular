@@ -59,7 +59,7 @@
       "registryName": "alloy_forge_chromium_chloride",
       "name": "Chromium Chloride",
       "duration": 240,
-      "tier": {
+      "tiers": {
         "casing": 2
       },
       "inputs": [
@@ -87,7 +87,7 @@
       "registryName": "alloy_forge_stainless_steel",
       "name": "Stainless Steel",
       "duration": 400,
-      "tier": {
+      "tiers": {
         "casing": 3
       },
       "inputs": [

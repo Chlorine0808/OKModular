@@ -1,0 +1,277 @@
+{
+  "group": "SelftestPattern",
+  "recipes": [
+    {
+      "registryName": "selftest_pat_ycut",
+      "name": "Selftest Pattern: y < 40 cuts the pattern",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_ycut",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_celly",
+      "name": "Selftest Pattern: thinner further above the anchor",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:dirt",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_celly",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_two_anchors",
+      "name": "Selftest Pattern: a distance-shaded ball at both anchors",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_shaded",
+          "symbol": "A",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_stripes",
+      "name": "Selftest Pattern: stripes from cell_x % 2",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_stripes",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_light",
+      "name": "Selftest Pattern: glass only where the block light is under 8",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:planks",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_light",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_sphere",
+      "name": "Selftest Pattern: a radius 6 ball",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:clay_ball",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_sphere",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_noise_threshold",
+      "name": "Selftest Pattern: noise(6) > 0.5 in a box",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:flint",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_noise_threshold",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_noise_prob",
+      "name": "Selftest Pattern: noise(6) as a chance in a box",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:bone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_noise_prob",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_scale_3",
+      "name": "Selftest Pattern: noise(3) > 0.5 in a flat slab",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:string",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_scale_3",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_scale_6",
+      "name": "Selftest Pattern: noise(6) > 0.5 in a flat slab",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:feather",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_scale_6",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_scale_16",
+      "name": "Selftest Pattern: noise(16) > 0.5 in a flat slab",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:wheat_seeds",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_scale_16",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_vein",
+      "name": "Selftest Pattern: the finished vein",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:apple",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_vein",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_falloff",
+      "name": "Selftest Pattern: the vein's distance falloff alone",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:stick",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_falloff",
+          "symbol": "A"
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_vein_two",
+      "name": "Selftest Pattern: the vein at two neighbouring anchors",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:coal",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_vein",
+          "symbol": "A",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_pat_rerun",
+      "name": "Selftest Pattern: noise blobs, run twice",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sugar",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "type": "structure",
+          "pattern": "selftest_pat_rerun",
+          "symbol": "A"
+        }
+      ]
+    }
+  ]
+}

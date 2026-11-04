@@ -1,0 +1,470 @@
+[
+  {
+    "id": "s3.5-block-true",
+    "section": "3.5",
+    "title": "A block condition naming the block at the machine's position lets the recipe start",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `block / block_below` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `block`; BlockCondition reads the context position, which is the controller (TEMachineController#newConditionContext), so the matching block is the controller itself; data -1 = any meta (CONDITIONS.md ブロックのメタデータ)",
+    "machine": {
+      "structure": "selftest_cond_block"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-block-false",
+    "section": "3.5",
+    "title": "A block condition naming another block refuses the recipe and says why",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `block / block_below` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `block`; the controller's position does not hold stone; reason text src/main/resources/assets/okmodular/lang/en_US.lang okmodular.condition.block",
+    "machine": {
+      "structure": "selftest_cond_block"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sand",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "conditionFailure",
+        "contains": "Requires block: minecraft:stone"
+      }
+    ]
+  },
+  {
+    "id": "s3.5-block-below-true",
+    "section": "3.5",
+    "title": "A block_below condition is met when the block under the machine matches",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `block / block_below` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `block_below`; block_below = the block at Y-1 of the machine",
+    "machine": {
+      "structure": "selftest_cond_block_below"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          -1,
+          0
+        ],
+        "block": "minecraft:iron_block"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-block-below-false",
+    "section": "3.5",
+    "title": "A block_below condition refuses when another block is under the machine",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `block / block_below` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `block_below`; reason text src/main/resources/assets/okmodular/lang/en_US.lang okmodular.condition.block_below with the block's display name",
+    "machine": {
+      "structure": "selftest_cond_block_below"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          -1,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "conditionFailure",
+        "contains": "Requires block below: Block of Iron"
+      }
+    ]
+  },
+  {
+    "id": "s3.5-dimension-true",
+    "section": "3.5",
+    "title": "A dimension condition for the nether is met in the nether",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `dimension` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `dimension`; ネザーとオーバーワールド",
+    "dimension": -1,
+    "machine": {
+      "structure": "selftest_cond_dimension"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-dimension-false",
+    "section": "3.5",
+    "title": "A dimension condition for the nether refuses in the overworld",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `dimension` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `dimension`; reason text src/main/resources/assets/okmodular/lang/en_US.lang okmodular.condition.dimension",
+    "machine": {
+      "structure": "selftest_cond_dimension"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "conditionFailure",
+        "contains": "Allowed dimensions: [-1]"
+      }
+    ]
+  },
+  {
+    "id": "s3.5-biome-true",
+    "section": "3.5",
+    "title": "A biome condition for Desert is met once the machine's column is desert",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `biome / pattern` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `biome`; 対象バイオームとその外; the selftest world is superflat, which is Plains",
+    "machine": {
+      "structure": "selftest_cond_biome"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "biome",
+        "from": [
+          -1,
+          0,
+          -1
+        ],
+        "to": [
+          1,
+          0,
+          1
+        ],
+        "biome": "desert"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-biome-false",
+    "section": "3.5",
+    "title": "A biome condition for Desert refuses on the superflat world's Plains",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `biome / pattern` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `biome`; reason text src/main/resources/assets/okmodular/lang/en_US.lang okmodular.condition.biome.base + BiomeCondition#getDescription ' Biomes:[...]'",
+    "machine": {
+      "structure": "selftest_cond_biome"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "conditionFailure",
+        "contains": "Biomes:[Desert]"
+      }
+    ]
+  },
+  {
+    "id": "s3.5-pattern-true",
+    "section": "3.5",
+    "title": "A biome pattern (desert ringed by plains) is met when only the machine's column is desert",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `biome / pattern` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `pattern`; pattern + keys around the machine, centre = the machine",
+    "machine": {
+      "structure": "selftest_cond_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "biome",
+        "from": [
+          0,
+          0,
+          0
+        ],
+        "to": [
+          0,
+          0,
+          0
+        ],
+        "biome": "desert"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-pattern-false",
+    "section": "3.5",
+    "title": "A biome pattern refuses when the ring is desert too, not plains",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `biome / pattern` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `pattern`; the centre still matches, so only reading the ring can refuse; reason text BiomePatternCondition#getDescription 'pattern(3x3)'",
+    "machine": {
+      "structure": "selftest_cond_pattern"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "biome",
+        "from": [
+          -1,
+          0,
+          -1
+        ],
+        "to": [
+          1,
+          0,
+          1
+        ],
+        "biome": "desert"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "conditionFailure",
+        "contains": "pattern(3x3)"
+      }
+    ]
+  },
+  {
+    "id": "s3.5-weather-true",
+    "section": "3.5",
+    "title": "A rain condition is met while it rains",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `weather` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `weather`; /weather rain",
+    "exclusive": true,
+    "machine": {
+      "structure": "selftest_cond_weather"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "weather",
+        "value": "rain"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-weather-false",
+    "section": "3.5",
+    "title": "A rain condition refuses in clear weather",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `weather` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `weather`; /weather clear; reason text src/main/resources/assets/okmodular/lang/en_US.lang okmodular.condition.weather.RAIN",
+    "exclusive": true,
+    "machine": {
+      "structure": "selftest_cond_weather"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "weather",
+        "value": "clear"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "conditionFailure",
+        "contains": "Requires rain"
+      }
+    ]
+  },
+  {
+    "id": "s3.5-offset-true",
+    "section": "3.5",
+    "title": "An offset block condition is met when the target cell holds the block",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `offset` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `offset`; 対象マスを置いた状態; dy 2 is the first cell above the probe cube",
+    "machine": {
+      "structure": "selftest_cond_offset"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "setBlock",
+        "pos": [
+          0,
+          2,
+          0
+        ],
+        "block": "minecraft:gold_block"
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-offset-false",
+    "section": "3.5",
+    "title": "An offset block condition refuses while the target cell is empty",
+    "source": "run/TESTING.md §3.5 世界の状態を読む条件 `offset` (両方踏むには); docs/jp/recipes/CONDITIONS.md §1 条件の種類 `offset`; 空の状態; reason text OffsetCondition#getDescription 'offset(dx, dy, dz): ' + the inner condition's",
+    "machine": {
+      "structure": "selftest_cond_offset"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      },
+      {
+        "kind": "conditionFailure",
+        "contains": "offset(0, 2, 0): Requires block: minecraft:gold_block"
+      }
+    ]
+  }
+]

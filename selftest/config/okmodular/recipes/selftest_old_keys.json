@@ -1,0 +1,27 @@
+{
+  "machine": "SelftestTiered",
+  "recipes": [
+    {
+      "registryName": "selftest_old_keys_clay",
+      "localizedName": "Selftest Old Keys: clay to brick, written with the renamed keys",
+      "time": 20,
+      "input": [
+        { "item": "minecraft:clay_ball", "amount": 1 }
+      ],
+      "output": [
+        { "item": "minecraft:brick", "amount": 1 }
+      ]
+    },
+    {
+      "registryName": "selftest_old_keys_netherrack",
+      "localizedName": "Selftest Old Keys: netherrack to nether brick, the second user of each old key",
+      "time": 20,
+      "input": [
+        { "item": "minecraft:netherrack", "amount": 1 }
+      ],
+      "output": [
+        { "item": "minecraft:netherbrick", "amount": 1 }
+      ]
+    }
+  ]
+}

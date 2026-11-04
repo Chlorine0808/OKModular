@@ -1,0 +1,142 @@
+{
+  "group": "SelftestChance",
+  "recipes": [
+    {
+      "registryName": "selftest_chance_ppp_1",
+      "name": "Selftest Chance: glass on every air cell (chance 1.0)",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "type": "per_position_probability",
+          "chance": 1.0,
+          "symbol": "_",
+          "output": {
+            "symbol": "_",
+            "block": "minecraft:glass"
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_chance_ppp_0",
+      "name": "Selftest Chance: glass on no air cell (chance 0.0)",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:dirt",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "type": "per_position_probability",
+          "chance": 0.0,
+          "symbol": "_",
+          "output": {
+            "symbol": "_",
+            "block": "minecraft:glass"
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_chance_bonus",
+      "name": "Selftest Chance: a diamond bonus every run (chance 1.0)",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:glass",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "bonus": {
+            "chance": 1.0,
+            "outputs": [
+              {
+                "item": "minecraft:diamond",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_chance_random",
+      "name": "Selftest Chance: glass on exactly 5 air cells",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:gravel",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "type": "random_block_output",
+          "symbol": "_",
+          "count": 5,
+          "outputs": [
+            {
+              "block": "minecraft:glass"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "registryName": "selftest_chance_payout",
+      "name": "Selftest Chance: clay to flint through a chance draw that always wins",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:clay_ball",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:flint",
+          "amount": 1
+        }
+      ],
+      "decorators": [
+        {
+          "chance": 1.0
+        }
+      ]
+    }
+  ]
+}

@@ -30,3 +30,67 @@ test {
         .withPropertyName('dependencies')
         .withPathSensitivity(PathSensitivity.RELATIVE)
 }
+
+// In-game selftest: ./gradlew runServer -Pselftest [-Pselftest.only=3.5] [-Pselftest.port=25572]
+// Runs in run/selftest (never run/server, which holds the developer's own server config), builds the
+// scenarios from selftest/scenarios, writes run/selftest/report/index.html and stops the server.
+def selftestRunDir = file('run/selftest')
+def selftestPort = (project.findProperty('selftest.port') ?: '25571').toString()
+
+tasks.register('prepareSelftest') {
+    group = 'okmodular'
+    description = 'Resets run/selftest: fresh world, config, report and logs for the in-game selftest.'
+    def runDir = selftestRunDir
+    def configSources = [file('src/main/resources/assets/okmodular/defaults'), file('selftest/config/okmodular')]
+    def port = selftestPort
+    outputs.upToDateWhen { false }
+    doLast {
+        runDir.mkdirs()
+        runDir.listFiles().each { f ->
+            if (f.isDirectory() && f.name.startsWith('selftest-world')) f.deleteDir()
+        }
+        ['config/okmodular', 'report', 'logs'].each { new File(runDir, it).deleteDir() }
+        def target = new File(runDir, 'config/okmodular').toPath()
+        configSources.each { src ->
+            if (!src.isDirectory()) return
+            def root = src.toPath()
+            java.nio.file.Files.walk(root).withCloseable { paths ->
+                paths.filter { java.nio.file.Files.isRegularFile(it) }.each { p ->
+                    def dest = target.resolve(root.relativize(p).toString())
+                    java.nio.file.Files.createDirectories(dest.parent)
+                    java.nio.file.Files.copy(p, dest, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                }
+            }
+        }
+        new File(runDir, 'eula.txt').setText('eula=true\n', 'UTF-8')
+        new File(runDir, 'server.properties').setText([
+            'level-name=selftest-world',
+            'level-type=FLAT',
+            "server-port=${port}",
+            'online-mode=false',
+            'allow-nether=true',
+            'spawn-monsters=false',
+            'spawn-animals=false',
+            'spawn-npcs=false',
+            'generate-structures=false',
+            'view-distance=4',
+            'motd=OKModular selftest',
+        ].join('\n') + '\n', 'UTF-8')
+    }
+}
+
+if (project.hasProperty('selftest') && project.property('selftest').toString() != 'false') {
+    def repoDir = projectDir.absolutePath
+    def only = project.findProperty('selftest.only')
+    tasks.named('runServer') {
+        dependsOn 'prepareSelftest'
+        workingDir = selftestRunDir
+        systemProperty 'okmodular.selftest', 'true'
+        systemProperty 'okmodular.selftest.repo', repoDir
+        systemProperty 'okmodular.selftest.scenarios', new File(repoDir, 'selftest/scenarios').absolutePath
+        systemProperty 'okmodular.selftest.report', new File(repoDir, 'run/selftest/report').absolutePath
+        systemProperty 'okmodular.selftest.annotations', new File(repoDir, 'selftest/annotations.json').absolutePath
+        if (only != null) systemProperty 'okmodular.selftest.only', only.toString()
+        args '--port', selftestPort
+    }
+}

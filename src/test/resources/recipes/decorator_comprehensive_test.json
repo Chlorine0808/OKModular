@@ -726,21 +726,21 @@
       "decorators": [
         {
           "type": "random_block_output",
+          "symbol": "G",
           "count": 1,
-          "selections": [
+          "outputs": [
             {
-              "symbol": "G",
-              "output": {
-                "symbol": "G",
-                "block": "minecraft:grass"
-              }
-            },
+              "block": "minecraft:grass"
+            }
+          ]
+        },
+        {
+          "type": "random_block_output",
+          "symbol": "M",
+          "count": 1,
+          "outputs": [
             {
-              "symbol": "M",
-              "output": {
-                "symbol": "M",
-                "block": "minecraft:mycelium"
-              }
+              "block": "minecraft:mycelium"
             }
           ]
         }
@@ -766,35 +766,41 @@
       "decorators": [
         {
           "type": "random_block_output",
+          "symbol": "C",
           "count": 2,
-          "selections": [
+          "outputs": [
             {
-              "symbol": "C",
-              "output": {
-                "symbol": "C",
-                "block": "minecraft:coal_ore"
-              }
-            },
+              "block": "minecraft:coal_ore"
+            }
+          ]
+        },
+        {
+          "type": "random_block_output",
+          "symbol": "I",
+          "count": 2,
+          "outputs": [
             {
-              "symbol": "I",
-              "output": {
-                "symbol": "I",
-                "block": "minecraft:iron_ore"
-              }
-            },
+              "block": "minecraft:iron_ore"
+            }
+          ]
+        },
+        {
+          "type": "random_block_output",
+          "symbol": "G",
+          "count": 2,
+          "outputs": [
             {
-              "symbol": "G",
-              "output": {
-                "symbol": "G",
-                "block": "minecraft:gold_ore"
-              }
-            },
+              "block": "minecraft:gold_ore"
+            }
+          ]
+        },
+        {
+          "type": "random_block_output",
+          "symbol": "D",
+          "count": 2,
+          "outputs": [
             {
-              "symbol": "D",
-              "output": {
-                "symbol": "D",
-                "block": "minecraft:diamond_ore"
-              }
+              "block": "minecraft:diamond_ore"
             }
           ]
         }

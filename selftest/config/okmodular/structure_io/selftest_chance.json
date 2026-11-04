@@ -1,0 +1,460 @@
+{
+  "patterns": [
+    {
+      "name": "selftest_chance_half",
+      "anchor": "A",
+      "mappings": {
+        "X": {
+          "block": "minecraft:lapis_block",
+          "chance": 0.5
+        }
+      },
+      "layers": [
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "     A     ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           "
+        ]
+      ]
+    },
+    {
+      "name": "selftest_chance_weights",
+      "anchor": "A",
+      "mappings": {
+        "X": {
+          "weights": {
+            "minecraft:iron_ore": 8,
+            "minecraft:gold_ore": 2
+          }
+        }
+      },
+      "layers": [
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "     A     ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           "
+        ]
+      ]
+    },
+    {
+      "name": "selftest_chance_weights_air",
+      "anchor": "A",
+      "mappings": {
+        "X": {
+          "weights": {
+            "minecraft:coal_ore": 1,
+            "_": 1
+          }
+        }
+      },
+      "layers": [
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "     A     ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           "
+        ]
+      ]
+    },
+    {
+      "name": "selftest_chance_weights_blank",
+      "anchor": "A",
+      "mappings": {
+        "X": {
+          "weights": {
+            "minecraft:quartz_block": 1,
+            " ": 1
+          }
+        }
+      },
+      "layers": [
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "     A     ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           "
+        ]
+      ]
+    },
+    {
+      "name": "selftest_chance_tier",
+      "anchor": "A",
+      "mappings": {
+        "X": {
+          "block": "minecraft:emerald_block",
+          "chance": "tier * 0.2"
+        }
+      },
+      "layers": [
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX",
+          "XXXXXXXXXXX"
+        ],
+        [
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "     A     ",
+          "           ",
+          "           ",
+          "           ",
+          "           ",
+          "           "
+        ]
+      ]
+    }
+  ]
+}

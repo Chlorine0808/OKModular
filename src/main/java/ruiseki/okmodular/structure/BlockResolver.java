@@ -122,6 +122,14 @@ public class BlockResolver {
      * @return IStructureElement or null if invalid
      */
     public static <T> IStructureElement<T> createElement(String blockString) {
+        IStructureElement<T> element = createUntrackedElement(blockString);
+        return element == null ? null : withTracking(element);
+    }
+
+    /**
+     * Like {@link #createElement(String)}, but check neither tracks the position nor collects a port.
+     */
+    private static <T> IStructureElement<T> createUntrackedElement(String blockString) {
         ResolvedBlock result = resolve(blockString);
         if (result == null) {
             return null;
@@ -129,7 +137,7 @@ public class BlockResolver {
 
         if (result.isAir) {
             IStructureElement<T> airElement = isAir();
-            return withTracking(new HybridStructureElement<>(airElement, airElement));
+            return new HybridStructureElement<>(airElement, airElement);
         }
 
         if (result.isAny) {
@@ -150,7 +158,7 @@ public class BlockResolver {
                     return true;
                 }
             };
-            return withTracking(new HybridStructureElement<>(anyElement, anyElement));
+            return new HybridStructureElement<>(anyElement, anyElement);
         }
 
         if (result.anyMeta) {
@@ -159,13 +167,13 @@ public class BlockResolver {
             // - Visual: display as meta 0
             IStructureElement<T> logic = ofBlockAnyMeta(result.block, 0);
             IStructureElement<T> visual = ofBlock(result.block, 0);
-            return withTracking(new HybridStructureElement<>(logic, visual));
+            return new HybridStructureElement<>(logic, visual);
         } else {
             // For specific meta:
             // Use HybridStructureElement to ensure NEI's StructureHacks processes via
             // fallbacks() path, which correctly applies tinting.
             IStructureElement<T> element = ofBlock(result.block, result.meta);
-            return withTracking(new HybridStructureElement<>(element, element));
+            return new HybridStructureElement<>(element, element);
         }
     }
 
@@ -241,6 +249,47 @@ public class BlockResolver {
         }
 
         return ofChain(elements.toArray(new IStructureElement[0]));
+    }
+
+    /**
+     * Create the element of a tiered part: it checks like
+     * {@link #createChainElementWithTileAdder(List)}, but hints and places the tier picked by the
+     * trigger's stack size.
+     *
+     * @param tiers block string to tier
+     * @return the element, or null if no block resolves
+     */
+    public static <T extends IMachineController> IStructureElement<T> createTieredElementWithTileAdder(
+        Map<String, Integer> tiers) {
+        List<String> ordered = orderByTier(tiers);
+        IStructureElement<T> checker = createChainElementWithTileAdder(ordered);
+        if (checker == null) {
+            return null;
+        }
+
+        List<IStructureElement<T>> placeable = new ArrayList<>();
+        for (String blockString : ordered) {
+            IStructureElement<T> element = createUntrackedElement(blockString);
+            if (element != null) {
+                placeable.add(element);
+            }
+        }
+        return new TierByTriggerElement<>(checker, placeable);
+    }
+
+    /**
+     * Block strings of a tiered part, lowest tier first; equal tiers in block string order.
+     */
+    public static List<String> orderByTier(Map<String, Integer> tiers) {
+        List<Map.Entry<String, Integer>> entries = new ArrayList<>(tiers.entrySet());
+        entries.sort(
+            Map.Entry.<String, Integer>comparingByValue()
+                .thenComparing(Map.Entry.comparingByKey()));
+        List<String> ordered = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : entries) {
+            ordered.add(entry.getKey());
+        }
+        return ordered;
     }
 
     /**

@@ -113,7 +113,7 @@ public class FluidInput extends AbstractModularRecipeInput {
     public void write(JsonObject json) {
         if (index != -1) json.addProperty("index", index);
         if (!consume) json.addProperty("consume", false);
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
 
         if (required != null && required.getFluid() != null) {
             json.addProperty(
@@ -147,9 +147,9 @@ public class FluidInput extends AbstractModularRecipeInput {
     @Override
     public IRecipeInput copy(int multiplier) {
         FluidStack copyStack = required != null ? required.copy() : null;
-        if (copyStack != null) copyStack.amount *= multiplier;
+        if (copyStack != null) copyStack.amount = Amounts.toInt((long) copyStack.amount * multiplier);
         FluidInput result = new FluidInput(copyStack);
-        result.amount = this.amount * multiplier;
+        result.amount = Amounts.toInt((long) this.amount * multiplier);
         result.amountExpr = ArithmeticExpression.scaled(this.amountExpr, multiplier);
         result.consume = this.consume;
         result.interval = this.interval;

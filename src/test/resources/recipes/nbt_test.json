@@ -18,7 +18,7 @@
                 {
                     "item": "minecraft:diamond_sword",
                     "amount": 1,
-                    "nbtlist": {
+                    "nbtList": {
                         "path": "ench",
                         "ops": [
                             {"id": 16, "lvl": 5},
@@ -35,7 +35,7 @@
                 {
                     "item": "minecraft:diamond_sword",
                     "amount": 1,
-                    "nbtlist": {
+                    "nbtList": {
                         "path": "ench",
                         "ops": [
                             {"id": 16, "lvl": ">=3"}
@@ -51,7 +51,7 @@
                 {
                     "item": "minecraft:diamond_sword",
                     "amount": 1,
-                    "nbtlist": {
+                    "nbtList": {
                         "path": "ench",
                         "ops": [
                             {"id": 16, "lvl": "+2"},
@@ -68,7 +68,7 @@
                 {
                     "item": "minecraft:diamond_sword",
                     "amount": 1,
-                    "nbtlist": {
+                    "nbtList": {
                         "path": "ench",
                         "ops": [
                             {"id": 20, "lvl": ">0"}
@@ -84,7 +84,7 @@
                 {
                     "item": "minecraft:diamond_sword",
                     "amount": 1,
-                    "nbtlist": {
+                    "nbtList": {
                         "path": "ench",
                         "ops": [
                             {"id": 20, "lvl": 0}
@@ -121,7 +121,7 @@
                 {
                     "item": "minecraft:diamond_sword",
                     "amount": 1,
-                    "nbtlist": {
+                    "nbtList": {
                         "path": "ench",
                         "ops": [
                             {"id": 16, "lvl": ">=5"},
@@ -138,7 +138,7 @@
                         "nbt('display.Name') = 'Legendary Blade'",
                         "nbt('display.Lore') = ['Line 1', 'Line 2']"
                     ],
-                    "nbtlist": {
+                    "nbtList": {
                         "path": "ench",
                         "ops": [
                             {"id": 16, "lvl": "+1"},

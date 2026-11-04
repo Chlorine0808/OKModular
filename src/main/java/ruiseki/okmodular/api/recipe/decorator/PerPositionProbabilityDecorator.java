@@ -1,5 +1,6 @@
 package ruiseki.okmodular.api.recipe.decorator;
 
+import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.util.ChunkCoordinates;
@@ -14,6 +15,7 @@ import ruiseki.okmodular.api.recipe.expression.ExpressionsParser;
 import ruiseki.okmodular.api.recipe.expression.IExpression;
 import ruiseki.okmodular.api.recipe.expression.SeedMixer;
 import ruiseki.okmodular.api.recipe.io.BlockOutput;
+import ruiseki.okmodular.api.recipe.io.IRecipeOutput;
 import ruiseki.okmodular.api.structure.core.StructureSymbols;
 
 /**
@@ -47,8 +49,9 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
 
         // Each position is asked separately, which only means anything because the seed
         // has the coordinates mixed in - see rollsAt.
+        ConditionContext own = ownDraw(context);
         for (ChunkCoordinates pos : positions) {
-            if (output.acceptsAt(recipeContext, pos) && rollsAt(context, pos)) {
+            if (output.acceptsAt(recipeContext, pos) && rollsAt(own, pos)) {
                 output.applyAt(recipeContext, pos, context);
             }
         }
@@ -69,6 +72,20 @@ public class PerPositionProbabilityDecorator extends RecipeDecorator {
         long seed = context != null ? context.getEvaluationSeed() : 0L;
         long positioned = SeedMixer.forPosition(seed, pos.posX, pos.posY, pos.posZ);
         return SeedMixer.toUnitInterval(positioned, SeedMixer.PER_POSITION) < chance;
+    }
+
+    @Override
+    public List<DecoratorDescription> describe() {
+        return Collections.singletonList(
+            new DecoratorDescription(
+                "okmodular.nei.decorator.per_position_probability",
+                String.valueOf(symbol),
+                percent(chanceExpr)));
+    }
+
+    @Override
+    public List<IRecipeOutput> getPossibleOutputs() {
+        return Collections.singletonList(output);
     }
 
     /**

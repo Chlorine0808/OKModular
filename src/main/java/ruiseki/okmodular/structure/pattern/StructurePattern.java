@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.gtnewhorizon.structurelib.alignment.enumerable.ExtendedFacing;
 
@@ -120,6 +122,23 @@ public final class StructurePattern {
      */
     public boolean isDeterministic() {
         return deterministic;
+    }
+
+    /** Every block a drawn cell may receive, air excluded. NEI looks a structure output up by these. */
+    public Set<String> placedBlocks() {
+        Set<String> blocks = new LinkedHashSet<>();
+        for (String[] layer : shape) {
+            for (String row : layer) {
+                for (int col = 0; col < row.length(); col++) {
+                    CellMapping mapping = mappings.get(row.charAt(col));
+                    if (mapping == null) continue;
+                    for (String block : mapping.choices()) {
+                        if (block != null && !block.startsWith(StructurePatternParser.AIR)) blocks.add(block);
+                    }
+                }
+            }
+        }
+        return blocks;
     }
 
     private static boolean allCellsSettled(String[][] shape, Map<Character, CellMapping> mappings) {

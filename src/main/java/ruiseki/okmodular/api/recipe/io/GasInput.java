@@ -97,7 +97,7 @@ public class GasInput extends AbstractModularRecipeInput {
     public void write(JsonObject json) {
         if (index != -1) json.addProperty("index", index);
         if (!consume) json.addProperty("consume", false);
-        if (interval > 0) json.addProperty("pertick", interval);
+        if (interval > 0) json.addProperty("perTick", interval);
 
         if (gasName != null) {
             json.addProperty("gas", gasName);
@@ -127,7 +127,7 @@ public class GasInput extends AbstractModularRecipeInput {
 
     @Override
     public IRecipeInput copy(int multiplier) {
-        GasInput result = new GasInput(gasName, (int) (amount * multiplier));
+        GasInput result = new GasInput(gasName, Amounts.toInt((long) amount * multiplier));
         result.consume = this.consume;
         result.interval = this.interval;
         result.index = this.index;
