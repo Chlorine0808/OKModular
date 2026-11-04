@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -16,6 +20,8 @@ import net.minecraftforge.fluids.FluidStack;
 import com.gtnewhorizon.structurelib.alignment.enumerable.ExtendedFacing;
 import com.gtnewhorizon.structurelib.alignment.enumerable.Flip;
 import com.gtnewhorizon.structurelib.alignment.enumerable.Rotation;
+import com.gtnewhorizon.structurelib.structure.IItemSource;
+import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 
 import ruiseki.okmodular.api.modular.IModularPort;
 import ruiseki.okmodular.api.modular.IPortType;
@@ -36,6 +42,9 @@ import ruiseki.okmodular.structure.StructureManager;
 
 /** Builds a scenario's machine at its site with the controller on the origin, and fills or empties its ports. */
 final class MachineRig {
+
+    /** A survival build places what it can per call; a few calls finish any selftest structure. */
+    private static final int SURVIVAL_ROUNDS = 16;
 
     final TestSites.Site site;
     final MachineSpec spec;
@@ -67,12 +76,27 @@ final class MachineRig {
             .setStackInSlot(TEMachineController.BLUEPRINT_SLOT, blueprint);
         ItemStack trigger = blueprint.copy();
         trigger.stackSize = spec.blueprintCount;
-        new MachineControllerInfoContainer().construct(trigger, false, te, facing);
+        if (spec.survival) {
+            placeCells(site, spec.structure, entry, facing, spec.standing);
+            survivalBuild(site, te, trigger, facing, spec.carry);
+        } else {
+            new MachineControllerInfoContainer().construct(trigger, false, te, facing);
+        }
 
-        // construct places the first option of each symbol; cells overrides choose another.
+        // The build places the first option of each symbol; cells overrides choose another.
+        placeCells(site, spec.structure, entry, facing, spec.cells);
+        te.getStructureAgent()
+            .forceStructureCheck();
+        MachineRig rig = new MachineRig(site, spec, te);
+        rig.rememberPorts();
+        return rig;
+    }
+
+    private static void placeCells(TestSites.Site site, String structure, IStructureEntry entry,
+        ExtendedFacing facing, Map<String, String> cells) {
         String[][] shape = authoredShape(entry);
-        int[] offset = CustomStructureRegistry.getControllerOffset(spec.structure);
-        for (Map.Entry<String, String> cell : spec.cells.entrySet()) {
+        int[] offset = CustomStructureRegistry.getControllerOffset(structure);
+        for (Map.Entry<String, String> cell : cells.entrySet()) {
             BlockId id = BlockId.parse(cell.getValue());
             Block block = block(id.name);
             for (int[] abc : ShapeCells.resolve(shape, entry.getDefaultFacing(), cell.getKey())) {
@@ -80,11 +104,28 @@ final class MachineRig {
                 site.world.setBlock(p[0], p[1], p[2], block, id.meta, 3);
             }
         }
-        te.getStructureAgent()
-            .forceStructureCheck();
-        MachineRig rig = new MachineRig(site, spec, te);
-        rig.rememberPorts();
-        return rig;
+    }
+
+    /** Builds as a survival player does: a fake player places blocks taken from a bag of the carried items. */
+    private static void survivalBuild(TestSites.Site site, TEMachineController te, ItemStack trigger,
+        ExtendedFacing facing, List<InputSpec> carry) {
+        List<ItemStack> stacks = new ArrayList<>();
+        for (InputSpec in : carry) {
+            ItemStack proto = stack(in.id, 1);
+            for (int left = in.amount; left > 0; left -= proto.getMaxStackSize()) {
+                ItemStack s = proto.copy();
+                s.stackSize = Math.min(left, proto.getMaxStackSize());
+                stacks.add(s);
+            }
+        }
+        InventoryBasic bag = new InventoryBasic("selftest carry", false, Math.max(1, stacks.size()));
+        for (int i = 0; i < stacks.size(); i++) bag.setInventorySlotContents(i, stacks.get(i));
+        EntityPlayerMP actor = FakePlayerFactory.getMinecraft((WorldServer) site.world);
+        ISurvivalBuildEnvironment env = ISurvivalBuildEnvironment.create(IItemSource.fromInventory(bag), actor);
+        MachineControllerInfoContainer info = new MachineControllerInfoContainer();
+        for (int round = 0; round < SURVIVAL_ROUNDS; round++) {
+            if (info.survivalConstruct(trigger, Integer.MAX_VALUE, env, te, facing) <= 0) break;
+        }
     }
 
     private void rememberPorts() {
