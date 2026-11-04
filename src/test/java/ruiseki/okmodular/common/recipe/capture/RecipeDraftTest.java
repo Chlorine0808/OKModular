@@ -187,6 +187,17 @@ public class RecipeDraftTest {
     }
 
     @Test
+    public void energyOnlyDraftRefusesToSerialize() {
+        RecipeDraft draft = new RecipeDraft("g", 20);
+        draft.addInput(json("{'item':'a'}"));
+        draft.setEnergy(100, true);
+        draft.remove(1);
+
+        assertFalse(draft.hasEntries());
+        assertThrows(IllegalStateException.class, draft::toRecipeJson);
+    }
+
+    @Test
     public void emptyDraftRefusesToSerialize() {
         assertThrows(IllegalStateException.class, () -> new RecipeDraft("g", 20).toRecipeJson());
     }
@@ -194,6 +205,7 @@ public class RecipeDraftTest {
     @Test
     public void roundTripThroughTheParser() {
         RecipeDraft draft = new RecipeDraft("g", 20);
+        draft.addOutput(json("{'item':'minecraft:stone'}"));
         draft.setEnergy(50, true);
         draft.setDuration(40);
 

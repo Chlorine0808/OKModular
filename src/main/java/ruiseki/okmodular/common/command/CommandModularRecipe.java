@@ -171,7 +171,7 @@ public class CommandModularRecipe extends CommandMod {
         RecipeDraft draft = RecipeDraftManager.getInstance()
             .get(id);
         if (draft == null) return noDraft(sender);
-        if (draft.isEmpty()) {
+        if (!draft.hasEntries()) {
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_empty_draft"));
             return Command.SINGLE_SUCCESS;
         }

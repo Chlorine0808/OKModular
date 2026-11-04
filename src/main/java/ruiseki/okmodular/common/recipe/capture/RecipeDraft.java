@@ -88,12 +88,13 @@ public final class RecipeDraft {
         return energyPerTick;
     }
 
-    public boolean isEmpty() {
-        return inputs.isEmpty() && outputs.isEmpty() && energy == 0;
+    /** A recipe needs at least one input or output; energy alone does not count. */
+    public boolean hasEntries() {
+        return size() > 0;
     }
 
     public JsonObject toRecipeJson() {
-        if (isEmpty()) throw new IllegalStateException("the draft has nothing to save");
+        if (!hasEntries()) throw new IllegalStateException("the draft has nothing to save");
         JsonObject json = new JsonObject();
         json.addProperty("duration", duration);
         JsonArray in = new JsonArray();
