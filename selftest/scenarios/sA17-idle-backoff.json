@@ -1,0 +1,38 @@
+[
+  {
+    "id": "sA17-late-input",
+    "section": "A-17",
+    "title": "A machine idle for 200 ticks still starts within 20 ticks of its input arriving",
+    "source": "docs/jp/recipes/CONDITIONS.md §5 Tips (待機中の機械は、始められるレシピが見つからない間、検索の間隔を 1 tick から倍にしていき、最大で 20 tick（1 秒）ごとにします); selftest/config/okmodular/recipes/selftest_old_keys.json",
+    "machine": {
+      "structure": "selftest_tiered"
+    },
+    "ticks": 260,
+    "steps": [
+      {
+        "at": 200,
+        "action": "insert",
+        "inputs": [
+          {
+            "item": "minecraft:netherrack",
+            "amount": 1
+          }
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 199
+      },
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 200,
+        "to": 220
+      }
+    ]
+  }
+]
