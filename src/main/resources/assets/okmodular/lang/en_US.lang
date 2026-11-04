@@ -389,7 +389,6 @@ command.okmodular.recipe_bad_group=Invalid group name "%s". Use letters, digits,
 command.okmodular.recipe_nothing_captured=Every port is empty, so there is nothing to capture.
 command.okmodular.recipe_no_draft=No recipe draft. Run /okmodular recipe capture <duration> first.
 command.okmodular.recipe_empty_draft=The draft is empty; nothing to save.
-command.okmodular.recipe_captured=Captured %s entries into a draft.
 command.okmodular.recipe_edit_failed=Cannot edit the draft: %s
 command.okmodular.recipe_saved=Saved the recipe to %s
 command.okmodular.recipe_save_failed=Cannot save the recipe: %s

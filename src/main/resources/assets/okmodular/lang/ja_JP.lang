@@ -392,7 +392,6 @@ command.okmodular.recipe_bad_group=グループ名 "%s" は使えません。英
 command.okmodular.recipe_nothing_captured=すべてのポートが空なので，取り込む内容がありません。
 command.okmodular.recipe_no_draft=下書きがありません。先に /okmodular recipe capture <時間> を実行してください。
 command.okmodular.recipe_empty_draft=下書きが空なので保存できません。
-command.okmodular.recipe_captured=%s 件を下書きに取り込みました。
 command.okmodular.recipe_edit_failed=下書きを編集できません: %s
 command.okmodular.recipe_saved=レシピを保存しました: %s
 command.okmodular.recipe_save_failed=レシピを保存できません: %s
