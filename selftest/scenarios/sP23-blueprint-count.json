@@ -42,5 +42,120 @@
         "value": 6
       }
     ]
+  },
+  {
+    "id": "sP23-survival-count-3",
+    "section": "P23",
+    "title": "A survival build from three stacked blueprints places every casing at the third-lowest tier",
+    "source": "docs/jp/structures/JSON_FORMAT.md §4 部品ごとの Tier; selftest/config/okmodular/structures/selftest_tiered.json (23 casing cells) (サバイバル建造)",
+    "machine": {
+      "structure": "selftest_tiered",
+      "blueprintCount": 3,
+      "survival": {
+        "carry": [
+          {
+            "item": "okmodular:casing_plain:2",
+            "amount": 64
+          },
+          {
+            "item": "okmodular:modular_item_input:0",
+            "amount": 1
+          },
+          {
+            "item": "okmodular:modular_item_output:0",
+            "amount": 1
+          },
+          {
+            "item": "okmodular:modular_energy_input:0",
+            "amount": 1
+          }
+        ]
+      }
+    },
+    "ticks": 10,
+    "snapshots": {
+      "shape": {
+        "from": [-2, -2, -2],
+        "to": [2, 2, 2]
+      }
+    },
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "componentTier",
+        "component": "casing",
+        "value": 3
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "shape",
+        "block": "okmodular:casing_plain:2",
+        "min": 23,
+        "max": 23
+      }
+    ]
+  },
+  {
+    "id": "sP23-survival-keeps-tier",
+    "section": "P23",
+    "title": "A survival build keeps a casing of another tier already standing and builds the rest",
+    "source": "docs/jp/structures/JSON_FORMAT.md §4 部品ごとの Tier; selftest/config/okmodular/structures/selftest_tiered.json (23 casing cells) (サバイバル建造では，別 Tier のブロックが既にあれば残す)",
+    "machine": {
+      "structure": "selftest_tiered",
+      "blueprintCount": 3,
+      "survival": {
+        "standing": {
+          "C#0": "okmodular:casing_plain:0"
+        },
+        "carry": [
+          {
+            "item": "okmodular:casing_plain:2",
+            "amount": 64
+          },
+          {
+            "item": "okmodular:modular_item_input:0",
+            "amount": 1
+          },
+          {
+            "item": "okmodular:modular_item_output:0",
+            "amount": 1
+          },
+          {
+            "item": "okmodular:modular_energy_input:0",
+            "amount": 1
+          }
+        ]
+      }
+    },
+    "ticks": 10,
+    "snapshots": {
+      "shape": {
+        "from": [-2, -2, -2],
+        "to": [2, 2, 2]
+      }
+    },
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "shape",
+        "block": "okmodular:casing_plain",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "kind": "blockCount",
+        "snapshot": "shape",
+        "block": "okmodular:casing_plain:2",
+        "min": 22,
+        "max": 22
+      }
+    ]
   }
 ]
