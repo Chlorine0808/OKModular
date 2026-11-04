@@ -49,6 +49,9 @@ or `[remove]` in `show` only puts the command in the chat box. You press Enter y
 - If the file does not exist it is created with a `"group"` header.
 - Files you wrote by hand are never touched.
 - A captured file that is malformed is refused and left as it is.
+- A recipe without a `registryName` is named `captured_<group>_<n>`, where `n` is the number of
+  recipes in the file plus one (names already in the file are skipped). To rename it, edit the JSON.
+- `save` clears the draft. Running `capture` again overwrites the existing draft.
 - One draft exists per player. It is lost on logout and on server stop.
 
 ## What is not captured
