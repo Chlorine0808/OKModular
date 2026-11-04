@@ -61,7 +61,7 @@ class RecipeDraftChatTest {
             clicks.get(0)
                 .getValue());
         assertEquals(
-            ClickEvent.Action.RUN_COMMAND,
+            ClickEvent.Action.SUGGEST_COMMAND,
             clicks.get(1)
                 .getAction());
         assertEquals(

@@ -68,7 +68,7 @@ final class RecipeDraftChat {
             click(
                 "command.okmodular.recipe_click_remove",
                 EnumChatFormatting.RED,
-                ClickEvent.Action.RUN_COMMAND,
+                ClickEvent.Action.SUGGEST_COMMAND,
                 COMMAND + "remove " + number));
         return line;
     }
