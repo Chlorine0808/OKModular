@@ -20,7 +20,11 @@ public final class Step {
             "fillOutputs",
             "unloadReload",
             "recordNbt",
-            "snapshot"));
+            "snapshot",
+            "putOutput",
+            "recipeCapture",
+            "recipeAmountOf",
+            "recipeSave"));
 
     public final int at;
     public final String action;

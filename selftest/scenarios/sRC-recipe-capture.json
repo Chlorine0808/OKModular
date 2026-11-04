@@ -1,0 +1,34 @@
+[
+  {
+    "id": "sRC-capture-save-run",
+    "section": "RC",
+    "title": "A recipe captured from the ports, edited and saved runs on the same machine",
+    "source": "docs/superpowers/specs/2026-10-31-recipe-capture-design.md テスト; src/main/java/ruiseki/okmodular/common/recipe/capture/RecipeCapture.java; selftest/config/okmodular/structures/selftest_capture.json (group selftest_capture has no recipe file until the save)",
+    "machine": {
+      "structure": "selftest_capture"
+    },
+    "ticks": 120,
+    "steps": [
+      {
+        "at": 5,
+        "action": "insert",
+        "inputs": [
+          { "item": "minecraft:clay_ball", "amount": 1 },
+          { "fluid": "water", "amount": 1000 }
+        ]
+      },
+      { "at": 5, "action": "putOutput", "item": "minecraft:brick", "amount": 1 },
+      { "at": 10, "action": "recipeCapture", "duration": 20 },
+      { "at": 11, "action": "recipeAmountOf", "fluid": "water", "amount": 144 },
+      { "at": 12, "action": "recipeSave" },
+      { "at": 13, "action": "clearOutputs" }
+    ],
+    "expect": [
+      { "kind": "recipeStarted", "value": false, "from": 0, "to": 11 },
+      { "kind": "recipeStarted", "value": true, "from": 13, "to": 80 },
+      { "kind": "outputCount", "item": "minecraft:brick", "min": 1, "max": 1 },
+      { "kind": "inputCount", "item": "minecraft:clay_ball", "min": 0, "max": 0 },
+      { "kind": "inputCount", "item": "fluid:water", "min": 856, "max": 856 }
+    ]
+  }
+]

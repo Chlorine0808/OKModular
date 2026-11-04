@@ -180,6 +180,18 @@ final class MachineRig {
         }
     }
 
+    /** Puts one stack into the first empty slot of the item output ports. */
+    void putOutput(String item, int amount) {
+        for (AbstractItemIOPortTE port : ports(false, IPortType.Type.ITEM, AbstractItemIOPortTE.class)) {
+            for (int slot = 0; slot < port.getSizeInventory(); slot++) {
+                if (port.getStackInSlot(slot) != null) continue;
+                port.setInventorySlotContents(slot, stack(item, amount));
+                return;
+            }
+        }
+        throw new IllegalStateException(item + " did not fit the item outputs");
+    }
+
     void clearOutputs() {
         for (AbstractItemIOPortTE port : ports(false, IPortType.Type.ITEM, AbstractItemIOPortTE.class)) {
             for (int slot = 0; slot < port.getSizeInventory(); slot++) port.setInventorySlotContents(slot, null);

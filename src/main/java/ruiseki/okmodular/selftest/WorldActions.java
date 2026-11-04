@@ -1,6 +1,10 @@
 package ruiseki.okmodular.selftest;
 
+import java.io.IOException;
+import java.util.UUID;
+
 import net.minecraft.block.Block;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
@@ -10,6 +14,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import ruiseki.okmodular.common.recipe.capture.RecipeCapture;
+import ruiseki.okmodular.common.recipe.capture.RecipeDraft;
+import ruiseki.okmodular.common.recipe.capture.RecipeDraftManager;
 import ruiseki.okmodular.selftest.judge.Observation;
 import ruiseki.okmodular.selftest.scenario.Region;
 import ruiseki.okmodular.selftest.scenario.ScenarioParser;
@@ -20,6 +27,8 @@ final class WorldActions {
 
     /** Long enough that the weather never changes by itself during a run. */
     private static final int WEATHER_HOLD_TICKS = 1_000_000;
+    /** The draft owner for recipe capture steps; no player stands at the controller. */
+    static final UUID CAPTURE_OWNER = UUID.fromString("00000000-0000-0000-0000-00000000c0de");
 
     private WorldActions() {}
 
@@ -59,6 +68,21 @@ final class WorldActions {
             case "fillOutputs":
                 machine(rig, step).fillOutputs(str(a, "item"));
                 break;
+            case "putOutput":
+                machine(rig, step).putOutput(
+                    str(a, "item"),
+                    a.has("amount") ? a.get("amount")
+                        .getAsInt() : 1);
+                break;
+            case "recipeCapture":
+                recipeCapture(machine(rig, step), a);
+                break;
+            case "recipeAmountOf":
+                recipeAmountOf(a);
+                break;
+            case "recipeSave":
+                recipeSave();
+                break;
             case "unloadReload":
                 site.owner.unloadReload(site, obs);
                 if (rig != null) rig.reattach();
@@ -77,6 +101,56 @@ final class WorldActions {
             default:
                 throw new IllegalArgumentException("unknown action " + step.action);
         }
+    }
+
+    private static void recipeCapture(MachineRig rig, JsonObject a) {
+        String group = a.has("group") ? str(a, "group") : null;
+        RecipeDraft draft = RecipeCapture.capture(
+            rig.controller(),
+            a.get("duration")
+                .getAsInt(),
+            group);
+        if (draft == null) throw new IllegalStateException("recipeCapture found every port empty");
+        RecipeDraftManager.getInstance()
+            .put(CAPTURE_OWNER, draft);
+    }
+
+    /** Sets the amount of the first draft entry naming the given item or fluid. */
+    private static void recipeAmountOf(JsonObject a) {
+        RecipeDraft draft = captured();
+        String key = a.has("fluid") ? "fluid" : "item";
+        String name = str(a, key);
+        for (int n = 1; n <= draft.size(); n++) {
+            JsonObject entry = draft.entry(n);
+            if (entry.has(key) && entry.get(key)
+                .getAsString()
+                .equals(name)) {
+                draft.setAmount(
+                    n,
+                    a.get("amount")
+                        .getAsLong());
+                return;
+            }
+        }
+        throw new IllegalStateException("the draft has no entry for " + key + " " + name);
+    }
+
+    private static void recipeSave() {
+        RecipeDraft draft = captured();
+        try {
+            RecipeCapture.save(draft, MinecraftServer.getServer());
+        } catch (IOException e) {
+            throw new IllegalStateException("recipeSave failed: " + e.getMessage(), e);
+        }
+        RecipeDraftManager.getInstance()
+            .clear(CAPTURE_OWNER);
+    }
+
+    private static RecipeDraft captured() {
+        RecipeDraft draft = RecipeDraftManager.getInstance()
+            .get(CAPTURE_OWNER);
+        if (draft == null) throw new IllegalStateException("no recipe draft; run recipeCapture first");
+        return draft;
     }
 
     /** Sets raining and thundering, their timers, and the strengths the world reads, all at once. */

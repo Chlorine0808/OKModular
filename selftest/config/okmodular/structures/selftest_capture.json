@@ -1,0 +1,23 @@
+[
+  {
+    "name": "selftest_capture",
+    "displayName": "Selftest Capture",
+    "recipeGroup": ["selftest_capture"],
+    "layers": [
+      { "name": "top",    "rows": ["CCC", "CCC", "CCC"] },
+      { "name": "middle", "rows": ["CIC", "OQF", "CCC"] },
+      { "name": "bottom", "rows": ["CCC", "CCC", "CCC"] }
+    ],
+    "mappings": {
+      "C": "okmodular:casing_plain:0",
+      "I": { "blocks": ["okmodular:modular_item_input:0"] },
+      "O": { "blocks": ["okmodular:modular_item_output:0"] },
+      "F": { "blocks": ["okmodular:modular_fluid_input:0"] }
+    },
+    "requirements": [
+      { "type": "itemInput", "min": 1 },
+      { "type": "itemOutput", "min": 1 },
+      { "type": "fluidInput", "min": 1 }
+    ]
+  }
+]
