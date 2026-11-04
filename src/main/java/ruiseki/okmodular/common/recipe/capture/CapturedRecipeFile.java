@@ -31,11 +31,18 @@ public final class CapturedRecipeFile {
         .disableHtmlEscaping()
         .create();
 
+    /** Windows device names, which cannot be file names even with an extension. */
+    private static final Pattern RESERVED = Pattern.compile("(?i)(con|prn|aux|nul|com[1-9]|lpt[1-9])(\\..*)?");
+
     private CapturedRecipeFile() {}
 
     public static boolean isValidGroup(String group) {
         return group != null && GROUP.matcher(group)
-            .matches() && !group.equals(".") && !group.equals("..");
+            .matches()
+            && !group.equals(".")
+            && !group.equals("..")
+            && !RESERVED.matcher(group)
+                .matches();
     }
 
     public static File fileFor(File recipesDir, String group) {

@@ -120,7 +120,8 @@ public class CapturedRecipeFileTest {
 
     @Test
     public void groupThatEscapesTheFolderIsRefused() {
-        for (String bad : new String[] { "../evil", "a/b", "a\\b", "..", ".", "" }) {
+        for (String bad : new String[] { "../evil", "a/b", "a\\b", "..", ".", "", "con", "NUL", "Aux.txt", "com1",
+            "lpt9.x", "prn.a.b" }) {
             assertFalse(CapturedRecipeFile.isValidGroup(bad), bad);
             assertThrows(
                 IllegalArgumentException.class,
@@ -128,6 +129,8 @@ public class CapturedRecipeFileTest {
         }
         assertFalse(CapturedRecipeFile.isValidGroup(null));
         assertTrue(CapturedRecipeFile.isValidGroup("my_machine-2.x"));
+        assertTrue(CapturedRecipeFile.isValidGroup("console"));
+        assertTrue(CapturedRecipeFile.isValidGroup("com10"));
         assertEquals(
             0,
             tmp.toFile()
