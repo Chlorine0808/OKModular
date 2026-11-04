@@ -62,7 +62,7 @@ public final class RecipeDraft {
         return copy(at(number));
     }
 
-    public void setAmount(int number, long amount) {
+    public void setAmount(int number, int amount) {
         check(number);
         if (amount <= 0) throw new IllegalArgumentException("amount must be positive: " + amount);
         at(number).addProperty("amount", amount);
@@ -120,17 +120,19 @@ public final class RecipeDraft {
         return number <= inputs.size() ? inputs.get(number - 1) : outputs.get(number - inputs.size() - 1);
     }
 
-    /** Adds the entry, or adds its amount to an entry that differs only in amount. */
+    /** Adds the entry, or adds its amount to an entry that differs only in amount. Throws IAE on int overflow. */
     private static void merge(List<JsonObject> list, JsonObject entry) {
         JsonObject added = copy(entry);
-        long amount = amountOf(added);
+        int amount = amountOf(added);
         added.remove("amount");
         for (JsonObject existing : list) {
-            long existingAmount = amountOf(existing);
+            int existingAmount = amountOf(existing);
             JsonObject key = copy(existing);
             key.remove("amount");
             if (key.equals(added)) {
-                existing.addProperty("amount", existingAmount + amount);
+                long sum = (long) existingAmount + amount;
+                if (sum > Integer.MAX_VALUE) throw new IllegalArgumentException("amount overflows int: " + sum);
+                existing.addProperty("amount", (int) sum);
                 return;
             }
         }
@@ -138,9 +140,9 @@ public final class RecipeDraft {
         list.add(added);
     }
 
-    private static long amountOf(JsonObject entry) {
+    private static int amountOf(JsonObject entry) {
         return entry.has("amount") ? entry.get("amount")
-            .getAsLong() : 1;
+            .getAsInt() : 1;
     }
 
     private static JsonObject copy(JsonObject source) {

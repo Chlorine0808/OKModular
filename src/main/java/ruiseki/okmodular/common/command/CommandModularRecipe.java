@@ -17,7 +17,6 @@ import net.minecraft.util.Vec3;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -58,13 +57,14 @@ public class CommandModularRecipe extends CommandMod {
             .then(
                 literal("amount").then(
                     intArg("number").then(
-                        RequiredArgumentBuilder.<ICommandSender, Long>argument("amount", LongArgumentType.longArg())
+                        RequiredArgumentBuilder
+                            .<ICommandSender, Integer>argument("amount", IntegerArgumentType.integer(1))
                             .executes(
                                 ctx -> edit(
                                     ctx,
                                     draft -> draft.setAmount(
                                         IntegerArgumentType.getInteger(ctx, "number"),
-                                        LongArgumentType.getLong(ctx, "amount")))))))
+                                        IntegerArgumentType.getInteger(ctx, "amount")))))))
             .then(
                 literal("remove").then(
                     intArg("number").executes(

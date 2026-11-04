@@ -68,6 +68,15 @@ public class RecipeDraftTest {
     }
 
     @Test
+    public void mergeThatOverflowsIntIsRefusedAndLeavesTheDraftAlone() {
+        RecipeDraft draft = new RecipeDraft("g", 20);
+        draft.addInput(json("{'item':'a','amount':2147483647}"));
+
+        assertThrows(IllegalArgumentException.class, () -> draft.addInput(json("{'item':'a'}")));
+        assertEquals(Integer.MAX_VALUE, amountOf(draft, 1));
+    }
+
+    @Test
     public void numbersRunThroughInputsThenOutputs() {
         RecipeDraft draft = new RecipeDraft("g", 20);
         draft.addInput(json("{'item':'a'}"));

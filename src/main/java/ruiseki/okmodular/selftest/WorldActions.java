@@ -128,7 +128,7 @@ final class WorldActions {
                 draft.setAmount(
                     n,
                     a.get("amount")
-                        .getAsLong());
+                        .getAsInt());
                 return;
             }
         }
