@@ -65,7 +65,9 @@ final class MachineRig {
             .createBlueprint(MachineryItems.MACHINE_BLUEPRINT.getItem(), spec.structure);
         te.getInventory()
             .setStackInSlot(TEMachineController.BLUEPRINT_SLOT, blueprint);
-        new MachineControllerInfoContainer().construct(blueprint, false, te, facing);
+        ItemStack trigger = blueprint.copy();
+        trigger.stackSize = spec.blueprintCount;
+        new MachineControllerInfoContainer().construct(trigger, false, te, facing);
 
         // construct places the first option of each symbol; cells overrides choose another.
         String[][] shape = authoredShape(entry);

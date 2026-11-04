@@ -157,12 +157,17 @@ public final class ScenarioParser {
                         .getAsString());
             }
         }
+        int blueprintCount = intOr(m, "blueprintCount", 1);
+        if (blueprintCount < 1 || blueprintCount > 64) {
+            throw new ScenarioParseException("blueprintCount must be 1 to 64, not " + blueprintCount);
+        }
         return new MachineSpec(
             structure,
             strOr(m, "facing", "NORTH"),
             strOr(m, "rotation", "NORMAL"),
             strOr(m, "flip", "NONE"),
-            cells);
+            cells,
+            blueprintCount);
     }
 
     /** The "inputs" array of an insert step's args, read exactly like a scenario's own inputs. */

@@ -72,6 +72,19 @@ class ScenarioParserTest {
     }
 
     @Test
+    void blueprintCountDefaultsToOneAndStaysWithinAStack() {
+        Scenario plain = parse("[" + scen("a", ",\"machine\":{\"structure\":\"x\"}") + "]").get(0);
+        assertEquals(1, plain.machine.blueprintCount);
+        Scenario three = parse("[" + scen("a", ",\"machine\":{\"structure\":\"x\",\"blueprintCount\":3}") + "]").get(0);
+        assertEquals(3, three.machine.blueprintCount);
+        for (int bad : new int[] { 0, 65 }) {
+            Scenario s = parse(
+                "[" + scen("a", ",\"machine\":{\"structure\":\"x\",\"blueprintCount\":" + bad + "}") + "]").get(0);
+            assertNotNull(s.parseError, "blueprintCount " + bad);
+        }
+    }
+
+    @Test
     void unknownActionMakesScenarioInvalid() {
         Scenario s = parse("[" + scen("a", ",\"steps\":[{\"at\":1,\"action\":\"explode\"}]") + "]").get(0);
         assertTrue(s.parseError.contains("unknown action 'explode'"), s.parseError);
