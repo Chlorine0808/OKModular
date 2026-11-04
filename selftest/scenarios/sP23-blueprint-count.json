@@ -1,0 +1,46 @@
+[
+  {
+    "id": "sP23-count-3",
+    "section": "P23",
+    "title": "Three stacked blueprints build the casing at its third-lowest tier",
+    "source": "docs/jp/structures/JSON_FORMAT.md §4 部品ごとの Tier (N 枚なら低いほうから N 番目); selftest/config/okmodular/structures/selftest_tiered.json",
+    "machine": {
+      "structure": "selftest_tiered",
+      "blueprintCount": 3
+    },
+    "ticks": 10,
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "componentTier",
+        "component": "casing",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "id": "sP23-count-64",
+    "section": "P23",
+    "title": "A full stack of blueprints, more than the casing has tiers, builds its highest tier",
+    "source": "docs/jp/structures/JSON_FORMAT.md §4 部品ごとの Tier (部品の Tier の数より多ければ最も高い Tier); selftest/config/okmodular/structures/selftest_tiered.json (6 tiers)",
+    "machine": {
+      "structure": "selftest_tiered",
+      "blueprintCount": 64
+    },
+    "ticks": 10,
+    "expect": [
+      {
+        "kind": "formed",
+        "value": true
+      },
+      {
+        "kind": "componentTier",
+        "component": "casing",
+        "value": 6
+      }
+    ]
+  }
+]
