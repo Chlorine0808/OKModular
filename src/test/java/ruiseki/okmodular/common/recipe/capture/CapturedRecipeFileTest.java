@@ -50,7 +50,8 @@ public class CapturedRecipeFileTest {
                 .toFile()
                 .isFile());
         assertEquals(
-            json("{'group':'crusher','recipes':[{'duration':20,'inputs':[],'outputs':[]}]}"),
+            json(
+                "{'group':'crusher','recipes':[{'registryName':'captured_crusher_1','duration':20,'inputs':[],'outputs':[]}]}"),
             readCaptured("crusher"));
     }
 
@@ -59,7 +60,42 @@ public class CapturedRecipeFileTest {
         CapturedRecipeFile.append(tmp.toFile(), "crusher", json("{'duration':1}"));
         CapturedRecipeFile.append(tmp.toFile(), "crusher", json("{'duration':2}"));
 
-        assertEquals(json("{'group':'crusher','recipes':[{'duration':1},{'duration':2}]}"), readCaptured("crusher"));
+        assertEquals(
+            json(
+                "{'group':'crusher','recipes':[{'registryName':'captured_crusher_1','duration':1},"
+                    + "{'registryName':'captured_crusher_2','duration':2}]}"),
+            readCaptured("crusher"));
+    }
+
+    // The loader drops a recipe without a registryName, so every captured recipe gets one.
+    @Test
+    public void generatedNameSkipsANameAlreadyInTheFile() throws IOException {
+        File file = CapturedRecipeFile.fileFor(tmp.toFile(), "crusher");
+        file.getParentFile()
+            .mkdirs();
+        Files.write(
+            file.toPath(),
+            "{\"group\":\"crusher\",\"recipes\":[{\"registryName\":\"captured_crusher_2\"}]}"
+                .getBytes(StandardCharsets.UTF_8));
+
+        CapturedRecipeFile.append(tmp.toFile(), "crusher", json("{'duration':1}"));
+
+        assertEquals(
+            "captured_crusher_3",
+            readCaptured("crusher").getAsJsonArray("recipes")
+                .get(1)
+                .getAsJsonObject()
+                .get("registryName")
+                .getAsString());
+    }
+
+    @Test
+    public void givenNameIsKept() throws IOException {
+        CapturedRecipeFile.append(tmp.toFile(), "crusher", json("{'registryName':'mine','duration':1}"));
+
+        assertEquals(
+            json("{'group':'crusher','recipes':[{'registryName':'mine','duration':1}]}"),
+            readCaptured("crusher"));
     }
 
     @Test

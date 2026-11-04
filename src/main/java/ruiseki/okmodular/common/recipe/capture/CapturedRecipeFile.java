@@ -7,6 +7,9 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.gson.Gson;
@@ -50,8 +53,8 @@ public final class CapturedRecipeFile {
             root.addProperty("group", group);
             root.add("recipes", new JsonArray());
         }
-        root.getAsJsonArray("recipes")
-            .add(recipe);
+        JsonArray recipes = root.getAsJsonArray("recipes");
+        recipes.add(named(recipe, group, recipes));
 
         File dir = target.getParentFile();
         if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("cannot create " + dir);
@@ -73,6 +76,27 @@ public final class CapturedRecipeFile {
         } finally {
             Files.deleteIfExists(tmpFile);
         }
+    }
+
+    /** The loader needs a registryName; a recipe without one gets {@code captured_<group>_<n>}. */
+    private static JsonObject named(JsonObject recipe, String group, JsonArray existing) {
+        if (recipe.has("registryName")) return recipe;
+        Set<String> taken = new HashSet<>();
+        for (JsonElement e : existing) {
+            if (e.isJsonObject() && e.getAsJsonObject()
+                .has("registryName")) {
+                taken.add(
+                    e.getAsJsonObject()
+                        .get("registryName")
+                        .getAsString());
+            }
+        }
+        int n = existing.size() + 1;
+        while (taken.contains("captured_" + group + "_" + n)) n++;
+        JsonObject out = new JsonObject();
+        out.addProperty("registryName", "captured_" + group + "_" + n);
+        for (Map.Entry<String, JsonElement> e : recipe.entrySet()) out.add(e.getKey(), e.getValue());
+        return out;
     }
 
     private static JsonObject readExisting(File file) throws IOException {
