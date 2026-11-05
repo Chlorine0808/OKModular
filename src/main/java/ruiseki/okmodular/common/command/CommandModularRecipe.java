@@ -138,7 +138,14 @@ public class CommandModularRecipe extends CommandMod {
             return Command.SINGLE_SUCCESS;
         }
         int duration = IntegerArgumentType.getInteger(context, "duration");
-        RecipeDraft draft = RecipeCapture.capture(controller, duration, name);
+        RecipeDraft draft;
+        try {
+            draft = RecipeCapture.capture(controller, duration, name);
+        } catch (IllegalArgumentException e) {
+            // Merged amounts can overflow an int with creative or ME-backed ports.
+            printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_capture_failed", e.getMessage()));
+            return Command.SINGLE_SUCCESS;
+        }
         if (draft == null) {
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_nothing_captured"));
             return Command.SINGLE_SUCCESS;
