@@ -62,14 +62,14 @@ final class RecipeDraftChat {
                 "command.okmodular.recipe_click_amount",
                 EnumChatFormatting.AQUA,
                 ClickEvent.Action.SUGGEST_COMMAND,
-                COMMAND + "amount " + number + " "));
+                COMMAND + "at " + draft.getRevision() + " amount " + number + " "));
         line.appendSibling(new ChatComponentText(" "));
         line.appendSibling(
             click(
                 "command.okmodular.recipe_click_remove",
                 EnumChatFormatting.RED,
                 ClickEvent.Action.SUGGEST_COMMAND,
-                COMMAND + "remove " + number));
+                COMMAND + "at " + draft.getRevision() + " remove " + number));
         return line;
     }
 

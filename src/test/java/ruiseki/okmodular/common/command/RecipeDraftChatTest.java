@@ -57,7 +57,7 @@ class RecipeDraftChatTest {
             clicks.get(0)
                 .getAction());
         assertEquals(
-            "/okmodular recipe amount 3 ",
+            "/okmodular recipe at " + draft.getRevision() + " amount 3 ",
             clicks.get(0)
                 .getValue());
         assertEquals(
@@ -65,7 +65,7 @@ class RecipeDraftChatTest {
             clicks.get(1)
                 .getAction());
         assertEquals(
-            "/okmodular recipe remove 3",
+            "/okmodular recipe at " + draft.getRevision() + " remove 3",
             clicks.get(1)
                 .getValue());
     }

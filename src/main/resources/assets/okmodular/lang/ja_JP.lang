@@ -393,6 +393,7 @@ command.okmodular.recipe_nothing_captured=すべてのポートが空なので�
 command.okmodular.recipe_no_draft=下書きがありません。先に /okmodular recipe capture <時間> を実行してください。
 command.okmodular.recipe_empty_draft=下書きが空なので保存できません。
 command.okmodular.recipe_capture_failed=ポートを取り込めません: %s
+command.okmodular.recipe_list_outdated=古い一覧のボタンです。下の一覧を使ってください。
 command.okmodular.recipe_edit_failed=下書きを編集できません: %s
 command.okmodular.recipe_saved=レシピを保存しました: %s
 command.okmodular.recipe_save_failed=レシピを保存できません: %s

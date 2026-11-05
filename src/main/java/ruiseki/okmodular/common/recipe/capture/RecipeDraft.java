@@ -2,6 +2,7 @@ package ruiseki.okmodular.common.recipe.capture;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -15,12 +16,16 @@ import ruiseki.okmodular.api.recipe.io.EnergyInput;
  */
 public final class RecipeDraft {
 
+    /** Shared by all drafts, so a new draft never reuses the revision of the one it replaces. */
+    private static final AtomicInteger REVISIONS = new AtomicInteger();
+
     private final String group;
     private int duration;
     private final List<JsonObject> inputs = new ArrayList<>();
     private final List<JsonObject> outputs = new ArrayList<>();
     private int energy;
     private boolean energyPerTick;
+    private int revision = REVISIONS.incrementAndGet();
 
     public RecipeDraft(String group, int duration) {
         this.group = group;
@@ -29,6 +34,11 @@ public final class RecipeDraft {
 
     public String getGroup() {
         return group;
+    }
+
+    /** Changes whenever entry numbers may shift: on creation and on remove. */
+    public int getRevision() {
+        return revision;
     }
 
     public int getDuration() {
@@ -72,6 +82,7 @@ public final class RecipeDraft {
         check(number);
         if (number <= inputs.size()) inputs.remove(number - 1);
         else outputs.remove(number - inputs.size() - 1);
+        revision = REVISIONS.incrementAndGet();
     }
 
     public void setEnergy(int amount, boolean perTick) {

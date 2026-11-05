@@ -40,6 +40,7 @@ public class CommandModularRecipe extends CommandMod {
     public static final String NAME = "recipe";
 
     private static final double REACH = 5.0;
+    private static final String REVISION = "revision";
 
     public CommandModularRecipe(ModBase mod) {
         super(mod, NAME);
@@ -54,21 +55,13 @@ public class CommandModularRecipe extends CommandMod {
     public LiteralArgumentBuilder<ICommandSender> make() {
         return super.make().then(captureNode())
             .then(literal("show").executes(ctx -> edit(ctx, draft -> {})))
+            .then(amountNode(false))
+            .then(removeNode(false))
+            // What the chat buttons suggest: the revision makes a button from an older list refuse to run.
             .then(
-                literal("amount").then(
-                    intArg("number").then(
-                        RequiredArgumentBuilder
-                            .<ICommandSender, Integer>argument("amount", IntegerArgumentType.integer(1))
-                            .executes(
-                                ctx -> edit(
-                                    ctx,
-                                    draft -> draft.setAmount(
-                                        IntegerArgumentType.getInteger(ctx, "number"),
-                                        IntegerArgumentType.getInteger(ctx, "amount")))))))
-            .then(
-                literal("remove").then(
-                    intArg("number").executes(
-                        ctx -> edit(ctx, draft -> draft.remove(IntegerArgumentType.getInteger(ctx, "number"))))))
+                literal("at").then(
+                    intArg(REVISION).then(amountNode(true))
+                        .then(removeNode(true))))
             .then(
                 literal("duration").then(
                     RequiredArgumentBuilder.<ICommandSender, Integer>argument("ticks", IntegerArgumentType.integer(1))
@@ -79,6 +72,25 @@ public class CommandModularRecipe extends CommandMod {
             .then(energyNode())
             .then(literal("save").executes(this::save))
             .then(literal("discard").executes(this::discard));
+    }
+
+    private LiteralArgumentBuilder<ICommandSender> amountNode(boolean checked) {
+        return literal("amount").then(
+            intArg("number").then(
+                RequiredArgumentBuilder.<ICommandSender, Integer>argument("amount", IntegerArgumentType.integer(1))
+                    .executes(
+                        ctx -> edit(
+                            ctx,
+                            checked,
+                            draft -> draft.setAmount(
+                                IntegerArgumentType.getInteger(ctx, "number"),
+                                IntegerArgumentType.getInteger(ctx, "amount"))))));
+    }
+
+    private LiteralArgumentBuilder<ICommandSender> removeNode(boolean checked) {
+        return literal("remove").then(
+            intArg("number").executes(
+                ctx -> edit(ctx, checked, draft -> draft.remove(IntegerArgumentType.getInteger(ctx, "number")))));
     }
 
     private LiteralArgumentBuilder<ICommandSender> captureNode() {
@@ -156,13 +168,26 @@ public class CommandModularRecipe extends CommandMod {
         return Command.SINGLE_SUCCESS;
     }
 
-    /** Applies an edit to the sender's draft, then prints the list. A rejected edit leaves the draft as it was. */
     private int edit(CommandContext<ICommandSender> context, Consumer<RecipeDraft> edit) {
+        return edit(context, false, edit);
+    }
+
+    /**
+     * Applies an edit to the sender's draft, then prints the list. A rejected edit leaves the draft as it was.
+     *
+     * @param checked true when the command came from a chat button and carries the list's revision
+     */
+    private int edit(CommandContext<ICommandSender> context, boolean checked, Consumer<RecipeDraft> edit) {
         ICommandSender sender = context.getSource();
         if (!(sender instanceof EntityPlayer player)) return playerOnly(sender);
         RecipeDraft draft = RecipeDraftManager.getInstance()
             .get(player.getUniqueID());
         if (draft == null) return noDraft(sender);
+        if (checked && IntegerArgumentType.getInteger(context, REVISION) != draft.getRevision()) {
+            printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_list_outdated"));
+            sendList(sender, draft);
+            return Command.SINGLE_SUCCESS;
+        }
         try {
             edit.accept(draft);
         } catch (IllegalArgumentException e) {

@@ -35,6 +35,8 @@ All commands live under `/okmodular recipe` and need permission level 2.
 
 Entries are numbered **inputs first, then outputs**. Energy has no number. Clicking `[amount]`
 or `[remove]` in `show` only puts the command in the chat box. You press Enter yourself.
+The button's command starts with `at <revision>`. After a `remove` or a new `capture` the
+numbers change, so a button from an older list is refused and the current list is printed.
 
 ## What is captured
 

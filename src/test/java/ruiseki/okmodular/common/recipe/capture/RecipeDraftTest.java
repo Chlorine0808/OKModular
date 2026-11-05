@@ -112,6 +112,26 @@ public class RecipeDraftTest {
         assertTrue(draft.isOutput(2));
     }
 
+    // Chat buttons carry the revision, so a button from an older list cannot hit a shifted entry.
+    @Test
+    public void revisionChangesWhenNumbersShiftAndDiffersBetweenDrafts() {
+        RecipeDraft draft = new RecipeDraft("g", 20);
+        draft.addInput(json("{'item':'a'}"));
+        draft.addInput(json("{'item':'b'}"));
+        int listed = draft.getRevision();
+
+        draft.setAmount(1, 5);
+        draft.setDuration(40);
+        draft.setEnergy(10, true);
+        assertEquals(listed, draft.getRevision(), "edits that keep the numbers keep the revision");
+
+        draft.remove(1);
+        assertFalse(listed == draft.getRevision(), "remove shifts the numbers");
+
+        RecipeDraft next = new RecipeDraft("g", 20);
+        assertFalse(draft.getRevision() == next.getRevision(), "a new capture is a new list");
+    }
+
     @Test
     public void badNumbersAndAmountsAreRefusedAndChangeNothing() {
         RecipeDraft draft = new RecipeDraft("g", 20);
