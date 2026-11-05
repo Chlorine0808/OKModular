@@ -11,8 +11,9 @@ draft in chat, and save.
    fluids.
 3. Look at the controller (within 5 blocks) and run
    `/okmodular recipe capture <duration> [group]`.
-4. Read the draft with `/okmodular recipe show`. Fix amounts and the duration, add or remove
-   entries, and set the energy.
+4. Read the draft with `/okmodular recipe show`. Fix amounts and the duration, remove
+   entries you do not want, and set the energy. To add an entry, put it in a port and capture
+   again.
 5. Run `/okmodular recipe save`. The recipe is appended to a file and recipes are reloaded.
 
 Ports are **not consumed**. Capture only reads them.
