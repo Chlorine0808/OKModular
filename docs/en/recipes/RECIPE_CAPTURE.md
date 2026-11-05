@@ -53,6 +53,9 @@ or `[remove]` in `show` only puts the command in the chat box. You press Enter y
   so the recipe still belongs to the machine.
 - Files you wrote by hand are never touched.
 - A captured file that is malformed is refused and left as it is.
+- A captured file whose `"group"` header names another group is refused too. Two groups can
+  share one file name (`Ore Crusher` and `Ore_Crusher`), and appending would move the recipe to
+  the other group.
 - A recipe without a `registryName` is named `captured_<file>_<n>`, where `n` is the number of
   recipes in the file plus one (names already in the file are skipped). To rename it, edit the JSON.
 - `save` clears the draft. Running `capture` again overwrites the existing draft.

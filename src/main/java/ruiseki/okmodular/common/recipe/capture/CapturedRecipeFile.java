@@ -113,6 +113,7 @@ public final class CapturedRecipeFile {
         return out;
     }
 
+    /** Refuses a file whose header names another group, since appending would move the recipe there. */
     private static JsonObject readExisting(File file, String group) throws IOException {
         String text = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
         JsonElement parsed;
@@ -128,6 +129,13 @@ public final class CapturedRecipeFile {
                 .isJsonArray()) {
             throw new IOException(file.getName() + " has no \"recipes\" array");
         }
-        return parsed.getAsJsonObject();
+        JsonObject root = parsed.getAsJsonObject();
+        JsonElement header = root.get("group");
+        if (header == null || !header.isJsonPrimitive()
+            || !header.getAsString()
+                .equals(group)) {
+            throw new IOException(file.getName() + " belongs to group " + header + ", not \"" + group + "\"");
+        }
+        return root;
     }
 }

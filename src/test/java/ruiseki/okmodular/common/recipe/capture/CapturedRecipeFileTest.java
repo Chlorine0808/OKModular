@@ -170,6 +170,25 @@ public class CapturedRecipeFileTest {
             "nothing created");
     }
 
+    // Two groups can share a safe file name, and a hand-edited header would move every recipe in it.
+    @Test
+    public void fileWhoseHeaderNamesAnotherGroupIsLeftUntouched() throws IOException {
+        for (String header : new String[] { "\"group\":\"Ore_Crusher\",", "" }) {
+            File file = CapturedRecipeFile.fileFor(tmp.toFile(), "Ore Crusher");
+            file.getParentFile()
+                .mkdirs();
+            byte[] bytes = ("{" + header + "\"recipes\":[]}").getBytes(StandardCharsets.UTF_8);
+            Files.write(file.toPath(), bytes);
+
+            assertThrows(
+                IOException.class,
+                () -> CapturedRecipeFile.append(tmp.toFile(), "Ore Crusher", json("{'duration':1}")),
+                header);
+
+            assertArrayEquals(bytes, Files.readAllBytes(file.toPath()), header);
+        }
+    }
+
     @Test
     public void handWrittenFilesAreNotTouched() throws IOException {
         Path hand = tmp.resolve("crusher.json");
