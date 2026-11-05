@@ -393,5 +393,5 @@ command.okmodular.recipe_capture_failed=Cannot capture the ports: %s
 command.okmodular.recipe_edit_failed=Cannot edit the draft: %s
 command.okmodular.recipe_saved=Saved the recipe to %s
 command.okmodular.recipe_save_failed=Cannot save the recipe: %s
-command.okmodular.recipe_reload_failed=Saved, but reloading recipes failed: %s
+command.okmodular.recipe_reload_failed=Saved to %s, but reloading recipes failed: %s
 command.okmodular.recipe_discarded=Draft discarded.

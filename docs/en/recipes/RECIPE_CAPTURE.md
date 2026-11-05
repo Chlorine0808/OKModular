@@ -30,7 +30,7 @@ All commands live under `/okmodular recipe` and need permission level 2.
 | `remove <number>` | Removes entry `<number>` |
 | `duration <ticks>` | Sets the recipe duration |
 | `energy <amount> [perTick]` | Sets the energy. `perTick` defaults to `true` (RF per tick); `false` means a total. `0` removes the energy |
-| `save` | Appends the draft to the group's file and reloads recipes |
+| `save` | Appends the draft to the group's file and reloads recipes only (structures and tiers are not reloaded) |
 | `discard` | Throws the draft away |
 
 Entries are numbered **inputs first, then outputs**. Energy has no number. Clicking `[amount]`

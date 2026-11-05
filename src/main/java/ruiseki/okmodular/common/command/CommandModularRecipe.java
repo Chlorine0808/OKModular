@@ -183,16 +183,29 @@ public class CommandModularRecipe extends CommandMod {
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_empty_draft"));
             return Command.SINGLE_SUCCESS;
         }
+        File file;
         try {
-            File file = RecipeCapture.save(draft, sender);
-            RecipeDraftManager.getInstance()
-                .clear(id);
-            sender.addChatMessage(
-                new ChatComponentText(
-                    EnumChatFormatting.GREEN + LangHelpers.localize("command.okmodular.recipe_saved", file.getPath())));
+            file = RecipeCapture.save(draft);
         } catch (IOException | IllegalStateException | IllegalArgumentException e) {
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_save_failed", e.getMessage()));
+            return Command.SINGLE_SUCCESS;
         }
+        RecipeDraftManager.getInstance()
+            .clear(id);
+        try {
+            RecipeCapture.reloadRecipes();
+        } catch (Exception e) {
+            // The write stays; the draft is gone, so the message names the file to fix by hand.
+            printErrorToChat(
+                sender,
+                LangHelpers.localize("command.okmodular.recipe_reload_failed", file.getPath(), e.getMessage()));
+            return Command.SINGLE_SUCCESS;
+        }
+        sender.addChatMessage(
+            new ChatComponentText(
+                EnumChatFormatting.GREEN + LangHelpers.localize("command.okmodular.recipe_saved", file.getPath())));
+        // Recipes that failed to load are written to errors.txt, not thrown.
+        LoadErrorReport.toChat(sender);
         return Command.SINGLE_SUCCESS;
     }
 

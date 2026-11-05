@@ -1,10 +1,8 @@
 package ruiseki.okmodular.selftest;
 
-import java.io.IOException;
 import java.util.UUID;
 
 import net.minecraft.block.Block;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
@@ -138,8 +136,9 @@ final class WorldActions {
     private static void recipeSave() {
         RecipeDraft draft = captured();
         try {
-            RecipeCapture.save(draft, MinecraftServer.getServer());
-        } catch (IOException e) {
+            RecipeCapture.save(draft);
+            RecipeCapture.reloadRecipes();
+        } catch (Exception e) {
             throw new IllegalStateException("recipeSave failed: " + e.getMessage(), e);
         }
         RecipeDraftManager.getInstance()

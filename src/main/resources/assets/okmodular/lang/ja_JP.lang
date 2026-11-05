@@ -396,5 +396,5 @@ command.okmodular.recipe_capture_failed=ポートを取り込めません: %s
 command.okmodular.recipe_edit_failed=下書きを編集できません: %s
 command.okmodular.recipe_saved=レシピを保存しました: %s
 command.okmodular.recipe_save_failed=レシピを保存できません: %s
-command.okmodular.recipe_reload_failed=保存しましたが，レシピの再読み込みに失敗しました: %s
+command.okmodular.recipe_reload_failed=%s に保存しましたが，レシピの再読み込みに失敗しました: %s
 command.okmodular.recipe_discarded=下書きを破棄しました。
