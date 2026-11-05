@@ -56,6 +56,8 @@ or `[remove]` in `show` only puts the command in the chat box. You press Enter y
 - A captured file whose `"group"` header names another group is refused too. Two groups can
   share one file name (`Ore Crusher` and `Ore_Crusher`), and appending would move the recipe to
   the other group.
+- `save` rewrites the whole captured file, so a captured file with comments or other lenient
+  JSON is refused instead of losing them. Keep hand edits in a file outside `captured/`.
 - A recipe without a `registryName` is named `captured_<file>_<n>`, where `n` is the number of
   recipes in the file plus one (names already in the file are skipped). To rename it, edit the JSON.
 - `save` clears the draft. Running `capture` again overwrites the existing draft.

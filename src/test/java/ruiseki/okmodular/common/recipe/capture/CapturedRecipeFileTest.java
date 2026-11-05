@@ -189,6 +189,26 @@ public class CapturedRecipeFileTest {
         }
     }
 
+    // Saving rewrites the whole file, which would silently drop comments the loader accepts.
+    @Test
+    public void fileWithCommentsIsLeftUntouched() throws IOException {
+        File file = CapturedRecipeFile.fileFor(tmp.toFile(), "crusher");
+        file.getParentFile()
+            .mkdirs();
+        byte[] bytes = "{\"group\":\"crusher\", // tuned by hand\n\"recipes\":[]}".getBytes(StandardCharsets.UTF_8);
+        Files.write(file.toPath(), bytes);
+
+        IOException e = assertThrows(
+            IOException.class,
+            () -> CapturedRecipeFile.append(tmp.toFile(), "crusher", json("{'duration':1}")));
+
+        assertTrue(
+            e.getMessage()
+                .contains("comment"),
+            e.getMessage());
+        assertArrayEquals(bytes, Files.readAllBytes(file.toPath()));
+    }
+
     @Test
     public void handWrittenFilesAreNotTouched() throws IOException {
         Path hand = tmp.resolve("crusher.json");

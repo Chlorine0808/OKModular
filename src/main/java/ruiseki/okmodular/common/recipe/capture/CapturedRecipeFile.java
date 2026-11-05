@@ -2,6 +2,7 @@ package ruiseki.okmodular.common.recipe.capture;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -19,10 +20,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.google.gson.internal.bind.TypeAdapters;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 
 /**
  * Appends recipes to {@code <recipes>/captured/<file>.json}, where the file name is the group made
- * safe for a file system. A file that cannot be read is never overwritten.
+ * safe for a file system. A file that cannot be read back exactly is never overwritten.
  */
 public final class CapturedRecipeFile {
 
@@ -113,14 +117,22 @@ public final class CapturedRecipeFile {
         return out;
     }
 
-    /** Refuses a file whose header names another group, since appending would move the recipe there. */
+    /** Refuses a file the rewrite would change in meaning: lenient syntax, or a header for another group. */
     private static JsonObject readExisting(File file, String group) throws IOException {
         String text = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
         JsonElement parsed;
         try {
-            parsed = new JsonParser().parse(text);
-        } catch (JsonParseException e) {
-            throw new IOException(file.getName() + " is not valid JSON: " + e.getMessage(), e);
+            parsed = parseStrict(text);
+        } catch (IOException | JsonParseException strictError) {
+            try {
+                new JsonParser().parse(text);
+            } catch (JsonParseException e) {
+                throw new IOException(file.getName() + " is not valid JSON: " + e.getMessage(), e);
+            }
+            throw new IOException(
+                file.getName() + " has comments or other non-standard JSON that saving would drop;"
+                    + " move the hand edits to another file",
+                strictError);
         }
         if (!parsed.isJsonObject() || !parsed.getAsJsonObject()
             .has("recipes")
@@ -137,5 +149,14 @@ public final class CapturedRecipeFile {
             throw new IOException(file.getName() + " belongs to group " + header + ", not \"" + group + "\"");
         }
         return root;
+    }
+
+    /** JsonParser is always lenient, so it accepts comments that a rewrite would lose. */
+    private static JsonElement parseStrict(String text) throws IOException {
+        JsonReader reader = new JsonReader(new StringReader(text));
+        reader.setLenient(false);
+        JsonElement element = TypeAdapters.JSON_ELEMENT.read(reader);
+        if (reader.peek() != JsonToken.END_DOCUMENT) throw new IOException("trailing content");
+        return element;
     }
 }
