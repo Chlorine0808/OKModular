@@ -118,19 +118,51 @@ public class CapturedRecipeFileTest {
         }
     }
 
+    // The header keeps the real group so the machine still finds the recipe; only the file name is made safe.
     @Test
-    public void groupThatEscapesTheFolderIsRefused() {
-        for (String bad : new String[] { "../evil", "a/b", "a\\b", "..", ".", "", "con", "NUL", "Aux.txt", "com1",
-            "lpt9.x", "prn.a.b" }) {
-            assertFalse(CapturedRecipeFile.isValidGroup(bad), bad);
+    public void groupThatCannotBeAFileNameIsSavedUnderASafeName() throws IOException {
+        String[][] cases = { { "Ore Crusher", "Ore_Crusher" }, { "mod:group", "mod_group" }, { "../evil", ".._evil" },
+            { "a\\b", "a_b" }, { "..", "_.." }, { ".", "_." }, { "con", "_con" }, { "NUL", "_NUL" },
+            { "Aux.txt", "_Aux.txt" }, { "com1", "_com1" }, { "console", "console" }, { "com10", "com10" } };
+        for (String[] c : cases) {
+            CapturedRecipeFile.append(tmp.toFile(), c[0], json("{'duration':1}"));
+
+            File file = tmp.resolve("captured")
+                .resolve(c[1] + ".json")
+                .toFile();
+            assertTrue(file.isFile(), c[0]);
+            JsonObject root = new JsonParser()
+                .parse(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8))
+                .getAsJsonObject();
+            assertEquals(
+                c[0],
+                root.get("group")
+                    .getAsString(),
+                c[0]);
+            assertEquals(
+                "captured_" + c[1] + "_1",
+                root.getAsJsonArray("recipes")
+                    .get(0)
+                    .getAsJsonObject()
+                    .get("registryName")
+                    .getAsString(),
+                c[0]);
+        }
+        assertEquals(
+            1,
+            tmp.toFile()
+                .list().length,
+            "everything stays under captured/");
+    }
+
+    @Test
+    public void blankGroupIsRefused() {
+        for (String bad : new String[] { null, "", "  " }) {
+            assertFalse(CapturedRecipeFile.isValidGroup(bad), String.valueOf(bad));
             assertThrows(
                 IllegalArgumentException.class,
                 () -> CapturedRecipeFile.append(tmp.toFile(), bad, json("{'duration':1}")));
         }
-        assertFalse(CapturedRecipeFile.isValidGroup(null));
-        assertTrue(CapturedRecipeFile.isValidGroup("my_machine-2.x"));
-        assertTrue(CapturedRecipeFile.isValidGroup("console"));
-        assertTrue(CapturedRecipeFile.isValidGroup("com10"));
         assertEquals(
             0,
             tmp.toFile()

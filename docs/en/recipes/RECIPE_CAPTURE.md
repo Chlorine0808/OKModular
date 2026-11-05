@@ -43,14 +43,17 @@ or `[remove]` in `show` only puts the command in the chat box. You press Enter y
 
 ## Where it is saved
 
-`save` appends to `config/okmodular/recipes/captured/<group>.json`.
+`save` appends to `config/okmodular/recipes/captured/<file>.json`.
 
-- `group` defaults to the controller's first recipe group, or `default` if it has none. It must
-  match `[A-Za-z0-9_.-]`.
-- If the file does not exist it is created with a `"group"` header.
+- `group` defaults to the controller's first recipe group, or `default` if it has none.
+- `<file>` is the group with every character outside `[A-Za-z0-9_.-]` turned into `_`. Names
+  Windows reserves (`con`, `nul`, `com1` and so on) and `.`/`..` get a `_` in front. For example,
+  `Ore Crusher` is saved to `Ore_Crusher.json`.
+- If the file does not exist it is created with a `"group"` header that holds the group as it is,
+  so the recipe still belongs to the machine.
 - Files you wrote by hand are never touched.
 - A captured file that is malformed is refused and left as it is.
-- A recipe without a `registryName` is named `captured_<group>_<n>`, where `n` is the number of
+- A recipe without a `registryName` is named `captured_<file>_<n>`, where `n` is the number of
   recipes in the file plus one (names already in the file are skipped). To rename it, edit the JSON.
 - `save` clears the draft. Running `capture` again overwrites the existing draft.
 - One draft exists per player. It is lost on logout and on server stop.

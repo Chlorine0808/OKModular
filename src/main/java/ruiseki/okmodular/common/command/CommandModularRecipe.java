@@ -123,10 +123,6 @@ public class CommandModularRecipe extends CommandMod {
         ICommandSender sender = context.getSource();
         if (!(sender instanceof EntityPlayer player)) return playerOnly(sender);
 
-        if (group != null && !CapturedRecipeFile.isValidGroup(group)) {
-            printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_bad_group", group));
-            return Command.SINGLE_SUCCESS;
-        }
         TEMachineController controller = lookedAtController(player);
         if (controller == null) {
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_no_machine"));
@@ -136,8 +132,13 @@ public class CommandModularRecipe extends CommandMod {
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_not_formed"));
             return Command.SINGLE_SUCCESS;
         }
+        String name = group != null ? group : controller.getRecipeGroup();
+        if (!CapturedRecipeFile.isValidGroup(name)) {
+            printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_bad_group", name));
+            return Command.SINGLE_SUCCESS;
+        }
         int duration = IntegerArgumentType.getInteger(context, "duration");
-        RecipeDraft draft = RecipeCapture.capture(controller, duration, group);
+        RecipeDraft draft = RecipeCapture.capture(controller, duration, name);
         if (draft == null) {
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_nothing_captured"));
             return Command.SINGLE_SUCCESS;
@@ -182,7 +183,7 @@ public class CommandModularRecipe extends CommandMod {
             sender.addChatMessage(
                 new ChatComponentText(
                     EnumChatFormatting.GREEN + LangHelpers.localize("command.okmodular.recipe_saved", file.getPath())));
-        } catch (IOException | IllegalStateException e) {
+        } catch (IOException | IllegalStateException | IllegalArgumentException e) {
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_save_failed", e.getMessage()));
         }
         return Command.SINGLE_SUCCESS;

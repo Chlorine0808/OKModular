@@ -21,12 +21,12 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
 /**
- * Appends recipes to {@code <recipes>/captured/<group>.json}. A file that cannot be read is
- * never overwritten.
+ * Appends recipes to {@code <recipes>/captured/<file>.json}, where the file name is the group made
+ * safe for a file system. A file that cannot be read is never overwritten.
  */
 public final class CapturedRecipeFile {
 
-    private static final Pattern GROUP = Pattern.compile("[A-Za-z0-9_.-]+");
+    private static final Pattern UNSAFE = Pattern.compile("[^A-Za-z0-9_.-]");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting()
         .disableHtmlEscaping()
         .create();
@@ -37,35 +37,42 @@ public final class CapturedRecipeFile {
     private CapturedRecipeFile() {}
 
     public static boolean isValidGroup(String group) {
-        return group != null && GROUP.matcher(group)
-            .matches()
-            && !group.equals(".")
-            && !group.equals("..")
-            && !RESERVED.matcher(group)
-                .matches();
+        return group != null && !group.trim()
+            .isEmpty();
     }
 
     public static File fileFor(File recipesDir, String group) {
+        return new File(new File(recipesDir, "captured"), fileStem(group) + ".json");
+    }
+
+    /** Replaces characters a file name cannot hold, and prefixes "_" to dot names and Windows device names. */
+    static String fileStem(String group) {
         if (!isValidGroup(group)) throw new IllegalArgumentException("invalid group name: " + group);
-        return new File(new File(recipesDir, "captured"), group + ".json");
+        String stem = UNSAFE.matcher(group)
+            .replaceAll("_");
+        if (stem.equals(".") || stem.equals("..")
+            || RESERVED.matcher(stem)
+                .matches())
+            stem = "_" + stem;
+        return stem;
     }
 
     public static void append(File recipesDir, String group, JsonObject recipe) throws IOException {
         File target = fileFor(recipesDir, group);
         JsonObject root;
         if (target.exists()) {
-            root = readExisting(target);
+            root = readExisting(target, group);
         } else {
             root = new JsonObject();
             root.addProperty("group", group);
             root.add("recipes", new JsonArray());
         }
         JsonArray recipes = root.getAsJsonArray("recipes");
-        recipes.add(named(recipe, group, recipes));
+        recipes.add(named(recipe, fileStem(group), recipes));
 
         File dir = target.getParentFile();
         if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("cannot create " + dir);
-        Path tmpFile = new File(dir, group + ".json.tmp").toPath();
+        Path tmpFile = new File(dir, target.getName() + ".tmp").toPath();
         try {
             Files.write(
                 tmpFile,
@@ -85,8 +92,8 @@ public final class CapturedRecipeFile {
         }
     }
 
-    /** The loader needs a registryName; a recipe without one gets {@code captured_<group>_<n>}. */
-    private static JsonObject named(JsonObject recipe, String group, JsonArray existing) {
+    /** The loader needs a registryName; a recipe without one gets {@code captured_<file>_<n>}. */
+    private static JsonObject named(JsonObject recipe, String stem, JsonArray existing) {
         if (recipe.has("registryName")) return recipe;
         Set<String> taken = new HashSet<>();
         for (JsonElement e : existing) {
@@ -99,14 +106,14 @@ public final class CapturedRecipeFile {
             }
         }
         int n = existing.size() + 1;
-        while (taken.contains("captured_" + group + "_" + n)) n++;
+        while (taken.contains("captured_" + stem + "_" + n)) n++;
         JsonObject out = new JsonObject();
-        out.addProperty("registryName", "captured_" + group + "_" + n);
+        out.addProperty("registryName", "captured_" + stem + "_" + n);
         for (Map.Entry<String, JsonElement> e : recipe.entrySet()) out.add(e.getKey(), e.getValue());
         return out;
     }
 
-    private static JsonObject readExisting(File file) throws IOException {
+    private static JsonObject readExisting(File file, String group) throws IOException {
         String text = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
         JsonElement parsed;
         try {
