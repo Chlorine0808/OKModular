@@ -2,7 +2,6 @@ package ruiseki.okmodular.common.recipe.capture;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import net.minecraft.command.ICommandSender;
@@ -30,12 +29,7 @@ public final class RecipeCapture {
      * @return null when every captured port is empty
      */
     public static RecipeDraft capture(TEMachineController controller, int duration, String group) {
-        String name = group;
-        if (name == null) {
-            List<String> groups = controller.getRecipeGroups();
-            name = groups == null || groups.isEmpty() ? "default" : groups.get(0);
-        }
-        RecipeDraft draft = new RecipeDraft(name, duration);
+        RecipeDraft draft = new RecipeDraft(group != null ? group : controller.getRecipeGroup(), duration);
         for (Map.Entry<IPortType.Type, PortCapturer> e : PortCapturers.all()
             .entrySet()) {
             for (IModularPort port : controller.getPortManager()
