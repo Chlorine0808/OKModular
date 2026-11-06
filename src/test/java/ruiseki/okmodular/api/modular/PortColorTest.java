@@ -215,13 +215,19 @@ public class PortColorTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(EnumDye.class)
-    @DisplayName("すべての EnumDye に対応する色がある")
+    @EnumSource(value = EnumDye.class, names = "TRANSPARENT", mode = EnumSource.Mode.EXCLUDE)
+    @DisplayName("すべての染料に対応する色がある")
     public void test全EnumDyeに対応がある(EnumDye dye) {
         PortColor color = PortColor.fromDye(dye);
 
         assertTrue(color.isColored(), () -> dye + " に対応する色が無い");
         assertSame(dye, color.toDye());
+    }
+
+    @Test
+    @DisplayName("EnumDye.TRANSPARENT は塗っていない扱いになる")
+    public void testTransparentはNone() {
+        assertSame(PortColor.NONE, PortColor.fromDye(EnumDye.TRANSPARENT));
     }
 
     @Test
