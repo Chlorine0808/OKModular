@@ -54,6 +54,12 @@ final class WorldActions {
             case "weather":
                 weather(site.world, a.has("value") ? str(a, "value") : str(a, "weather"));
                 break;
+            case "time":
+                // Every scenario starts at noon (LiveDriver); this moves the clock for the rest of the run.
+                site.world.setWorldTime(
+                    a.get("value")
+                        .getAsLong());
+                break;
             case "biome":
                 biome(site, triple(a, "from"), triple(a, "to"), str(a, "biome"));
                 break;

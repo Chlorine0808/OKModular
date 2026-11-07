@@ -14,6 +14,7 @@ public final class Step {
             "setBlock",
             "fill",
             "weather",
+            "time",
             "biome",
             "insert",
             "clearOutputs",
