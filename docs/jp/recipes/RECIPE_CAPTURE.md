@@ -7,7 +7,7 @@ ID を手で打つ必要がありません。ポートに材料を入れ、コ�
 
 1. 機械を建て、**完成した状態**にします。
 2. 入力ポートに材料を、出力ポートに成果物を入れます。液体も入れられます。
-3. コントローラーを見て（5 ブロック以内）、`/okmodular recipe capture <duration> [group]` を実行します。
+3. コントローラーを見て（5 ブロック以内）、`/okmodular recipe capture [duration] [energy] [group]` を実行します。
 4. `/okmodular recipe show` で下書きを確認します。量や所要時間を直し、要らない項目を消し、エネルギーを設定します。項目を足したいときは、ポートに入れてからもう一度キャプチャします。
 5. `/okmodular recipe save` を実行します。レシピがファイルに追記され、レシピが再読み込みされます。
 
@@ -19,7 +19,7 @@ ID を手で打つ必要がありません。ポートに材料を入れ、コ�
 
 | コマンド | 内容 |
 |---|---|
-| `capture <duration> [group]` | 見ているコントローラーのポートを読んで、下書きを作ります。`duration` の単位は tick です |
+| `capture [duration] [energy] [group]` | 見ているコントローラーのポートを読んで、下書きを作ります。`duration` の単位は tick で、既定は 100 です。`energy` は 1 tick あたりの RF で、既定は 0（エネルギーなし）です。`group` を省くとコントローラーのレシピグループを使います。`group` を書くときは `energy` も書きます（なしなら 0） |
 | `show` | 下書きを表示します。各項目に `[amount]` と `[remove]` のボタンが付きます |
 | `amount <number> <amount>` | `<number>` 番の項目の量を設定します（アイテムは個数、液体は mB） |
 | `remove <number>` | `<number>` 番の項目を消します |

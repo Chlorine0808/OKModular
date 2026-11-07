@@ -41,6 +41,10 @@ public class CommandModularRecipe extends CommandMod {
 
     private static final double REACH = 5.0;
     private static final String REVISION = "revision";
+    private static final String DURATION = "duration";
+    private static final String ENERGY = "energy";
+    private static final String GROUP = "group";
+    static final int DEFAULT_DURATION = 100;
 
     public CommandModularRecipe(ModBase mod) {
         super(mod, NAME);
@@ -53,7 +57,7 @@ public class CommandModularRecipe extends CommandMod {
 
     @Override
     public LiteralArgumentBuilder<ICommandSender> make() {
-        return super.make().then(captureNode())
+        return super.make().then(captureNode(this))
             .then(literal("show").executes(ctx -> edit(ctx, draft -> {})))
             .then(amountNode(false))
             .then(removeNode(false))
@@ -93,13 +97,43 @@ public class CommandModularRecipe extends CommandMod {
                 ctx -> edit(ctx, checked, draft -> draft.remove(IntegerArgumentType.getInteger(ctx, "number")))));
     }
 
-    private LiteralArgumentBuilder<ICommandSender> captureNode() {
-        return literal("capture").then(
-            RequiredArgumentBuilder.<ICommandSender, Integer>argument("duration", IntegerArgumentType.integer(1))
-                .executes(ctx -> capture(ctx, null))
-                .then(
-                    RequiredArgumentBuilder.<ICommandSender, String>argument("group", StringArgumentType.word())
-                        .executes(ctx -> capture(ctx, StringArgumentType.getString(ctx, "group")))));
+    /** capture [duration] [energy] [group]; energy is RF per tick, 0 for none. */
+    static LiteralArgumentBuilder<ICommandSender> captureNode(CommandModularRecipe command) {
+        Command<ICommandSender> run = ctx -> command.capture(ctx);
+        return literal("capture").executes(run)
+            .then(
+                RequiredArgumentBuilder.<ICommandSender, Integer>argument(DURATION, IntegerArgumentType.integer(1))
+                    .executes(run)
+                    .then(
+                        RequiredArgumentBuilder
+                            .<ICommandSender, Integer>argument(ENERGY, IntegerArgumentType.integer(0))
+                            .executes(run)
+                            .then(
+                                RequiredArgumentBuilder
+                                    .<ICommandSender, String>argument(GROUP, StringArgumentType.word())
+                                    .executes(run))));
+    }
+
+    static int captureDuration(CommandContext<ICommandSender> context) {
+        return has(context, DURATION) ? IntegerArgumentType.getInteger(context, DURATION) : DEFAULT_DURATION;
+    }
+
+    static int captureEnergy(CommandContext<ICommandSender> context) {
+        return has(context, ENERGY) ? IntegerArgumentType.getInteger(context, ENERGY) : 0;
+    }
+
+    /** Null when omitted, which means the controller's recipe group. */
+    static String captureGroup(CommandContext<ICommandSender> context) {
+        return has(context, GROUP) ? StringArgumentType.getString(context, GROUP) : null;
+    }
+
+    private static boolean has(CommandContext<ICommandSender> context, String argument) {
+        try {
+            context.getArgument(argument, Object.class);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private LiteralArgumentBuilder<ICommandSender> energyNode() {
@@ -131,7 +165,8 @@ public class CommandModularRecipe extends CommandMod {
         return Command.SINGLE_SUCCESS;
     }
 
-    private int capture(CommandContext<ICommandSender> context, String group) {
+    private int capture(CommandContext<ICommandSender> context) {
+        String group = captureGroup(context);
         ICommandSender sender = context.getSource();
         if (!(sender instanceof EntityPlayer player)) return playerOnly(sender);
 
@@ -149,10 +184,9 @@ public class CommandModularRecipe extends CommandMod {
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_bad_group", name));
             return Command.SINGLE_SUCCESS;
         }
-        int duration = IntegerArgumentType.getInteger(context, "duration");
         RecipeDraft draft;
         try {
-            draft = RecipeCapture.capture(controller, duration, name);
+            draft = RecipeCapture.capture(controller, captureDuration(context), name);
         } catch (IllegalArgumentException e) {
             // Merged amounts can overflow an int with creative or ME-backed ports.
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_capture_failed", e.getMessage()));
@@ -162,6 +196,7 @@ public class CommandModularRecipe extends CommandMod {
             printErrorToChat(sender, LangHelpers.localize("command.okmodular.recipe_nothing_captured"));
             return Command.SINGLE_SUCCESS;
         }
+        draft.setEnergy(captureEnergy(context), true);
         RecipeDraftManager.getInstance()
             .put(player.getUniqueID(), draft);
         sendList(sender, draft);

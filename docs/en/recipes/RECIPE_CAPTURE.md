@@ -10,7 +10,7 @@ draft in chat, and save.
 2. Put the inputs in the input ports and the outputs in the output ports. A port may also hold
    fluids.
 3. Look at the controller (within 5 blocks) and run
-   `/okmodular recipe capture <duration> [group]`.
+   `/okmodular recipe capture [duration] [energy] [group]`.
 4. Read the draft with `/okmodular recipe show`. Fix amounts and the duration, remove
    entries you do not want, and set the energy. To add an entry, put it in a port and capture
    again.
@@ -24,7 +24,7 @@ All commands live under `/okmodular recipe` and need permission level 2.
 
 | Command | What it does |
 |---|---|
-| `capture <duration> [group]` | Reads the ports of the controller you look at and starts a draft. `duration` is in ticks |
+| `capture [duration] [energy] [group]` | Reads the ports of the controller you look at and starts a draft. `duration` is in ticks (default 100). `energy` is RF per tick (default 0, no energy). `group` defaults to the controller's recipe group; to give it, write the energy too, as 0 if none |
 | `show` | Prints the draft. Each entry has `[amount]` and `[remove]` buttons |
 | `amount <number> <amount>` | Sets the amount of entry `<number>` (items: count, fluids: mB) |
 | `remove <number>` | Removes entry `<number>` |
