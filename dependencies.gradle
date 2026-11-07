@@ -79,7 +79,9 @@ dependencies {
     // @NBTPersist field unreachable from a test.
     // ModularUI 1: something in the tile entity hierarchy resolves through it, so
     // the port tile entity classes cannot be loaded without it.
+    // brigadier: the command classes; in game OKCore downloads it at launch.
     testRuntimeOnly 'org.joml:joml:1.10.8'
+    testRuntimeOnly 'com.mojang:brigadier:1.0.18'
     testRuntimeOnly("com.github.GTNewHorizons:ModularUI:1.3.4:dev")
 
     // Versions kept in sync with OmoshiroiKamo's dependencies.gradle.
