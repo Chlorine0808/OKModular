@@ -207,6 +207,52 @@
           }
         }
       ]
+    },
+    {
+      "group": "SelftestCondDayNight",
+      "registryName": "selftest_cond_night",
+      "name": "Selftest Condition: at night",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:cobblestone",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "expression": "is_night == 1"
+        }
+      ]
+    },
+    {
+      "group": "SelftestCondDayNight",
+      "registryName": "selftest_cond_day",
+      "name": "Selftest Condition: by day",
+      "duration": 20,
+      "inputs": [
+        {
+          "item": "minecraft:sand",
+          "amount": 1
+        }
+      ],
+      "outputs": [
+        {
+          "item": "minecraft:stone",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "expression": "is_day == 1"
+        }
+      ]
     }
   ]
 }

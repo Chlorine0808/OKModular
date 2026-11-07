@@ -1,5 +1,7 @@
 package ruiseki.okmodular.api.recipe.expression;
 
+import net.minecraft.world.World;
+
 import com.google.gson.JsonObject;
 
 import ruiseki.okmodular.api.condition.ConditionContext;
@@ -55,14 +57,16 @@ public class WorldPropertyExpression implements IExpression {
                     (double) context.getWorld()
                         .getMoonPhase());
                 break;
+            // Vanilla's isDaytime is fixed where the sky never turns (always day in the End, always night in the
+            // Nether), so neither holds in a dimension without a sky.
             case "is_day":
                 result = new EvaluationValue(
-                    context.getWorld()
+                    hasDayCycle(context.getWorld()) && context.getWorld()
                         .isDaytime());
                 break;
             case "is_night":
                 result = new EvaluationValue(
-                    !context.getWorld()
+                    hasDayCycle(context.getWorld()) && !context.getWorld()
                         .isDaytime());
                 break;
             case "is_raining":
@@ -174,6 +178,11 @@ public class WorldPropertyExpression implements IExpression {
 
         context.setCachedValue(cacheKey, result);
         return result;
+    }
+
+    /** Whether the sky here turns from day to night; the End and the Nether have no sky. */
+    private static boolean hasDayCycle(World world) {
+        return !world.provider.hasNoSky;
     }
 
     @Override

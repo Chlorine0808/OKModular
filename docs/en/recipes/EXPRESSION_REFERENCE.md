@@ -71,8 +71,8 @@ Retrieve information about the world where the machine is located.
 - `dimension`: Current dimension ID (Overworld = 0, Nether = -1, End = 1)
 
 #### Weather & Environment
-- `is_day`: Whether it is daytime (1 or 0)
-- `is_night`: Whether it is nighttime (1 or 0)
+- `is_day`: Whether it is daytime (1 or 0). Always 0 in a dimension without a sky, such as the End or the Nether, since its sky never turns
+- `is_night`: Whether it is nighttime (1 or 0). Always 0 in a dimension without a sky, as `is_day`
 - `is_raining`: Whether it is raining (1 or 0)
 - `is_thundering`: Whether it is thundering (1 or 0)
 - `temp`: Biome temperature at the controller's location (0.0 to 2.0)
