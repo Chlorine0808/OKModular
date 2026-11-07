@@ -29,6 +29,7 @@ import codechicken.nei.recipe.GuiUsageRecipe;
 import codechicken.nei.recipe.TemplateRecipeHandler;
 import ruiseki.okcore.addon.nei.PositionedFluidTank;
 import ruiseki.okcore.addon.nei.RecipeHandlerBase;
+import ruiseki.okcore.enums.Mods;
 import ruiseki.okmodular.Reference;
 import ruiseki.okmodular.api.condition.ICondition;
 import ruiseki.okmodular.api.recipe.core.IModularRecipe;
@@ -153,7 +154,10 @@ public class ModularRecipeNEIHandler extends RecipeHandlerBase {
                 }
             }
 
-            if (crecipe.blueprintRect != null && crecipe.blueprintRect.contains(relMouse)) {
+            // The preview handler exists only with BlockRenderer6343 (see NEIConfig); touching it without that mod
+            // crashes.
+            if (Mods.BlockRenderer6343.isLoaded() && crecipe.blueprintRect != null
+                && crecipe.blueprintRect.contains(relMouse)) {
                 List<String> compatible = getCompatibleStructures();
                 if (!compatible.isEmpty()) {
                     String structureName = compatible.get(0);

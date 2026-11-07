@@ -30,8 +30,10 @@ import ruiseki.okcore.proxy.ICommonProxy;
 import ruiseki.okmodular.client.nei.NEIConfig;
 import ruiseki.okmodular.common.command.CommandModularHand;
 import ruiseki.okmodular.common.command.CommandModularList;
+import ruiseki.okmodular.common.command.CommandModularRecipe;
 import ruiseki.okmodular.common.command.CommandModularReload;
 import ruiseki.okmodular.common.command.CommandModularWand;
+import ruiseki.okmodular.common.recipe.capture.RecipeDraftManager;
 import ruiseki.okmodular.config.MachineryConfig;
 import ruiseki.okmodular.config.WorldGenConfig;
 import ruiseki.okmodular.integration.waila.BlockProvider;
@@ -88,7 +90,8 @@ public class OKModular extends ModBase {
         return super.constructBaseCommand(server).then(new CommandModularReload(this).make())
             .then(new CommandModularList(this).make())
             .then(new CommandModularWand(this).make())
-            .then(new CommandModularHand(this).make());
+            .then(new CommandModularHand(this).make())
+            .then(new CommandModularRecipe(this).make());
     }
 
     @Override
@@ -153,6 +156,8 @@ public class OKModular extends ModBase {
     @EventHandler
     public void onServerStopped(FMLServerStoppedEvent event) {
         super.onServerStopped(event);
+        RecipeDraftManager.getInstance()
+            .clearAll();
     }
 
     @Override

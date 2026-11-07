@@ -466,5 +466,134 @@
         "contains": "offset(0, 2, 0): Requires block: minecraft:gold_block"
       }
     ]
+  },
+  {
+    "id": "s3.5-day-overworld-true",
+    "section": "3.5",
+    "title": "is_day holds at noon in the overworld",
+    "source": "docs/jp/recipes/EXPRESSION_REFERENCE.md is_day / is_night: 昼夜のないディメンション（空が無い End・ネザー）ではどちらも 0",
+    "machine": {
+      "structure": "selftest_cond_day_night"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sand",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-night-overworld-true",
+    "section": "3.5",
+    "title": "is_night holds at midnight in the overworld",
+    "source": "docs/jp/recipes/EXPRESSION_REFERENCE.md is_day / is_night: 昼夜のないディメンション（空が無い End・ネザー）ではどちらも 0",
+    "machine": {
+      "structure": "selftest_cond_day_night"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "steps": [
+      {
+        "at": 0,
+        "action": "time",
+        "value": 18000
+      }
+    ],
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": true,
+        "from": 0,
+        "to": 40
+      }
+    ]
+  },
+  {
+    "id": "s3.5-night-overworld-false",
+    "section": "3.5",
+    "title": "is_night does not hold at noon in the overworld",
+    "source": "docs/jp/recipes/EXPRESSION_REFERENCE.md is_day / is_night: 昼夜のないディメンション（空が無い End・ネザー）ではどちらも 0",
+    "machine": {
+      "structure": "selftest_cond_day_night"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      }
+    ]
+  },
+  {
+    "id": "s3.5-night-nether-false",
+    "section": "3.5",
+    "title": "is_night does not hold in the nether, whose sky never turns",
+    "source": "docs/jp/recipes/EXPRESSION_REFERENCE.md is_day / is_night: 昼夜のないディメンション（空が無い End・ネザー）ではどちらも 0",
+    "dimension": -1,
+    "machine": {
+      "structure": "selftest_cond_day_night"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:cobblestone",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      }
+    ]
+  },
+  {
+    "id": "s3.5-day-end-false",
+    "section": "3.5",
+    "title": "is_day does not hold in the End, whose sky never turns",
+    "source": "docs/jp/recipes/EXPRESSION_REFERENCE.md is_day / is_night: 昼夜のないディメンション（空が無い End・ネザー）ではどちらも 0",
+    "dimension": 1,
+    "machine": {
+      "structure": "selftest_cond_day_night"
+    },
+    "inputs": [
+      {
+        "item": "minecraft:sand",
+        "amount": 1
+      }
+    ],
+    "ticks": 60,
+    "expect": [
+      {
+        "kind": "recipeStarted",
+        "value": false,
+        "from": 0,
+        "to": 60
+      }
+    ]
   }
 ]

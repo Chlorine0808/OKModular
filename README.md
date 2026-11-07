@@ -15,7 +15,7 @@ Split out of [OmoshiroiKamo](https://github.com/Shigure-Ruiseki/OmoshiroiKamo).
 
 | Mod | Minimum version |
 |---|---|
-| [OKCore](https://github.com/Shigure-Ruiseki/OKCore) | 26.10.10.0 |
+| [OKCore](https://github.com/Shigure-Ruiseki/OKCore) | 26.10.31.1 |
 | [GTNHLib](https://github.com/GTNewHorizons/GTNHLib) | 0.11.41 |
 | [StructureLib](https://github.com/GTNewHorizons/StructureLib) | 1.4.39 |
 | [ModularUI2](https://github.com/GTNewHorizons/ModularUI2) | 2.3.79-1.7.10 |
@@ -97,7 +97,7 @@ Minecraft 1.7.10 用のモジュラーマルチブロック機械 mod である�
 
 | Mod | 最低バージョン |
 |---|---|
-| [OKCore](https://github.com/Shigure-Ruiseki/OKCore) | 26.10.10.0 |
+| [OKCore](https://github.com/Shigure-Ruiseki/OKCore) | 26.10.31.1 |
 | [GTNHLib](https://github.com/GTNewHorizons/GTNHLib) | 0.11.41 |
 | [StructureLib](https://github.com/GTNewHorizons/StructureLib) | 1.4.39 |
 | [ModularUI2](https://github.com/GTNewHorizons/ModularUI2) | 2.3.79-1.7.10 |

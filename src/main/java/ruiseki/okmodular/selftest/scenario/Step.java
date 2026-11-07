@@ -14,13 +14,18 @@ public final class Step {
             "setBlock",
             "fill",
             "weather",
+            "time",
             "biome",
             "insert",
             "clearOutputs",
             "fillOutputs",
             "unloadReload",
             "recordNbt",
-            "snapshot"));
+            "snapshot",
+            "putOutput",
+            "recipeCapture",
+            "recipeAmountOf",
+            "recipeSave"));
 
     public final int at;
     public final String action;

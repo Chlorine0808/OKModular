@@ -24,12 +24,12 @@ import ruiseki.okcore.enums.EnumDye;
  * which is how the Color Applicator clears a colour. Without that, a painted
  * port could never be unpainted with the same tool.
  *
- * <h2>OKCore's EnumDye runs the other way</h2>
+ * <h2>OKCore's EnumDye is matched by name</h2>
  *
- * {@link EnumDye} is ordered by dye damage value - {@code BLACK = 0} through
- * {@code WHITE = 15} - which is the exact reverse, so the two ordinals sum to 15.
- * OKCore is not modified, so the conversion lives here. Getting it backwards
- * inverts every colour rather than failing, which is why it is pinned by a test.
+ * {@link EnumDye}'s order belongs to OKCore and has changed between releases, so
+ * each colour holds its dye constant and nothing here reads the dye's ordinal.
+ * Getting the pairing wrong swaps colours rather than failing, which is why it is
+ * pinned by a test.
  *
  * <h2>Adding or renaming</h2>
  *

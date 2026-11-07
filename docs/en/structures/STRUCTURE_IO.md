@@ -427,3 +427,5 @@ schema versioning, so anything written there is frozen for good.
 
 - `/okmodular reload`: reloads structures, patterns, tiers and recipes. Patterns are reloaded
   before recipes, because a recipe resolves its pattern by name.
+- `/okmodular recipe ...`: builds a recipe from the ports of a formed machine. See
+  [Recipe Capture](../recipes/RECIPE_CAPTURE.md).

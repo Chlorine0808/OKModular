@@ -32,6 +32,7 @@ import ruiseki.okmodular.common.integration.structurelib.MachineControllerInfoCo
 import ruiseki.okmodular.common.item.ItemFluidCanister;
 import ruiseki.okmodular.common.network.PacketReloadNEI;
 import ruiseki.okmodular.common.recipe.RecipeLoader;
+import ruiseki.okmodular.common.recipe.capture.RecipeDraftManager;
 import ruiseki.okmodular.common.tier.TierConfigLoader;
 import ruiseki.okmodular.common.tile.StructureTintCache;
 import ruiseki.okmodular.common.tile.TEMachineController;
@@ -139,6 +140,8 @@ public class MachineryModule extends ModModuleBase {
         MemoryEventHandler.registerOnClientDisconnect(StructureTintCache::clearAll);
         // Subscribe the handler itself, otherwise the callbacks above can never fire.
         MemoryEventHandler.INSTANCE.register();
+        RecipeDraftManager.getInstance()
+            .register();
 
         // Pre-scan recipe group names so NEI can register handlers
         // before RecipeLoader.loadAll() runs in postInit
