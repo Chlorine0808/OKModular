@@ -3,6 +3,7 @@ package ruiseki.okmodular.common.network;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -204,17 +205,25 @@ public class PacketWireFormatTest {
     }
 
     @Test
-    @DisplayName("短いバイト列を素通しすると、OKCore の codec は例外を飲んで print する")
-    void unguarded_short_buffer_swallows_and_prints() {
-        // P19 の壊れ方そのもの。loopCodecFields が try/catch で例外を飲み
-        // printStackTrace するだけなので、**落ちずにログだけが膨らむ**。
+    @DisplayName("短いバイト列を素通しすると、OKCore の codec は例外を投げる")
+    void unguarded_short_buffer_throws() {
+        // P19 の壊れ方そのもの。OKCore 26.10.10.0 までは loopCodecFields が例外を飲んで
+        // print するだけで、ログが膨らんだ。26.10.31.1 からは IllegalStateException で包んで投げる。
         ByteBuf wire = encode(energy());
         assertEquals(12, wire.readableBytes());
 
-        String trace = captureStderr(() -> new UnguardedListPacket().decode(new ExtendedBuffer(wire)));
+        IllegalStateException thrown = assertThrows(
+            IllegalStateException.class,
+            () -> new UnguardedListPacket().decode(new ExtendedBuffer(wire)));
 
-        assertTrue(trace.contains("IndexOutOfBoundsException"), "例外が出ていない: " + trace);
-        assertTrue(trace.contains("readerIndex(9)") && trace.contains("writerIndex(12)"), "観測された例外文と一致しない: " + trace);
+        Throwable cause = thrown.getCause();
+        assertTrue(cause instanceof IndexOutOfBoundsException, "原因が IndexOutOfBoundsException でない: " + cause);
+        assertTrue(
+            cause.getMessage()
+                .contains("readerIndex(9)")
+                && cause.getMessage()
+                    .contains("writerIndex(12)"),
+            "観測された例外文と一致しない: " + cause.getMessage());
     }
 
     // ========== P19: PacketStructureTint 側のガード ==========
@@ -291,7 +300,7 @@ public class PacketWireFormatTest {
             System.setErr(new PrintStream(captured, true, "UTF-8"));
             body.run();
         } catch (Exception e) {
-            throw new AssertionError("decode は例外を飲むはずだった", e);
+            throw new AssertionError("decode が例外を投げた。ガードが効いていない", e);
         } finally {
             System.setErr(originalErr);
         }

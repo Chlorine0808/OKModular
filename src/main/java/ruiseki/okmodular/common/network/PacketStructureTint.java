@@ -23,10 +23,10 @@ import ruiseki.okmodular.util.Logger;
  * one that can be handed bytes it cannot read and turn that into a problem:
  * <ul>
  * <li>The framework's list codec reads a 4-byte length first. On a buffer too short for
- * it, the read throws, and the reflective field loop catches the exception and prints
- * the stack trace. <b>Nothing fails and nothing recovers</b> - the packet is silently
- * half-decoded and the log grows. One session produced 698 copies of the same trace
- * and grew the log from 1.2MB to 5.8MB.
+ * it, the read throws. Up to OKCore 26.10.10.0 the reflective field loop printed the
+ * trace and carried on, so the packet was half-decoded and the log grew (one session:
+ * 698 copies, 1.2MB to 5.8MB). From 26.10.31.1 the loop rethrows it as an
+ * {@code IllegalStateException} out of the network decoder.
  * <li>On a buffer that is long enough but holds something else, the length read returns
  * whatever those four bytes happen to be, and the codec passes it straight to
  * {@code Lists.newArrayListWithExpectedSize}. A garbage length is then an allocation

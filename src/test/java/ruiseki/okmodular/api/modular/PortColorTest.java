@@ -42,14 +42,15 @@ import ruiseki.okcore.enums.EnumDye;
  * （`ToolColorApplicator:364`）ので、この一致がスプレー互換の全体。
  *
  * ============================================
- * OKCore の EnumDye は逆順である
+ * OKCore の EnumDye とは名前で対応づける
  * ============================================
  *
- * `ruiseki.okcore.enums.EnumDye` は**染料のダメージ値順**（BLACK=0 … WHITE=15）。
- * 上の 3 つとちょうど逆で、`15 - ordinal` の関係になる。
- * OKCore は改変しない（SSOT D-2）ので、変換はこちら側が持つ。
+ * `ruiseki.okcore.enums.EnumDye` の並びは OKCore の都合で変わる。
+ * 26.10.10.0 までは染料のダメージ値順（BLACK=0 … WHITE=15）、
+ * 26.10.31.1 からは上の 3 つと同じ順（WHITE=0 … BLACK=15, 16=TRANSPARENT）になった。
+ * OKCore は改変しない（SSOT D-2）ので、`PortColor` は ordinal ではなく**名前**で対応づける。
  *
- * **ここを間違えると色が上下反転する。** 白を塗ったら黒群に入る、という壊れ方をする。
+ * **ここを間違えると色が入れ替わる。** 白を塗ったら黒群に入る、という壊れ方をする。
  *
  * ============================================
  * NONE は AEColor.Transparent と同じ番号にしてある
@@ -190,23 +191,20 @@ public class PortColorTest {
         assertSame(PortColor.NONE, PortColor.fromName(null), "キーが無いのは「塗っていない」と同じ");
     }
 
-    // ========== EnumDye との対応（逆順） ==========
+    // ========== EnumDye との対応（名前） ==========
 
     /**
-     * EnumDye は染料ダメージ値順なので、こちらとは足して 15 になる。
+     * EnumDye の並びは OKCore の版で変わるので、名前が一致することだけを求める。
      *
-     * この不変式が崩れると色が上下反転する。白を塗ったら黒として扱われる。
+     * この不変式が崩れると色が入れ替わる。白を塗ったら黒として扱われる。
      */
     @ParameterizedTest(name = "{0}")
     @EnumSource(value = PortColor.class, names = "NONE", mode = EnumSource.Mode.EXCLUDE)
-    @DisplayName("EnumDye の ordinal と足して 15 になる")
-    public void testEnumDyeとは逆順(PortColor color) {
+    @DisplayName("EnumDye と同じ名前の色に対応する")
+    public void testEnumDyeとは名前で対応する(PortColor color) {
         EnumDye dye = color.toDye();
 
-        assertEquals(
-            15,
-            color.ordinal() + dye.ordinal(),
-            () -> color + " (" + color.ordinal() + ") と " + dye + " (" + dye.ordinal() + ") の対応がずれている");
+        assertEquals(color.name(), dye.name(), () -> color + " と " + dye + " の対応がずれている");
     }
 
     @ParameterizedTest(name = "{0}")
@@ -217,13 +215,19 @@ public class PortColorTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(EnumDye.class)
-    @DisplayName("すべての EnumDye に対応する色がある")
+    @EnumSource(value = EnumDye.class, names = "TRANSPARENT", mode = EnumSource.Mode.EXCLUDE)
+    @DisplayName("すべての染料に対応する色がある")
     public void test全EnumDyeに対応がある(EnumDye dye) {
         PortColor color = PortColor.fromDye(dye);
 
         assertTrue(color.isColored(), () -> dye + " に対応する色が無い");
         assertSame(dye, color.toDye());
+    }
+
+    @Test
+    @DisplayName("EnumDye.TRANSPARENT は塗っていない扱いになる")
+    public void testTransparentはNone() {
+        assertSame(PortColor.NONE, PortColor.fromDye(EnumDye.TRANSPARENT));
     }
 
     @Test
